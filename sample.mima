@@ -1,0 +1,25 @@
+#Memory associations
+§define minus_eins
+§define eins
+§define zero
+§define val
+
+#Instructions
+#This is a comment
+LDC 5
+STV val
+LDC 0
+STV zero
+LDC 1
+STV eins
+NOT
+ADD eins
+STV minus_eins
+Loop : LDV val
+EQL zero
+JMN Stop
+LDV val
+ADD minus_eins
+STV val
+JMP Loop
+Stop : HALT
