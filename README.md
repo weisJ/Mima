@@ -3,12 +3,12 @@ Simple environment for writing Mima-Code (see http://gbi.ira.uka.de/ chapter 10)
 
 This mima runs on 24bit machine words in memory and 20 bits addresses / constants
 
-Supports:
+# Supports:
 - simple syntax highlighting
 - memory address variables
 - instruction address variables
 
-Instructions:
+# Instructions:
 
 __<__ __a__ __>__ denotes the value in memory at address __a__
 
