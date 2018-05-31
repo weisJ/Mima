@@ -1,0 +1,34 @@
+package edu.kit.mima.gui.loading;
+
+import java.io.*;
+import java.util.stream.Collectors;
+
+/**
+ * @author Jannis Weis
+ * @since 2018
+ */
+public class SaveHandler {
+
+    private final String saveDirectory;
+    private final String tmpFile;
+
+    public SaveHandler(String saveDirectory) {
+        this.saveDirectory = saveDirectory;
+        this.tmpFile = saveDirectory + "/save.tmp";
+    }
+
+    public String loadTmp() throws IOException {
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(tmpFile), "ISO-8859-1"));
+        return reader.lines().collect(Collectors.joining("\n"));
+    }
+
+    public void saveTmp(String text) throws IOException {
+        PrintWriter writer = new PrintWriter(tmpFile, "ISO-8859-1");
+        writer.write(text);
+        writer.close();
+    }
+
+    public void deleteTmp() {
+        new File(tmpFile).delete();
+    }
+}
