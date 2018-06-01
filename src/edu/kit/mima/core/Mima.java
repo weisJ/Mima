@@ -14,19 +14,25 @@ public class Mima {
     private final Memory memory;
     private final ArithmeticLogicUnit alu;
     private Interpreter icu;
-    private MachineWord akku;
+
+    private MachineWord accumulator;
+    private MachineWord stackPointer;
+    private Stack<Integer> returnStack;
+
     private boolean running;
 
     public Mima() {
         memory = new Memory(WORD_LENGTH);
         alu = new ArithmeticLogicUnit(WORD_LENGTH);
-        akku = new MachineWord(0, WORD_LENGTH);
+        accumulator = new MachineWord(0, WORD_LENGTH);
+        stackPointer = accumulator.copy();
+        returnStack = new Stack<>();
     }
 
     public void reset() {
         icu.reset();
         memory.reset();
-        akku.setValue(0);
+        accumulator.setValue(0);
     }
 
     public void loadProgram(String[] lines) {
@@ -39,7 +45,7 @@ public class Mima {
         Map<Integer, MachineWord> values = memory.getMemory();
         Map<String, Integer> associations = icu.getMemoryLookupTable();
         Object[][] data = new Object[values.values().size() + 1][];
-        data[0] = new Object[]{"akku", akku};
+        data[0] = new Object[]{"accumulator", accumulator};
         int index = 1;
         for (int i : values.keySet()) {
             if (associations.containsValue(i)) {
@@ -86,55 +92,142 @@ public class Mima {
     private void processCommand(Command command) {
         switch (command.getCommand()) {
             case "LDC":
-                akku = command.getValue();
+                if (command.isReference()) {
+                    fail("can't pass a reference at line " + (icu.getInstructionPointer() + 1));
+                }
+                if (command.getValue().intValue() < 0) {
+                    fail("can't pass negative values in line " + (icu.getInstructionPointer() + 1));
+                }
+                accumulator = command.getValue();
                 break;
             case "LDV":
-                akku = memory.loadValue(command.getValue().intValue());
+                if (!command.isReference() && command.getValue().intValue() < 0) {
+                    fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
+                }
+                accumulator = memory.loadValue(command.getValue().intValue());
                 break;
             case "STV":
-                memory.storeValue(command.getValue().intValue(), akku.copy());
+                if (!command.isReference() && command.getValue().intValue() < 0) {
+                    fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
+                }
+                memory.storeValue(command.getValue().intValue(), accumulator.copy());
                 break;
             case "LDIV":
-                akku = memory.loadValue(memory.loadValue(command.getValue().intValue()).intValue());
+                if (!command.isReference() && command.getValue().intValue() < 0) {
+                    fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
+                }
+                accumulator = memory.loadValue(memory.loadValue(command.getValue().intValue()).intValue());
                 break;
             case "STIV":
-                memory.storeValue(memory.loadValue(command.getValue().intValue()).intValue(), akku.copy());
+                if (!command.isReference() && command.getValue().intValue() < 0) {
+                    fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
+                }
+                memory.storeValue(memory.loadValue(command.getValue().intValue()).intValue(), accumulator.copy());
                 break;
             case "RAR":
-                akku = alu.RAR(akku);
+                if (command.hasCommand()) {
+                    fail("unexpected argument at line " + (icu.getInstructionPointer() + 1));
+                }
+                accumulator = alu.RAR(accumulator);
                 break;
             case "NOT":
-                akku.invert();
+                if (command.hasCommand()) {
+                    fail("unexpected argument at line " + (icu.getInstructionPointer() + 1));
+                }
+                accumulator.invert();
                 break;
             case "ADD":
-                akku = alu.ADD(MachineWord.cast(akku, WORD_LENGTH), memory.loadValue(command.getValue().intValue()));
+                if (!command.isReference() && command.getValue().intValue() < 0) {
+                    fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
+                }
+                accumulator = alu.ADD(MachineWord.cast(accumulator, WORD_LENGTH), memory.loadValue(command.getValue().intValue()));
                 break;
             case "AND":
-                akku = alu.AND(MachineWord.cast(akku, WORD_LENGTH), memory.loadValue(command.getValue().intValue()));
+                if (!command.isReference() && command.getValue().intValue() < 0) {
+                    fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
+                }
+                accumulator = alu.AND(MachineWord.cast(accumulator, WORD_LENGTH), memory.loadValue(command.getValue().intValue()));
                 break;
             case "OR":
-                akku = alu.OR(MachineWord.cast(akku, WORD_LENGTH), memory.loadValue(command.getValue().intValue()));
+                if (!command.isReference() && command.getValue().intValue() < 0) {
+                    fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
+                }
+                accumulator = alu.OR(MachineWord.cast(accumulator, WORD_LENGTH), memory.loadValue(command.getValue().intValue()));
                 break;
             case "XOR":
-                akku = alu.XOR(MachineWord.cast(akku, WORD_LENGTH), memory.loadValue(command.getValue().intValue()));
+                if (!command.isReference() && command.getValue().intValue() < 0) {
+                    fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
+                }
+                accumulator = alu.XOR(MachineWord.cast(accumulator, WORD_LENGTH), memory.loadValue(command.getValue().intValue()));
                 break;
             case "EQL":
-                akku = alu.EQL(MachineWord.cast(akku, WORD_LENGTH), memory.loadValue(command.getValue().intValue()));
+                if (!command.isReference() && command.getValue().intValue() < 0) {
+                    fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
+                }
+                accumulator = alu.EQL(MachineWord.cast(accumulator, WORD_LENGTH), memory.loadValue(command.getValue().intValue()));
                 break;
             case "HALT":
+                if (command.hasCommand()) {
+                    fail("unexpected argument at line " + (icu.getInstructionPointer() + 1));
+                }
                 stop();
                 break;
             case "JMP":
                 icu.setInstructionPointer(command.getValue().intValue() - 1);
                 break;
             case "JMN":
-                if (akku.MSB() == 1) {
+                if (accumulator.MSB() == 1) {
                     icu.setInstructionPointer(command.getValue().intValue() - 1);
                 }
                 break;
+            case "CALL":
+                returnStack.push(icu.getInstructionPointer() + 1);
+                icu.setInstructionPointer(command.getValue().intValue() - 1);
+            case "RET":
+                if (command.hasCommand()) {
+                    fail("unexpected argument at line " + (icu.getInstructionPointer() + 1));
+                }
+                if (returnStack.isEmpty()) {
+                    fail("nowhere to return to");
+                }
+                icu.setInstructionPointer(returnStack.pop());
+                break;
+            case "ADC":
+                if (command.isReference()) {
+                    fail("can't pass a reference at line " + (icu.getInstructionPointer() + 1));
+                }
+                accumulator = alu.ADD(accumulator, command.getValue());
+                break;
+            case "LDSP":
+                if (command.hasCommand()) {
+                    fail("unexpected argument at line " + (icu.getInstructionPointer() + 1));
+                }
+                accumulator.setBits(stackPointer.getBits());
+                break;
+            case "STSP":
+                if (command.isReference()) {
+                    fail("can't pass a reference at line " + (icu.getInstructionPointer() + 1));
+                }
+                if (command.getValue().intValue() < 0) {
+                    fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
+                }
+                stackPointer.setValue(command.getValue().intValue());
+                break;
+            case "STVR(SP)":
+                if (command.isReference()) {
+                    fail("can't pass a reference at line " + (icu.getInstructionPointer() + 1));
+                }
+                memory.storeValue(stackPointer.intValue() + command.getValue().intValue(), accumulator);
+                break;
+            case "LDVR(SP)":
+                if (command.isReference()) {
+                    fail("can't pass a reference at line " + (icu.getInstructionPointer() + 1));
+                }
+                accumulator = memory.loadValue(stackPointer.intValue() + command.getValue().intValue());
+                break;
             default:
-                throw new IllegalArgumentException("unknown instruction <" + command.getCommand()
-                                                           + "> at line " + (icu.getInstructionPointer() + 1));
+                fail("unknown instruction <" + command.getCommand() + "> at line " + (icu.getInstructionPointer() + 1));
+                break;
         }
     }
 
@@ -144,5 +237,10 @@ public class Mima {
 
     public static String[] getInstructionSet() {
         return new String[]{"LDC", "LDV", "STV", "STIV", "LDIV", "RAR", "NOT", "ADD", "AND", "OR", "XOR", "EQL", "HALT", "JMP", "JMN"};
+    }
+
+    private void fail(String message) {
+        running = false;
+        throw new IllegalArgumentException(message);
     }
 }

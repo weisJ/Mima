@@ -12,12 +12,14 @@ public class Interpreter {
     private static final Pattern COMMAND_PATTERN = Pattern.compile("^(?: )*([a-zA-Z]*)(?: )*([^ :§]*)?(?: )*$");
     private static final Pattern COMMAND_LOOKUP = Pattern
             .compile("^(?: )*([^ :§]+)(?: )*:(?: )*([^ :§*]*(?: )*[^ :§*]*)(?: )*$");
-    private static final Pattern COMMAND_INTERN = Pattern.compile("^([a-zA-Z]*)§((?:0b)?-?[0-9]+)?$");
+    private static final Pattern COMMAND_INTERN = Pattern.compile("^([a-zA-Z]*)§&?(-?[0-9]+)?$");
 
     private static final String DEFINITION = "§define";
     private static final Pattern DEF_PATTERN = Pattern.compile("^(?:§define)([^ :$]+)(?:|:([0-9]+))$");
 
     private static final String BINARY_PREFIX = "0b";
+    private static final String REFERENCE_PREFIX = "&";
+    private final int constWordLength;
     private final int wordLength;
     private final String[] program;
     private Map<String, Integer> memoryLookupTable;
@@ -26,9 +28,10 @@ public class Interpreter {
     private int firstInstruction;
 
 
-    public Interpreter(final String[] lines, final int wordLength) {
+    public Interpreter(final String[] lines, final int constWordLength, final int wordLength) {
         this.program = lines;
         this.instructionPointer = 0;
+        this.constWordLength = constWordLength;
         this.wordLength = wordLength;
     }
 
@@ -107,9 +110,9 @@ public class Interpreter {
             String command = matcher.group(1) != null ? matcher.group(1) : "";
             String value = matcher.group(2) != null ? matcher.group(2) : "";
             if (memoryLookupTable.containsKey(value)) {
-                value = String.valueOf(memoryLookupTable.get(value));
+                value = REFERENCE_PREFIX + String.valueOf(memoryLookupTable.get(value));
             } else if (commandLookupTable.containsKey(value)) {
-                value = String.valueOf(commandLookupTable.get(value));
+                value = REFERENCE_PREFIX + String.valueOf(commandLookupTable.get(value));
             } else if (value.startsWith(BINARY_PREFIX)) {
                 value = String.valueOf(parseBinary(value.substring(BINARY_PREFIX.length())));
             } else if (!value.matches("[0-9]*")) {
@@ -117,10 +120,7 @@ public class Interpreter {
             } else {
                 try {
                     int val = Integer.parseInt(value);
-                   value = String.valueOf(val);
-                   if (val < 0) {
-                       throw new NumberFormatException();
-                   }
+                    value = String.valueOf(val);
                 } catch (NumberFormatException e) {
                     throw new IllegalArgumentException("illegal memory address <" + value + "> at line" + (i + 1));
                 }
@@ -155,11 +155,15 @@ public class Interpreter {
         }
         //No argument command
         if (matcher.group(2) == null || matcher.group(2).isEmpty()) {
-            return new Command(matcher.group(1), new MachineWord(0, wordLength));
+            return new Command(matcher.group(1), null, false);
         }
 
         //Argument command
         String sVal = matcher.group(2); //Argument value
+        boolean isReference = sVal.startsWith(REFERENCE_PREFIX);
+        if (isReference) {
+            sVal = sVal.substring(REFERENCE_PREFIX.length());
+        }
         int value;
         try {
             value = Integer.parseInt(sVal);
@@ -167,7 +171,7 @@ public class Interpreter {
             throw new IllegalArgumentException("parameter in line " + (instructionPointer + 1)
                                                        + " is neither an integer value nor a memory reference");
         }
-        return new Command(matcher.group(1), new MachineWord(value, wordLength));
+        return new Command(matcher.group(1), new MachineWord(value, wordLength), isReference);
     }
 
     private String addCommandEntry(final String line, final int lineNumber) {
@@ -193,7 +197,12 @@ public class Interpreter {
         if (digits.length() > wordLength) {
             throw new IllegalArgumentException("binary number <" + sVal + "> is too large for " + wordLength + "bits");
         }
-        boolean[] bits = new boolean[wordLength];
+        boolean[] bits;
+        if (digits.length() > constWordLength) {
+            bits = new boolean[wordLength];
+        } else {
+            bits = new boolean[constWordLength];
+        }
         for (int i = 0; i < digits.length(); i++) {
             bits[i] = digits.charAt(i) == '1';
         }
