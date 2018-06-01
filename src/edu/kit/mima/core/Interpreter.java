@@ -36,7 +36,7 @@ public class Interpreter {
     }
 
     public static String[] getKeywords() {
-        return new String[]{"§define", ":", "[0-9]+", "0b[01]*", "#[^\n]*\n"};
+        return new String[]{"§define", ":", "(", ")", "[0-9]+", "0b[01]*", "#[^\n]*\n"};
     }
 
     public void compile() {
