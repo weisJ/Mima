@@ -42,7 +42,7 @@ public class Console extends JScrollPane {
 
     public void error(final String message) {
         try {
-            document.insertString(document.getLength(), message + "\n", styleError);
+            document.insertString(document.getLength(), "Error: " + message + "\n", styleError);
         } catch (BadLocationException ignored) {
         }
         scrollToBottom();
