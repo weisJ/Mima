@@ -114,6 +114,16 @@ public class Interpreter {
                 value = String.valueOf(parseBinary(value.substring(BINARY_PREFIX.length())));
             } else if (!value.matches("[0-9]*")) {
                 throw new IllegalArgumentException("unresolved Symbol <" + value + "> at line " + (i + 1));
+            } else {
+                try {
+                    int val = Integer.parseInt(value);
+                   value = String.valueOf(val);
+                   if (val < 0) {
+                       throw new NumberFormatException();
+                   }
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("illegal memory address <" + value + "> at line" + (i + 1));
+                }
             }
             program[i] = command + "§" + value;
         }
