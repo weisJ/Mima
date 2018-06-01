@@ -20,7 +20,7 @@ __iar__ is the instruction pointer register
 
 - __LDC__ __c__ : c  → akku
 - __LDV__ __a__ : <a\> → akku
-- __STV__ __a__ : akku → <a>
+- __STV__ __a__ : akku → <a\>
 - __LDIV__ __a__ : <<a\>\> → akku
 - __STIV__ __a__ : akku → <<a\>\>
 
