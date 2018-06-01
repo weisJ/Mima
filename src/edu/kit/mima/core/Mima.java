@@ -36,7 +36,7 @@ public class Mima {
     }
 
     public void loadProgram(String[] lines) {
-        icu = new Interpreter(lines, WORD_LENGTH_CONST);
+        icu = new Interpreter(lines, WORD_LENGTH_CONST, WORD_LENGTH);
         memory.empty();
         icu.compile();
     }
@@ -237,6 +237,10 @@ public class Mima {
 
     public static String[] getInstructionSet() {
         return new String[]{"LDC", "LDV", "STV", "STIV", "LDIV", "RAR", "NOT", "ADD", "AND", "OR", "XOR", "EQL", "HALT", "JMP", "JMN"};
+    }
+
+    public static String[] getMimaXInstructions() {
+        return new String[]{"ADC", "CALL", "RET", "LDSP", "STSP", "STVR", "SP", "LDVR"};
     }
 
     private void fail(String message) {
