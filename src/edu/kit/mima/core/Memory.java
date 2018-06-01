@@ -24,7 +24,7 @@ public class Memory {
         if (memory.containsKey(index)) {
             return memory.get(index).copy();
         } else {
-            throw new IllegalArgumentException("invalid memory address");
+            return memory.put(index, new MachineWord(0, machineWordLength));
         }
     }
 
