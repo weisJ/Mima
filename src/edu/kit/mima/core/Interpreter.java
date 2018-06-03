@@ -36,7 +36,7 @@ public class Interpreter {
     }
 
     public static String[] getKeywords() {
-        return new String[]{"§define", ":", "(", ")", "[0-9]+", "0b[01]*", "#[^\n]*\n"};
+        return new String[]{"§define", ":", "\\(", "\\)", " [0-9]+ ?", "0b[01]*", "#[^\n]*\n?"};
     }
 
     public void compile() {
@@ -52,8 +52,17 @@ public class Interpreter {
 
     private void removeComments() {
         for (int i = 0; i < program.length; i++) {
-            if (program[i] != null && program[i].length() > 0 && program[i].charAt(0) == '#') {
-                program[i] = "";
+            if (program[i] != null && program[i].length() > 0) {
+                if (program[i].charAt(0) == '#') {
+                    program[i] = "";
+                } else if (program[i].contains("#")) {
+                    String line = program[i];
+                    int index = line.indexOf('#');
+                    int lastIndex = line.lastIndexOf('#');
+                    if (index == lastIndex) {
+                        program[i] = line.substring(0, index - 1);
+                    }
+                }
             }
         }
     }
