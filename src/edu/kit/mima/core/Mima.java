@@ -20,6 +20,7 @@ public class Mima {
     private Stack<Integer> returnStack;
 
     private boolean running;
+    private boolean extendedInstructions;
 
     public Mima() {
         memory = new Memory(WORD_LENGTH);
@@ -29,14 +30,31 @@ public class Mima {
         returnStack = new Stack<>();
     }
 
+    public static String[] getInstructionSet() {
+        return new String[]{"LDC", "LDV", "STV", "STIV", "LDIV", "RAR", "NOT", "ADD", "AND", "OR", "XOR", "EQL", "HALT", "JMP", "JMN"};
+    }
+
+    public static String[] getMimaXInstructionSet() {
+        return new String[]{"ADC", "CALL", "RET", "LDSP", "STSP", "STVR", "SP", "LDVR"};
+    }
+
+    public boolean usesExtendedInstructionSet() {
+        return extendedInstructions;
+    }
+
     public void reset() {
         icu.reset();
         memory.reset();
         accumulator.setValue(0);
     }
 
-    public void loadProgram(String[] lines) {
-        icu = new Interpreter(lines, WORD_LENGTH_CONST, WORD_LENGTH);
+    public void loadProgram(String[] lines, boolean extendedInstructions) {
+        this.extendedInstructions = extendedInstructions;
+        if (extendedInstructions) {
+            icu = new Interpreter(lines, WORD_LENGTH, WORD_LENGTH);
+        } else {
+            icu = new Interpreter(lines, WORD_LENGTH_CONST, WORD_LENGTH);
+        }
         memory.empty();
         icu.compile();
     }
@@ -71,10 +89,16 @@ public class Mima {
 
     public void step() {
         if (icu.hasInstructions()) {
-            processCommand(icu.nextInstruction());
+            Command command = icu.nextInstruction();
+            boolean finished = processMimaCommand(command);
+            if (finished)
+                return;
+            finished = processMimaXCommand(command);
+            if (!finished)
+                fail("unknown instruction <" + command.getCommand() + "> at line " + (icu.getInstructionPointer() + 1));
         } else {
             stop();
-            throw new IllegalArgumentException("No more instructions");
+            throw new IllegalArgumentException("no more instructions");
         }
     }
 
@@ -89,7 +113,8 @@ public class Mima {
         return icu.getInstructionPointer();
     }
 
-    private void processCommand(Command command) {
+    private boolean processMimaCommand(Command command) {
+        boolean found = true;
         switch (command.getCommand()) {
             case "LDC":
                 if (command.isReference()) {
@@ -140,31 +165,36 @@ public class Mima {
                 if (!command.isReference() && command.getValue().intValue() < 0) {
                     fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
                 }
-                accumulator = alu.ADD(MachineWord.cast(accumulator, WORD_LENGTH), memory.loadValue(command.getValue().intValue()));
+                accumulator = alu.ADD(MachineWord.cast(accumulator, WORD_LENGTH),
+                                      memory.loadValue(command.getValue().intValue()));
                 break;
             case "AND":
                 if (!command.isReference() && command.getValue().intValue() < 0) {
                     fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
                 }
-                accumulator = alu.AND(MachineWord.cast(accumulator, WORD_LENGTH), memory.loadValue(command.getValue().intValue()));
+                accumulator = alu.AND(MachineWord.cast(accumulator, WORD_LENGTH),
+                                      memory.loadValue(command.getValue().intValue()));
                 break;
             case "OR":
                 if (!command.isReference() && command.getValue().intValue() < 0) {
                     fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
                 }
-                accumulator = alu.OR(MachineWord.cast(accumulator, WORD_LENGTH), memory.loadValue(command.getValue().intValue()));
+                accumulator = alu.OR(MachineWord.cast(accumulator, WORD_LENGTH),
+                                     memory.loadValue(command.getValue().intValue()));
                 break;
             case "XOR":
                 if (!command.isReference() && command.getValue().intValue() < 0) {
                     fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
                 }
-                accumulator = alu.XOR(MachineWord.cast(accumulator, WORD_LENGTH), memory.loadValue(command.getValue().intValue()));
+                accumulator = alu.XOR(MachineWord.cast(accumulator, WORD_LENGTH),
+                                      memory.loadValue(command.getValue().intValue()));
                 break;
             case "EQL":
                 if (!command.isReference() && command.getValue().intValue() < 0) {
                     fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
                 }
-                accumulator = alu.EQL(MachineWord.cast(accumulator, WORD_LENGTH), memory.loadValue(command.getValue().intValue()));
+                accumulator = alu.EQL(MachineWord.cast(accumulator, WORD_LENGTH),
+                                      memory.loadValue(command.getValue().intValue()));
                 break;
             case "HALT":
                 if (command.hasCommand()) {
@@ -180,6 +210,16 @@ public class Mima {
                     icu.setInstructionPointer(command.getValue().intValue() - 1);
                 }
                 break;
+            default:
+                found = false;
+                break;
+        }
+        return found;
+    }
+
+    private boolean processMimaXCommand(Command command) {
+        boolean found = true;
+        switch (command.getCommand()) {
             case "CALL":
                 returnStack.push(icu.getInstructionPointer() + 1);
                 icu.setInstructionPointer(command.getValue().intValue() - 1);
@@ -217,30 +257,31 @@ public class Mima {
                 if (command.isReference()) {
                     fail("can't pass a reference at line " + (icu.getInstructionPointer() + 1));
                 }
-                memory.storeValue(stackPointer.intValue() + command.getValue().intValue(), accumulator);
+                int address = stackPointer.intValue() + command.getValue().intValue();
+                if (address < 0) {
+                    fail("illegal memory address <" + address + "> at line " + (icu.getInstructionPointer() + 1));
+                }
+                memory.storeValue(address, accumulator);
                 break;
             case "LDVR(SP)":
                 if (command.isReference()) {
                     fail("can't pass a reference at line " + (icu.getInstructionPointer() + 1));
                 }
-                accumulator = memory.loadValue(stackPointer.intValue() + command.getValue().intValue());
+                address = stackPointer.intValue() + command.getValue().intValue();
+                if (address < 0) {
+                    fail("illegal memory address <" + address + "> at line " + (icu.getInstructionPointer() + 1));
+                }
+                accumulator = memory.loadValue(address);
                 break;
             default:
-                fail("unknown instruction <" + command.getCommand() + "> at line " + (icu.getInstructionPointer() + 1));
+                found = false;
                 break;
         }
+        return found;
     }
 
     public boolean isRunning() {
         return icu.hasInstructions();
-    }
-
-    public static String[] getInstructionSet() {
-        return new String[]{"LDC", "LDV", "STV", "STIV", "LDIV", "RAR", "NOT", "ADD", "AND", "OR", "XOR", "EQL", "HALT", "JMP", "JMN"};
-    }
-
-    public static String[] getMimaXInstructions() {
-        return new String[]{"ADC", "CALL", "RET", "LDSP", "STSP", "STVR", "SP", "LDVR"};
     }
 
     private void fail(String message) {

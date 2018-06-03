@@ -1,7 +1,6 @@
 package edu.kit.mima.gui.loading;
 
 import java.io.*;
-import java.util.stream.Collectors;
 
 /**
  * @author Jannis Weis
@@ -25,9 +24,9 @@ public class OptionsLoader {
         }
     }
 
-    public String loadOptions() throws IOException {
+    public String[] loadOptions() throws IOException {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(optionsPath), "ISO-8859-1"));
-        return reader.lines().collect(Collectors.joining("\n"));
+        return reader.lines().toArray(String[]::new);
     }
 
     public void saveOptions(String save) throws IOException {

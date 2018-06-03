@@ -20,42 +20,41 @@ public final class Main extends JFrame {
 
     private static final Dimension FULLSCREEN = Toolkit.getDefaultToolkit().getScreenSize();
     private static final String TITLE = "Mima-Simulator";
-    private static final String FILE_EXTENSION = ".mima";
+    private static final String FILE_EXTENSION = "mima";
+    private static final String FILE_EXTENSION_X = "mimax";
     private static final String MIMA_DIR = System.getProperty("user.home") + "/.mima";
 
     private final Mima mima;
     private final TextLoader textLoader;
     private final OptionsLoader optionsLoader;
     private final SaveHandler saveHandler;
-
     private final Console console;
     private final Editor editor;
     private final MemoryView memoryView;
     private final JButton run = new JButton("RUN");
     private final JButton step = new JButton("STEP");
-    private String savedPath;
+    private boolean unsaved;
+    private String lastFile;
+    private String directory;
     private String[] lines;
+    private boolean mimaXFile;
 
 
     public Main() {
         optionsLoader = new OptionsLoader(MIMA_DIR);
         saveHandler = new SaveHandler(MIMA_DIR);
         editor = new Editor();
-        setSyntaxHighlighting();
         console = new Console();
         memoryView = new MemoryView(new String[]{"Address", "Value"});
-
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
                 try {
-                    saveHandler.deleteTmp();
-                    optionsLoader.saveOptions(savedPath);
-                    saveHandler.saveTmp(editor.getText());
-                } catch (IOException ignored) {
-                } finally {
+                    if (unsaved) savePopUp();
+                    optionsLoader.saveOptions(lastFile);
                     e.getWindow().dispose();
-                }
+                } catch (IOException | IllegalArgumentException ignored) { }
             }
         });
         setResizable(true);
@@ -73,8 +72,21 @@ public final class Main extends JFrame {
         Menu menu = new Menu();
         JMenu file = new JMenu("File");
         JMenuItem newFile = new JMenuItem("New");
-        newFile.addActionListener(e -> editor.setText(""));
+        newFile.addActionListener(e -> newFile());
         file.add(newFile);
+        file.addSeparator();
+        JMenuItem save = new JMenuItem("Save");
+        save.addActionListener(e -> {
+            if (unsaved) {
+                saveAs();
+            } else {
+                save();
+            }
+        });
+        file.add(save);
+        JMenuItem saveAs = new JMenuItem("Save as");
+        saveAs.addActionListener(e -> saveAs());
+        file.add(saveAs);
         menu.add(file);
         setJMenuBar(menu);
         add(editor, BorderLayout.CENTER);
@@ -84,7 +96,11 @@ public final class Main extends JFrame {
             public void onLoad(String path) { log("Loading: " + path + "..."); }
 
             @Override
-            public void afterRequest(File chosenFile) { savedPath = chosenFile.getParentFile().getAbsolutePath(); }
+            public void afterRequest(File chosenFile) {
+                mimaXFile = (chosenFile.getAbsolutePath().endsWith(FILE_EXTENSION_X));
+                lastFile = chosenFile.getAbsolutePath();
+                directory = chosenFile.getParentFile().getAbsolutePath();
+            }
 
             @Override
             public void afterLoad() { log("done"); }
@@ -98,23 +114,26 @@ public final class Main extends JFrame {
             @Override
             public void onFail(String errorMessage) { error(errorMessage); }
         };
-        textLoader = new TextLoader(this, FILE_EXTENSION, loadManager);
+        textLoader = new TextLoader(this, loadManager);
 
         mima = new Mima();
         //Load Options
         try {
-            savedPath = optionsLoader.loadOptions();
+            String[] options = optionsLoader.loadOptions();
+            this.lastFile = options[0];
+            this.directory = new File(lastFile).getParentFile().getAbsolutePath();
         } catch (IOException e) {
-            savedPath = System.getProperty("user.home");
+            this.directory = System.getProperty("user.home");
         }
-        //Load Tmp
+        //Load Last File
         try {
-            String text = saveHandler.loadTmp();
+            String text = saveHandler.loadFile(lastFile);
             editor.setText(text);
             lines = text.split("\n");
         } catch (IOException e) {
             firstStart();
         }
+        setSyntaxHighlighting();
         editor.setStylize(true);
         editor.stylize();
     }
@@ -133,10 +152,10 @@ public final class Main extends JFrame {
                                       JOptionPane.PLAIN_MESSAGE,
                                       null, new String[]{"Load", "New"}, "New");
             if (response == 0) { //Load
-                load(textLoader.requestLoad(savedPath, () -> System.exit(0)));
+                load(textLoader.requestLoad(directory, new String[]{FILE_EXTENSION, FILE_EXTENSION_X},
+                                            () -> System.exit(0)));
             } else if (response == 1) { //New
-                lines = new String[]{"#Put Code here"};
-                editor.setText("#Put Code here");
+                newFile();
             } else { //Abort
                 System.exit(0);
             }
@@ -145,21 +164,40 @@ public final class Main extends JFrame {
         }
     }
 
+    private void newFile() {
+        int response = JOptionPane.showOptionDialog(this, "Choose file type", "File type",
+                                                    JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE,
+                                                    null, new String[]{"Mima", "MimaX"}, "Mima");
+        if (response == JOptionPane.CLOSED_OPTION) return;
+        mimaXFile = response == 1;
+        setSyntaxHighlighting();
+        lines = new String[]{"#Put Code here"};
+        editor.setText("#Put Code here");
+        unsaved = true;
+    }
+
     private void run() {
         step.setEnabled(false);
         run.setEnabled(false);
-        log("Running program: " + savedPath + "...");
+        log("Running program: " + lastFile + "...");
         try {
             mima.run();
             update();
         } catch (IllegalArgumentException e) {
             error(e.getMessage());
-            mima.reset();
+            reset();
         } finally {
             step.setEnabled(true);
             run.setEnabled(true);
         }
         log("done");
+    }
+
+    private void reset() {
+        mima.reset();
+        run.setEnabled(true);
+        step.setEnabled(true);
+        update();
     }
 
     private void step() {
@@ -179,37 +217,31 @@ public final class Main extends JFrame {
         String corrected = text.replaceAll("\r?\n", "\n");
         editor.setText(corrected);
         lines = corrected.split("\n");
+        setSyntaxHighlighting();
+        editor.stylize();
+        unsaved = false;
     }
 
     private void update() {
         memoryView.setContent(mima.memoryTable());
-        editor.stylize();
         repaint();
     }
 
     private void setupButtons() {
-        JButton save = new JButton("SAVE");
-        save.addActionListener(e -> textLoader.requestSave(editor.getText(), savedPath, () -> { }));
         run.addActionListener(e -> run());
         step.addActionListener(e -> step());
         JButton load = new JButton("LOAD");
-        load.addActionListener(e -> load(textLoader.requestLoad(savedPath, () -> { })));
+        load.addActionListener(e -> load(textLoader.requestLoad(directory, new String[]{FILE_EXTENSION, FILE_EXTENSION_X}, () -> { })));
         JButton compile = new JButton("COMPILE");
         compile.addActionListener(e -> compile());
         JButton reset = new JButton("RESET");
-        reset.addActionListener(e -> {
-            mima.reset();
-            run.setEnabled(true);
-            step.setEnabled(true);
-            update();
-        });
+        reset.addActionListener(e -> reset());
 
         run.setEnabled(false);
         step.setEnabled(false);
 
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(1, 5));
-        panel.add(save);
+        panel.setLayout(new GridLayout(1, 4));
         panel.add(load);
         panel.add(compile);
         panel.add(reset);
@@ -219,18 +251,53 @@ public final class Main extends JFrame {
     }
 
     private void setSyntaxHighlighting() {
-        editor.setHighlight(Mima.getInstructionSet(), new Color(27, 115, 207));
-        editor.setHighlight(Interpreter.getKeywords(), new Color[]{
-                new Color(168, 120, 43), //$define
-                new Color(168, 120, 43), // :
+        Color instructionsColor = new Color(27, 115, 207);
+        Color keywordColor = new Color(168, 120, 43);
+        editor.setHighlight(Mima.getInstructionSet(), instructionsColor);
+        editor.addHighlight(Interpreter.getKeywords(), new Color[]{
+                keywordColor, //$define
+                keywordColor, // :
+                keywordColor, // (
+                keywordColor, // )
                 new Color(37, 143, 148), //Numbers
                 new Color(136, 64, 170), //0b,
                 new Color(63, 135, 54), //Comments
         });
+        if (mimaXFile) {
+            editor.addHighlight(Mima.getMimaXInstructionSet(), instructionsColor);
+        }
+    }
+
+    private void saveAs() {
+        String extension = mimaXFile ? FILE_EXTENSION_X : FILE_EXTENSION;
+        textLoader.requestSave(editor.getText(), directory, extension, () -> { throw new IllegalArgumentException(); });
+        unsaved = false;
+    }
+
+    private void save() {
+        try {
+            log("saving...");
+            saveHandler.saveFile(editor.getText(), lastFile);
+            log("done");
+        } catch (IOException e) {
+            error("failed to save: " + e.getMessage());
+        }
+    }
+
+    private void savePopUp() {
+        int response = JOptionPane.showOptionDialog(Main.this, "Do you want to save?", "Unsaved File",
+                                                    JOptionPane.YES_NO_OPTION,
+                                                    JOptionPane.WARNING_MESSAGE,
+                                                    null, new String[]{"Save", "Don't save"}, "Save");
+        if (response == JOptionPane.OK_OPTION) {
+            saveAs();
+        } else if (response == JOptionPane.CLOSED_OPTION) {
+            throw new IllegalArgumentException("Window not closed");
+        }
     }
 
     private void compile() {
-        log("Compiling: " + savedPath + "...");
+        log("Compiling: " + lastFile + "...");
         try {
             lines = editor.getText().split("\n");
             reloadMima();
@@ -255,7 +322,7 @@ public final class Main extends JFrame {
 
     private void reloadMima() {
         try {
-            mima.loadProgram(lines.clone());
+            mima.loadProgram(lines.clone(), mimaXFile);
             run.setEnabled(false);
             step.setEnabled(false);
         } catch (IllegalArgumentException e) {

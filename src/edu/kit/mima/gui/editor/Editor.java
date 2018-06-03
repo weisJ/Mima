@@ -18,8 +18,8 @@ public class Editor extends JScrollPane {
     private static final Color TEXT_COLOR = Color.LIGHT_GRAY;
     private final String nLine = java.lang.System.getProperty("line.separator");
     private final JTextPane editorPane;
-    private final List<String> regexList;
-    private final List<Color> colorList;
+    private List<String> regexList;
+    private List<Color> colorList;
     private StyledDocument document;
     private boolean stylize;
 
@@ -65,37 +65,56 @@ public class Editor extends JScrollPane {
         this.stylize = stylize;
     }
 
-    public void setHighlight(String[] regexArray, Color color) {
+    public void addHighlight(String[] regexArray, Color color) {
         StringBuilder sb = new StringBuilder("(");
         for (String s : regexArray) {
             sb.append(s).append("|");
         }
         sb.deleteCharAt(sb.length() - 1);
         sb.append(")");
-        setHighlight(sb.toString(), color);
+        addHighlight(sb.toString(), color);
     }
 
-    public void setHighlight(String regex, Color color) {
+    public void addHighlight(String regex, Color color) {
         regexList.add(regex);
         colorList.add(color);
     }
 
-    public void setHighlight(String[] regexArray, Color[] colors) {
+    public void addHighlight(String[] regexArray, Color[] colors) {
         if (regexArray.length != colors.length) {
             throw new IllegalArgumentException("unequal array lengths");
         }
         for (int i = 0; i < regexArray.length; i++) {
-            setHighlight(regexArray[i], colors[i]);
+            addHighlight(regexArray[i], colors[i]);
         }
+    }
+
+    public void setHighlight(String[] regexArray, Color color) {
+        removeHighlighting();
+        regexList = new ArrayList<>();
+        colorList = new ArrayList<>();
+        addHighlight(regexArray, color);
+    }
+
+    public void setHighlight(String[] regexArray, Color[] colors) {
+        removeHighlighting();
+        regexList = new ArrayList<>();
+        colorList = new ArrayList<>();
+        addHighlight(regexArray, colors);
+    }
+
+    public void setHighlight(String regex, Color color) {
+        removeHighlighting();
+        regexList = new ArrayList<>();
+        colorList = new ArrayList<>();
+        setHighlight(regex, color);
     }
 
     public void stylize() {
         if (stylize) {
             stylize = false;
             StyleContext context = new StyleContext();
-            Style standard = context.addStyle("Default", null);
-            standard.addAttribute(StyleConstants.Foreground, TEXT_COLOR);
-            document.setCharacterAttributes(0, document.getLength() - 1, standard, true);
+            removeHighlighting();
             for (int i = 0; i < regexList.size(); i++) {
                 Style style = context.addStyle("Style " + i, null);
                 style.addAttribute(StyleConstants.Foreground, colorList.get(i));
@@ -107,6 +126,13 @@ public class Editor extends JScrollPane {
             }
             stylize = true;
         }
+    }
+
+    private void removeHighlighting() {
+        StyleContext context = new StyleContext();
+        Style standard = context.addStyle("Default", null);
+        standard.addAttribute(StyleConstants.Foreground, TEXT_COLOR);
+        document.setCharacterAttributes(0, document.getLength() - 1, standard, true);
     }
 
 
