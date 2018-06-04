@@ -33,6 +33,9 @@ public class Memory {
     }
 
     public void storeValue(int index, MachineWord value) {
+        if (memory.size() >= Math.pow(2, machineWordLength)) {
+            throw new IllegalArgumentException("no more memory addresses");
+        }
         memory.put(index, new MachineWord(value.intValue(), machineWordLength));
     }
 
