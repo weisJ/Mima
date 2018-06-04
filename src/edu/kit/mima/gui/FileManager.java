@@ -71,7 +71,7 @@ public class FileManager {
     }
 
     public void load() {
-        text = textLoader.requestLoad(directory, extensions, () -> System.exit(0));
+        text = textLoader.requestLoad(directory, extensions, () -> { });
         fileHash = text.hashCode();
     }
 
@@ -109,7 +109,7 @@ public class FileManager {
         fileHash = text.hashCode();
     }
 
-    public void saveAs(String text) {
+    public void saveAs() {
         try {
             textLoader.requestSave(text, directory, lastExtension,
                                                     () -> { throw new IllegalArgumentException(); });
@@ -118,13 +118,22 @@ public class FileManager {
         fileHash = text.hashCode();
     }
 
-    public void savePopUp(String text) {
+    public void savePopUp() {
         int response = JOptionPane.showOptionDialog(parent, "Do you want to save?", "Unsaved File",
-                                                    JOptionPane.YES_NO_OPTION,
-                                                    JOptionPane.WARNING_MESSAGE,
-                                                    null, new String[]{"Save", "Don't save"}, "Save");
-        if (response == JOptionPane.OK_OPTION) {
-            saveAs(text);
+                                                    JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
+                                                    null, new String[]{"Save", "Save as", "Don't save"}, "Save");
+        if (response == 0) {
+            if (isNewFile) {
+                saveAs();
+            } else {
+                try {
+                    save();
+                } catch (IOException e) {
+                    error(e.getMessage());
+                }
+            }
+        } else if (response == 1) {
+            saveAs();
         } else if (response == JOptionPane.CLOSED_OPTION) {
             throw new IllegalArgumentException("Window not closed");
         }

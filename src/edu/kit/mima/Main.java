@@ -66,7 +66,7 @@ public final class Main extends JFrame {
         editor.addStyleGroup(syntaxStyle);
         editor.addStyleGroup(referenceStyle);
         editor.doReplaceTabs(true);
-        editor.useHistory(true, 20);
+        editor.useHistory(true, 100);
         updateSyntaxHighlighting();
         updateReferenceHighlighting();
         editor.addAfterUpdateAction(e -> fileManager.setText(editor.getText()));
@@ -88,7 +88,7 @@ public final class Main extends JFrame {
             @Override
             public void windowClosing(WindowEvent e) {
                 try {
-                    if (!fileManager.isSaved()) fileManager.savePopUp(editor.getText());
+                    if (!fileManager.isSaved()) fileManager.savePopUp();
                     fileManager.saveOptions();
                     e.getWindow().dispose();
                 } catch (IOException | IllegalArgumentException ignored) { }
@@ -106,17 +106,25 @@ public final class Main extends JFrame {
         JMenu file = new JMenu("File");
         JMenuItem newFile = new JMenuItem("New");
         newFile.addActionListener(e -> {
+            if (!fileManager.isSaved()) fileManager.savePopUp();
             fileManager.newFile();
             editor.setText(fileManager.getText());
+            updateSyntaxHighlighting();
+            updateReferenceHighlighting();
             editor.resetHistory();
+            editor.stylize();
         });
         newFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
         file.add(newFile);
         JMenuItem load = new JMenuItem("Load");
         load.addActionListener(e -> {
+            if (!fileManager.isSaved()) fileManager.savePopUp();
             fileManager.load();
             editor.setText(fileManager.getText());
+            updateSyntaxHighlighting();
+            updateReferenceHighlighting();
             editor.resetHistory();
+            editor.stylize();
         });
         load.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK));
         file.add(load);
@@ -126,12 +134,12 @@ public final class Main extends JFrame {
         JMenuItem save = new JMenuItem("Save");
         save.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
         save.addActionListener(e -> {
-            if (!fileManager.isOnDisk()) fileManager.saveAs(editor.getText());
+            if (!fileManager.isOnDisk()) fileManager.saveAs();
             else save();
         });
         file.add(save);
         JMenuItem saveAs = new JMenuItem("Save as");
-        saveAs.addActionListener(e -> fileManager.saveAs(editor.getText()));
+        saveAs.addActionListener(e -> fileManager.saveAs());
         saveAs.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
                                                      InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK));
         file.add(saveAs);

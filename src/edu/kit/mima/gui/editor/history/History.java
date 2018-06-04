@@ -1,4 +1,4 @@
-package edu.kit.mima.gui.editor;
+package edu.kit.mima.gui.editor.history;
 
 import java.util.*;
 
@@ -34,6 +34,18 @@ public class History<T> {
         }
     }
 
+    public int legth() {
+        return history.size();
+    }
+
+    public void setCurrent(T element) {
+        history.set(top, element);
+    }
+
+    public T getCurrent() {
+        return history.get(top);
+    }
+
     public T back() {
         try {
             top++;
@@ -47,6 +59,7 @@ public class History<T> {
     public T forward() {
         try {
             top--;
+            if (top < 0) top = 0;
             return history.get(--top);
         } catch (IndexOutOfBoundsException e) {
             top++;
