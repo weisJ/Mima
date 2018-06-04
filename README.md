@@ -52,7 +52,7 @@ MimaX:
 - __ADC__ __c__ : accu + c → accu
 
 - __LDSP__ : sp → accu
--__STSP__ : accu → sp
+- __STSP__ : accu → sp
 
 - __STVR__ __disp(SP)__ : accu → <<sp> + disp>
 - __LDVR__ __disp(SP)__ : <<sp> + disp> → accu
