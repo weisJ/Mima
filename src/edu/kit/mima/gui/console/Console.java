@@ -1,21 +1,15 @@
 package edu.kit.mima.gui.console;
 
 import javax.swing.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Style;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
-import java.awt.Adjustable;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
+import javax.swing.text.*;
+import java.awt.*;
+import java.awt.event.*;
 
 public class Console extends JScrollPane {
 
     private final StyledDocument document;
-    private final Style styleDefault;
-    private final Style styleError;
+    private final Color DEFAULT_COLOR = Color.LIGHT_GRAY;
+    private final Style style;
 
     public Console() {
         JTextPane textPane = new JTextPane();
@@ -24,27 +18,33 @@ public class Console extends JScrollPane {
         textPane.setEditable(false);
         document = textPane.getStyledDocument();
 
-        styleError = textPane.addStyle("Error", null);
-        StyleConstants.setForeground(styleError, Color.RED);
-        styleDefault = textPane.addStyle("Error", null);
-        StyleConstants.setForeground(styleDefault, Color.LIGHT_GRAY);
+        style = textPane.addStyle("Color", null);
+        StyleConstants.setForeground(style, DEFAULT_COLOR);
 
         setViewportView(textPane);
     }
 
-    public void log(final String message) {
+    public void println(final String message) {
+        println(message, DEFAULT_COLOR);
+    }
+
+    public void println(final String message, Color color) {
         try {
-            document.insertString(document.getLength(), message + "\n", styleDefault);
-        } catch (BadLocationException ignored) {
-        }
+            StyleConstants.setForeground(style, color);
+            document.insertString(document.getLength(), message + "\n", style);
+        } catch (BadLocationException ignored) { }
         scrollToBottom();
     }
 
-    public void error(final String message) {
+    public void print(final String message) {
+        print(message, DEFAULT_COLOR);
+    }
+
+    public void print(final String message, Color color) {
         try {
-            document.insertString(document.getLength(), "Error: " + message + "\n", styleError);
-        } catch (BadLocationException ignored) {
-        }
+            StyleConstants.setForeground(style, color);
+            document.insertString(document.getLength(), message + "\n", style);
+        } catch (BadLocationException ignored) { }
         scrollToBottom();
     }
 
@@ -59,5 +59,6 @@ public class Console extends JScrollPane {
             }
         };
         verticalBar.addAdjustmentListener(downScroller);
+        repaint();
     }
 }

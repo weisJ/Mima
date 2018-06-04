@@ -45,7 +45,8 @@ public class LineNumbers extends JPanel {
         int startingY = -1;
 
         try {
-            startingY = pane.modelToView(start).y - scrollPane.getViewport().getViewPosition().y + fontHeight - fontDesc;
+            startingY = pane.modelToView(start).y - scrollPane.getViewport()
+                    .getViewPosition().y + fontHeight - fontDesc;
         } catch (BadLocationException e1) {
             e1.printStackTrace();
         }

@@ -23,7 +23,7 @@ public class Mima {
     private boolean extendedInstructions;
 
     public Mima() {
-        memory = new Memory(WORD_LENGTH);
+        memory = new Memory(WORD_LENGTH, 100);
         alu = new ArithmeticLogicUnit(WORD_LENGTH);
         accumulator = new MachineWord(0, WORD_LENGTH);
         stackPointer = accumulator.copy();
@@ -292,5 +292,9 @@ public class Mima {
     private void fail(String message) {
         running = false;
         throw new IllegalArgumentException(message);
+    }
+
+    public List<Set<String>> getReferences(String[] lines) {
+        return icu.getReferences(lines);
     }
 }

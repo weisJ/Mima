@@ -1,6 +1,6 @@
 package edu.kit.mima.core;
 
-import java.util.function.BinaryOperator;
+import java.util.function.*;
 
 /**
  * @author Jannis Weis

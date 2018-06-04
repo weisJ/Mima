@@ -25,7 +25,8 @@ public class OptionsLoader {
     }
 
     public String[] loadOptions() throws IOException {
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(optionsPath), "ISO-8859-1"));
+        final BufferedReader reader = new BufferedReader(
+                new InputStreamReader(new FileInputStream(optionsPath), "ISO-8859-1"));
         return reader.lines().toArray(String[]::new);
     }
 

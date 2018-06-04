@@ -1,9 +1,8 @@
 package edu.kit.mima.gui.menu;
 
 import javax.swing.*;
-import java.awt.Font;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.*;
+import java.awt.event.*;
 
 /**
  * @author Jannis Weis
@@ -30,7 +29,7 @@ public class Help extends JFrame {
         JTextPane pane = new JTextPane();
         pane.setEditable(false);
         int fontPoints = 12;
-        pane.setFont(new Font(Font.MONOSPACED, Font.PLAIN, fontPoints ));
+        pane.setFont(new Font(Font.MONOSPACED, Font.PLAIN, fontPoints));
         pane.setText("\n"
                              + "Instructions:\n"
                              + "\n"
