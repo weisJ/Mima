@@ -16,7 +16,7 @@ __<a\>__ denotes the value in memory at address __a__
 
 __c__ is a constant value
 
-__accu__ is the default register
+__accu__ is the accumulation register
 
 __iar__ is the instruction address register
 
