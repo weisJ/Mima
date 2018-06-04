@@ -10,24 +10,32 @@ import java.util.regex.*;
 public class Interpreter {
 
     private static final String POINTER = "\\([^()]*\\)";
-    private static final Pattern COMMAND_PATTERN = Pattern.compile("^(?: )*([a-zA-Z]*(?:"
-                                                                           + POINTER + ")?)(?: )*([^ :§]*)?(?: )*$");
+    private static final Pattern COMMAND_PATTERN = Pattern
+            .compile("^(?: )*([a-zA-Z]*(?:" + POINTER + ")?)(?: )*([^ :§]*)?(?: )*$");
     private static final Pattern COMMAND_LOOKUP = Pattern
             .compile("^(?: )*([^ :§]+)(?: )*:(?: )*([^ :§*]*(?: )*[^ :§*]*)(?: )*$");
-    private static final Pattern COMMAND_INTERN = Pattern.compile("^([a-zA-Z]*(?:" + POINTER + ")?)§(&?-?[0-9]+)?$");
+    private static final Pattern COMMAND_INTERN = Pattern
+            .compile("^([a-zA-Z]*(?:" + POINTER + ")?)§(&?-?[0-9]+)?$");
 
     private static final String DEFINITION = "§define";
-    private static final Pattern DEF_PATTERN = Pattern.compile("^(?:§define)([^ :$]+)(?:|:([0-9]+))$");
+    private static final String CONST = "const";
+    private static final Pattern DEF_PATTERN = Pattern
+            .compile("^(?:" + DEFINITION + ")([^ :$]+)(?:|:([0-9]+))$");
+    private static final Pattern DEF_CONST_PATTERN = Pattern
+            .compile("^(?:" + DEFINITION + CONST + ")([^ :$]+)(?:|:([0-9]+))$");
 
     private static final String BINARY_PREFIX = "0b";
     private static final String REFERENCE_PREFIX = "&";
+
     private final int constWordLength;
     private final int wordLength;
     private final String[] program;
-    private Map<String, Integer> memoryLookupTable;
-    private Map<String, Integer> commandLookupTable;
     private int instructionPointer;
     private int firstInstruction;
+    private int reservedIndex;
+    private Map<String, Integer> memoryLookupTable;
+    private Map<String, Integer> commandLookupTable;
+    private Map<String, Integer> constLookupTable;
 
 
     public Interpreter(final String[] lines, final int constWordLength, final int wordLength) {
@@ -35,21 +43,24 @@ public class Interpreter {
         this.instructionPointer = 0;
         this.constWordLength = constWordLength;
         this.wordLength = wordLength;
+        this.reservedIndex = -1;
     }
 
     public static String[] getKeywords() {
-        return new String[]{"§define", ":", "\\(", "\\)", " [0-9]+ ?", "0b[01]*", "#[^\n]*\n?"};
+        return new String[]{DEFINITION, " " + CONST + " ", ":", "\\(", "\\)", " [0-9]+ ?", "0b[01]*", "#[^\n]*\n?"};
     }
 
     public void compile() {
         this.memoryLookupTable = new HashMap<>();
         this.commandLookupTable = new HashMap<>();
+        this.constLookupTable = new HashMap<>();
+        reservedIndex = -1;
         setInstructionPointer(0);
         removeComments();
-        setupMemoryLookup();
+        setupDefinitions();
         firstInstruction = instructionPointer;
         setupInstructionLookup();
-        replaceMemoryAssociations();
+        replaceAssociations();
     }
 
     private void removeComments() {
@@ -69,38 +80,61 @@ public class Interpreter {
         }
     }
 
-    private void setupMemoryLookup() {
-        int reservedIndex = -1; //Won't clash with allowed memory address
+    private void setupDefinitions() {
         while (program[instructionPointer].startsWith(DEFINITION)) {
-            try {
-                String line = program[instructionPointer].replace(" ", "");
-                Matcher matcher = DEF_PATTERN.matcher(line);
-                if (!matcher.matches()) {
-                    throw new IllegalArgumentException("illegal definition at line :" + (instructionPointer + 1));
-                }
-                String reference = matcher.group(1);
-                if (reference.isEmpty()) {
-                    throw new IllegalArgumentException("missing identifier at line " + (instructionPointer + 1));
-                }
-                int value;
-                if (matcher.group(2) == null || matcher.group(2).isEmpty()) {
-                    value = reservedIndex;
-                    reservedIndex--;
-                } else {
-                    try {
-                        value = Integer.parseInt(matcher.group(2));
-                    } catch (NumberFormatException e) {
-                        throw new IllegalArgumentException("reference must be an integer");
-                    }
-                }
-                if (memoryLookupTable.containsKey(reference)) {
-                    throw new IllegalArgumentException("reference <" + reference + "> already defined");
-                }
-                memoryLookupTable.put(reference, value);
-                instructionPointer++;
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("errror parsing reference at line " + (instructionPointer + 1));
+            String line = program[instructionPointer].replace(" ", "");
+            boolean parsed = setMemoryDefinition(line);
+            if (!parsed) {
+                parsed = setConstDefinition(line);
             }
+            if (!parsed) {
+                throw new IllegalArgumentException("invalid definition at line " + (instructionPointer + 1));
+            }
+        }
+    }
+
+    private boolean setMemoryDefinition(String line) {
+        Matcher matcher = DEF_PATTERN.matcher(line);
+        if (!matcher.matches()) {
+            return false;
+        }
+        parseDefinition(matcher, memoryLookupTable);
+        return true;
+    }
+
+    private boolean setConstDefinition(String line) {
+        Matcher matcher = DEF_CONST_PATTERN.matcher(line);
+        if (!matcher.matches()) {
+            return false;
+        }
+        parseDefinition(matcher, constLookupTable);
+        return true;
+    }
+
+    private void parseDefinition(Matcher matcher, Map<String, Integer> table) {
+        try {
+            String reference = matcher.group(1);
+            if (reference.isEmpty()) {
+                throw new IllegalArgumentException("missing identifier at line " + (instructionPointer + 1));
+            }
+            int value;
+            if (matcher.group(2) == null || matcher.group(2).isEmpty()) {
+                value = reservedIndex;
+                reservedIndex--;
+            } else {
+                try {
+                    value = Integer.parseInt(matcher.group(2));
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("reference must be an integer");
+                }
+            }
+            if (table.containsKey(reference)) {
+                throw new IllegalArgumentException("reference <" + reference + "> already defined");
+            }
+            table.put(reference, value);
+            instructionPointer++;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("error parsing reference at line " + (instructionPointer + 1));
         }
     }
 
@@ -114,9 +148,11 @@ public class Interpreter {
         }
     }
 
-    private void replaceMemoryAssociations() {
+    private void replaceAssociations() {
         for (int i = instructionPointer; i < program.length; i++) {
             String line = program[i];
+
+            //Bracket (...) operator
             Pattern brackets = Pattern.compile(POINTER);
             Matcher bracketMatcher = brackets.matcher(line);
             String pointerBracket = "";
@@ -136,6 +172,8 @@ public class Interpreter {
                     value = REFERENCE_PREFIX + String.valueOf(memoryLookupTable.get(value));
                 } else if (commandLookupTable.containsKey(value)) {
                     value = REFERENCE_PREFIX + String.valueOf(commandLookupTable.get(value));
+                } else if (constLookupTable.containsKey(value)) {
+                    value = String.valueOf(constLookupTable.get(value));
                 } else if (value.startsWith(BINARY_PREFIX)) {
                     value = String.valueOf(parseBinary(value.substring(BINARY_PREFIX.length())));
                 } else if (!value.matches("[0-9]*")) {
