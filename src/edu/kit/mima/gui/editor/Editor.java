@@ -1,5 +1,7 @@
 package edu.kit.mima.gui.editor;
 
+import edu.kit.mima.gui.editor.history.*;
+
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
@@ -29,6 +31,10 @@ public class Editor extends JScrollPane {
     private boolean useHistory;
     private boolean changeLock;
 
+    private char lastTypedChar;
+    private boolean charTyped;
+    private boolean firstHistory = true;
+
     public Editor() {
         JPanel textPanel = new JPanel();
         LineNumbers lineNumbers = new LineNumbers();
@@ -38,25 +44,36 @@ public class Editor extends JScrollPane {
         textPanel.add(editorPane, BorderLayout.CENTER);
         setViewportView(textPanel);
 
-        replaceTabs = false;
-        useHistory = false;
-        changeLock = false;
-
         styles = new HashSet<>();
         afterUpdate = new ArrayList<>();
         history = new History<>(20);
 
         document = editorPane.getStyledDocument();
-        Consumer<DocumentEvent> afterChange = (e) -> {
-            int caretPosition = editorPane.getCaretPosition();
+        BiConsumer<DocumentEvent, Integer[]> afterChange = (e, carets) -> {
             if (!changeLock) {
-                changeLock = true;
+                int oldCaret = carets[0];
+                int newCaret = carets[1];
                 SwingUtilities.invokeLater(() -> {
                     for (Consumer<DocumentEvent> consumer : afterUpdate) {
                         consumer.accept(e);
                     }
                     afterUpdate();
-                    editorPane.setCaretPosition(caretPosition + e.getLength());
+                    if (useHistory) {
+                        FileHistoryObject fhs = history.getCurrent();
+                        if (!firstHistory && charTyped //Amend history
+                                && lastTypedChar != ' ' && lastTypedChar != '\n'
+                                && Math.abs(oldCaret - fhs.getCaretPosition()) <= fhs.getAmendLength() + 1) {
+                            history.setCurrent(
+                                    new FileHistoryObject(fhs.getCaretPosition(), getText(), fhs.getAmendLength() + 1));
+                        } else {
+                            if (firstHistory) {
+                                firstHistory = false;
+                            }
+                            history.add(new FileHistoryObject(oldCaret, getText(), 0));
+                        }
+                    }
+                    charTyped = false;
+                    editorPane.setCaretPosition(newCaret);
                     changeLock = false;
                 });
             }
@@ -64,12 +81,14 @@ public class Editor extends JScrollPane {
         DocumentListener listener = new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                afterChange.accept(e);
+                afterChange.accept(e, new Integer[]{editorPane.getCaretPosition()
+                        , editorPane.getCaretPosition() + e.getLength()});
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                afterChange.accept(e);
+                afterChange.accept(e, new Integer[]{editorPane.getCaretPosition()
+                        , editorPane.getCaretPosition() - e.getLength()});
             }
 
             @Override
@@ -82,15 +101,18 @@ public class Editor extends JScrollPane {
             boolean control = false;
 
             @Override
-            public void keyTyped(KeyEvent e) { }
+            public void keyTyped(KeyEvent e) {
+                lastTypedChar = e.getKeyChar();
+                charTyped = true;
+            }
 
             @Override
             public void keyPressed(KeyEvent e) {
                 if (!useHistory) return;
                 if (e.getKeyCode() == KeyEvent.VK_Z && control && shift) {
-                    updateHistory(true);
+                    moveHistory(true);
                 } else if (e.getKeyCode() == KeyEvent.VK_Z && control) {
-                    updateHistory(false);
+                    moveHistory(false);
                 } else if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
                     shift = true;
                 } else if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
@@ -100,6 +122,7 @@ public class Editor extends JScrollPane {
 
             @Override
             public void keyReleased(KeyEvent e) {
+                if (!useHistory) return;
                 if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
                     shift = false;
                 } else if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
@@ -111,15 +134,16 @@ public class Editor extends JScrollPane {
         editorPane.setCaretColor(TEXT_COLOR);
     }
 
-    private void updateHistory(boolean forward) {
+    private void moveHistory(boolean forward) {
+        int caret = history.getCurrent().getCaretPosition();
         FileHistoryObject fhs = forward ? history.forward() : history.back();
-        String text = fhs.text;
-        text = text == null ? getText() : text;
+        String text = fhs == null ? getText() : fhs.getText();
         setText(text);
-        useHistory = false;
+        changeLock = true;
         afterUpdate();
-        useHistory = true;
-        editorPane.setCaretPosition(fhs.caretPosition);
+        changeLock = false;
+        editorPane.setCaretPosition(caret);
+        System.out.println("jumped to:" + editorPane.getCaretPosition());
     }
 
     public void cleanNewLine() {
@@ -144,9 +168,6 @@ public class Editor extends JScrollPane {
     private void afterUpdate() {
         if (replaceTabs) {
             setText(getText().replaceAll("\t", "    "));
-        }
-        if (useHistory) {
-            history.add(new FileHistoryObject(editorPane.getCaretPosition(), getText()));
         }
         if (stylize) {
             stylize();
@@ -185,9 +206,10 @@ public class Editor extends JScrollPane {
     }
 
     public void setText(String text) {
+        boolean lock = changeLock;
         changeLock = true;
         editorPane.setText(text);
-        changeLock = false;
+        changeLock = lock;
     }
 
     public void doReplaceTabs(boolean replaceTabs) {
@@ -197,21 +219,13 @@ public class Editor extends JScrollPane {
     public void useHistory(boolean useHistory, int capacity) {
         this.useHistory = useHistory;
         this.history = new History<>(capacity);
-        this.history.add(new FileHistoryObject(editorPane.getCaretPosition(), getText()));
+        this.history.add(new FileHistoryObject(editorPane.getCaretPosition(), getText(), 0));
+        firstHistory = true;
     }
 
     public void resetHistory() {
         this.history.reset();
-        history.add(new FileHistoryObject(editorPane.getCaretPosition(), getText()));
-    }
-
-    private class FileHistoryObject {
-        final int caretPosition;
-        final String text;
-
-        private FileHistoryObject(final int caretPosition, final String text) {
-            this.caretPosition = caretPosition;
-            this.text = text;
-        }
+        history.add(new FileHistoryObject(editorPane.getCaretPosition(), getText(), 0));
+        firstHistory = true;
     }
 }
