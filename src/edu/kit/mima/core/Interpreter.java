@@ -93,6 +93,9 @@ public class Interpreter {
                         throw new IllegalArgumentException("reference must be an integer");
                     }
                 }
+                if (memoryLookupTable.containsKey(reference)) {
+                    throw new IllegalArgumentException("reference <" + reference + "> already defined");
+                }
                 memoryLookupTable.put(reference, value);
                 instructionPointer++;
             } catch (NumberFormatException e) {
@@ -201,7 +204,7 @@ public class Interpreter {
         }
         String reference = matcher.group(1);
         if (memoryLookupTable.containsKey(reference)) {
-            throw new IllegalArgumentException(reference + " is already associated with a memory cell");
+            throw new IllegalArgumentException(reference + " is already associated with an instruction");
         }
         commandLookupTable.put(reference, lineNumber + 1);
         return matcher.group(2);
