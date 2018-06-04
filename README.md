@@ -14,24 +14,32 @@ __<__ __a__ __>__ denotes the value in memory at address __a__
 
 __c__ is a constant value
 
-__akku__ is the default register
+__accu__ is the default register
 
 __iar__ is the instruction pointer register
 
-- __LDC__ __c__ : c  → akku
-- __LDV__ __a__ : <a\> → akku
-- __STV__ __a__ : akku → <a\>
-- __LDIV__ __a__ : <<a\>\> → akku
-- __STIV__ __a__ : akku → <<a\>\>
+__sp__ is the stack pointer
 
-- __NOT__ : invert all bits in akku
-- __RAR__ : rotate bits in akku one place to the right
+Mima:
 
-- __ADD__ __a__ : akku + <a\> → akku
-- __AND__ : akku AND <a\> → akku (bitwise)
-- __OR__ : akku OR <a\> → akku (bitwise)
-- __XOR__ : akku XOR <a\> → akku (bitwise)
-- __EQL__ __a__ : if <a\> = akku -1 → akku else 0 → akku
+- __LDC__ __c__ : c  → accu
+- __LDV__ __a__ : <a\> → accu
+- __STV__ __a__ : accu → <a\>
+- __LDIV__ __a__ : <<a\>\> → accu
+- __STIV__ __a__ : accu → <<a\>\>
+
+- __NOT__ : invert all bits in accu
+- __RAR__ : rotate bits in accu one place to the right
+
+- __ADD__ __a__ : accu + <a\> → accu
+- __AND__ : accu AND <a\> → accu (bitwise)
+- __OR__ : accu OR <a\> → accu (bitwise)
+- __XOR__ : accu XOR <a\> → accu (bitwise)
+- __EQL__ __a__ : if <a\> = accu then -1 → accu else 0 → accu
 
 - __JMP__ __c__ : c → iar
-- __JMN__ __c__ : if msb of akku = 1 then c → iar
+- __JMN__ __c__ : if msb of accu = 1 then c → iar
+
+MimaX:
+
+- Todo
