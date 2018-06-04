@@ -16,7 +16,7 @@ __<a\>__ denotes the value in memory at address __a__
 
 __c__ is a constant value
 
-__accu__ is the default register
+__accu__ is the accumulation register
 
 __iar__ is the instruction address register
 
@@ -49,13 +49,13 @@ MimaX:
 - __CALL__ __c__ : rs.push(iar) and c → iar
 - __RET__ : rs.pop() → iar
 
--__ADC__ __c__ : accu + c → accu
+- __ADC__ __c__ : accu + c → accu
 
--__LDSP__ : sp → accu
+- __LDSP__ : sp → accu
 -__STSP__ : accu → sp
 
--__STVR__ __disp(SP)__ : accu → <<sp> + disp>
--__LDVR__ __disp(SP)__ : <<sp> + disp> → accu
+- __STVR__ __disp(SP)__ : accu → <<sp> + disp>
+- __LDVR__ __disp(SP)__ : <<sp> + disp> → accu
 
 -all instructions from Mima
 
