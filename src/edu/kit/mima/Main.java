@@ -4,13 +4,17 @@ import edu.kit.mima.core.*;
 import edu.kit.mima.gui.*;
 import edu.kit.mima.gui.console.Console;
 import edu.kit.mima.gui.editor.*;
-import edu.kit.mima.gui.loading.*;
+import edu.kit.mima.gui.logging.*;
 import edu.kit.mima.gui.menu.Menu;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.List;
+import java.util.*;
+
+import static edu.kit.mima.gui.logging.Logger.*;
 
 /**
  * @author Jannis Weis
@@ -25,82 +29,49 @@ public final class Main extends JFrame {
     private static final String MIMA_DIR = System.getProperty("user.home") + "/.mima";
 
     private final Mima mima;
-    private final TextLoader textLoader;
-    private final OptionsLoader optionsLoader;
-    private final SaveHandler saveHandler;
-    private final Console console;
-    private final Editor editor;
+    private final FileManager fileManager;
     private final MemoryView memoryView;
+
+    private final Editor editor;
+    private final StyleGroup syntaxStyle;
+    private final StyleGroup referenceStyle;
+
     private final JButton run = new JButton("RUN");
     private final JButton step = new JButton("STEP");
-    private boolean unsaved;
-    private String lastFile;
-    private String directory;
-    private String[] lines;
-    private boolean mimaXFile;
-
 
     public Main() {
-        optionsLoader = new OptionsLoader(MIMA_DIR);
-        saveHandler = new SaveHandler(MIMA_DIR);
+        fileManager = new FileManager(this, MIMA_DIR, new String[]{FILE_EXTENSION, FILE_EXTENSION_X});
         editor = new Editor();
-        console = new Console();
+        Console console = new Console();
+        Logger.setConsole(console);
         memoryView = new MemoryView(new String[]{"Address", "Value"});
-        setupWindow();
 
+        setupWindow();
         JPanel memoryConsole = new JPanel(new GridLayout(2, 1));
         memoryConsole.add(memoryView);
         memoryConsole.add(console);
         add(memoryConsole, BorderLayout.LINE_START);
-
         setupButtons();
         setupMenu();
         add(editor, BorderLayout.CENTER);
 
-        LoadManager loadManager = new DefaultLoadManager() {
-            @Override
-            public void onLoad(String path) { log("Loading: " + path + "..."); }
-
-            @Override
-            public void afterRequest(File chosenFile) {
-                mimaXFile = (chosenFile.getAbsolutePath().endsWith(FILE_EXTENSION_X));
-                lastFile = chosenFile.getAbsolutePath();
-                directory = chosenFile.getParentFile().getAbsolutePath();
-            }
-
-            @Override
-            public void afterLoad() { log("done"); }
-
-            @Override
-            public void onSave(String path) { log("Saving: " + path + "..."); }
-
-            @Override
-            public void afterSave() { log("done"); }
-
-            @Override
-            public void onFail(String errorMessage) { error(errorMessage); }
-        };
-        textLoader = new TextLoader(this, loadManager);
-
         mima = new Mima();
-        //Load Options
-        try {
-            String[] options = optionsLoader.loadOptions();
-            this.lastFile = options[0];
-            this.directory = new File(lastFile).getParentFile().getAbsolutePath();
-        } catch (IOException e) {
-            this.directory = System.getProperty("user.home");
-        }
-        //Load Last File
-        try {
-            String text = saveHandler.loadFile(lastFile);
-            editor.setText(text);
-            lines = text.split("\n");
-            mimaXFile = lastFile.endsWith(FILE_EXTENSION_X);
-        } catch (IOException e) {
-            firstStart();
-        }
+        fileManager.loadOptions();
+        fileManager.loadLastFile();
+        editor.setText(fileManager.getText());
+        reloadMima();
+
+        syntaxStyle = new StyleGroup();
+        referenceStyle = new StyleGroup();
+        editor.addStyleGroup(syntaxStyle);
+        editor.addStyleGroup(referenceStyle);
+        editor.doReplaceTabs(true);
+        editor.useHistory(true, 20);
         updateSyntaxHighlighting();
+        updateReferenceHighlighting();
+        editor.addAfterUpdateAction(e -> fileManager.setText(editor.getText()));
+        editor.addAfterUpdateAction(e -> updateReferenceHighlighting());
+
         editor.setStylize(true);
         editor.stylize();
     }
@@ -117,8 +88,8 @@ public final class Main extends JFrame {
             @Override
             public void windowClosing(WindowEvent e) {
                 try {
-                    if (unsaved) savePopUp();
-                    optionsLoader.saveOptions(lastFile);
+                    if (!fileManager.isSaved()) fileManager.savePopUp(editor.getText());
+                    fileManager.saveOptions();
                     e.getWindow().dispose();
                 } catch (IOException | IllegalArgumentException ignored) { }
             }
@@ -134,13 +105,19 @@ public final class Main extends JFrame {
         Menu menu = new Menu();
         JMenu file = new JMenu("File");
         JMenuItem newFile = new JMenuItem("New");
-        newFile.addActionListener(e -> newFile());
+        newFile.addActionListener(e -> {
+            fileManager.newFile();
+            editor.setText(fileManager.getText());
+            editor.resetHistory();
+        });
         newFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
         file.add(newFile);
         JMenuItem load = new JMenuItem("Load");
-        load.addActionListener(e -> load(textLoader.requestLoad(directory,
-                                                                new String[]{FILE_EXTENSION, FILE_EXTENSION_X},
-                                                                () -> { })));
+        load.addActionListener(e -> {
+            fileManager.load();
+            editor.setText(fileManager.getText());
+            editor.resetHistory();
+        });
         load.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK));
         file.add(load);
 
@@ -149,12 +126,12 @@ public final class Main extends JFrame {
         JMenuItem save = new JMenuItem("Save");
         save.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
         save.addActionListener(e -> {
-            if (unsaved) saveAs();
+            if (!fileManager.isOnDisk()) fileManager.saveAs(editor.getText());
             else save();
         });
         file.add(save);
         JMenuItem saveAs = new JMenuItem("Save as");
-        saveAs.addActionListener(e -> saveAs());
+        saveAs.addActionListener(e -> fileManager.saveAs(editor.getText()));
         saveAs.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
                                                      InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK));
         file.add(saveAs);
@@ -200,31 +177,12 @@ public final class Main extends JFrame {
         button.addActionListener(e -> action.run());
     }
 
-    private void firstStart() {
-        try {
-            int response = JOptionPane
-                    .showOptionDialog(this, "Create/Load File", TITLE, JOptionPane.DEFAULT_OPTION,
-                                      JOptionPane.PLAIN_MESSAGE,
-                                      null, new String[]{"Load", "New"}, "New");
-            if (response == 0) { //Load
-                load(textLoader.requestLoad(directory, new String[]{FILE_EXTENSION, FILE_EXTENSION_X},
-                                            () -> System.exit(0)));
-            } else if (response == 1) { //New
-                newFile();
-            } else { //Abort
-                System.exit(0);
-            }
-        } catch (IllegalArgumentException e) {
-            error(e.getMessage());
-        }
-    }
-
     private void step() {
         try {
             log("Step!");
             mima.step();
             run.setEnabled(false);
-            log("Instruction: " + lines[mima.getCurrentLineIndex() - 1]);
+            log("Instruction: " + fileManager.lines()[mima.getCurrentLineIndex() - 1]);
             updateMemoryTable();
             step.setEnabled(mima.isRunning());
         } catch (IllegalArgumentException e) {
@@ -237,7 +195,7 @@ public final class Main extends JFrame {
     private void run() {
         step.setEnabled(false);
         run.setEnabled(false);
-        log("Running program: " + lastFile + "...");
+        log("Running program: " + fileManager.getLastFile() + "...");
         try {
             mima.run();
             updateMemoryTable();
@@ -257,31 +215,9 @@ public final class Main extends JFrame {
         updateMemoryTable();
     }
 
-
-    private void newFile() {
-        int response = JOptionPane.showOptionDialog(this, "Choose file type", "File type",
-                                                    JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE,
-                                                    null, new String[]{"Mima", "MimaX"}, "Mima");
-        if (response == JOptionPane.CLOSED_OPTION) return;
-        mimaXFile = response == 1;
-        updateSyntaxHighlighting();
-        lines = new String[]{"#Put Code here"};
-        editor.setText("#Put Code here");
-        unsaved = true;
-    }
-
-    private void load(String text) {
-        String corrected = text.replaceAll("\r?\n", "\n");
-        editor.setText(corrected);
-        lines = corrected.split("\n");
-        updateSyntaxHighlighting();
-        editor.stylize();
-        unsaved = false;
-    }
-
     private void reloadMima() {
         try {
-            mima.loadProgram(lines.clone(), mimaXFile);
+            mima.loadProgram(fileManager.lines().clone(), fileManager.getLastExtension().equals(FILE_EXTENSION_X));
             run.setEnabled(false);
             step.setEnabled(false);
         } catch (IllegalArgumentException e) {
@@ -292,42 +228,20 @@ public final class Main extends JFrame {
     private void save() {
         try {
             log("saving...");
-            saveHandler.saveFile(editor.getText(), lastFile);
+            fileManager.save();
             log("done");
         } catch (IOException e) {
             error("failed to save: " + e.getMessage());
         }
     }
 
-    private void saveAs() {
-        String extension = mimaXFile ? FILE_EXTENSION_X : FILE_EXTENSION;
-        try {
-            textLoader.requestSave(editor.getText(), directory, extension,
-                                   () -> { throw new IllegalArgumentException(); });
-        } catch (IllegalArgumentException ignored) { }
-        unsaved = false;
-    }
-
-    private void savePopUp() {
-        int response = JOptionPane.showOptionDialog(Main.this, "Do you want to save?", "Unsaved File",
-                                                    JOptionPane.YES_NO_OPTION,
-                                                    JOptionPane.WARNING_MESSAGE,
-                                                    null, new String[]{"Save", "Don't save"}, "Save");
-        if (response == JOptionPane.OK_OPTION) {
-            saveAs();
-        } else if (response == JOptionPane.CLOSED_OPTION) {
-            throw new IllegalArgumentException("Window not closed");
-        }
-    }
-
     private void compile() {
-        log("Compiling: " + lastFile + "...");
+        log("Compiling: " + fileManager.getLastFile() + "...");
         try {
-            lines = editor.getText().split("\n");
             reloadMima();
+            updateMemoryTable();
             run.setEnabled(true);
             step.setEnabled(true);
-            updateMemoryTable();
         } catch (IllegalArgumentException e) {
             error(e.getMessage());
             run.setEnabled(false);
@@ -344,30 +258,38 @@ public final class Main extends JFrame {
     private void updateSyntaxHighlighting() {
         Color instructionsColor = new Color(27, 115, 207);
         Color keywordColor = new Color(168, 120, 43);
-        editor.setHighlight(Mima.getInstructionSet(), instructionsColor);
-        editor.addHighlight(Interpreter.getKeywords(), new Color[]{
+
+        syntaxStyle.setHighlight(Interpreter.getKeywords(), new Color[]{
                 keywordColor, //$define
                 keywordColor, //const
                 keywordColor, // :
                 keywordColor, // (
                 keywordColor, // )
                 new Color(37, 143, 148), //Numbers
-                new Color(136, 64, 170), //0b,
+                new Color(165, 170, 56), //0b,
                 new Color(63, 135, 54), //Comments
         });
-        if (mimaXFile) {
-            editor.addHighlight(Mima.getMimaXInstructionSet(), instructionsColor);
+        if (fileManager.getLastExtension().equals(FILE_EXTENSION_X)) {
+            syntaxStyle.addHighlight(Mima.getMimaXInstructionSet(), instructionsColor);
         }
     }
 
-    private void log(String message) {
-        console.log(message);
-        repaint();
-    }
+    private void updateReferenceHighlighting() {
+        if (mima == null) return;
+        try {
+            List<Set<String>> references = mima.getReferences(fileManager.lines().clone());
 
-    private void error(String message) {
-        console.error(message);
-        repaint();
+            referenceStyle.setHighlight(Mima.getInstructionSet(), new Color(27, 115, 207));
+            String[] constants = references.get(0)
+                    .stream().map(s -> "(?<![^ \n])" + s + "(?![^ \n])").toArray(String[]::new);
+            referenceStyle.addHighlight(constants, new Color(255, 96, 179));
+            String[] instructionReferences = references.get(2)
+                    .stream().map(s -> "(?<![^ \n])" + s + "(?![^ \n])").toArray(String[]::new);
+            referenceStyle.addHighlight(instructionReferences, new Color(63, 135, 54));
+            String[] memoryReferences = references.get(1)
+                    .stream().map(s -> "(?<![^ \n])" + s + "(?![^ \n])").toArray(String[]::new);
+            referenceStyle.addHighlight(memoryReferences, new Color(136, 37, 170));
+        } catch (IllegalArgumentException ignored) { }
     }
 
 }

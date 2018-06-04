@@ -1,19 +1,21 @@
 package edu.kit.mima.core;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Jannis Weis
  * @since 2018
  */
 public class Memory {
-    private Map<Integer, MachineWord> memory;
     private final int machineWordLength;
+    private Map<Integer, MachineWord> memory;
 
-    public Memory(final int machineWordLength) {
+    public Memory(final int machineWordLength, int initialCapacity) {
         this.machineWordLength = machineWordLength;
         this.memory = new HashMap<>();
+        for (int i = 0; i < initialCapacity; i++) {
+            storeValue(i, new MachineWord(0, machineWordLength));
+        }
     }
 
     public Map<Integer, MachineWord> getMemory() {

@@ -1,7 +1,7 @@
 package edu.kit.mima.gui.loading;
 
 import java.io.*;
-import java.util.stream.Collectors;
+import java.util.stream.*;
 
 /**
  * @author Jannis Weis
@@ -18,12 +18,14 @@ public class SaveHandler {
     }
 
     public String loadFile(String file) throws IOException {
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "ISO-8859-1"));
+        final BufferedReader reader = new BufferedReader(
+                new InputStreamReader(new FileInputStream(file), "ISO-8859-1"));
         return reader.lines().collect(Collectors.joining("\n"));
     }
 
     public String loadTmp() throws IOException {
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(tmpFile), "ISO-8859-1"));
+        final BufferedReader reader = new BufferedReader(
+                new InputStreamReader(new FileInputStream(tmpFile), "ISO-8859-1"));
         return reader.lines().collect(Collectors.joining("\n"));
     }
 

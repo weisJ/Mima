@@ -29,17 +29,17 @@ public class Interpreter {
 
     private final int constWordLength;
     private final int wordLength;
-    private final String[] program;
+    private final String[] instructions;
     private int instructionPointer;
     private int firstInstruction;
     private int reservedIndex;
     private Map<String, Integer> memoryLookupTable;
-    private Map<String, Integer> commandLookupTable;
+    private Map<String, Integer> instructionLookupTable;
     private Map<String, Integer> constLookupTable;
 
 
     public Interpreter(final String[] lines, final int constWordLength, final int wordLength) {
-        this.program = lines;
+        this.instructions = lines;
         this.instructionPointer = 0;
         this.constWordLength = constWordLength;
         this.wordLength = wordLength;
@@ -47,67 +47,97 @@ public class Interpreter {
     }
 
     public static String[] getKeywords() {
-        return new String[]{DEFINITION, " " + CONST + " ", ":", "\\(", "\\)", " [0-9]+ ?", "0b[01]*", "#[^\n]*\n?"};
+        return new String[]{"(?<![^ \n])" + DEFINITION + "(?![^ \n])"
+                , "(?<![^ \n])" + CONST + "(?![^ \n])"
+                , "(?<![^ \n]):(?![^ \n])"
+                , "\\(", "\\)"
+                , "(?<![^ \n])[0-9]+(?![^ (\n])"
+                , "0b[01]*"
+                , "#[^\n]*\n?"};
     }
 
     public void compile() {
         this.memoryLookupTable = new HashMap<>();
-        this.commandLookupTable = new HashMap<>();
+        this.instructionLookupTable = new HashMap<>();
         this.constLookupTable = new HashMap<>();
         reservedIndex = -1;
         setInstructionPointer(0);
-        removeComments();
-        setupDefinitions();
-        firstInstruction = instructionPointer;
-        setupInstructionLookup();
+        int index = removeComments(instructions);
+        firstInstruction = setupDefinitions(instructions, index, memoryLookupTable, constLookupTable);
+        setupInstructionLookup(instructions, firstInstruction, instructionLookupTable);
+        setInstructionPointer(firstInstruction);
         replaceAssociations();
+        setInstructionPointer(firstInstruction);
+
     }
 
-    private void removeComments() {
-        for (int i = 0; i < program.length; i++) {
-            if (program[i] != null && program[i].length() > 0) {
-                if (program[i].charAt(0) == '#') {
-                    program[i] = "";
-                } else if (program[i].contains("#")) {
-                    String line = program[i];
+    public List<Set<String>> getReferences(String[] lines) throws IllegalArgumentException {
+        Map<String, Integer> constTable = new HashMap<>();
+        Map<String, Integer> memoryTable = new HashMap<>();
+        Map<String, Integer> instructionTable = new HashMap<>();
+        int index = removeComments(lines);
+        index = setupDefinitions(lines, index, memoryTable, constTable);
+        setupInstructionLookup(lines, index, instructionTable);
+        return List.of(constTable.keySet(), memoryTable.keySet(), instructionTable.keySet());
+    }
+
+    private int removeComments(String[] lines) {
+        if (lines.length == 0) return 0;
+        boolean foundFirstNonComment = false;
+        int firstNonComment = 0;
+        for (int i = 0; i < lines.length; i++) {
+            if (lines[i] != null && lines[i].length() > 0) {
+                if (lines[i].charAt(0) == '#') {
+                    lines[i] = "";
+                } else if (lines[i].contains("#")) {
+                    String line = lines[i];
                     int index = line.indexOf('#');
                     int lastIndex = line.lastIndexOf('#');
                     if (index == lastIndex) {
-                        program[i] = line.substring(0, index - 1);
+                        lines[i] = line.substring(0, index - 1);
                     }
+                } else if (!foundFirstNonComment) {
+                    firstNonComment = i;
+                    foundFirstNonComment = true;
                 }
             }
         }
+        return firstNonComment;
     }
 
-    private void setupDefinitions() {
-        while (program[instructionPointer].startsWith(DEFINITION)) {
-            String line = program[instructionPointer].replace(" ", "");
-            boolean parsed = setMemoryDefinition(line);
+    private int setupDefinitions(String[] lines, int startIndex, Map<String, Integer> memoryMap,
+                                 Map<String, Integer> constMap) {
+        if (lines.length == 0) return startIndex;
+        int index = startIndex;
+        while (lines[index].startsWith(DEFINITION)) {
+            String line = lines[index].replace(" ", "");
+            boolean parsed = setConstDefinition(line, constMap);
             if (!parsed) {
-                parsed = setConstDefinition(line);
+                parsed = setMemoryDefinition(line, memoryMap);
             }
             if (!parsed) {
-                throw new IllegalArgumentException("invalid definition at line " + (instructionPointer + 1));
+                throw new IllegalArgumentException("invalid definition at line " + (index + 1));
             }
+            index++;
         }
+        return index;
     }
 
-    private boolean setMemoryDefinition(String line) {
+    private boolean setMemoryDefinition(String line, Map<String, Integer> lookupTable) {
         Matcher matcher = DEF_PATTERN.matcher(line);
         if (!matcher.matches()) {
             return false;
         }
-        parseDefinition(matcher, memoryLookupTable);
+        parseDefinition(matcher, lookupTable);
         return true;
     }
 
-    private boolean setConstDefinition(String line) {
+    private boolean setConstDefinition(String line, Map<String, Integer> lookupTable) {
         Matcher matcher = DEF_CONST_PATTERN.matcher(line);
         if (!matcher.matches()) {
             return false;
         }
-        parseDefinition(matcher, constLookupTable);
+        parseDefinition(matcher, lookupTable);
         return true;
     }
 
@@ -132,25 +162,38 @@ public class Interpreter {
                 throw new IllegalArgumentException("reference <" + reference + "> already defined");
             }
             table.put(reference, value);
-            instructionPointer++;
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("error parsing reference at line " + (instructionPointer + 1));
         }
     }
 
-    private void setupInstructionLookup() {
-        for (int i = instructionPointer; i < program.length; i++) {
-            String line = program[i];
+    private void setupInstructionLookup(String[] lines, int startIndex, Map<String, Integer> instructionMap) {
+        if (lines.length == 0) return;
+        for (int i = startIndex; i < lines.length; i++) {
+            String line = lines[i];
             if (line.contains(":")) {
-                line = addCommandEntry(line, i);
-                program[i] = line;
+                line = addCommandEntry(line, i, instructionMap);
+                lines[i] = line;
             }
         }
     }
 
+    private String addCommandEntry(final String line, final int lineNumber, Map<String, Integer> lookupTable) {
+        Matcher matcher = COMMAND_LOOKUP.matcher(line);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("not a correct jump association at line : " + (lineNumber + 1));
+        }
+        String reference = matcher.group(1);
+        if (lookupTable.containsKey(reference)) {
+            throw new IllegalArgumentException(reference + " is already associated with an instruction");
+        }
+        lookupTable.put(reference, lineNumber + 1);
+        return matcher.group(2);
+    }
+
     private void replaceAssociations() {
-        for (int i = instructionPointer; i < program.length; i++) {
-            String line = program[i];
+        for (int i = instructionPointer; i < instructions.length; i++) {
+            String line = instructions[i];
 
             //Bracket (...) operator
             Pattern brackets = Pattern.compile(POINTER);
@@ -170,8 +213,8 @@ public class Interpreter {
             if (value.length() > 0) {
                 if (memoryLookupTable.containsKey(value)) {
                     value = REFERENCE_PREFIX + String.valueOf(memoryLookupTable.get(value));
-                } else if (commandLookupTable.containsKey(value)) {
-                    value = REFERENCE_PREFIX + String.valueOf(commandLookupTable.get(value));
+                } else if (instructionLookupTable.containsKey(value)) {
+                    value = REFERENCE_PREFIX + String.valueOf(instructionLookupTable.get(value));
                 } else if (constLookupTable.containsKey(value)) {
                     value = String.valueOf(constLookupTable.get(value));
                 } else if (value.startsWith(BINARY_PREFIX)) {
@@ -187,7 +230,7 @@ public class Interpreter {
                     }
                 }
             }
-            program[i] = command + pointerBracket + "§" + value;
+            instructions[i] = command + pointerBracket + "§" + value;
         }
     }
 
@@ -195,7 +238,7 @@ public class Interpreter {
         if (!hasInstructions()) {
             throw new IllegalStateException("No more instructions");
         }
-        String line = program[instructionPointer];
+        String line = instructions[instructionPointer];
         instructionPointer++;
         Command command = parseCommand(line);
 
@@ -235,19 +278,6 @@ public class Interpreter {
         return new Command(matcher.group(1), new MachineWord(value, wordLength), isReference);
     }
 
-    private String addCommandEntry(final String line, final int lineNumber) {
-        Matcher matcher = COMMAND_LOOKUP.matcher(line);
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException("not a correct jump association at line : " + (lineNumber + 1));
-        }
-        String reference = matcher.group(1);
-        if (memoryLookupTable.containsKey(reference)) {
-            throw new IllegalArgumentException(reference + " is already associated with an instruction");
-        }
-        commandLookupTable.put(reference, lineNumber + 1);
-        return matcher.group(2);
-    }
-
     private int parseBinary(final String sVal) {
         Pattern crop = Pattern.compile("0*([01]*)");
         Matcher matcher = crop.matcher(sVal);
@@ -275,7 +305,7 @@ public class Interpreter {
     }
 
     public void setInstructionPointer(final int pointer) {
-        if (pointer < 0 || pointer >= program.length) {
+        if (pointer < 0 || pointer >= instructions.length) {
             throw new IllegalArgumentException("invalid pointer position");
         }
         instructionPointer = pointer;
@@ -286,10 +316,11 @@ public class Interpreter {
     }
 
     public boolean hasInstructions() {
-        return instructionPointer < program.length;
+        return instructionPointer < instructions.length;
     }
 
     public void reset() {
         setInstructionPointer(firstInstruction);
     }
+
 }
