@@ -54,15 +54,16 @@ MimaX:
 - __LDSP__ : sp → accu
 - __STSP__ : accu → sp
 
-- __STVR__ __disp(SP)__ : accu → <<sp> + disp>
-- __LDVR__ __disp(SP)__ : <<sp> + disp> → accu
+- __STVR__ __disp(SP)__ : accu → <<sp\> + disp>
+- __LDVR__ __disp(SP)__ : <<sp\> + disp> → accu
 
 - all instructions from Mima
 
 #Language details
 
 - Comments: __#...__ or __#...#__
-- Definitions: - __§define__ __"def"__ __:__ __"value"__ (use with e.g. STV "def")
-               - __§define__ __const__ __"def"__ : __"value"__ (use with e.g. LDC "def")
-               - __"def"__ __:__ __...___ (use with e.g. JMP "def")
+- Definitions:
+    - __§define__ __"def"__ __:__ __"value"__ (use with e.g. STV "def")
+    - __§define__ __const__ __"def"__ : __"value"__ (use with e.g. LDC "def")
+    - __"def"__ __:__ __...___ (use with e.g. JMP "def")
 
