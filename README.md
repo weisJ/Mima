@@ -24,7 +24,7 @@ __sp__ is the stack pointer
 
 __rs__ is the return stack
 
-Mima:
+__Mima:__
 
 - __LDC__ __c__ : c  → accu
 - __LDV__ __a__ : <a\> → accu
@@ -44,7 +44,7 @@ Mima:
 - __JMP__ __c__ : c → iar
 - __JMN__ __c__ : if msb of accu = 1 then c → iar
 
-MimaX:
+__MimaX:__
 
 - __CALL__ __c__ : rs.push(iar) and c → iar
 - __RET__ : rs.pop() → iar
