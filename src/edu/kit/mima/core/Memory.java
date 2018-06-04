@@ -24,7 +24,9 @@ public class Memory {
         if (memory.containsKey(index)) {
             return memory.get(index).copy();
         } else {
-            return memory.put(index, new MachineWord(0, machineWordLength));
+            MachineWord entry = new MachineWord(0, machineWordLength);
+            memory.put(index, entry);
+            return entry;
         }
     }
 

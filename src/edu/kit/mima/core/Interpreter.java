@@ -9,10 +9,12 @@ import java.util.regex.*;
  */
 public class Interpreter {
 
-    private static final Pattern COMMAND_PATTERN = Pattern.compile("^(?: )*([a-zA-Z]*)(?: )*([^ :§]*)?(?: )*$");
+    private static final String POINTER = "\\([^()]*\\)";
+    private static final Pattern COMMAND_PATTERN = Pattern.compile("^(?: )*([a-zA-Z]*(?:"
+                                                                           + POINTER + ")?)(?: )*([^ :§]*)?(?: )*$");
     private static final Pattern COMMAND_LOOKUP = Pattern
             .compile("^(?: )*([^ :§]+)(?: )*:(?: )*([^ :§*]*(?: )*[^ :§*]*)(?: )*$");
-    private static final Pattern COMMAND_INTERN = Pattern.compile("^([a-zA-Z]*)§&?(-?[0-9]+)?$");
+    private static final Pattern COMMAND_INTERN = Pattern.compile("^([a-zA-Z]*(?:" + POINTER + ")?)§(&?-?[0-9]+)?$");
 
     private static final String DEFINITION = "§define";
     private static final Pattern DEF_PATTERN = Pattern.compile("^(?:§define)([^ :$]+)(?:|:([0-9]+))$");
@@ -112,31 +114,40 @@ public class Interpreter {
     private void replaceMemoryAssociations() {
         for (int i = instructionPointer; i < program.length; i++) {
             String line = program[i];
+            Pattern brackets = Pattern.compile(POINTER);
+            Matcher bracketMatcher = brackets.matcher(line);
+            String pointerBracket = "";
+            if (bracketMatcher.find()) {
+                pointerBracket = bracketMatcher.group();
+                line = line.replaceAll(POINTER, "");
+            }
+
             Matcher matcher = COMMAND_PATTERN.matcher(line);
             if (!matcher.matches()) {
                 throw new IllegalArgumentException("invalid instruction at line : " + (i + 1));
             }
             String command = matcher.group(1) != null ? matcher.group(1) : "";
             String value = matcher.group(2) != null ? matcher.group(2) : "";
-            if (memoryLookupTable.containsKey(value)) {
-                value = REFERENCE_PREFIX + String.valueOf(memoryLookupTable.get(value));
-            } else if (commandLookupTable.containsKey(value)) {
-                value = REFERENCE_PREFIX + String.valueOf(commandLookupTable.get(value));
-            } else if (value.startsWith(BINARY_PREFIX)) {
-                value = String.valueOf(parseBinary(value.substring(BINARY_PREFIX.length())));
-            } else if (!value.matches("[0-9]*")) {
-                throw new IllegalArgumentException("unresolved Symbol <" + value + "> at line " + (i + 1));
-            } else {
-                try {
-                    int val = Integer.parseInt(value);
-                    value = String.valueOf(val);
-                } catch (NumberFormatException e) {
-                    throw new IllegalArgumentException("illegal memory address <" + value + "> at line" + (i + 1));
+            if (value.length() > 0) {
+                if (memoryLookupTable.containsKey(value)) {
+                    value = REFERENCE_PREFIX + String.valueOf(memoryLookupTable.get(value));
+                } else if (commandLookupTable.containsKey(value)) {
+                    value = REFERENCE_PREFIX + String.valueOf(commandLookupTable.get(value));
+                } else if (value.startsWith(BINARY_PREFIX)) {
+                    value = String.valueOf(parseBinary(value.substring(BINARY_PREFIX.length())));
+                } else if (!value.matches("[0-9]*")) {
+                    throw new IllegalArgumentException("unresolved Symbol <" + value + "> at line " + (i + 1));
+                } else {
+                    try {
+                        int val = Integer.parseInt(value);
+                        value = String.valueOf(val);
+                    } catch (NumberFormatException e) {
+                        throw new IllegalArgumentException("illegal memory address <" + value + "> at line " + (i + 1));
+                    }
                 }
             }
-            program[i] = command + "§" + value;
+            program[i] = command + pointerBracket + "§" + value;
         }
-
     }
 
     public Command nextInstruction() throws IllegalArgumentException {

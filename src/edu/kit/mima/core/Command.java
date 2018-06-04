@@ -28,6 +28,6 @@ public class Command {
     }
 
     public boolean hasCommand() {
-        return command != null;
+        return value != null;
     }
 }
