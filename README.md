@@ -59,7 +59,7 @@ MimaX:
 
 - all instructions from Mima
 
-#Language details
+# Language details
 
 - Comments: __#...__ or __#...#__
 - Definitions:
