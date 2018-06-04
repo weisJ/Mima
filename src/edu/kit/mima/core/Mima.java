@@ -71,6 +71,10 @@ public class Mima {
             } else {
                 data[index] = new Object[]{i, values.get(i).intValue()};
             }
+            System.out.println(data[i][0]);
+            if (i == stackPointer.intValue()) {
+                data[i][0] = data[i][0] + "(SP)";
+            }
             index++;
         }
         return data;
@@ -93,7 +97,9 @@ public class Mima {
             boolean finished = processMimaCommand(command);
             if (finished)
                 return;
-            finished = processMimaXCommand(command);
+            if (extendedInstructions) {
+                finished = processMimaXCommand(command);
+            }
             if (!finished)
                 fail("unknown instruction <" + command.getCommand() + "> at line " + (icu.getInstructionPointer() + 1));
         } else {
@@ -127,25 +133,25 @@ public class Mima {
                 break;
             case "LDV":
                 if (!command.isReference() && command.getValue().intValue() < 0) {
-                    fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
+                    fail("invalid memory address at line " + (icu.getInstructionPointer() + 1));
                 }
                 accumulator = memory.loadValue(command.getValue().intValue());
                 break;
             case "STV":
                 if (!command.isReference() && command.getValue().intValue() < 0) {
-                    fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
+                    fail("invalid memory address at line " + (icu.getInstructionPointer() + 1));
                 }
                 memory.storeValue(command.getValue().intValue(), accumulator.copy());
                 break;
             case "LDIV":
                 if (!command.isReference() && command.getValue().intValue() < 0) {
-                    fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
+                    fail("invalid memory address at line " + (icu.getInstructionPointer() + 1));
                 }
                 accumulator = memory.loadValue(memory.loadValue(command.getValue().intValue()).intValue());
                 break;
             case "STIV":
                 if (!command.isReference() && command.getValue().intValue() < 0) {
-                    fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
+                    fail("invalid memory address at line " + (icu.getInstructionPointer() + 1));
                 }
                 memory.storeValue(memory.loadValue(command.getValue().intValue()).intValue(), accumulator.copy());
                 break;
@@ -163,35 +169,35 @@ public class Mima {
                 break;
             case "ADD":
                 if (!command.isReference() && command.getValue().intValue() < 0) {
-                    fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
+                    fail("invalid memory address at line " + (icu.getInstructionPointer() + 1));
                 }
                 accumulator = alu.ADD(MachineWord.cast(accumulator, WORD_LENGTH),
                                       memory.loadValue(command.getValue().intValue()));
                 break;
             case "AND":
                 if (!command.isReference() && command.getValue().intValue() < 0) {
-                    fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
+                    fail("invalid memory address at line " + (icu.getInstructionPointer() + 1));
                 }
                 accumulator = alu.AND(MachineWord.cast(accumulator, WORD_LENGTH),
                                       memory.loadValue(command.getValue().intValue()));
                 break;
             case "OR":
                 if (!command.isReference() && command.getValue().intValue() < 0) {
-                    fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
+                    fail("invalid memory address at line " + (icu.getInstructionPointer() + 1));
                 }
                 accumulator = alu.OR(MachineWord.cast(accumulator, WORD_LENGTH),
                                      memory.loadValue(command.getValue().intValue()));
                 break;
             case "XOR":
                 if (!command.isReference() && command.getValue().intValue() < 0) {
-                    fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
+                    fail("invalid memory address at line " + (icu.getInstructionPointer() + 1));
                 }
                 accumulator = alu.XOR(MachineWord.cast(accumulator, WORD_LENGTH),
                                       memory.loadValue(command.getValue().intValue()));
                 break;
             case "EQL":
                 if (!command.isReference() && command.getValue().intValue() < 0) {
-                    fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
+                    fail("invalid memory address at line " + (icu.getInstructionPointer() + 1));
                 }
                 accumulator = alu.EQL(MachineWord.cast(accumulator, WORD_LENGTH),
                                       memory.loadValue(command.getValue().intValue()));
@@ -245,19 +251,18 @@ public class Mima {
                 accumulator.setBits(stackPointer.getBits());
                 break;
             case "STSP":
-                if (command.isReference()) {
-                    fail("can't pass a reference at line " + (icu.getInstructionPointer() + 1));
+                if (command.hasCommand()) {
+                    fail("unexpected argument at line " + (icu.getInstructionPointer() + 1));
                 }
-                if (command.getValue().intValue() < 0) {
-                    fail("invalid memory address at line" + (icu.getInstructionPointer() + 1));
-                }
-                stackPointer.setValue(command.getValue().intValue());
+                int address = accumulator.intValue();
+                memory.storeValue(address, memory.loadValue(address));
+                stackPointer.setValue(address);
                 break;
             case "STVR(SP)":
                 if (command.isReference()) {
                     fail("can't pass a reference at line " + (icu.getInstructionPointer() + 1));
                 }
-                int address = stackPointer.intValue() + command.getValue().intValue();
+                address = stackPointer.intValue() + command.getValue().intValue();
                 if (address < 0) {
                     fail("illegal memory address <" + address + "> at line " + (icu.getInstructionPointer() + 1));
                 }
