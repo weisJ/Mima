@@ -54,8 +54,8 @@ MimaX:
 - __LDSP__ : sp → accu
 - __STSP__ : accu → sp
 
-- __STVR__ __disp(SP)__ : accu → <<sp\> + disp>
-- __LDVR__ __disp(SP)__ : <<sp\> + disp> → accu
+- __STVR__ __disp(SP)__ : accu → <<sp> + disp>
+- __LDVR__ __disp(SP)__ : <<sp> + disp> → accu
 
 - all instructions from Mima
 
