@@ -347,6 +347,7 @@ public final class Main extends JFrame {
         editor.setHighlight(Mima.getInstructionSet(), instructionsColor);
         editor.addHighlight(Interpreter.getKeywords(), new Color[]{
                 keywordColor, //$define
+                keywordColor, //const
                 keywordColor, // :
                 keywordColor, // (
                 keywordColor, // )
