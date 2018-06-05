@@ -22,7 +22,7 @@ public class Interpreter {
     private static final String DEFINITION = "§define";
     private static final String CONST = "const";
     private static final Pattern DEF_PATTERN = Pattern
-            .compile("^(?:" + DEFINITION + ")([^ :$]+)(?:|:([0-9]+))$");
+            .compile("^(?:" + DEFINITION + ")([^ :$]+)(?:|:(-?[0-9]+))$");
     private static final Pattern DEF_CONST_PATTERN = Pattern
             .compile("^(?:" + DEFINITION + CONST + ")([^ :$]+)(?:|:(-?[0-9]+))$");
 
@@ -35,6 +35,9 @@ public class Interpreter {
     private int instructionPointer;
     private int firstInstruction;
     private int reservedIndex;
+
+    private boolean isSilent;
+
     private Map<String, Integer> memoryLookupTable;
     private Map<String, Integer> instructionLookupTable;
     private Map<String, Integer> constLookupTable;
@@ -53,7 +56,7 @@ public class Interpreter {
                 , "(?<![^ \n])" + CONST + "(?![^ \n])"
                 , "(?<![^ \n]):(?![^ \n])"
                 , "\\(", "\\)"
-                , "(?<![^ \n])[0-9]+(?![^ (\n])"
+                , "(?<![^ \n])-?[0-9]+(?![^ (\n])"
                 , "0b[01]*"
                 , "#[^\n]*\n?"};
     }
@@ -78,8 +81,14 @@ public class Interpreter {
         Map<String, Integer> memoryTable = new HashMap<>();
         Map<String, Integer> instructionTable = new HashMap<>();
         int index = removeComments(lines);
-        index = setupDefinitions(lines, index, memoryTable, constTable);
-        setupInstructionLookup(lines, index, instructionTable);
+        isSilent = true;
+        try {
+            index = setupDefinitions(lines, index, memoryTable, constTable);
+        } catch (InterpretationException ignored) { }
+        try {
+            setupInstructionLookup(lines, index, instructionTable);
+        } catch (InterpretationException ignored) { }
+        isSilent = false;
         return List.of(constTable.keySet(), memoryTable.keySet(), instructionTable.keySet());
     }
 
@@ -112,15 +121,19 @@ public class Interpreter {
         if (lines.length == 0) return startIndex;
         int index = startIndex;
         while (lines[index].startsWith(DEFINITION)) {
-            String line = lines[index].replace(" ", "");
-            boolean parsed = setConstDefinition(line, constMap);
-            if (!parsed) {
-                parsed = setMemoryDefinition(line, memoryMap);
+            try {
+                String line = lines[index].replace(" ", "");
+                boolean parsed = setConstDefinition(line, constMap);
+                if (!parsed) {
+                    parsed = setMemoryDefinition(line, memoryMap);
+                }
+                if (!parsed) {
+                    throw new InterpretationException("invalid definition", lines[index], index + 1);
+                }
+                index++;
+            } catch (InterpretationException e) {
+                if (!isSilent) throw e;
             }
-            if (!parsed) {
-                throw new InterpretationException("invalid definition", lines[index], index + 1);
-            }
-            index++;
         }
         return index;
     }
@@ -130,9 +143,7 @@ public class Interpreter {
         if (!matcher.matches()) {
             return false;
         }
-        if (parseDefinition(matcher, lookupTable) < 0) {
-            throw new InterpretationException("negative memory address", line);
-        }
+        parseDefinition(matcher, lookupTable, false);
         return true;
     }
 
@@ -141,36 +152,34 @@ public class Interpreter {
         if (!matcher.matches()) {
             return false;
         }
-        parseDefinition(matcher, lookupTable);
+        parseDefinition(matcher, lookupTable, true);
         return true;
     }
 
-    private int parseDefinition(Matcher matcher, Map<String, Integer> table) {
-        try {
-            String reference = matcher.group(1);
-            if (reference.isEmpty()) {
-                throw new InterpretationException("missing identifier", instructionPointer + 1);
-            }
-            int value;
-            if (matcher.group(2) == null || matcher.group(2).isEmpty()) {
-                value = reservedIndex;
-                reservedIndex--;
-            } else {
-                try {
-                    value = Integer.parseInt(matcher.group(2));
-                } catch (NumberFormatException e) {
-                    throw new InterpretationException("reference must be an integer", instructionPointer + 1);
-                }
-            }
-            if (table.containsKey(reference)) {
-                throw new InterpretationException("reference <" + reference + "> already defined",
-                                                  instructionPointer + 1);
-            }
-            table.put(reference, value);
-            return value;
-        } catch (NumberFormatException e) {
-            throw new InterpretationException("error parsing reference", instructionPointer + 1);
+    private void parseDefinition(Matcher matcher, Map<String, Integer> table, boolean allowNegative) {
+        String reference = matcher.group(1);
+        if (reference.isEmpty()) {
+            throw new InterpretationException("missing identifier", instructionPointer + 1);
         }
+        int value = 0;
+        if (matcher.group(2) == null || matcher.group(2).isEmpty()) {
+            value = reservedIndex;
+            reservedIndex--;
+        } else {
+            try {
+                value = Integer.parseInt(matcher.group(2));
+                if (!allowNegative && value < 0) {
+                    fail("negative memory address", reference + " : " + value);
+                }
+            } catch (NumberFormatException e) {
+                fail("reference must be an integer", instructionPointer + 1);
+            }
+        }
+        if (table.containsKey(reference)) {
+            throw new InterpretationException("reference <" + reference + "> already defined",
+                                              instructionPointer + 1);
+        }
+        table.put(reference, value);
     }
 
     private void setupInstructionLookup(String[] lines, int startIndex, Map<String, Integer> instructionMap) {
@@ -191,7 +200,7 @@ public class Interpreter {
         }
         String reference = matcher.group(1);
         if (lookupTable.containsKey(reference)) {
-            throw new InterpretationException(reference + " is already associated with an instruction", lineNumber + 1);
+            fail(reference + " is already associated with an instruction", lineNumber + 1);
         }
         lookupTable.put(reference, lineNumber + 1);
         return matcher.group(2);
@@ -327,6 +336,26 @@ public class Interpreter {
 
     public void reset() {
         setInstructionPointer(firstInstruction);
+    }
+
+    /*
+     * Mute Errors while fetching references
+     */
+
+    private void fail(String message, String line, int lineNumber) {
+        if (!isSilent) throw new InterpretationException(message, line, lineNumber);
+    }
+
+    private void fail(String message, int lineNumber) {
+        if (!isSilent) throw new InterpretationException(message, lineNumber);
+    }
+
+    private void fail(String message, String line) {
+        if (!isSilent) throw new InterpretationException(message, line);
+    }
+
+    private void fail(String message) {
+        if (!isSilent) throw new InterpretationException(message);
     }
 
 }

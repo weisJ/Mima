@@ -7,12 +7,13 @@ import java.awt.event.*;
 
 public class Console extends JScrollPane {
 
+    private final JTextPane textPane;
     private final StyledDocument document;
     private final Color DEFAULT_COLOR = Color.LIGHT_GRAY;
     private final Style style;
 
     public Console() {
-        JTextPane textPane = new JTextPane();
+        textPane = new JTextPane();
         textPane.setBackground(Color.BLACK);
         textPane.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         textPane.setEditable(false);
@@ -46,6 +47,25 @@ public class Console extends JScrollPane {
             document.insertString(document.getLength(), message + "\n", style);
         } catch (BadLocationException ignored) { }
         scrollToBottom();
+    }
+
+    public void clear() {
+        textPane.setText("");
+        scrollToTop();
+    }
+
+    private void scrollToTop() {
+        JScrollBar verticalBar = getVerticalScrollBar();
+        AdjustmentListener downScroller = new AdjustmentListener() {
+            @Override
+            public void adjustmentValueChanged(AdjustmentEvent e) {
+                Adjustable adjustable = e.getAdjustable();
+                adjustable.setValue(adjustable.getMinimum());
+                verticalBar.removeAdjustmentListener(this);
+            }
+        };
+        verticalBar.addAdjustmentListener(downScroller);
+        repaint();
     }
 
     private void scrollToBottom() {
