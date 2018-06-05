@@ -63,7 +63,7 @@ public class Editor extends JScrollPane implements KeyListener {
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                afterChange(e, editorPane.getCaretPosition(), editorPane.getCaretPosition() + e.getLength());
+                afterChange(e, editorPane.getCaretPosition(), editorPane.getCaretPosition() - e.getLength());
             }
 
             @Override

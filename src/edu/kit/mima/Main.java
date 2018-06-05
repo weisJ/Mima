@@ -32,6 +32,7 @@ public final class Main extends JFrame {
 
     private final Mima mima;
     private final FileManager fileManager;
+    private final Console console;
     private final MemoryView memoryView;
 
     private final Editor editor;
@@ -44,7 +45,7 @@ public final class Main extends JFrame {
     public Main() {
         fileManager = new FileManager(this, MIMA_DIR, new String[]{FILE_EXTENSION, FILE_EXTENSION_X});
         editor = new Editor();
-        Console console = new Console();
+        console = new Console();
         Logger.setConsole(console);
         memoryView = new MemoryView(new String[]{"Address", "Value"});
 
@@ -109,6 +110,7 @@ public final class Main extends JFrame {
         JMenuItem newFile = new JMenuItem("New");
         newFile.addActionListener(e -> {
             if (!fileManager.isSaved()) fileManager.savePopUp();
+            console.clear();
             fileManager.newFile();
             editor.setText(fileManager.getText());
             updateSyntaxHighlighting();
@@ -121,6 +123,7 @@ public final class Main extends JFrame {
         JMenuItem load = new JMenuItem("Load");
         load.addActionListener(e -> {
             if (!fileManager.isSaved()) fileManager.savePopUp();
+            console.clear();
             fileManager.load();
             editor.setText(fileManager.getText());
             updateSyntaxHighlighting();
