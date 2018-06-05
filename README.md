@@ -6,7 +6,8 @@ Simple environment for writing Mima-Code (see http://gbi.ira.uka.de/ chapter 10)
 </p>
 
 This mima runs on 24bit machine words in memory and 20 bits addresses / constants
-(Note: mimaX programs also run 24bit addresses/constants;
+
+__Note:__ mimaX programs also run 24bit addresses/constants
 
 # Supports:
 - simple syntax highlighting
