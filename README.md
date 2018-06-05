@@ -10,6 +10,9 @@ This mima runs on 24bit machine words in memory and 20 bits addresses / constant
 - instruction address variables
 - constant value references
 
+# How to use
+You can run either the jar or executable from \build. No further installation is needed.
+
 # Instructions:
 
 __<a\>__ denotes the value in memory at address __a__
