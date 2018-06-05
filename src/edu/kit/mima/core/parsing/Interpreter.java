@@ -1,4 +1,6 @@
-package edu.kit.mima.core;
+package edu.kit.mima.core.parsing;
+
+import edu.kit.mima.core.data.*;
 
 import java.util.*;
 import java.util.regex.*;
@@ -22,7 +24,7 @@ public class Interpreter {
     private static final Pattern DEF_PATTERN = Pattern
             .compile("^(?:" + DEFINITION + ")([^ :$]+)(?:|:([0-9]+))$");
     private static final Pattern DEF_CONST_PATTERN = Pattern
-            .compile("^(?:" + DEFINITION + CONST + ")([^ :$]+)(?:|:([0-9]+))$");
+            .compile("^(?:" + DEFINITION + CONST + ")([^ :$]+)(?:|:(-?[0-9]+))$");
 
     private static final String BINARY_PREFIX = "0b";
     private static final String REFERENCE_PREFIX = "&";
@@ -116,7 +118,7 @@ public class Interpreter {
                 parsed = setMemoryDefinition(line, memoryMap);
             }
             if (!parsed) {
-                throw new IllegalArgumentException("invalid definition at line " + (index + 1));
+                throw new InterpretationException("invalid definition", lines[index], index + 1);
             }
             index++;
         }
@@ -128,7 +130,9 @@ public class Interpreter {
         if (!matcher.matches()) {
             return false;
         }
-        parseDefinition(matcher, lookupTable);
+        if (parseDefinition(matcher, lookupTable) < 0) {
+            throw new InterpretationException("negative memory address", line);
+        }
         return true;
     }
 
@@ -141,11 +145,11 @@ public class Interpreter {
         return true;
     }
 
-    private void parseDefinition(Matcher matcher, Map<String, Integer> table) {
+    private int parseDefinition(Matcher matcher, Map<String, Integer> table) {
         try {
             String reference = matcher.group(1);
             if (reference.isEmpty()) {
-                throw new IllegalArgumentException("missing identifier at line " + (instructionPointer + 1));
+                throw new InterpretationException("missing identifier", instructionPointer + 1);
             }
             int value;
             if (matcher.group(2) == null || matcher.group(2).isEmpty()) {
@@ -155,15 +159,17 @@ public class Interpreter {
                 try {
                     value = Integer.parseInt(matcher.group(2));
                 } catch (NumberFormatException e) {
-                    throw new IllegalArgumentException("reference must be an integer");
+                    throw new InterpretationException("reference must be an integer", instructionPointer + 1);
                 }
             }
             if (table.containsKey(reference)) {
-                throw new IllegalArgumentException("reference <" + reference + "> already defined");
+                throw new InterpretationException("reference <" + reference + "> already defined",
+                                                  instructionPointer + 1);
             }
             table.put(reference, value);
+            return value;
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("error parsing reference at line " + (instructionPointer + 1));
+            throw new InterpretationException("error parsing reference", instructionPointer + 1);
         }
     }
 
@@ -181,11 +187,11 @@ public class Interpreter {
     private String addCommandEntry(final String line, final int lineNumber, Map<String, Integer> lookupTable) {
         Matcher matcher = COMMAND_LOOKUP.matcher(line);
         if (!matcher.matches()) {
-            throw new IllegalArgumentException("not a correct jump association at line : " + (lineNumber + 1));
+            throw new InterpretationException("incorrect jump association", lineNumber + 1);
         }
         String reference = matcher.group(1);
         if (lookupTable.containsKey(reference)) {
-            throw new IllegalArgumentException(reference + " is already associated with an instruction");
+            throw new InterpretationException(reference + " is already associated with an instruction", lineNumber + 1);
         }
         lookupTable.put(reference, lineNumber + 1);
         return matcher.group(2);
@@ -206,7 +212,7 @@ public class Interpreter {
 
             Matcher matcher = COMMAND_PATTERN.matcher(line);
             if (!matcher.matches()) {
-                throw new IllegalArgumentException("invalid instruction at line : " + (i + 1));
+                throw new InterpretationException("invalid instruction", i + 1);
             }
             String command = matcher.group(1) != null ? matcher.group(1) : "";
             String value = matcher.group(2) != null ? matcher.group(2) : "";
@@ -220,13 +226,13 @@ public class Interpreter {
                 } else if (value.startsWith(BINARY_PREFIX)) {
                     value = String.valueOf(parseBinary(value.substring(BINARY_PREFIX.length())));
                 } else if (!value.matches("[0-9]*")) {
-                    throw new IllegalArgumentException("unresolved Symbol <" + value + "> at line " + (i + 1));
+                    throw new InterpretationException("unresolved Symbol", value, i + 1);
                 } else {
                     try {
                         int val = Integer.parseInt(value);
                         value = String.valueOf(val);
                     } catch (NumberFormatException e) {
-                        throw new IllegalArgumentException("illegal memory address <" + value + "> at line " + (i + 1));
+                        throw new InterpretationException("illegal memory address", value, i + 1);
                     }
                 }
             }
@@ -255,7 +261,7 @@ public class Interpreter {
         }
         Matcher matcher = COMMAND_INTERN.matcher(l);
         if (!matcher.matches()) {
-            throw new IllegalArgumentException("invalid instruction at line " + instructionPointer);
+            throw new InterpretationException("invalid instruction", instructionPointer);
         }
         //No argument command
         if (matcher.group(2) == null || matcher.group(2).isEmpty()) {
@@ -272,8 +278,8 @@ public class Interpreter {
         try {
             value = Integer.parseInt(sVal);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("parameter in line " + (instructionPointer + 1)
-                                                       + " is neither an integer value nor a memory reference");
+            throw new InterpretationException("parameter is neither an integer value nor a memory reference",
+                                              instructionPointer + 1);
         }
         return new Command(matcher.group(1), new MachineWord(value, wordLength), isReference);
     }
@@ -282,11 +288,11 @@ public class Interpreter {
         Pattern crop = Pattern.compile("0*([01]*)");
         Matcher matcher = crop.matcher(sVal);
         if (!matcher.matches()) {
-            throw new IllegalArgumentException("not a binary number <" + sVal + ">");
+            throw new InterpretationException("not a binary number", sVal);
         }
         String digits = new StringBuilder(matcher.group(1)).reverse().toString(); //reverse and crop leading 0
         if (digits.length() > wordLength) {
-            throw new IllegalArgumentException("binary number <" + sVal + "> is too large for " + wordLength + "bits");
+            throw new InterpretationException("binary number is too large for " + wordLength + "bits", sVal);
         }
         boolean[] bits;
         if (digits.length() > constWordLength) {

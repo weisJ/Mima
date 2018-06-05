@@ -1,7 +1,9 @@
 package edu.kit.mima;
 
 import edu.kit.mima.core.*;
+import edu.kit.mima.core.parsing.*;
 import edu.kit.mima.gui.*;
+import edu.kit.mima.gui.button.*;
 import edu.kit.mima.gui.console.Console;
 import edu.kit.mima.gui.editor.*;
 import edu.kit.mima.gui.logging.*;
@@ -65,12 +67,12 @@ public final class Main extends JFrame {
         referenceStyle = new StyleGroup();
         editor.addStyleGroup(syntaxStyle);
         editor.addStyleGroup(referenceStyle);
-        editor.doReplaceTabs(true);
+        editor.useTabs(true);
         editor.useHistory(true, 100);
         updateSyntaxHighlighting();
         updateReferenceHighlighting();
-        editor.addAfterUpdateAction(e -> fileManager.setText(editor.getText()));
-        editor.addAfterUpdateAction(e -> updateReferenceHighlighting());
+        editor.addAfterChangeAction(e -> fileManager.setText(editor.getText()));
+        editor.addAfterChangeAction(e -> updateReferenceHighlighting());
 
         editor.setStylize(true);
         editor.stylize();
@@ -141,23 +143,27 @@ public final class Main extends JFrame {
         JMenuItem saveAs = new JMenuItem("Save as");
         saveAs.addActionListener(e -> fileManager.saveAs());
         saveAs.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
-                                                     InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK));
+                                                     InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
         file.add(saveAs);
         menu.add(file);
         setJMenuBar(menu);
     }
 
     private void setupButtons() {
-        shortcutButton(run, KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK), this::run);
+        shortcutButton(run, KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.ALT_DOWN_MASK), this::run);
         shortcutButton(step,
-                       KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK),
+                       KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.ALT_DOWN_MASK),
                        this::step);
         JButton compile = new JButton("COMPILE");
-        shortcutButton(compile, KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK), this::compile);
+        shortcutButton(compile, KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.ALT_DOWN_MASK), this::compile);
         JButton reset = new JButton("RESET");
         shortcutButton(reset,
-                       KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK),
-                       this::compile);
+                       KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK),
+                       () -> {
+                           Logger.setLevel(LogLevel.ERROR);
+                           compile();
+                           Logger.setLevel(LogLevel.INFO);
+                       });
 
         run.setEnabled(false);
         step.setEnabled(false);
@@ -172,17 +178,10 @@ public final class Main extends JFrame {
     }
 
     private void shortcutButton(JButton button, KeyStroke keyStroke, Runnable action) {
-        Action buttonAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("Action performed");
-                action.run();
-            }
-        };
-        String name = button.getName();
-        this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyStroke, name);
-        this.getRootPane().getActionMap().put(name, buttonAction);
         button.addActionListener(e -> action.run());
+        ClickAction clickAction = new ClickAction(button);
+        button.getInputMap(JButton.WHEN_IN_FOCUSED_WINDOW).put(keyStroke, keyStroke.toString());
+        button.getActionMap().put(keyStroke.toString(), clickAction);
     }
 
     private void step() {
@@ -193,7 +192,7 @@ public final class Main extends JFrame {
             log("Instruction: " + fileManager.lines()[mima.getCurrentLineIndex() - 1]);
             updateMemoryTable();
             step.setEnabled(mima.isRunning());
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | IllegalStateException e) {
             error(e.getMessage());
             step.setEnabled(false);
             run.setEnabled(false);
@@ -207,7 +206,7 @@ public final class Main extends JFrame {
         try {
             mima.run();
             updateMemoryTable();
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | IllegalStateException e) {
             error(e.getMessage());
             reset();
         }
