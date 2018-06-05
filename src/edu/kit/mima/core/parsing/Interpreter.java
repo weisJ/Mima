@@ -11,23 +11,21 @@ import java.util.regex.*;
  */
 public class Interpreter {
 
-    private static final String POINTER = "\\([^()]*\\)";
-    private static final Pattern COMMAND_PATTERN = Pattern
-            .compile("^(?: )*([a-zA-Z]*(?:" + POINTER + ")?)(?: )*([^ :§]*)?(?: )*$");
-    private static final Pattern COMMAND_LOOKUP = Pattern
-            .compile("^(?: )*([^ :§]+)(?: )*:(?: )*([^ :§*]*(?: )*[^ :§*]*)(?: )*$");
-    private static final Pattern COMMAND_INTERN = Pattern
-            .compile("^([a-zA-Z]*(?:" + POINTER + ")?)§(&?-?[0-9]+)?$");
+    // @formatter:off
+    private static final String  POINTER = "\\([^()]*\\)";
+    private static final String  DEFINITION = "§define";
+    private static final String  REFERENCE = "([^ :§]+)(?: )*(?:|:(?: )*([^ \n])*)";
+    private static final String  CONST = "const";
+    private static final String  BINARY_PREFIX = "0b";
+    private static final String  REFERENCE_PREFIX = "&";
 
-    private static final String DEFINITION = "§define";
-    private static final String CONST = "const";
-    private static final Pattern DEF_PATTERN = Pattern
-            .compile("^(?:" + DEFINITION + ")([^ :$]+)(?:|:(-?[0-9]+))$");
-    private static final Pattern DEF_CONST_PATTERN = Pattern
-            .compile("^(?:" + DEFINITION + CONST + ")([^ :$]+)(?:|:(-?[0-9]+))$");
+    private static final Pattern COMMAND_PATTERN = Pattern.compile("^(?: )*([a-zA-Z]*(?:" + POINTER + ")?)(?: )*([^ :§]*)?(?: )*$");
+    private static final Pattern COMMAND_LOOKUP = Pattern.compile("^(?: )*([^ :§]+)(?: )*:(?: )*([^\n]*)$");
+    private static final Pattern COMMAND_INTERN = Pattern.compile("^([a-zA-Z]*(?:" + POINTER + ")?)§(&?-?[0-9]+)?$");
 
-    private static final String BINARY_PREFIX = "0b";
-    private static final String REFERENCE_PREFIX = "&";
+    private static final Pattern DEF_PATTERN = Pattern.compile("^(?: )*" + DEFINITION + "(?: )*" + REFERENCE + "(?: )*[^\\n]*$");
+    private static final Pattern DEF_CONST_PATTERN = Pattern.compile("^(?: )*" + DEFINITION + "(?: )*" + CONST + "(?: )*" + REFERENCE + "(?: )*[^\\n]*$");
+    // @formatter:on
 
     private final int constWordLength;
     private final int wordLength;
@@ -122,7 +120,7 @@ public class Interpreter {
         int index = startIndex;
         while (lines[index].startsWith(DEFINITION)) {
             try {
-                String line = lines[index].replace(" ", "");
+                String line = lines[index];
                 boolean parsed = setConstDefinition(line, constMap);
                 if (!parsed) {
                     parsed = setMemoryDefinition(line, memoryMap);

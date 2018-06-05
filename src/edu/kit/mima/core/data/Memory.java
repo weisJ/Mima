@@ -8,14 +8,16 @@ import java.util.*;
  */
 public class Memory {
     private final int machineWordLength;
+    private final int initialCapacity;
     private Map<Integer, MachineWord> memory;
 
     public Memory(final int machineWordLength, int initialCapacity) {
-        this.machineWordLength = machineWordLength;
-        this.memory = new HashMap<>();
-        for (int i = 0; i < initialCapacity; i++) {
-            storeValue(i, new MachineWord(0, machineWordLength));
+        if (initialCapacity >= Math.pow(2, machineWordLength)) {
+            throw new IllegalArgumentException("not enough bits to reach all values");
         }
+        this.machineWordLength = machineWordLength;
+        this.initialCapacity = initialCapacity;
+        empty();
     }
 
     public Map<Integer, MachineWord> getMemory() {
@@ -47,5 +49,8 @@ public class Memory {
 
     public void empty() {
         memory = new HashMap<>();
+        for (int i = 0; i < initialCapacity; i++) {
+            memory.put(i, new MachineWord(i, machineWordLength));
+        }
     }
 }

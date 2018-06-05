@@ -74,9 +74,8 @@ public class Mima {
             } else {
                 data[index] = new Object[]{i, values.get(i).intValue()};
             }
-            System.out.println(data[i][0]);
             if (i == stackPointer.intValue()) {
-                data[i][0] = data[i][0] + "(SP)";
+                data[index][0] = data[index][0] + "(SP)";
             }
             index++;
         }
