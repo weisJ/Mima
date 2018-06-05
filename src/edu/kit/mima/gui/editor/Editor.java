@@ -6,7 +6,6 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.util.*;
 import java.util.List;
 import java.util.function.*;
@@ -16,7 +15,7 @@ import java.util.regex.*;
  * @author Jannis Weis
  * @since 2018
  */
-public class Editor extends JScrollPane implements KeyListener {
+public class Editor extends JScrollPane {
 
     private static final Color BACKGROUND_COLOR = new Color(50, 51, 50);
     private static final Color TEXT_COLOR = Color.LIGHT_GRAY;
@@ -37,9 +36,6 @@ public class Editor extends JScrollPane implements KeyListener {
     private char lastTypedChar;
     private boolean charTyped;
     private boolean firstHistory = true;
-
-    private boolean shift = false;
-    private boolean control = false;
 
     public Editor() {
         JPanel textPanel = new JPanel();
@@ -70,13 +66,17 @@ public class Editor extends JScrollPane implements KeyListener {
             public void changedUpdate(DocumentEvent e) { }
         });
 
-        editorPane.addKeyListener(this);
         editorPane.setBackground(BACKGROUND_COLOR);
         editorPane.setCaretColor(TEXT_COLOR);
     }
 
     private void afterChange(DocumentEvent e, int oldCaret, int newCaret) {
         if (!changeLock) {
+            try {
+                String lastTyped = document.getText(e.getOffset(), e.getLength());
+                lastTypedChar = lastTyped.charAt(lastTyped.length() - 1);
+                charTyped = lastTyped.length() == 1;
+            } catch (BadLocationException ignored) { }
             SwingUtilities.invokeLater(() -> {
                 for (Consumer<DocumentEvent> consumer : afterChangeActions) {
                     consumer.accept(e);
@@ -107,15 +107,24 @@ public class Editor extends JScrollPane implements KeyListener {
         }
     }
 
-    private void moveHistory(boolean forward) {
+    public void undo() {
         try {
-            FileHistoryObject fhs = forward ? history.forward() : history.back();
-            setText(fhs.getText());
+            setHistory(history.back());
+        } catch (IndexOutOfBoundsException ignored) { }
+    }
+
+    public void redo() {
+        try {
+            setHistory(history.forward());
+        } catch (IndexOutOfBoundsException ignored) { }
+    }
+
+    private void setHistory(FileHistoryObject hisotryObject) {
+            setText(hisotryObject.getText());
             changeLock = true;
             clean();
             changeLock = false;
-            editorPane.setCaretPosition(fhs.getCaretPosition() + fhs.getAmendLength() + 1);
-        } catch (IndexOutOfBoundsException ignored) { }
+            editorPane.setCaretPosition(hisotryObject.getCaretPosition() + hisotryObject.getAmendLength() + 1);
     }
 
     public void cleanNewLine() {
@@ -201,33 +210,4 @@ public class Editor extends JScrollPane implements KeyListener {
         firstHistory = true;
     }
 
-    @Override
-    public void keyTyped(KeyEvent e) {
-        lastTypedChar = e.getKeyChar();
-        charTyped = true;
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        if (!useHistory) return;
-        if (e.getKeyCode() == KeyEvent.VK_Z && control && shift) {
-            moveHistory(true);
-        } else if (e.getKeyCode() == KeyEvent.VK_Z && control) {
-            moveHistory(false);
-        } else if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
-            shift = true;
-        } else if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
-            control = true;
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        if (!useHistory) return;
-        if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
-            shift = false;
-        } else if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
-            control = false;
-        }
-    }
 }

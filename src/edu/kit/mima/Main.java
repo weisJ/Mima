@@ -7,7 +7,7 @@ import edu.kit.mima.gui.button.*;
 import edu.kit.mima.gui.console.Console;
 import edu.kit.mima.gui.editor.*;
 import edu.kit.mima.gui.logging.*;
-import edu.kit.mima.gui.menu.Menu;
+import edu.kit.mima.gui.menu.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -105,87 +105,53 @@ public final class Main extends JFrame {
     }
 
     private void setupMenu() {
-        Menu menu = new Menu();
-        JMenu file = new JMenu("File");
-        JMenuItem newFile = new JMenuItem("New");
-        newFile.addActionListener(e -> {
-            if (!fileManager.isSaved()) fileManager.savePopUp();
-            console.clear();
-            fileManager.newFile();
-            editor.setText(fileManager.getText());
-            updateSyntaxHighlighting();
-            updateReferenceHighlighting();
-            editor.resetHistory();
-            editor.stylize();
-        });
-        newFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
-        file.add(newFile);
-        JMenuItem load = new JMenuItem("Load");
-        load.addActionListener(e -> {
-            if (!fileManager.isSaved()) fileManager.savePopUp();
-            console.clear();
-            fileManager.load();
-            editor.setText(fileManager.getText());
-            updateSyntaxHighlighting();
-            updateReferenceHighlighting();
-            editor.resetHistory();
-            editor.stylize();
-        });
-        load.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK));
-        file.add(load);
-
-        file.addSeparator();
-
-        JMenuItem save = new JMenuItem("Save");
-        save.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
-        save.addActionListener(e -> {
-            if (!fileManager.isOnDisk()) fileManager.saveAs();
-            else save();
-        });
-        file.add(save);
-        JMenuItem saveAs = new JMenuItem("Save as");
-        saveAs.addActionListener(e -> fileManager.saveAs());
-        saveAs.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
-                                                     InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
-        file.add(saveAs);
-        menu.add(file);
-        setJMenuBar(menu);
+        // @formatter:off
+        JMenuBar menuBar = new MenuBuilder()
+                .addMenu("Help")
+                        .addItem("Show Help", () -> Help.getInstance().setVisible(true))
+                .addMenu("File")
+                        .addItem("New", () -> changeFile(fileManager::newFile), "control N")
+                        .addItem("Load", () -> changeFile(fileManager::load), "control L")
+                        .separator()
+                        .addItem("Save", () -> {
+                            if (!fileManager.isOnDisk()) fileManager.saveAs();
+                            else save();
+                        }, "control S")
+                        .addItem("Save as", fileManager::saveAs, "control shift S")
+                .addMenu("Edit")
+                        .addItem("Undo", editor::undo, "control Z")
+                        .addItem("Redo", editor::redo, "control shift Z")
+                .get();
+        setJMenuBar(menuBar);
+        // @formatter:on
     }
 
     private void setupButtons() {
-        shortcutButton(run, KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.ALT_DOWN_MASK), this::run);
-        shortcutButton(step,
-                       KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.ALT_DOWN_MASK),
-                       this::step);
-        JButton compile = new JButton("COMPILE");
-        shortcutButton(compile, KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.ALT_DOWN_MASK), this::compile);
-        JButton reset = new JButton("RESET");
-        shortcutButton(reset,
-                       KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK),
-                       () -> {
-                           Logger.setLevel(LogLevel.ERROR);
-                           compile();
-                           Logger.setLevel(LogLevel.INFO);
-                       });
-
-        run.setEnabled(false);
-        step.setEnabled(false);
-
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(1, 3));
-        panel.add(compile);
-        panel.add(reset);
-        panel.add(step);
-        panel.add(run);
-        add(panel, BorderLayout.PAGE_START);
+        // @formatter:off
+        JPanel buttonPanel = new ButtonPanelFactory()
+                .addButton("COMPILE", this::compile, "alt R")
+                .addButton("RESET", () -> {
+                    Logger.setLevel(LogLevel.ERROR);
+                    compile();
+                    Logger.setLevel(LogLevel.INFO);
+                }, "alt shift R")
+                .addButton(step).addAccelerator("alt S").addAction(this::step).setEnabled(false)
+                .addButton(run).addAccelerator("alt R").addAction(this::run).setEnabled(false)
+                .get();
+        add(buttonPanel, BorderLayout.PAGE_START);
+        // @formatter:on
+        add(buttonPanel, BorderLayout.PAGE_START);
     }
 
-    private void shortcutButton(JButton button, KeyStroke keyStroke, Runnable action) {
-        button.addActionListener(e -> action.run());
-        button.setToolTipText(" "); //So the shortcut will be displayed at hover over
-        ClickAction clickAction = new ClickAction(button);
-        button.getInputMap(JButton.WHEN_IN_FOCUSED_WINDOW).put(keyStroke, keyStroke.toString());
-        button.getActionMap().put(keyStroke.toString(), clickAction);
+    private void changeFile(Runnable loadAction) {
+        if (!fileManager.isSaved()) fileManager.savePopUp();
+        console.clear();
+        loadAction.run();
+        editor.setText(fileManager.getText());
+        updateSyntaxHighlighting();
+        updateReferenceHighlighting();
+        editor.resetHistory();
+        editor.stylize();
     }
 
     private void step() {

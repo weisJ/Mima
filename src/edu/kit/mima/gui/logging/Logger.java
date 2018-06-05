@@ -26,7 +26,7 @@ public class Logger {
         Logger.console = console;
     }
 
-    public static void setLevel(LogLevel info) {
+    public static void setLevel(LogLevel level) {
         Logger.level = level;
     }
 
