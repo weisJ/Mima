@@ -10,23 +10,23 @@ public class History<T> {
 
     private final LinkedList<T> history;
     private final int maxCapacity;
-    private int top;
+    private int head;
 
     public History(int capacity) {
         history = new LinkedList<>();
         maxCapacity = capacity;
-        top = 0;
+        head = 0;
     }
 
     public String toString() {
-        return history.toString() + "[" + top + "]";
+        return history.toString() + "[" + head + "]";
     }
 
     public void add(T element) {
-        int removeCount = top;
+        int removeCount = head;
         for (int i = 0; i < removeCount; i++) {
             history.removeFirst();
-            top--;
+            head--;
         }
         history.addFirst(element);
         if (history.size() > maxCapacity) {
@@ -39,27 +39,27 @@ public class History<T> {
     }
 
     public T getCurrent() {
-        return history.get(top);
+        return history.get(head);
     }
 
     public void setCurrent(T element) {
-        history.set(top, element);
+        history.set(head, element);
     }
 
     public T back() {
-        if (top >= length() - 1) {
+        if (head >= length() - 1) {
             throw new IndexOutOfBoundsException("reached end of history");
         }
-        top++;
-        return history.get(top);
+        head++;
+        return history.get(head);
     }
 
     public T forward() {
-        if (top == 0) {
+        if (head == 0) {
             throw new IndexOutOfBoundsException("already on newest version");
         }
-        top--;
-        return history.get(top);
+        head--;
+        return history.get(head);
     }
 
     public int capacity() {
@@ -67,7 +67,7 @@ public class History<T> {
     }
 
     public void reset() {
-        top = 0;
+        head = 0;
         while (!history.isEmpty()) {
             history.removeFirst();
         }
