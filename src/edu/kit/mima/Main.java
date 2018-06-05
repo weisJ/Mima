@@ -179,6 +179,7 @@ public final class Main extends JFrame {
 
     private void shortcutButton(JButton button, KeyStroke keyStroke, Runnable action) {
         button.addActionListener(e -> action.run());
+        button.setToolTipText(" "); //So the shortcut will be displayed at hover over
         ClickAction clickAction = new ClickAction(button);
         button.getInputMap(JButton.WHEN_IN_FOCUSED_WINDOW).put(keyStroke, keyStroke.toString());
         button.getActionMap().put(keyStroke.toString(), clickAction);
