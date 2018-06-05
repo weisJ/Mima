@@ -1,4 +1,6 @@
-package edu.kit.mima.core;
+package edu.kit.mima.core.parsing;
+
+import edu.kit.mima.core.data.*;
 
 /**
  * @author Jannis Weis

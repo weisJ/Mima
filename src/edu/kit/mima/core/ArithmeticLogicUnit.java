@@ -1,5 +1,7 @@
 package edu.kit.mima.core;
 
+import edu.kit.mima.core.data.*;
+
 import java.util.function.*;
 
 /**

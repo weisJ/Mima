@@ -34,37 +34,32 @@ public class History<T> {
         }
     }
 
-    public int legth() {
+    public int length() {
         return history.size();
-    }
-
-    public void setCurrent(T element) {
-        history.set(top, element);
     }
 
     public T getCurrent() {
         return history.get(top);
     }
 
+    public void setCurrent(T element) {
+        history.set(top, element);
+    }
+
     public T back() {
-        try {
-            top++;
-            return history.get(top);
-        } catch (IndexOutOfBoundsException e) {
-            top--;
-            return null;
+        if (top >= length() - 1) {
+            throw new IndexOutOfBoundsException("reached end of history");
         }
+        top++;
+        return history.get(top);
     }
 
     public T forward() {
-        try {
-            top--;
-            if (top < 0) top = 0;
-            return history.get(--top);
-        } catch (IndexOutOfBoundsException e) {
-            top++;
-            return null;
+        if (top == 0) {
+            throw new IndexOutOfBoundsException("already on newest version");
         }
+        top--;
+        return history.get(top);
     }
 
     public int capacity() {

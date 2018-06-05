@@ -1,4 +1,4 @@
-package edu.kit.mima.core;
+package edu.kit.mima.core.data;
 
 /**
  * @author Jannis Weis

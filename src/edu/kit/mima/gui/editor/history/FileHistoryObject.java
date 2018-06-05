@@ -6,25 +6,25 @@ package edu.kit.mima.gui.editor.history;
  */
 public class FileHistoryObject {
 
-        private final int caretPosition;
-        private final String text;
-        private final int amendLength;
+    private final String text;
+    private final int amendLength;
+    private final int caretPosition;
 
-        public FileHistoryObject(final int caretPosition, final String text, final int ammendLength) {
-            this.caretPosition = caretPosition;
-            this.text = text;
-            this.amendLength = ammendLength;
-        }
+    public FileHistoryObject(final int caretPosition, final String text, final int amendLength) {
+        this.caretPosition = caretPosition;
+        this.text = text;
+        this.amendLength = amendLength;
+    }
 
-        public int getCaretPosition() {
-            return caretPosition;
-        }
+    public int getCaretPosition() {
+        return caretPosition;
+    }
 
-        public String getText() {
-            return text;
-        }
+    public String getText() {
+        return text;
+    }
 
-        public int getAmendLength() {
-            return amendLength;
-        }
+    public int getAmendLength() {
+        return amendLength;
+    }
 }
