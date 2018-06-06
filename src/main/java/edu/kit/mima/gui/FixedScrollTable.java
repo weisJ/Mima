@@ -14,7 +14,7 @@ public class FixedScrollTable extends JScrollPane {
 
     /**
      * Table that can be scrolled down.
-     * The fieds of this table can not be edited by the user
+     * The fields of this table can not be edited by the user
      *
      * @param tableHeader header of table
      */

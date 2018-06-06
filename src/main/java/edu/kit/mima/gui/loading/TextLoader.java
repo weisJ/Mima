@@ -17,7 +17,7 @@ public class TextLoader {
 
 
     /**
-     * TextLoader to control loadig and saving files as well as handling the request for file paths
+     * TextLoader to control loading and saving files as well as handling the request for file paths
      *
      * @param parent parent component for dialogs
      * @param manager underlying load manager

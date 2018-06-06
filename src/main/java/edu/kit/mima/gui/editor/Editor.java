@@ -213,7 +213,7 @@ public class Editor extends JScrollPane {
     }
 
     /**
-     * Add an action that should be performed after an edit to the text has been occured
+     * Add an action that should be performed after an edit to the text has been occurred
      *
      * @param action action to perform after edit
      */
