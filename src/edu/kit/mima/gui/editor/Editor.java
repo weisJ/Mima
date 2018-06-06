@@ -39,10 +39,10 @@ public class Editor extends JScrollPane {
 
     public Editor() {
         JPanel textPanel = new JPanel();
-        LineNumbers lineNumbers = new LineNumbers();
-        editorPane = lineNumbers.getPane();
+        NumberedTextPane numberedTextPane = new NumberedTextPane();
+        editorPane = numberedTextPane.getPane();
         textPanel.setLayout(new BorderLayout());
-        textPanel.add(lineNumbers, BorderLayout.WEST);
+        textPanel.add(numberedTextPane, BorderLayout.WEST);
         textPanel.add(editorPane, BorderLayout.CENTER);
         setViewportView(textPanel);
 

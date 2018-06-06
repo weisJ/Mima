@@ -8,11 +8,14 @@ import java.awt.event.*;
  * @author Jannis Weis
  * @since 2018
  */
-public class Help extends JFrame {
+public final class Help extends JFrame {
 
     private static Help instance;
     private static boolean closed = true;
 
+    /*
+     * Construct the Help Screen
+     */
     private Help() {
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         setSize(500, 600);
@@ -67,6 +70,11 @@ public class Help extends JFrame {
         add(pane);
     }
 
+    /**
+     * Get an help screen instance
+     *
+     * @return instance of Help
+     */
     public static Help getInstance() {
         if (instance == null || closed)
             instance = new Help();

@@ -33,7 +33,7 @@ public final class MimaUI extends JFrame {
     private final Mima mima;
     private final FileManager fileManager;
     private final Console console;
-    private final MemoryView memoryView;
+    private final FixedScrollTable memoryView;
 
     private final Editor editor;
     private final StyleGroup syntaxStyle;
@@ -49,7 +49,7 @@ public final class MimaUI extends JFrame {
         fileManager = new FileManager(this, MIMA_DIR, new String[]{FILE_EXTENSION, FILE_EXTENSION_X});
         editor = new Editor();
         console = new Console();
-        memoryView = new MemoryView(new String[]{"Address", "Value"});
+        memoryView = new FixedScrollTable(new String[]{"Address", "Value"});
         Logger.setConsole(console);
 
         setupWindow();
@@ -62,7 +62,6 @@ public final class MimaUI extends JFrame {
         add(editor, BorderLayout.CENTER);
 
         mima = new Mima();
-        fileManager.loadOptions();
         fileManager.loadLastFile();
         editor.setText(fileManager.getText());
         reloadMima();
@@ -75,8 +74,8 @@ public final class MimaUI extends JFrame {
         editor.useHistory(true, 100);
         updateSyntaxHighlighting();
         updateReferenceHighlighting();
-        editor.addAfterChangeAction(e -> fileManager.setText(editor.getText()));
-        editor.addAfterChangeAction(e -> updateReferenceHighlighting());
+        editor.afterEditAction(e -> fileManager.setText(editor.getText()));
+        editor.afterEditAction(e -> updateReferenceHighlighting());
 
         editor.setStylize(true);
         editor.stylize();
@@ -162,9 +161,9 @@ public final class MimaUI extends JFrame {
             public void windowClosing(WindowEvent e) {
                 try {
                     if (!fileManager.isSaved()) fileManager.savePopUp();
-                    fileManager.saveOptions();
+                    fileManager.close();
                     e.getWindow().dispose();
-                } catch (IOException | IllegalArgumentException ignored) { }
+                } catch (IllegalArgumentException | IOException ignored) { }
             }
         };
     }

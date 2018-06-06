@@ -12,7 +12,7 @@ import static edu.kit.mima.gui.logging.Logger.*;
  * @author Jannis Weis
  * @since 2018
  */
-public class FileManager {
+public class FileManager implements AutoCloseable {
 
     private final Component parent;
 
@@ -30,6 +30,15 @@ public class FileManager {
 
     private int fileHash;
 
+    /**
+     * Create new FileManager to control loading and saving of files.
+     * Keeps track:  - if files are unsaved.
+     *               - last used file extension
+     *
+     * @param parent parent component for dialogs
+     * @param saveDirectory path to saveDirectory
+     * @param extensions allowed file extensions
+     */
     public FileManager(Component parent, String saveDirectory, String[] extensions) {
         optionsLoader = new OptionsLoader(saveDirectory);
         saveHandler = new SaveHandler(saveDirectory);
@@ -46,7 +55,11 @@ public class FileManager {
         });
     }
 
-    public void loadOptions() {
+
+    /*
+     * load last used directory from options
+     */
+    private void loadOptions() {
         try {
             String[] options = optionsLoader.loadOptions();
             this.lastFile = options[0];
@@ -56,26 +69,39 @@ public class FileManager {
         }
     }
 
-    public void saveOptions() throws IOException {
+    /*
+     * Save the last used directory to the options
+     */
+    private void saveOptions() throws IOException {
         optionsLoader.saveOptions(lastFile);
     }
 
+    /**
+     * loads text from path specified in the last saved option
+     */
     public void loadLastFile() {
         try {
+            loadOptions();
             text = saveHandler.loadFile(lastFile);
             setLastExtension(lastFile);
             fileHash = text.hashCode();
         } catch (IOException e) {
-            firstStart();
+            firstFile();
         }
     }
 
+    /**
+     * Load the text form last used file path
+     */
     public void load() {
         text = textLoader.requestLoad(directory, extensions, () -> { });
         fileHash = text.hashCode();
     }
 
-    private void firstStart() {
+    /*
+     * Launches a request to load/create a file
+     */
+    private void firstFile() {
         try {
             int response = JOptionPane
                     .showOptionDialog(parent, "Create/Load File", "Create/Load File", JOptionPane.DEFAULT_OPTION,
@@ -93,31 +119,44 @@ public class FileManager {
         }
     }
 
+    /**
+     * Create a new File. Requests user to chose file type
+     */
     public void newFile() {
-        int response = JOptionPane.showOptionDialog(parent, "Choose file type", "File type",
-                                                    JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE,
+        String response = (String) JOptionPane.showInputDialog(parent, "Choose file type", "New File",
+                                                   JOptionPane.QUESTION_MESSAGE,
                                                     null, extensions, extensions[0]);
-        if (response == JOptionPane.CLOSED_OPTION) return;
-        setLastExtension(extensions[response]);
-        text = "#Put code here\n";
+        if (response == null) return;
+        setLastExtension(response);
+        text = "#New File\n";
         isNewFile = true;
         fileHash = text.hashCode();
     }
 
+    /**
+     * Save file to last used location
+     *
+     * @throws IOException mey throw IOException
+     */
     public void save() throws IOException {
         saveHandler.saveFile(text, lastFile);
         fileHash = text.hashCode();
     }
 
+    /**
+     * Save file to location of users choice
+     */
     public void saveAs() {
         try {
-            textLoader.requestSave(text, directory, lastExtension,
-                                                    () -> { throw new IllegalArgumentException(); });
+            textLoader.requestSave(text, directory, lastExtension, () -> { throw new IllegalArgumentException(); });
         } catch (IllegalArgumentException ignored) { }
         isNewFile = false;
         fileHash = text.hashCode();
     }
 
+    /**
+     * Asks the user if he wants to save the file
+     */
     public void savePopUp() {
         int response = JOptionPane.showOptionDialog(parent, "Do you want to save?", "Unsaved File",
                                                     JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
@@ -139,34 +178,72 @@ public class FileManager {
         }
     }
 
+    /**
+     * Get loaded text
+     *
+     * @return text
+     */
     public String getText() {
         return text;
     }
 
+    /**
+     * Set the text used for saving
+     *
+     * @param text text
+     */
     public void setText(String text) {
         this.text = text;
     }
 
+    /**
+     * Get the lines array of getText()
+     *
+     * @return array of lines
+     */
     public String[] lines() {
         return text.split("\n");
     }
 
+    /**
+     * Returns whether the text has been changed since tha last save
+     *
+     * @return true if file has not changed
+     */
     public boolean isSaved() {
         return !isNewFile && fileHash == text.hashCode();
     }
 
+    /**
+     * Returns whther the current file is present on disk. Whether it is saved or not
+     *
+     * @return true if file is on disk
+     */
     public boolean isOnDisk() {
         return !isNewFile;
     }
 
+    /**
+     * Get the path to the last used file
+     *
+     * @return path to last file
+     */
     public String getLastFile() {
         return lastFile;
     }
 
+    /**
+     * Get the extension of the last used file
+     *
+     * @return extension of last used file
+     */
     public String getLastExtension() {
         return lastExtension;
     }
 
+    /*
+     * Set the extension used by loaded file
+     */
     private void setLastExtension(String file) {
         for (String s : extensions) {
             if (file.endsWith(s)) {
@@ -175,7 +252,15 @@ public class FileManager {
         }
     }
 
+    /*
+     * Set the extension used by file
+     */
     private void setLastExtension(File file) {
         setLastExtension(file.getAbsolutePath());
+    }
+
+    @Override
+    public void close() throws IOException {
+      saveOptions();
     }
 }

@@ -7,12 +7,18 @@ import javax.swing.table.*;
  * @author Jannis Weis
  * @since 2018
  */
-public class MemoryView extends JScrollPane {
+public class FixedScrollTable extends JScrollPane {
 
-    private String[] tableHeader;
-    private JTable table;
+    private final String[] tableHeader;
+    private final JTable table;
 
-    public MemoryView(String[] tableHeader) {
+    /**
+     * Table that can be scrolled down.
+     * The fieds of this table can not be edited by the user
+     *
+     * @param tableHeader header of table
+     */
+    public FixedScrollTable(final String[] tableHeader) {
         this.tableHeader = tableHeader;
         table = new JTable(new DefaultTableModel(tableHeader, 0)) {
             @Override
@@ -26,6 +32,11 @@ public class MemoryView extends JScrollPane {
         setViewportView(table);
     }
 
+    /**
+     * Set the content of the table
+     *
+     * @param data Data Vector
+     */
     public void setContent(Object[][] data) {
         DefaultTableModel tableModel = (DefaultTableModel) table.getModel();
         tableModel.setDataVector(data, tableHeader);
