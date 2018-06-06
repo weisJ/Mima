@@ -163,6 +163,7 @@ public final class MimaUI extends JFrame {
                     if (!fileManager.isSaved()) fileManager.savePopUp();
                     fileManager.close();
                     e.getWindow().dispose();
+                    Help.getInstance().dispose();
                 } catch (IllegalArgumentException | IOException ignored) { }
             }
         };
