@@ -215,7 +215,7 @@ public class FileManager implements AutoCloseable {
     }
 
     /**
-     * Returns whther the current file is present on disk. Whether it is saved or not
+     * Returns whether the current file is present on disk. Whether it is saved or not
      *
      * @return true if file is on disk
      */

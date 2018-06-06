@@ -79,7 +79,7 @@ public class History<T> {
     /**
      * Go back in history
      *
-     * @return element at new histoy position
+     * @return element at new history position
      */
     public T back() {
         if (head >= length() - 1) {
@@ -92,7 +92,7 @@ public class History<T> {
     /**
      * Go forward in history
      *
-     * @return element at new histoy position
+     * @return element at new history position
      */
     public T forward() {
         if (head == 0) {
@@ -108,7 +108,7 @@ public class History<T> {
      * @return capacity
      */
     public int capacity() {
-        return capacity();
+        return maxCapacity;
     }
 
     /**

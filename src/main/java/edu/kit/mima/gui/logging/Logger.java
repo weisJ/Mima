@@ -37,7 +37,7 @@ public final class Logger {
      * Prevent instantiation
      */
     private Logger() {
-        throw new RuntimeException("Logger should not be instatiated");
+        throw new RuntimeException("Logger should not be instantiated");
     }
 
     /**
@@ -53,7 +53,7 @@ public final class Logger {
     /**
      * Set the current logLevel
      *
-     * @param level new loglevel
+     * @param level new level
      */
     public static void setLevel(LogLevel level) {
         Logger.level = level;

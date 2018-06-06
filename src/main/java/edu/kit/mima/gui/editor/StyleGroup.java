@@ -13,7 +13,7 @@ public class StyleGroup {
     private final Map<String, Color> styleMap;
 
     /**
-     * Create new StylGroup for use with Editor.
+     * Create new StyleGroup for use with Editor.
      * Expressions will not be highlighted in order they are added. Registering multiple times
      * may not yield highlighting in the last color given.
      *
