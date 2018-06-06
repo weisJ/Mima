@@ -1,6 +1,7 @@
 package edu.kit.mima.gui.button;
 
 import javax.swing.*;
+import javax.swing.border.*;
 import java.awt.*;
 import java.util.*;
 import java.util.Queue;
@@ -73,22 +74,35 @@ public class ButtonPanelFactory {
             this.parent = parent;
             setAction(action);
             setAccelerator(accelerator);
+            styleButton();
         }
 
         private ButtonFactory(String label, Runnable action, ButtonPanelFactory parent) {
             this.button = new JButton(label);
             this.parent = parent;
             setAction(action);
+            styleButton();
         }
 
         private ButtonFactory(String label, ButtonPanelFactory parent) {
             this.button = new JButton(label);
             this.parent = parent;
+            styleButton();
         }
 
         private ButtonFactory(JButton button, ButtonPanelFactory parent) {
             this.button = button;
             this.parent = parent;
+            styleButton();
+        }
+
+        private void styleButton() {
+            this.button.setForeground(Color.BLACK);
+            Border line = new LineBorder(Color.DARK_GRAY);
+            Border margin = new EmptyBorder(5, 15, 5, 15);
+            Border compound = new CompoundBorder(line, margin);
+            this.button.setBorder(compound);
+            this.button.setFocusPainted(false);
         }
 
         /**
@@ -195,6 +209,7 @@ public class ButtonPanelFactory {
             this.button.getInputMap(JButton.WHEN_IN_FOCUSED_WINDOW)
                     .put(KeyStroke.getKeyStroke(accelerator), accelerator);
             this.button.getActionMap().put(accelerator, clickAction);
+            this.button.setToolTipText(" ");
         }
     }
 }
