@@ -4,15 +4,14 @@ import javafx.application.*;
 import javafx.embed.swing.*;
 import javafx.scene.*;
 import javafx.scene.web.*;
-import jdk.nashorn.api.scripting.*;
 import org.commonmark.node.Node;
 import org.commonmark.parser.*;
 import org.commonmark.renderer.html.*;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.net.*;
 import java.util.stream.*;
 
 /**
@@ -21,7 +20,6 @@ import java.util.stream.*;
  */
 public final class Help extends JFrame {
 
-    private static final String README_URL = "https://raw.githubusercontent.com/weisJ/Mima/master/README.md";
     private static Help instance;
     private static boolean closed = true;
 
@@ -35,26 +33,23 @@ public final class Help extends JFrame {
             @Override
             public void windowClosing(WindowEvent e) {
                 closed = true;
-                e.getWindow().dispose();
+                setVisible(false);
             }
         });
         setTitle("Help");
         setLocationRelativeTo(null);
         setResizable(false);
         JFXPanel jfxPanel = new JFXPanel();
-            Platform.runLater(() -> {
-                WebView webView = new WebView();
-                webView.getEngine().loadContent("<html> Help!");
-                try {
-                    webView.getEngine().loadContent(renderMarkdown(loadReadMe(README_URL)));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                jfxPanel.setScene(new Scene(webView));
-            });
+        Platform.runLater(() -> {
+            WebView webView = new WebView();
+            webView.getEngine().loadContent("<html> Help!");
+            webView.getEngine().loadContent(renderMarkdown(loadMarkdown("Help.md")));
+            jfxPanel.setScene(new Scene(webView));
+        });
 
 
         add(jfxPanel);
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("mima.png")));
     }
 
     /**
@@ -71,8 +66,9 @@ public final class Help extends JFrame {
     /*
      * Load ReadME from github
      */
-    private String loadReadMe(String url) throws IOException {
-        final BufferedReader reader = new BufferedReader(new URLReader(new URL(url)));
+    private String loadMarkdown(String fileName) {
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(
+                getClass().getClassLoader().getResourceAsStream("Help.md")));
         return reader.lines().collect(Collectors.joining("\n"));
     }
 
