@@ -10,7 +10,6 @@ import org.commonmark.renderer.html.*;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.io.*;
 import java.net.*;
 import java.util.stream.*;
@@ -24,22 +23,16 @@ public final class Help extends JFrame {
     private static final String HELP_LOCALE = "Help.md";
     private static final String HELP_WEB = "https://raw.githubusercontent.com/weisJ/Mima/master/README.md";
 
+    private static final Dimension SIZE = Toolkit.getDefaultToolkit().getScreenSize();
+
     private static Help instance;
-    private static boolean closed = true;
 
     /*
      * Construct the Help Screen
      */
     private Help() {
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        setSize(500, 600);
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                closed = true;
-                setVisible(false);
-            }
-        });
+        setSize((int) SIZE.getHeight() / 3, (int) SIZE.getWidth() / 3);
         setTitle("Help");
         setLocationRelativeTo(null);
         setResizable(false);

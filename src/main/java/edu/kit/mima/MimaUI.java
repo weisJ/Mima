@@ -87,6 +87,12 @@ public final class MimaUI extends JFrame {
      * @param args command line arguments (ignored)
      */
     public static void main(String[] args) {
+//        try {
+//            UIManager.setLookAndFeel(WebLookAndFeel.class.getCanonicalName());
+//        } catch (ClassNotFoundException | IllegalAccessException
+//                | InstantiationException | UnsupportedLookAndFeelException e) {
+//            e.printStackTrace();
+//        }
         MimaUI frame = new MimaUI();
         frame.setVisible(true);
         frame.repaint();
