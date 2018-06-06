@@ -12,6 +12,9 @@ public class Console extends JScrollPane {
     private final Color DEFAULT_COLOR = Color.LIGHT_GRAY;
     private final Style style;
 
+    /**
+     * Create new Console
+     */
     public Console() {
         textPane = new JTextPane();
         textPane.setBackground(Color.BLACK);
@@ -25,22 +28,40 @@ public class Console extends JScrollPane {
         setViewportView(textPane);
     }
 
+    /**
+     * Print message and jump to next line.
+     *
+     * @param message Message to print
+     */
     public void println(final String message) {
         println(message, DEFAULT_COLOR);
     }
 
+    /**
+     * Print message and jump to next line.
+     *
+     * @param message Message to print
+     * @param color color to print in
+     */
     public void println(final String message, Color color) {
-        try {
-            StyleConstants.setForeground(style, color);
-            document.insertString(document.getLength(), message + "\n", style);
-        } catch (BadLocationException ignored) { }
-        scrollToBottom();
+        print(message + "\n", color);
     }
 
+    /**
+     * Print message.
+     *
+     * @param message Message to print
+     */
     public void print(final String message) {
         print(message, DEFAULT_COLOR);
     }
 
+    /**
+     * Print message.
+     *
+     * @param message Message to print
+     * @param color color to print in
+     */
     public void print(final String message, Color color) {
         try {
             StyleConstants.setForeground(style, color);
@@ -49,11 +70,17 @@ public class Console extends JScrollPane {
         scrollToBottom();
     }
 
+    /**
+     * Clear all text from console
+     */
     public void clear() {
         textPane.setText("");
         scrollToTop();
     }
 
+    /*
+     * Scroll to the top of the console
+     */
     private void scrollToTop() {
         JScrollBar verticalBar = getVerticalScrollBar();
         AdjustmentListener downScroller = new AdjustmentListener() {
@@ -68,6 +95,9 @@ public class Console extends JScrollPane {
         repaint();
     }
 
+    /*
+     * Scroll to the bottom of the console
+     */
     private void scrollToBottom() {
         JScrollBar verticalBar = getVerticalScrollBar();
         AdjustmentListener downScroller = new AdjustmentListener() {

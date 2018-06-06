@@ -13,22 +13,52 @@ public class ButtonPanelFactory {
 
     private final Queue<JButton> buttons;
 
+    /**
+     * Create new ButtonPanelFactory
+     */
     public ButtonPanelFactory() {
         buttons = new LinkedList<>();
     }
 
+    /**
+     * Add Button to the ButtonPanel
+     *
+     * @param label Label
+     * @param action Action to perform when clicked
+     * @param accelerator Key combination to trigger button event
+     * @return ButtonFactory
+     */
     public ButtonFactory addButton(String label, Runnable action, String accelerator) {
         return new ButtonFactory(label, action, accelerator, this);
     }
 
-    public ButtonFactory addButton(String label) {
-        return new ButtonFactory(label, this);
-    }
-
+    /**
+     * Add Button to the ButtonPanel
+     *
+     * @param label Label
+     * @param action Action to perform when clicked
+     * @return ButtonFactory
+     */
     public ButtonFactory addButton(String label, Runnable action) {
         return new ButtonFactory(label, action, this);
     }
 
+    /**
+     * Add Button to the ButtonPanel
+     *
+     * @param label Label
+     * @return ButtonFactory
+     */
+    public ButtonFactory addButton(String label) {
+        return new ButtonFactory(label, this);
+    }
+
+    /**
+     * Add external Button to the ButtonPanel
+     *
+     * @param button button to add
+     * @return ButtonFactory
+     */
     public ButtonFactory addButton(JButton button) {
         return new ButtonFactory(button, this);
     }
@@ -61,41 +91,91 @@ public class ButtonPanelFactory {
             this.parent = parent;
         }
 
+        /**
+         * Set the accelerator for the current button
+         *
+         * @param accelerator key combination to trigger button event
+         * @return this
+         */
         public ButtonFactory addAccelerator(String accelerator) {
             setAccelerator(accelerator);
             return this;
         }
 
+        /**
+         * Set the action for the current button
+         *
+         * @param action action to perform at button press
+         * @return this
+         */
         public ButtonFactory addAction(Runnable action) {
             setAction(action);
             return this;
         }
 
+        /**
+         * Set whether the button is enabled
+         *
+         * @param enabled boolean
+         * @return this
+         */
         public ButtonFactory setEnabled(boolean enabled) {
             this.button.setEnabled(enabled);
             return this;
         }
 
+        /**
+         * Add next Button
+         *
+         * @param label Label
+         * @param action action to perform at button press
+         * @param accelerator key combination to trigger button action
+         * @return ButtonFactory
+         */
         public ButtonFactory addButton(String label, Runnable action, String accelerator) {
             this.parent.buttons.offer(this.button);
             return new ButtonFactory(label, action, accelerator, parent);
         }
 
-        public ButtonFactory addButton(String label) {
-            this.parent.buttons.offer(this.button);
-            return new ButtonFactory(label, parent);
-        }
-
+        /**
+         * Add next Button
+         *
+         * @param label Label
+         * @param action action to perform at button press
+         * @return ButtonFactory
+         */
         public ButtonFactory addButton(String label, Runnable action) {
             this.parent.buttons.offer(this.button);
             return new ButtonFactory(label, action, parent);
         }
 
+        /**
+         * Add next Button
+         *
+         * @param label Label
+         * @return ButtonFactory
+         */
+        public ButtonFactory addButton(String label) {
+            this.parent.buttons.offer(this.button);
+            return new ButtonFactory(label, parent);
+        }
+
+        /**
+         * Add external Button to the ButtonPanel
+         *
+         * @param button button to add
+         * @return ButtonFactory
+         */
         public ButtonFactory addButton(JButton button) {
             this.parent.buttons.offer(this.button);
             return new ButtonFactory(button, parent);
         }
 
+        /**
+         * Construct the ButtonPanel. Buttons are added in the order they were configured
+         *
+         * @return JPanel containing the buttons next to each other
+         */
         public JPanel get() {
             this.parent.buttons.offer(this.button);
             JPanel panel = new JPanel();

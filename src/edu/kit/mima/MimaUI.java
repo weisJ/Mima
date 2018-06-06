@@ -22,7 +22,7 @@ import static edu.kit.mima.gui.logging.Logger.*;
  * @author Jannis Weis
  * @since 2018
  */
-public final class Main extends JFrame {
+public final class MimaUI extends JFrame {
 
     private static final Dimension FULLSCREEN = Toolkit.getDefaultToolkit().getScreenSize();
     private static final String TITLE = "Mima-Simulator";
@@ -42,12 +42,15 @@ public final class Main extends JFrame {
     private final JButton run = new JButton("RUN");
     private final JButton step = new JButton("STEP");
 
-    public Main() {
+    /**
+     * Create a new Mima UI window
+     */
+    private MimaUI() {
         fileManager = new FileManager(this, MIMA_DIR, new String[]{FILE_EXTENSION, FILE_EXTENSION_X});
         editor = new Editor();
         console = new Console();
-        Logger.setConsole(console);
         memoryView = new MemoryView(new String[]{"Address", "Value"});
+        Logger.setConsole(console);
 
         setupWindow();
         JPanel memoryConsole = new JPanel(new GridLayout(2, 1));
@@ -79,24 +82,27 @@ public final class Main extends JFrame {
         editor.stylize();
     }
 
+    /**
+     * Entry point for starting the Mima UI
+     *
+     * @param args command line arguments (ignored)
+     */
     public static void main(String[] args) {
-        Main frame = new Main();
+        MimaUI frame = new MimaUI();
         frame.setVisible(true);
         frame.repaint();
     }
 
+    //////////////////////////////////////////////////////////////////////////
+    ///                         Window Setup                               ///
+    //////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Setup general Frame properties
+     */
     private void setupWindow() {
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                try {
-                    if (!fileManager.isSaved()) fileManager.savePopUp();
-                    fileManager.saveOptions();
-                    e.getWindow().dispose();
-                } catch (IOException | IllegalArgumentException ignored) { }
-            }
-        });
+        addWindowListener(setupWindowListener());
         setResizable(true);
         setSize((int) FULLSCREEN.getWidth() / 2, (int) FULLSCREEN.getHeight() / 2);
         setTitle(TITLE);
@@ -104,6 +110,9 @@ public final class Main extends JFrame {
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("mima.png")));
     }
 
+    /**
+     * Setup the MenuBar with all of its components
+     */
     private void setupMenu() {
         // @formatter:off
         JMenuBar menuBar = new MenuBuilder()
@@ -126,15 +135,14 @@ public final class Main extends JFrame {
         // @formatter:on
     }
 
+    /**
+     * Setup the the action buttons
+     */
     private void setupButtons() {
         // @formatter:off
         JPanel buttonPanel = new ButtonPanelFactory()
                 .addButton("COMPILE", this::compile, "alt R")
-                .addButton("RESET", () -> {
-                    Logger.setLevel(LogLevel.ERROR);
-                    compile();
-                    Logger.setLevel(LogLevel.INFO);
-                }, "alt shift R")
+                .addButton("RESET", this::reset, "alt shift R")
                 .addButton(step).addAccelerator("alt S").addAction(this::step).setEnabled(false)
                 .addButton(run).addAccelerator("alt R").addAction(this::run).setEnabled(false)
                 .get();
@@ -143,6 +151,33 @@ public final class Main extends JFrame {
         add(buttonPanel, BorderLayout.PAGE_START);
     }
 
+    /**
+     * Create the Window Listener for the frame
+     *
+     * @return the WindowListener
+     */
+    private WindowListener setupWindowListener() {
+        return new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                try {
+                    if (!fileManager.isSaved()) fileManager.savePopUp();
+                    fileManager.saveOptions();
+                    e.getWindow().dispose();
+                } catch (IOException | IllegalArgumentException ignored) { }
+            }
+        };
+    }
+
+    //////////////////////////////////////////////////////////////////////////
+    ///                         Functionality                              ///
+    //////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Wrapper function for changing a file
+     *
+     * @param loadAction function that loads the new file
+     */
     private void changeFile(Runnable loadAction) {
         if (!fileManager.isSaved()) fileManager.savePopUp();
         console.clear();
@@ -154,6 +189,9 @@ public final class Main extends JFrame {
         editor.stylize();
     }
 
+    /**
+     * Perform one instruction of the mima.
+     */
     private void step() {
         try {
             log("Step!");
@@ -169,6 +207,9 @@ public final class Main extends JFrame {
         }
     }
 
+    /**
+     * Run all instructions of the mima
+     */
     private void run() {
         step.setEnabled(false);
         run.setEnabled(false);
@@ -185,6 +226,9 @@ public final class Main extends JFrame {
         log("done");
     }
 
+    /**
+     * Reset the mima to begin of program.
+     */
     private void reset() {
         mima.reset();
         run.setEnabled(true);
@@ -192,6 +236,9 @@ public final class Main extends JFrame {
         updateMemoryTable();
     }
 
+    /**
+     * Load new program into mima
+     */
     private void reloadMima() {
         try {
             mima.loadProgram(fileManager.lines().clone(), fileManager.getLastExtension().equals(FILE_EXTENSION_X));
@@ -202,6 +249,9 @@ public final class Main extends JFrame {
         }
     }
 
+    /**
+     * Save current file
+     */
     private void save() {
         try {
             log("saving...");
@@ -212,6 +262,9 @@ public final class Main extends JFrame {
         }
     }
 
+    /**
+     * Compile mima program
+     */
     private void compile() {
         log("Compiling: " + fileManager.getLastFile() + "...");
         try {
@@ -227,11 +280,17 @@ public final class Main extends JFrame {
         log("done");
     }
 
+    /**
+     * Update the Memory table with new values
+     */
     private void updateMemoryTable() {
         memoryView.setContent(mima.memoryTable());
         repaint();
     }
 
+    /**
+     * Update the syntax highlighting according to the current instruction set
+     */
     private void updateSyntaxHighlighting() {
         Color instructionsColor = new Color(27, 115, 207);
         Color keywordColor = new Color(168, 120, 43);
@@ -251,6 +310,10 @@ public final class Main extends JFrame {
         }
     }
 
+    /**
+     * Perform code analysis to fetch current associations for syntax highlighting
+     * Performs a silent compile on the instructions
+     */
     private void updateReferenceHighlighting() {
         if (mima == null) return;
         try {

@@ -24,7 +24,7 @@ public class Editor extends JScrollPane {
     private final JTextPane editorPane;
 
     private History<FileHistoryObject> history;
-    private List<Consumer<DocumentEvent>> afterChangeActions;
+    private List<Consumer<DocumentEvent>> afterEditActions;
     private Set<StyleGroup> styles;
     private StyledDocument document;
 
@@ -47,19 +47,19 @@ public class Editor extends JScrollPane {
         setViewportView(textPanel);
 
         styles = new HashSet<>();
-        afterChangeActions = new ArrayList<>();
+        afterEditActions = new ArrayList<>();
         history = new History<>(20);
 
         document = editorPane.getStyledDocument();
         document.addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                afterChange(e, editorPane.getCaretPosition(), editorPane.getCaretPosition() + e.getLength());
+                afterEdit(e, editorPane.getCaretPosition(), editorPane.getCaretPosition() + e.getLength());
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                afterChange(e, editorPane.getCaretPosition(), editorPane.getCaretPosition() - e.getLength());
+                afterEdit(e, editorPane.getCaretPosition(), editorPane.getCaretPosition() - e.getLength());
             }
 
             @Override
@@ -70,7 +70,10 @@ public class Editor extends JScrollPane {
         editorPane.setCaretColor(TEXT_COLOR);
     }
 
-    private void afterChange(DocumentEvent e, int oldCaret, int newCaret) {
+    /*
+     * Steps performed after and edit has occurred
+     */
+    private void afterEdit(DocumentEvent e, int oldCaret, int newCaret) {
         if (!changeLock) {
             try {
                 String lastTyped = document.getText(e.getOffset(), e.getLength());
@@ -78,13 +81,13 @@ public class Editor extends JScrollPane {
                 charTyped = lastTyped.length() == 1;
             } catch (BadLocationException ignored) { }
             SwingUtilities.invokeLater(() -> {
-                for (Consumer<DocumentEvent> consumer : afterChangeActions) {
-                    consumer.accept(e);
-                }
-                clean();
                 if (useHistory) {
                     addHistory(oldCaret);
                 }
+                for (Consumer<DocumentEvent> consumer : afterEditActions) {
+                    consumer.accept(e);
+                }
+                clean();
                 editorPane.setCaretPosition(newCaret);
                 charTyped = false;
                 changeLock = false;
@@ -92,6 +95,9 @@ public class Editor extends JScrollPane {
         }
     }
 
+    /*
+     * Add new history item
+     */
     private void addHistory(int caret) {
         FileHistoryObject fhs = history.getCurrent();
         if (!firstHistory && charTyped //Amend history
@@ -119,26 +125,45 @@ public class Editor extends JScrollPane {
         } catch (IndexOutOfBoundsException ignored) { }
     }
 
-    private void setHistory(FileHistoryObject hisotryObject) {
-            setText(hisotryObject.getText());
+    /*
+     * Set the document to the state of the given history object
+     */
+    private void setHistory(FileHistoryObject historyObject) {
+            setText(historyObject.getText());
             changeLock = true;
             clean();
             changeLock = false;
-            editorPane.setCaretPosition(hisotryObject.getCaretPosition() + hisotryObject.getAmendLength() + 1);
+            editorPane.setCaretPosition(historyObject.getCaretPosition() + historyObject.getAmendLength() + 1);
     }
 
+    /**
+     * Replace all occurrences of new line characters with \n
+     */
     public void cleanNewLine() {
         editorPane.setText(editorPane.getText().replaceAll("(\r\n?|" + nLine + ")", "\n"));
     }
 
+    /**
+     * Set whether the text should be stylized
+     *
+     * @param stylize whether to stylize the text
+     */
     public void setStylize(boolean stylize) {
         this.stylize = stylize;
     }
 
+    /**
+     * Add a new style group that should be used for highlighting
+     *
+     * @param group StyleGroup
+     */
     public void addStyleGroup(StyleGroup group) {
         styles.add(group);
     }
 
+    /**
+     * Stylize the document
+     */
     public void stylize() {
         removeHighlighting();
         for (StyleGroup group : styles) {
@@ -146,7 +171,11 @@ public class Editor extends JScrollPane {
         }
     }
 
+    /**
+     * Clean the document
+     */
     private void clean() {
+        cleanNewLine();
         if (replaceTabs) {
             setText(getText().replaceAll("\t", "    "));
         }
@@ -155,6 +184,9 @@ public class Editor extends JScrollPane {
         }
     }
 
+    /*
+     * Stylize one specific StyleGroup
+     */
     private void stylize(StyleGroup group) {
         StyleContext context = new StyleContext();
         Set<String> regexSet = group.regexSet();
@@ -170,6 +202,9 @@ public class Editor extends JScrollPane {
         }
     }
 
+    /*
+     * Remove all previous highlighting
+     */
     private void removeHighlighting() {
         StyleContext context = new StyleContext();
         Style standard = context.addStyle("Default", null);
@@ -177,15 +212,29 @@ public class Editor extends JScrollPane {
         document.setCharacterAttributes(0, document.getLength(), standard, true);
     }
 
-    public void addAfterChangeAction(Consumer<DocumentEvent> afterUpdate) {
-        this.afterChangeActions.add(afterUpdate);
+    /**
+     * Add an action that should be performed after an edit to the text has been occured
+     *
+     * @param action action to perform after edit
+     */
+    public void afterEditAction(Consumer<DocumentEvent> action) {
+        this.afterEditActions.add(action);
     }
 
-
+    /**
+     * Get the text contained in the editor
+     *
+     * @return text in editor
+     */
     public String getText() {
         return editorPane.getText();
     }
 
+    /**
+     * Set the text in the editor
+     *
+     * @param text text to set
+     */
     public void setText(String text) {
         boolean lock = changeLock;
         changeLock = true;
@@ -193,10 +242,21 @@ public class Editor extends JScrollPane {
         changeLock = lock;
     }
 
+    /**
+     * Sets whether tabs or spaces should be used for indentations
+     *
+     * @param useTabs whether to useTabs
+     */
     public void useTabs(boolean useTabs) {
         this.replaceTabs = !useTabs;
     }
 
+    /**
+     * Use change history. If yes undo/redo will be supported
+     *
+     * @param useHistory whther to use history
+     * @param capacity capacity of history
+     */
     public void useHistory(boolean useHistory, int capacity) {
         this.useHistory = useHistory;
         this.history = new History<>(capacity);
@@ -204,6 +264,9 @@ public class Editor extends JScrollPane {
         firstHistory = true;
     }
 
+    /**
+     * Reset the change history
+     */
     public void resetHistory() {
         this.history.reset();
         history.add(new FileHistoryObject(editorPane.getCaretPosition(), getText(), 0));

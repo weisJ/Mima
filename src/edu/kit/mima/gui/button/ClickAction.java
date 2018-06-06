@@ -11,6 +11,11 @@ public class ClickAction extends AbstractAction {
 
     private final JButton button;
 
+    /**
+     * Action wrapper for a button action
+     *
+     * @param button Button
+     */
     public ClickAction(JButton button) {
         this.button = button;
     }
