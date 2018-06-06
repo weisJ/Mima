@@ -71,7 +71,7 @@ public class Editor extends JScrollPane {
     }
 
     /*
-     * Steps performed after and edit has occurred
+     * Steps performed after an edit has occurred
      */
     private void afterEdit(DocumentEvent e, int oldCaret, int newCaret) {
         if (!changeLock) {
@@ -82,7 +82,7 @@ public class Editor extends JScrollPane {
             } catch (BadLocationException ignored) { }
             SwingUtilities.invokeLater(() -> {
                 if (useHistory) {
-                    addHistory(oldCaret);
+                    addHistory(oldCaret, newCaret - oldCaret);
                 }
                 for (Consumer<DocumentEvent> consumer : afterEditActions) {
                     consumer.accept(e);
@@ -98,14 +98,17 @@ public class Editor extends JScrollPane {
     /*
      * Add new history item
      */
-    private void addHistory(int caret) {
+    private void addHistory(int caret, int changeLength) {
         FileHistoryObject fhs = history.getCurrent();
-        if (!firstHistory && charTyped //Amend history
+        if (!firstHistory && charTyped
                 && lastTypedChar != ' ' && lastTypedChar != '\n'
-                && fhs.getAmendLength() < MAXIMUM_AMEND_LENGTH
-                && Math.abs(caret - fhs.getCaretPosition()) <= fhs.getAmendLength() + 1) {
-            history.setCurrent(new FileHistoryObject(fhs.getCaretPosition(), getText(), fhs.getAmendLength() + 1));
-        } else { //New History-Object
+                && fhs.getLength() < MAXIMUM_AMEND_LENGTH
+                && Math.abs(caret - fhs.getCaretOffset()) <= fhs.getLength() + 1) {
+            //Amend history
+            history.setCurrent(
+                    new FileHistoryObject(fhs.getCaretOffset(), getText(), fhs.getLength() + changeLength));
+        } else {
+            //New History-Object
             if (firstHistory) {
                 firstHistory = false;
             }
@@ -113,12 +116,18 @@ public class Editor extends JScrollPane {
         }
     }
 
+    /**
+     * Undo last file change
+     */
     public void undo() {
         try {
             setHistory(history.back());
         } catch (IndexOutOfBoundsException ignored) { }
     }
 
+    /**
+     * Redo the last undo
+     */
     public void redo() {
         try {
             setHistory(history.forward());
@@ -133,7 +142,7 @@ public class Editor extends JScrollPane {
             changeLock = true;
             clean();
             changeLock = false;
-            editorPane.setCaretPosition(historyObject.getCaretPosition() + historyObject.getAmendLength() + 1);
+            editorPane.setCaretPosition(historyObject.getCaretOffset() + historyObject.getLength() + 1);
     }
 
     /**
