@@ -106,7 +106,7 @@ public final class MimaUI extends JFrame {
         setSize((int) FULLSCREEN.getWidth() / 2, (int) FULLSCREEN.getHeight() / 2);
         setTitle(TITLE);
         setLayout(new BorderLayout());
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("mima.png")));
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("mima.png")));
     }
 
     /**
