@@ -8,12 +8,15 @@ import java.awt.*;
  * @author Jannis Weis
  * @since 2018
  */
-public class LineNumbers extends JPanel {
+public class NumberedTextPane extends JPanel {
 
     private final JTextPane pane;
     private JScrollPane scrollPane;
 
-    public LineNumbers() {
+    /**
+     * Create a new JPanel containing a JTextPane with lineNumbering
+     */
+    public NumberedTextPane() {
         super();
         setMinimumSize(new Dimension(30, 30));
         setPreferredSize(new Dimension(30, 30));
@@ -22,13 +25,17 @@ public class LineNumbers extends JPanel {
         {
             public void paint(Graphics g) {
                 super.paint(g);
-                LineNumbers.this.repaint();
+                NumberedTextPane.this.repaint();
             }
         };
         scrollPane = new JScrollPane(pane);
-
     }
 
+    /**
+     * Paint the line Numbers
+     *
+     * @param g Graphics object
+     */
     public void paint(Graphics g) {
         super.paint(g);
 
@@ -54,10 +61,13 @@ public class LineNumbers extends JPanel {
         for (int line = startLine, y = startingY; line <= endLine; y += fontHeight, line++) {
             g.drawString(Integer.toString(line), 0, y);
         }
-
-
     }
 
+    /**
+     * Get the JTextPane of the NumberedTextPane
+     *
+     * @return JEditorPane with lineNumbers
+     */
     public JTextPane getPane() {
         return pane;
     }

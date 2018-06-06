@@ -5,6 +5,8 @@ import java.io.*;
 import static edu.kit.mima.gui.logging.Logger.*;
 
 /**
+ * Implementation if LoadManager using the Logger
+ *
  * @author Jannis Weis
  * @since 2018
  */

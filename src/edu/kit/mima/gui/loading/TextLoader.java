@@ -16,11 +16,25 @@ public class TextLoader {
     private final Component parent;
 
 
+    /**
+     * TextLoader to control loadig and saving files as well as handling the request for file paths
+     *
+     * @param parent parent component for dialogs
+     * @param manager underlying load manager
+     */
     public TextLoader(Component parent, LoadManager manager) {
         this.manager = manager;
         this.parent = parent;
     }
 
+    /**
+     * Request the user to choose a file location and save the text to this location
+     *
+     * @param text text to save
+     * @param searchPath starting directory for the file chooser
+     * @param extension allowed file extension
+     * @param abortHandler action to perform if request was aborted
+     */
     public void requestSave(String text, String searchPath, String extension, Runnable abortHandler) {
         String path = requestPath(searchPath, new String[]{extension}, abortHandler);
         if (path == null) return;
@@ -35,6 +49,14 @@ public class TextLoader {
         manager.afterSave();
     }
 
+    /**
+     * Request the user to choose a file location and load the text from this location
+     *
+     * @param searchPath starting directory for the file chooser
+     * @param extensions allowed file extension
+     * @param abortHandler action to perform if request was aborted
+     * @return loaded text
+     */
     public String requestLoad(String searchPath, String[] extensions, Runnable abortHandler) {
         String path = requestPath(searchPath, extensions, abortHandler);
         if (path == null) {
@@ -54,6 +76,9 @@ public class TextLoader {
         return text;
     }
 
+    /*
+     * Request the path form user using JFileChooser
+     */
     private String requestPath(String savedPath, String[] extensions, Runnable abortHandler) {
         String path = null;
         JFileChooser chooser = new JFileChooser(savedPath);
