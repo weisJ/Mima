@@ -22,30 +22,35 @@ public final class Help extends JFrame {
 
     private static final String HELP_LOCALE = "Help.md";
     private static final String HELP_WEB = "https://raw.githubusercontent.com/weisJ/Mima/master/README.md";
+    private static final int MAXIMUM_ATTEMPTS = 20;
 
     private static final Dimension SIZE = Toolkit.getDefaultToolkit().getScreenSize();
 
     private static Help instance;
 
+    private static Thread loadSource;
+    private static boolean loadedFromWeb;
+
+    private static JFXPanel jfxPanel;
+
+    private static String source;
+
     /*
      * Construct the Help Screen
      */
     private Help() {
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("mima.png")));
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         setSize((int) SIZE.getHeight() / 3, (int) SIZE.getWidth() / 3);
         setTitle("Help");
         setLocationRelativeTo(null);
         setResizable(false);
-        JFXPanel jfxPanel = new JFXPanel();
-        Platform.runLater(() -> {
-            WebView webView = new WebView();
-            webView.getEngine().loadContent("<html> Help!");
-            webView.getEngine().loadContent(renderMarkdown(loadMarkdown()));
-            jfxPanel.setScene(new Scene(webView));
-        });
 
+        jfxPanel = new JFXPanel();
         add(jfxPanel);
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("mima.png")));
+
+        loadSource = new Thread(this::fetchFromWebSource);
+        loadSource.start();
     }
 
     /**
@@ -60,6 +65,22 @@ public final class Help extends JFrame {
         return instance;
     }
 
+    private static void showHtml(String htmlSource) {
+        Platform.runLater(() -> {
+            WebView webView = new WebView();
+            webView.getEngine().loadContent("<html> Html loaded");
+            webView.getEngine().loadContent(htmlSource);
+            jfxPanel.setScene(new Scene(webView));
+        });
+    }
+
+    public static void close() {
+        Thread stop = loadSource;
+        loadSource = null;
+        stop.interrupt();
+        instance.dispose();
+    }
+
     /*
      * Load ReadME from github
      */
@@ -69,13 +90,16 @@ public final class Help extends JFrame {
 
             // set the connection timeout to 3 seconds and the read timeout to 5 seconds
             c.setConnectTimeout(3000);
-            c.setReadTimeout(50000);
+            c.setReadTimeout(5000);
 
             // get a stream to read data from
             BufferedReader reader = new BufferedReader(new InputStreamReader(c.getInputStream()));
-            return reader.lines().collect(Collectors.joining("\n"));
+            String markdown = reader.lines().collect(Collectors.joining("\n"));
+            loadedFromWeb = true;
+            return markdown;
         } catch (IOException e) {
-            return loadFallback();
+            System.out.println("exception");
+            return source == null ? loadFallback() : null;
         }
     }
 
@@ -96,5 +120,25 @@ public final class Help extends JFrame {
         Node document = parser.parse(text);
         HtmlRenderer renderer = HtmlRenderer.builder().build();
         return renderer.render(document);
+    }
+
+    private void fetchFromWebSource() {
+        boolean alive = true;
+        int attempts = 0;
+        showHtml(renderMarkdown(loadMarkdown()));
+        while (!loadedFromWeb && alive && attempts < MAXIMUM_ATTEMPTS) {
+            System.out.print("awake");
+            String htmlSource = loadMarkdown();
+            if (htmlSource != null) {
+                source = htmlSource;
+                showHtml(renderMarkdown(source));
+            }
+            try {
+                Thread.sleep(20000);
+                attempts++;
+            } catch (InterruptedException e) {
+                alive = false;
+            }
+        }
     }
 }
