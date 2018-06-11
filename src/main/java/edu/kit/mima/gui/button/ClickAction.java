@@ -16,12 +16,13 @@ public class ClickAction extends AbstractAction {
      *
      * @param button Button
      */
-    public ClickAction(JButton button) {
+    public ClickAction(final JButton button) {
+        super();
         this.button = button;
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(final ActionEvent e) {
         button.doClick();
     }
 }

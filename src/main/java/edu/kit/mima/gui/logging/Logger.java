@@ -37,6 +37,7 @@ public final class Logger {
      * Prevent instantiation
      */
     private Logger() {
+        super();
         throw new RuntimeException("Logger should not be instantiated");
     }
 
@@ -45,7 +46,7 @@ public final class Logger {
      *
      * @param console console to print to
      */
-    public static void setConsole(Console console) {
+    public static void setConsole(final Console console) {
 
         Logger.console = console;
     }
@@ -55,7 +56,7 @@ public final class Logger {
      *
      * @param level new level
      */
-    public static void setLevel(LogLevel level) {
+    public static void setLevel(final LogLevel level) {
         Logger.level = level;
     }
 

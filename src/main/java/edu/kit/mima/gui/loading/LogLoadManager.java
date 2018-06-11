@@ -12,12 +12,12 @@ import static edu.kit.mima.gui.logging.Logger.*;
  */
 public class LogLoadManager implements LoadManager {
     @Override
-    public void onLoad(String path) {
+    public void onLoad(final String path) {
         log("Loading: " + path + "...");
     }
 
     @Override
-    public void afterRequest(File chosenFile) {
+    public void afterRequest(final File chosenFile) {
         log(chosenFile.getAbsolutePath());
     }
 
@@ -27,7 +27,7 @@ public class LogLoadManager implements LoadManager {
     }
 
     @Override
-    public void onSave(String path) {
+    public void onSave(final String path) {
         log("Saving: " + path + "...");
     }
 
@@ -37,7 +37,7 @@ public class LogLoadManager implements LoadManager {
     }
 
     @Override
-    public void onFail(String errorMessage) {
+    public void onFail(final String errorMessage) {
         error(errorMessage);
     }
 }

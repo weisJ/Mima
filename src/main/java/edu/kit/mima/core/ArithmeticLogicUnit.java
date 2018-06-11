@@ -13,6 +13,7 @@ public class ArithmeticLogicUnit {
     private final int machineWordLength;
 
     public ArithmeticLogicUnit(final int machineWordLength) {
+        super();
         this.machineWordLength = machineWordLength;
     }
 
@@ -38,7 +39,7 @@ public class ArithmeticLogicUnit {
 
     public MachineWord EQL(final MachineWord a, final MachineWord b) {
         checkWord(a, b);
-        MachineWord comp = new MachineWord(bitwise(a, b, (v, w) -> v == w));
+        final MachineWord comp = new MachineWord(bitwise(a, b, (v, w) -> v == w));
         if (comp.intValue() == 0) {
             return new MachineWord(-1, machineWordLength);
         } else {
@@ -48,17 +49,17 @@ public class ArithmeticLogicUnit {
 
     public MachineWord RAR(final MachineWord a) {
         checkWord(a);
-        boolean[] bits = a.getBits();
-        boolean tmp = bits[0];
+        final boolean[] bits = a.getBits();
+        final boolean tmp = bits[0];
         System.arraycopy(bits, 1, bits, 2, machineWordLength - 1);
         bits[machineWordLength - 1] = tmp;
         return new MachineWord(bits);
     }
 
-    private boolean[] bitwise(final MachineWord a, final MachineWord b, BinaryOperator<Boolean> operator) {
-        boolean[] bits = new boolean[machineWordLength];
-        boolean[] aBits = a.getBits();
-        boolean[] bBits = b.getBits();
+    private boolean[] bitwise(final MachineWord a, final MachineWord b, final BinaryOperator<Boolean> operator) {
+        final boolean[] bits = new boolean[machineWordLength];
+        final boolean[] aBits = a.getBits();
+        final boolean[] bBits = b.getBits();
         for (int i = 0; i < machineWordLength; i++) {
             bits[i] = operator.apply(aBits[i], bBits[i]);
         }
@@ -66,7 +67,7 @@ public class ArithmeticLogicUnit {
     }
 
     private void checkWord(final MachineWord... var) {
-        for (MachineWord w : var) {
+        for (final MachineWord w : var) {
             if (w.getWordLength() != machineWordLength) {
                 throw new IllegalArgumentException("machine words must match mima word length");
             }

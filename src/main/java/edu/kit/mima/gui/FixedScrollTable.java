@@ -19,10 +19,11 @@ public class FixedScrollTable extends JScrollPane {
      * @param tableHeader header of table
      */
     public FixedScrollTable(final String[] tableHeader) {
+        super();
         this.tableHeader = tableHeader;
         table = new JTable(new DefaultTableModel(tableHeader, 0)) {
             @Override
-            public boolean isCellEditable(int row, int column) {
+            public boolean isCellEditable(final int row, final int column) {
                 return false;
             }
         };
@@ -37,8 +38,8 @@ public class FixedScrollTable extends JScrollPane {
      *
      * @param data Data Vector
      */
-    public void setContent(Object[][] data) {
-        DefaultTableModel tableModel = (DefaultTableModel) table.getModel();
+    public void setContent(final Object[][] data) {
+        final DefaultTableModel tableModel = (DefaultTableModel) table.getModel();
         tableModel.setDataVector(data, tableHeader);
     }
 }

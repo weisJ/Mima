@@ -11,7 +11,8 @@ public class Memory {
     private final int initialCapacity;
     private Map<Integer, MachineWord> memory;
 
-    public Memory(final int machineWordLength, int initialCapacity) {
+    public Memory(final int machineWordLength, final int initialCapacity) {
+        super();
         if (initialCapacity >= Math.pow(2, machineWordLength)) {
             throw new IllegalArgumentException("not enough bits to reach all values");
         }
@@ -24,17 +25,17 @@ public class Memory {
         return memory;
     }
 
-    public MachineWord loadValue(int index) {
+    public MachineWord loadValue(final int index) {
         if (memory.containsKey(index)) {
             return memory.get(index).copy();
         } else {
-            MachineWord entry = new MachineWord(0, machineWordLength);
+            final MachineWord entry = new MachineWord(0, machineWordLength);
             memory.put(index, entry);
             return entry;
         }
     }
 
-    public void storeValue(int index, MachineWord value) {
+    public void storeValue(final int index, final MachineWord value) {
         if (memory.size() >= Math.pow(2, machineWordLength)) {
             throw new IllegalArgumentException("no more memory addresses");
         }
@@ -42,7 +43,7 @@ public class Memory {
     }
 
     public void reset() {
-        for (MachineWord value : memory.values()) {
+        for (final MachineWord value : memory.values()) {
             value.setValue(0);
         }
     }
