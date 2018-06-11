@@ -10,7 +10,7 @@ import java.util.Queue;
  * @author Jannis Weis
  * @since 2018
  */
-public class ButtonPanelFactory {
+public final class ButtonPanelFactory {
 
     private final Queue<JButton> buttons;
 
@@ -18,6 +18,7 @@ public class ButtonPanelFactory {
      * Create new ButtonPanelFactory
      */
     public ButtonPanelFactory() {
+        super();
         buttons = new LinkedList<>();
     }
 
@@ -29,7 +30,7 @@ public class ButtonPanelFactory {
      * @param accelerator Key combination to trigger button event
      * @return ButtonFactory
      */
-    public ButtonFactory addButton(String label, Runnable action, String accelerator) {
+    public ButtonFactory addButton(final String label, final Runnable action, final String accelerator) {
         return new ButtonFactory(label, action, accelerator, this);
     }
 
@@ -40,7 +41,7 @@ public class ButtonPanelFactory {
      * @param action Action to perform when clicked
      * @return ButtonFactory
      */
-    public ButtonFactory addButton(String label, Runnable action) {
+    public ButtonFactory addButton(final String label, final Runnable action) {
         return new ButtonFactory(label, action, this);
     }
 
@@ -50,7 +51,7 @@ public class ButtonPanelFactory {
      * @param label Label
      * @return ButtonFactory
      */
-    public ButtonFactory addButton(String label) {
+    public ButtonFactory addButton(final String label) {
         return new ButtonFactory(label, this);
     }
 
@@ -60,16 +61,17 @@ public class ButtonPanelFactory {
      * @param button button to add
      * @return ButtonFactory
      */
-    public ButtonFactory addButton(JButton button) {
+    public ButtonFactory addButton(final JButton button) {
         return new ButtonFactory(button, this);
     }
 
-    public class ButtonFactory {
+    public final class ButtonFactory {
 
         private final JButton button;
         private final ButtonPanelFactory parent;
 
-        private ButtonFactory(String label, Runnable action, String accelerator, ButtonPanelFactory parent) {
+        private ButtonFactory(final String label, final Runnable action, final String accelerator, final ButtonPanelFactory parent) {
+            super();
             this.button = new JButton(label);
             this.parent = parent;
             setAction(action);
@@ -77,20 +79,23 @@ public class ButtonPanelFactory {
             styleButton();
         }
 
-        private ButtonFactory(String label, Runnable action, ButtonPanelFactory parent) {
+        private ButtonFactory(final String label, final Runnable action, final ButtonPanelFactory parent) {
+            super();
             this.button = new JButton(label);
             this.parent = parent;
             setAction(action);
             styleButton();
         }
 
-        private ButtonFactory(String label, ButtonPanelFactory parent) {
+        private ButtonFactory(final String label, final ButtonPanelFactory parent) {
+            super();
             this.button = new JButton(label);
             this.parent = parent;
             styleButton();
         }
 
-        private ButtonFactory(JButton button, ButtonPanelFactory parent) {
+        private ButtonFactory(final JButton button, final ButtonPanelFactory parent) {
+            super();
             this.button = button;
             this.parent = parent;
             styleButton();
@@ -98,9 +103,9 @@ public class ButtonPanelFactory {
 
         private void styleButton() {
             this.button.setForeground(Color.BLACK);
-            Border line = new LineBorder(Color.DARK_GRAY);
-            Border margin = new EmptyBorder(5, 15, 5, 15);
-            Border compound = new CompoundBorder(line, margin);
+            final Border line = new LineBorder(Color.DARK_GRAY);
+            final Border margin = new EmptyBorder(5, 15, 5, 15);
+            final Border compound = new CompoundBorder(line, margin);
             this.button.setBorder(compound);
             this.button.setFocusPainted(false);
         }
@@ -111,7 +116,7 @@ public class ButtonPanelFactory {
          * @param accelerator key combination to trigger button event
          * @return this
          */
-        public ButtonFactory addAccelerator(String accelerator) {
+        public ButtonFactory addAccelerator(final String accelerator) {
             setAccelerator(accelerator);
             return this;
         }
@@ -122,7 +127,7 @@ public class ButtonPanelFactory {
          * @param action action to perform at button press
          * @return this
          */
-        public ButtonFactory addAction(Runnable action) {
+        public ButtonFactory addAction(final Runnable action) {
             setAction(action);
             return this;
         }
@@ -133,7 +138,7 @@ public class ButtonPanelFactory {
          * @param enabled boolean
          * @return this
          */
-        public ButtonFactory setEnabled(boolean enabled) {
+        public ButtonFactory setEnabled(final boolean enabled) {
             this.button.setEnabled(enabled);
             return this;
         }
@@ -146,7 +151,7 @@ public class ButtonPanelFactory {
          * @param accelerator key combination to trigger button action
          * @return ButtonFactory
          */
-        public ButtonFactory addButton(String label, Runnable action, String accelerator) {
+        public ButtonFactory addButton(final String label, final Runnable action, final String accelerator) {
             this.parent.buttons.offer(this.button);
             return new ButtonFactory(label, action, accelerator, parent);
         }
@@ -158,7 +163,7 @@ public class ButtonPanelFactory {
          * @param action action to perform at button press
          * @return ButtonFactory
          */
-        public ButtonFactory addButton(String label, Runnable action) {
+        public ButtonFactory addButton(final String label, final Runnable action) {
             this.parent.buttons.offer(this.button);
             return new ButtonFactory(label, action, parent);
         }
@@ -169,7 +174,7 @@ public class ButtonPanelFactory {
          * @param label Label
          * @return ButtonFactory
          */
-        public ButtonFactory addButton(String label) {
+        public ButtonFactory addButton(final String label) {
             this.parent.buttons.offer(this.button);
             return new ButtonFactory(label, parent);
         }
@@ -180,7 +185,7 @@ public class ButtonPanelFactory {
          * @param button button to add
          * @return ButtonFactory
          */
-        public ButtonFactory addButton(JButton button) {
+        public ButtonFactory addButton(final JButton button) {
             this.parent.buttons.offer(this.button);
             return new ButtonFactory(button, parent);
         }
@@ -192,7 +197,7 @@ public class ButtonPanelFactory {
          */
         public JPanel get() {
             this.parent.buttons.offer(this.button);
-            JPanel panel = new JPanel();
+            final JPanel panel = new JPanel();
             panel.setLayout(new GridLayout(1, this.parent.buttons.size()));
             while (!this.parent.buttons.isEmpty()) {
                 panel.add(this.parent.buttons.poll());
@@ -200,12 +205,12 @@ public class ButtonPanelFactory {
             return panel;
         }
 
-        private void setAction(Runnable action) {
+        private void setAction(final Runnable action) {
             this.button.addActionListener(e -> action.run());
         }
 
-        private void setAccelerator(String accelerator) {
-            ClickAction clickAction = new ClickAction(this.button);
+        private void setAccelerator(final String accelerator) {
+            final Action clickAction = new ClickAction(this.button);
             this.button.getInputMap(JButton.WHEN_IN_FOCUSED_WINDOW)
                     .put(KeyStroke.getKeyStroke(accelerator), accelerator);
             this.button.getActionMap().put(accelerator, clickAction);

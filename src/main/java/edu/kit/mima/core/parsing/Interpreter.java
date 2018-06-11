@@ -42,6 +42,7 @@ public class Interpreter {
 
 
     public Interpreter(final String[] lines, final int constWordLength, final int wordLength) {
+        super();
         this.instructions = lines;
         this.instructionPointer = 0;
         this.constWordLength = constWordLength;
@@ -65,7 +66,7 @@ public class Interpreter {
         this.constLookupTable = new HashMap<>();
         reservedIndex = -1;
         setInstructionPointer(0);
-        int index = removeComments(instructions);
+        final int index = removeComments(instructions);
         firstInstruction = setupDefinitions(instructions, index, memoryLookupTable, constLookupTable);
         setupInstructionLookup(instructions, firstInstruction, instructionLookupTable);
         setInstructionPointer(firstInstruction);
@@ -74,34 +75,34 @@ public class Interpreter {
 
     }
 
-    public List<Set<String>> getReferences(String[] lines) throws IllegalArgumentException {
-        Map<String, Integer> constTable = new HashMap<>();
-        Map<String, Integer> memoryTable = new HashMap<>();
-        Map<String, Integer> instructionTable = new HashMap<>();
+    public List<Set<String>> getReferences(final String[] lines) throws IllegalArgumentException {
+        final Map<String, Integer> constTable = new HashMap<>();
+        final Map<String, Integer> memoryTable = new HashMap<>();
+        final Map<String, Integer> instructionTable = new HashMap<>();
         int index = removeComments(lines);
         isSilent = true;
         try {
             index = setupDefinitions(lines, index, memoryTable, constTable);
-        } catch (InterpretationException ignored) { }
+        } catch (final InterpretationException ignored) { }
         try {
             setupInstructionLookup(lines, index, instructionTable);
-        } catch (InterpretationException ignored) { }
+        } catch (final InterpretationException ignored) { }
         isSilent = false;
         return List.of(constTable.keySet(), memoryTable.keySet(), instructionTable.keySet());
     }
 
-    private int removeComments(String[] lines) {
+    private int removeComments(final String[] lines) {
         if (lines.length == 0) return 0;
         boolean foundFirstNonComment = false;
         int firstNonComment = 0;
         for (int i = 0; i < lines.length; i++) {
-            if (lines[i] != null && lines[i].length() > 0) {
+            if ((lines[i] != null) && (lines[i].length() > 0)) {
                 if (lines[i].charAt(0) == '#') {
                     lines[i] = "";
                 } else if (lines[i].contains("#")) {
-                    String line = lines[i];
-                    int index = line.indexOf('#');
-                    int lastIndex = line.lastIndexOf('#');
+                    final String line = lines[i];
+                    final int index = line.indexOf('#');
+                    final int lastIndex = line.lastIndexOf('#');
                     if (index == lastIndex) {
                         lines[i] = line.substring(0, index - 1);
                     }
@@ -114,13 +115,13 @@ public class Interpreter {
         return firstNonComment;
     }
 
-    private int setupDefinitions(String[] lines, int startIndex, Map<String, Integer> memoryMap,
-                                 Map<String, Integer> constMap) {
+    private int setupDefinitions(final String[] lines, final int startIndex, final Map<String, Integer> memoryMap,
+                                 final Map<String, Integer> constMap) {
         if (lines.length == 0) return startIndex;
         int index = startIndex;
         while (lines[index].startsWith(DEFINITION)) {
             try {
-                String line = lines[index];
+                final String line = lines[index];
                 boolean parsed = setConstDefinition(line, constMap);
                 if (!parsed) {
                     parsed = setMemoryDefinition(line, memoryMap);
@@ -129,15 +130,15 @@ public class Interpreter {
                     throw new InterpretationException("invalid definition", lines[index], index + 1);
                 }
                 index++;
-            } catch (InterpretationException e) {
+            } catch (final InterpretationException e) {
                 if (!isSilent) throw e;
             }
         }
         return index;
     }
 
-    private boolean setMemoryDefinition(String line, Map<String, Integer> lookupTable) {
-        Matcher matcher = DEF_PATTERN.matcher(line);
+    private boolean setMemoryDefinition(final String line, final Map<String, Integer> lookupTable) {
+        final Matcher matcher = DEF_PATTERN.matcher(line);
         if (!matcher.matches()) {
             return false;
         }
@@ -145,8 +146,8 @@ public class Interpreter {
         return true;
     }
 
-    private boolean setConstDefinition(String line, Map<String, Integer> lookupTable) {
-        Matcher matcher = DEF_CONST_PATTERN.matcher(line);
+    private boolean setConstDefinition(final String line, final Map<String, Integer> lookupTable) {
+        final Matcher matcher = DEF_CONST_PATTERN.matcher(line);
         if (!matcher.matches()) {
             return false;
         }
@@ -154,22 +155,22 @@ public class Interpreter {
         return true;
     }
 
-    private void parseDefinition(Matcher matcher, Map<String, Integer> table, boolean allowNegative) {
-        String reference = matcher.group(1);
+    private void parseDefinition(final MatchResult matcher, final Map<String, Integer> table, final boolean allowNegative) {
+        final String reference = matcher.group(1);
         if (reference.isEmpty()) {
             throw new InterpretationException("missing identifier", instructionPointer + 1);
         }
         int value = 0;
-        if (matcher.group(2) == null || matcher.group(2).isEmpty()) {
+        if ((matcher.group(2) == null) || matcher.group(2).isEmpty()) {
             value = reservedIndex;
             reservedIndex--;
         } else {
             try {
                 value = Integer.parseInt(matcher.group(2));
-                if (!allowNegative && value < 0) {
+                if (!allowNegative && (value < 0)) {
                     fail("negative memory address", reference + " : " + value);
                 }
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 fail("reference must be an integer", instructionPointer + 1);
             }
         }
@@ -180,7 +181,7 @@ public class Interpreter {
         table.put(reference, value);
     }
 
-    private void setupInstructionLookup(String[] lines, int startIndex, Map<String, Integer> instructionMap) {
+    private void setupInstructionLookup(final String[] lines, final int startIndex, final Map<String, Integer> instructionMap) {
         if (lines.length == 0) return;
         for (int i = startIndex; i < lines.length; i++) {
             String line = lines[i];
@@ -191,12 +192,12 @@ public class Interpreter {
         }
     }
 
-    private String addCommandEntry(final String line, final int lineNumber, Map<String, Integer> lookupTable) {
-        Matcher matcher = COMMAND_LOOKUP.matcher(line);
+    private String addCommandEntry(final String line, final int lineNumber, final Map<String, Integer> lookupTable) {
+        final Matcher matcher = COMMAND_LOOKUP.matcher(line);
         if (!matcher.matches()) {
             throw new InterpretationException("incorrect jump association", lineNumber + 1);
         }
-        String reference = matcher.group(1);
+        final String reference = matcher.group(1);
         if (lookupTable.containsKey(reference)) {
             fail(reference + " is already associated with an instruction", lineNumber + 1);
         }
@@ -209,20 +210,20 @@ public class Interpreter {
             String line = instructions[i];
 
             //Bracket (...) operator
-            Pattern brackets = Pattern.compile(POINTER);
-            Matcher bracketMatcher = brackets.matcher(line);
+            final Pattern brackets = Pattern.compile(POINTER);
+            final Matcher bracketMatcher = brackets.matcher(line);
             String pointerBracket = "";
             if (bracketMatcher.find()) {
                 pointerBracket = bracketMatcher.group();
                 line = line.replaceAll(POINTER, "");
             }
 
-            Matcher matcher = COMMAND_PATTERN.matcher(line);
+            final Matcher matcher = COMMAND_PATTERN.matcher(line);
             if (!matcher.matches()) {
                 throw new InterpretationException("invalid instruction", i + 1);
             }
-            String command = matcher.group(1) != null ? matcher.group(1) : "";
-            String value = matcher.group(2) != null ? matcher.group(2) : "";
+            final String command = (matcher.group(1) != null) ? matcher.group(1) : "";
+            String value = (matcher.group(2) != null) ? matcher.group(2) : "";
             if (value.length() > 0) {
                 if (memoryLookupTable.containsKey(value)) {
                     value = REFERENCE_PREFIX + String.valueOf(memoryLookupTable.get(value));
@@ -236,9 +237,9 @@ public class Interpreter {
                     throw new InterpretationException("unresolved Symbol", value, i + 1);
                 } else {
                     try {
-                        int val = Integer.parseInt(value);
+                        final int val = Integer.parseInt(value);
                         value = String.valueOf(val);
-                    } catch (NumberFormatException e) {
+                    } catch (final NumberFormatException e) {
                         throw new InterpretationException("illegal memory address", value, i + 1);
                     }
                 }
@@ -251,9 +252,9 @@ public class Interpreter {
         if (!hasInstructions()) {
             throw new IllegalStateException("No more instructions");
         }
-        String line = instructions[instructionPointer];
+        final String line = instructions[instructionPointer];
         instructionPointer++;
-        Command command = parseCommand(line);
+        final Command command = parseCommand(line);
 
         if (command == null) { //Ignore empty lines
             return nextInstruction();
@@ -263,28 +264,28 @@ public class Interpreter {
     }
 
     private Command parseCommand(final String l) {
-        if (l.equals("§")) {
+        if ("§".equals(l)) {
             return null;
         }
-        Matcher matcher = COMMAND_INTERN.matcher(l);
+        final Matcher matcher = COMMAND_INTERN.matcher(l);
         if (!matcher.matches()) {
             throw new InterpretationException("invalid instruction", instructionPointer);
         }
         //No argument command
-        if (matcher.group(2) == null || matcher.group(2).isEmpty()) {
+        if ((matcher.group(2) == null) || matcher.group(2).isEmpty()) {
             return new Command(matcher.group(1), null, false);
         }
 
         //Argument command
         String sVal = matcher.group(2); //Argument value
-        boolean isReference = sVal.startsWith(REFERENCE_PREFIX);
+        final boolean isReference = sVal.startsWith(REFERENCE_PREFIX);
         if (isReference) {
             sVal = sVal.substring(REFERENCE_PREFIX.length());
         }
-        int value;
+        final int value;
         try {
             value = Integer.parseInt(sVal);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             throw new InterpretationException("parameter is neither an integer value nor a memory reference",
                                               instructionPointer + 1);
         }
@@ -292,16 +293,16 @@ public class Interpreter {
     }
 
     private int parseBinary(final String sVal) {
-        Pattern crop = Pattern.compile("0*([01]*)");
-        Matcher matcher = crop.matcher(sVal);
+        final Pattern crop = Pattern.compile("0*([01]*)");
+        final Matcher matcher = crop.matcher(sVal);
         if (!matcher.matches()) {
             throw new InterpretationException("not a binary number", sVal);
         }
-        String digits = new StringBuilder(matcher.group(1)).reverse().toString(); //reverse and crop leading 0
+        final String digits = new StringBuilder(matcher.group(1)).reverse().toString(); //reverse and crop leading 0
         if (digits.length() > wordLength) {
             throw new InterpretationException("binary number is too large for " + wordLength + "bits", sVal);
         }
-        boolean[] bits;
+        final boolean[] bits;
         if (digits.length() > constWordLength) {
             bits = new boolean[wordLength];
         } else {
@@ -318,7 +319,7 @@ public class Interpreter {
     }
 
     public void setInstructionPointer(final int pointer) {
-        if (pointer < 0 || pointer >= instructions.length) {
+        if ((pointer < 0) || (pointer >= instructions.length)) {
             throw new IllegalArgumentException("invalid pointer position");
         }
         instructionPointer = pointer;
@@ -340,19 +341,19 @@ public class Interpreter {
      * Mute Errors while fetching references
      */
 
-    private void fail(String message, String line, int lineNumber) {
+    private void fail(final String message, final String line, final int lineNumber) {
         if (!isSilent) throw new InterpretationException(message, line, lineNumber);
     }
 
-    private void fail(String message, int lineNumber) {
+    private void fail(final String message, final int lineNumber) {
         if (!isSilent) throw new InterpretationException(message, lineNumber);
     }
 
-    private void fail(String message, String line) {
+    private void fail(final String message, final String line) {
         if (!isSilent) throw new InterpretationException(message, line);
     }
 
-    private void fail(String message) {
+    private void fail(final String message) {
         if (!isSilent) throw new InterpretationException(message);
     }
 

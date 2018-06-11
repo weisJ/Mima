@@ -6,14 +6,15 @@ import javax.swing.*;
  * @author Jannis Weis
  * @since 2018
  */
-public class MenuBuilder {
+public final class MenuBuilder {
 
-    private JMenuBar menuBar;
+    private final JMenuBar menuBar;
 
     /**
      * Create new MenuBuilder
      */
     public MenuBuilder() {
+        super();
         this.menuBar = new JMenuBar();
     }
 
@@ -23,16 +24,17 @@ public class MenuBuilder {
      * @param title Label
      * @return SubMenuBuilder
      */
-    public final SubMenuBuilder addMenu(String title) {
+    public SubMenuBuilder addMenu(final String title) {
         return new SubMenuBuilder(title, this);
     }
 
-    public class SubMenuBuilder {
+    public final class SubMenuBuilder {
 
-        private JMenu menu;
-        private MenuBuilder parent;
+        private final JMenu menu;
+        private final MenuBuilder parent;
 
-        private SubMenuBuilder(String title, MenuBuilder parent) {
+        private SubMenuBuilder(final String title, final MenuBuilder parent) {
+            super();
             this.menu = new JMenu(title);
             this.parent = parent;
         }
@@ -45,8 +47,8 @@ public class MenuBuilder {
          * @param accelerator key combination to trigger clicked event
          * @return this
          */
-        public SubMenuBuilder addItem(String title, Runnable action, String accelerator) {
-            JMenuItem item = new JMenuItem(title);
+        public SubMenuBuilder addItem(final String title, final Runnable action, final String accelerator) {
+            final JMenuItem item = new JMenuItem(title);
             item.addActionListener(e -> action.run());
             item.setAccelerator(KeyStroke.getKeyStroke(accelerator));
             menu.add(item);
@@ -60,8 +62,8 @@ public class MenuBuilder {
          * @param action action to perform when pressed
          * @return this
          */
-        public SubMenuBuilder addItem(String title, Runnable action) {
-            JMenuItem item = new JMenuItem(title);
+        public SubMenuBuilder addItem(final String title, final Runnable action) {
+            final JMenuItem item = new JMenuItem(title);
             item.addActionListener(e -> action.run());
             menu.add(item);
             return this;
@@ -73,8 +75,8 @@ public class MenuBuilder {
          * @param title label
          * @return this
          */
-        public SubMenuBuilder addItem(String title) {
-            JMenuItem item = new JMenuItem(title);
+        public SubMenuBuilder addItem(final String title) {
+            final JMenuItem item = new JMenuItem(title);
             menu.add(item);
             return this;
         }
@@ -95,7 +97,7 @@ public class MenuBuilder {
          * @param title label
          * @return SubMenuBuilder
          */
-        public SubMenuBuilder addMenu(String title) {
+        public SubMenuBuilder addMenu(final String title) {
             parent.menuBar.add(menu);
             return parent.addMenu(title);
         }

@@ -19,13 +19,14 @@ public class Mima {
     private Interpreter icu;
 
     private MachineWord accumulator;
-    private MachineWord stackPointer;
-    private Stack<Integer> returnStack;
+    private final MachineWord stackPointer;
+    private final Stack<Integer> returnStack;
 
     private boolean running;
     private boolean extendedInstructions;
 
     public Mima() {
+        super();
         memory = new Memory(WORD_LENGTH, 100);
         alu = new ArithmeticLogicUnit(WORD_LENGTH);
         accumulator = new MachineWord(0, WORD_LENGTH);
@@ -51,7 +52,7 @@ public class Mima {
         accumulator.setValue(0);
     }
 
-    public void loadProgram(String[] lines, boolean extendedInstructions) {
+    public void loadProgram(final String[] lines, final boolean extendedInstructions) {
         this.extendedInstructions = extendedInstructions;
         if (extendedInstructions) {
             icu = new Interpreter(lines, WORD_LENGTH, WORD_LENGTH);
@@ -63,27 +64,27 @@ public class Mima {
     }
 
     public Object[][] memoryTable() {
-        Map<Integer, MachineWord> values = memory.getMemory();
-        Map<String, Integer> associations = icu.getMemoryLookupTable();
-        Object[][] data = new Object[values.values().size() + 1][];
+        final Map<Integer, MachineWord> values = memory.getMemory();
+        final Map<String, Integer> associations = icu.getMemoryLookupTable();
+        final Object[][] data = new Object[values.values().size() + 1][];
         data[0] = new Object[]{"accumulator", accumulator};
         int index = 1;
-        for (int i : values.keySet()) {
+        for (final int i : values.keySet()) {
             if (associations.containsValue(i)) {
                 data[index] = new Object[]{getAssociation(associations, i), values.get(i).intValue()};
             } else {
                 data[index] = new Object[]{i, values.get(i).intValue()};
             }
             if (i == stackPointer.intValue()) {
-                data[index][0] = data[index][0] + "(SP)";
+                data[index][0] += "(SP)";
             }
             index++;
         }
         return data;
     }
 
-    private String getAssociation(Map<String, Integer> associations, int value) {
-        for (Map.Entry<String, Integer> entry : associations.entrySet()) {
+    private String getAssociation(final Map<String, Integer> associations, final int value) {
+        for (final Map.Entry<String, Integer> entry : associations.entrySet()) {
             if (entry.getValue() == value) return entry.getKey();
         }
         return null;
@@ -94,7 +95,7 @@ public class Mima {
     }
 
     public void step() {
-        Command command = icu.nextInstruction();
+        final Command command = icu.nextInstruction();
         boolean finished = processMimaCommand(command);
         if (finished)
             return;
@@ -116,38 +117,38 @@ public class Mima {
         return icu.getInstructionPointer();
     }
 
-    private boolean processMimaCommand(Command command) {
+    private boolean processMimaCommand(final Command command) {
         boolean found = true;
         switch (command.getCommand()) {
             case "LDC":
                 if (command.isReference()) {
                     fail("can't pass a reference at line ", icu.getInstructionPointer() + 1);
                 }
-                if (!extendedInstructions && command.getValue().intValue() < 0) {
+                if (!extendedInstructions && (command.getValue().intValue() < 0)) {
                     fail("can't pass negative values", icu.getInstructionPointer() + 1);
                 }
                 accumulator = command.getValue();
                 break;
             case "LDV":
-                if (!command.isReference() && command.getValue().intValue() < 0) {
+                if (!command.isReference() && (command.getValue().intValue() < 0)) {
                     fail("illegal memory address", icu.getInstructionPointer() + 1);
                 }
                 accumulator = memory.loadValue(command.getValue().intValue());
                 break;
             case "STV":
-                if (!command.isReference() && command.getValue().intValue() < 0) {
+                if (!command.isReference() && (command.getValue().intValue() < 0)) {
                     fail("illegal memory address", icu.getInstructionPointer() + 1);
                 }
                 memory.storeValue(command.getValue().intValue(), accumulator.copy());
                 break;
             case "LDIV":
-                if (!command.isReference() && command.getValue().intValue() < 0) {
+                if (!command.isReference() && (command.getValue().intValue() < 0)) {
                     fail("illegal memory address", icu.getInstructionPointer() + 1);
                 }
                 accumulator = memory.loadValue(memory.loadValue(command.getValue().intValue()).intValue());
                 break;
             case "STIV":
-                if (!command.isReference() && command.getValue().intValue() < 0) {
+                if (!command.isReference() && (command.getValue().intValue() < 0)) {
                     fail("illegal memory address", icu.getInstructionPointer() + 1);
                 }
                 memory.storeValue(memory.loadValue(command.getValue().intValue()).intValue(), accumulator.copy());
@@ -165,35 +166,35 @@ public class Mima {
                 accumulator.invert();
                 break;
             case "ADD":
-                if (!command.isReference() && command.getValue().intValue() < 0) {
+                if (!command.isReference() && (command.getValue().intValue() < 0)) {
                     fail("illegal memory address", icu.getInstructionPointer() + 1);
                 }
                 accumulator = alu.ADD(MachineWord.cast(accumulator, WORD_LENGTH),
                                       memory.loadValue(command.getValue().intValue()));
                 break;
             case "AND":
-                if (!command.isReference() && command.getValue().intValue() < 0) {
+                if (!command.isReference() && (command.getValue().intValue() < 0)) {
                     fail("illegal memory address", icu.getInstructionPointer() + 1);
                 }
                 accumulator = alu.AND(MachineWord.cast(accumulator, WORD_LENGTH),
                                       memory.loadValue(command.getValue().intValue()));
                 break;
             case "OR":
-                if (!command.isReference() && command.getValue().intValue() < 0) {
+                if (!command.isReference() && (command.getValue().intValue() < 0)) {
                     fail("illegal memory address", icu.getInstructionPointer() + 1);
                 }
                 accumulator = alu.OR(MachineWord.cast(accumulator, WORD_LENGTH),
                                      memory.loadValue(command.getValue().intValue()));
                 break;
             case "XOR":
-                if (!command.isReference() && command.getValue().intValue() < 0) {
+                if (!command.isReference() && (command.getValue().intValue() < 0)) {
                     fail("illegal memory address", icu.getInstructionPointer() + 1);
                 }
                 accumulator = alu.XOR(MachineWord.cast(accumulator, WORD_LENGTH),
                                       memory.loadValue(command.getValue().intValue()));
                 break;
             case "EQL":
-                if (!command.isReference() && command.getValue().intValue() < 0) {
+                if (!command.isReference() && (command.getValue().intValue() < 0)) {
                     fail("illegal memory address", icu.getInstructionPointer() + 1);
                 }
                 accumulator = alu.EQL(MachineWord.cast(accumulator, WORD_LENGTH),
@@ -220,7 +221,7 @@ public class Mima {
         return found;
     }
 
-    private boolean processMimaXCommand(Command command) {
+    private boolean processMimaXCommand(final Command command) {
         boolean found = true;
         switch (command.getCommand()) {
             case "CALL":
@@ -286,12 +287,12 @@ public class Mima {
         return icu.hasInstructions();
     }
 
-    private void fail(String message, int lineNumber) {
+    private void fail(final String message, final int lineNumber) {
         running = false;
         throw new InterpretationException(message, lineNumber);
     }
 
-    public List<Set<String>> getReferences(String[] lines) {
+    public List<Set<String>> getReferences(final String[] lines) {
         return icu.getReferences(lines);
     }
 }

@@ -9,7 +9,7 @@ import java.util.*;
 public class History<T> {
 
     private final LinkedList<T> history;
-    private final int maxCapacity;
+    private int maxCapacity;
     private int head;
 
     /**
@@ -18,6 +18,7 @@ public class History<T> {
      * @param capacity maximum capacity
      */
     public History(final int capacity) {
+        super();
         history = new LinkedList<>();
         maxCapacity = capacity;
         head = 0;
@@ -37,8 +38,8 @@ public class History<T> {
      * If there are elements in front of the current one they too will be deleted
      * @param element element to add
      */
-    public void add(T element) {
-        int removeCount = head;
+    public void add(final T element) {
+        final int removeCount = head;
         for (int i = 0; i < removeCount; i++) {
             history.removeFirst();
             head--;
@@ -64,7 +65,7 @@ public class History<T> {
      * @return current object
      */
     public T getCurrent() {
-        return history.get(head);
+        return (head < history.size()) ? history.get(head) : null;
     }
 
     /**
@@ -72,7 +73,7 @@ public class History<T> {
      *
      * @param element element to put at current position
      */
-    public void setCurrent(T element) {
+    public void setCurrent(final T element) {
         history.set(head, element);
     }
 
@@ -82,11 +83,10 @@ public class History<T> {
      * @return element at new history position
      */
     public T back() {
-        if (head >= length() - 1) {
+        if (head >= length()) {
             throw new IndexOutOfBoundsException("reached end of history");
         }
-        head++;
-        return history.get(head);
+        return history.get(head++);
     }
 
     /**
@@ -119,5 +119,17 @@ public class History<T> {
         while (!history.isEmpty()) {
             history.removeFirst();
         }
+    }
+
+    /**
+     * Set the capacity for the history
+     *
+     * @param capacity new capacity
+     */
+    public void setCapacity(final int capacity) {
+        if (capacity < maxCapacity) {
+            throw new IllegalArgumentException("Can't crop history. Too small capacity");
+        }
+        this.maxCapacity = capacity;
     }
 }
