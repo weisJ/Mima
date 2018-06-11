@@ -16,14 +16,16 @@ public class OptionsLoader {
      *
      * @param optionsDirectory path to options directory
      */
-    public OptionsLoader(String optionsDirectory) {
+    public OptionsLoader(final String optionsDirectory) {
+        super();
         this.optionsDirectory = optionsDirectory;
         this.optionsPath = optionsDirectory + "/.options";
         createDirectory();
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void createDirectory() {
-        File homeDir = new File(optionsPath);
+        final File homeDir = new File(optionsPath);
         if (!homeDir.exists()) {
             homeDir.mkdir();
         }
@@ -47,8 +49,8 @@ public class OptionsLoader {
      * @param save content to write to options file
      * @throws IOException may throw IOException during loading
      */
-    public void saveOptions(String save) throws IOException {
-        PrintWriter writer = new PrintWriter(optionsPath, "ISO-8859-1");
+    public void saveOptions(final String save) throws IOException {
+        final PrintWriter writer = new PrintWriter(optionsPath, "ISO-8859-1");
         writer.write(save);
         writer.close();
     }

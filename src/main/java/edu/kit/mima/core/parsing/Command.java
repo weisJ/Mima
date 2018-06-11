@@ -12,6 +12,7 @@ public class Command {
     private final boolean isReference;
 
     public Command(final String command, final MachineWord value, final boolean isReference) {
+        super();
         this.command = command;
         this.value = value;
         this.isReference = isReference;

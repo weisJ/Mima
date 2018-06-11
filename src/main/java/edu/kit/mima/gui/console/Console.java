@@ -7,15 +7,16 @@ import java.awt.event.*;
 
 public class Console extends JScrollPane {
 
+    private static final Color DEFAULT_COLOR = Color.LIGHT_GRAY;
     private final JTextPane textPane;
     private final StyledDocument document;
-    private final Color DEFAULT_COLOR = Color.LIGHT_GRAY;
     private final Style style;
 
     /**
      * Create new Console
      */
     public Console() {
+        super();
         textPane = new JTextPane();
         textPane.setBackground(Color.BLACK);
         textPane.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
@@ -43,8 +44,8 @@ public class Console extends JScrollPane {
      * @param message Message to print
      * @param color color to print in
      */
-    public void println(final String message, Color color) {
-        print(message + "\n", color);
+    public void println(final String message, final Color color) {
+        print(message, color);
     }
 
     /**
@@ -62,11 +63,11 @@ public class Console extends JScrollPane {
      * @param message Message to print
      * @param color color to print in
      */
-    public void print(final String message, Color color) {
+    public void print(final String message, final Color color) {
         try {
             StyleConstants.setForeground(style, color);
             document.insertString(document.getLength(), message + "\n", style);
-        } catch (BadLocationException ignored) { }
+        } catch (final BadLocationException ignored) { }
         scrollToBottom();
     }
 
@@ -82,11 +83,11 @@ public class Console extends JScrollPane {
      * Scroll to the top of the console
      */
     private void scrollToTop() {
-        JScrollBar verticalBar = getVerticalScrollBar();
-        AdjustmentListener downScroller = new AdjustmentListener() {
+        final JScrollBar verticalBar = getVerticalScrollBar();
+        final AdjustmentListener downScroller = new AdjustmentListener() {
             @Override
-            public void adjustmentValueChanged(AdjustmentEvent e) {
-                Adjustable adjustable = e.getAdjustable();
+            public void adjustmentValueChanged(final AdjustmentEvent e) {
+                final Adjustable adjustable = e.getAdjustable();
                 adjustable.setValue(adjustable.getMinimum());
                 verticalBar.removeAdjustmentListener(this);
             }
@@ -99,11 +100,11 @@ public class Console extends JScrollPane {
      * Scroll to the bottom of the console
      */
     private void scrollToBottom() {
-        JScrollBar verticalBar = getVerticalScrollBar();
-        AdjustmentListener downScroller = new AdjustmentListener() {
+        final JScrollBar verticalBar = getVerticalScrollBar();
+        final AdjustmentListener downScroller = new AdjustmentListener() {
             @Override
-            public void adjustmentValueChanged(AdjustmentEvent e) {
-                Adjustable adjustable = e.getAdjustable();
+            public void adjustmentValueChanged(final AdjustmentEvent e) {
+                final Adjustable adjustable = e.getAdjustable();
                 adjustable.setValue(adjustable.getMaximum());
                 verticalBar.removeAdjustmentListener(this);
             }

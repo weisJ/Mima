@@ -17,7 +17,8 @@ public class SaveHandler {
      *
      * @param saveDirectory save directory for temporary file
      */
-    public SaveHandler(String saveDirectory) {
+    public SaveHandler(final String saveDirectory) {
+        super();
         this.saveDirectory = saveDirectory;
         this.tmpFile = saveDirectory + "/save.tmp";
     }
@@ -29,7 +30,7 @@ public class SaveHandler {
      * @return content of file
      * @throws IOException may throw IOException during loading process if the file does not exist
      */
-    public String loadFile(String file) throws IOException {
+    public String loadFile(final String file) throws IOException {
         final BufferedReader reader = new BufferedReader(
                 new InputStreamReader(new FileInputStream(file), "ISO-8859-1"));
         return reader.lines().collect(Collectors.joining("\n"));
@@ -42,8 +43,8 @@ public class SaveHandler {
      * @param path path to file
      * @throws IOException may throw IOException during saving process
      */
-    public void saveFile(String text, String path) throws IOException {
-        PrintWriter writer = new PrintWriter(path, "ISO-8859-1");
+    public void saveFile(final String text, final String path) throws IOException {
+        final PrintWriter writer = new PrintWriter(path, "ISO-8859-1");
         writer.write(text);
         writer.close();
     }
@@ -66,8 +67,8 @@ public class SaveHandler {
      * @param text text to save in file
      * @throws IOException may throw IOException during saving process
      */
-    public void saveTmp(String text) throws IOException {
-        PrintWriter writer = new PrintWriter(tmpFile, "ISO-8859-1");
+    public void saveTmp(final String text) throws IOException {
+        final PrintWriter writer = new PrintWriter(tmpFile, "ISO-8859-1");
         writer.write(text);
         writer.close();
     }
@@ -75,6 +76,7 @@ public class SaveHandler {
     /**
      * Delete the temporary file
      */
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public void deleteTmp() {
         new File(tmpFile).delete();
     }

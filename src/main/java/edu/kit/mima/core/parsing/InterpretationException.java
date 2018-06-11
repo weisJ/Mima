@@ -11,28 +11,32 @@ public class InterpretationException extends IllegalArgumentException {
     private final int lineNumber;
     private final boolean number;
 
-    public InterpretationException(String message, String line, int lineNumber) {
+    public InterpretationException(final String message, final String line, final int lineNumber) {
+        super();
         this.message = message;
         this.line = line;
         this.lineNumber = lineNumber;
         this.number = true;
     }
 
-    public InterpretationException(String message, int lineNumber) {
+    public InterpretationException(final String message, final int lineNumber) {
+        super();
         this.message = message;
         this.line = null;
         this.lineNumber = lineNumber;
         this.number = true;
     }
 
-    public InterpretationException(String message, String line) {
+    public InterpretationException(final String message, final String line) {
+        super();
         this.message = message;
         this.line = line;
         this.lineNumber = 0;
         this.number = false;
     }
 
-    public InterpretationException(String message) {
+    public InterpretationException(final String message) {
+        super();
         this.message = message;
         this.line = null;
         this.lineNumber = 0;
@@ -42,8 +46,8 @@ public class InterpretationException extends IllegalArgumentException {
     @Override
     public String getMessage() {
         String cause = message;
-        cause = number ? cause + " | line: " + lineNumber : cause;
-        cause = line == null ? cause : cause + " <" + line + ">";
+        cause = number ? (cause + " | line: " + lineNumber) : cause;
+        cause = (line == null) ? cause : (cause + " <" + line + ">");
         return cause;
     }
 }

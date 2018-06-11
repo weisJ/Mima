@@ -20,6 +20,7 @@ public class StyleGroup {
      * To ensure this add the expression the second time in its own StyleGroup
      */
     public StyleGroup() {
+        super();
         styleMap = new HashMap<>();
     }
 
@@ -38,7 +39,7 @@ public class StyleGroup {
      * @param key regular expression
      * @return color of key
      */
-    public Color getColor(String key) {
+    public Color getColor(final String key) {
         return styleMap.get(key);
     }
 
@@ -49,11 +50,11 @@ public class StyleGroup {
      * @param regexArray array of regular expressions
      * @param color color to highlight expressions in
      */
-    public void addHighlight(String[] regexArray, Color color) {
+    public void addHighlight(final String[] regexArray, final Color color) {
         if (regexArray.length == 0) return;
-        StringBuilder sb = new StringBuilder("(");
-        for (String s : regexArray) {
-            sb.append(s).append("|");
+        final StringBuilder sb = new StringBuilder("(");
+        for (final String s : regexArray) {
+            sb.append(s).append('|');
         }
         sb.deleteCharAt(sb.length() - 1);
         sb.append(")");
@@ -66,7 +67,7 @@ public class StyleGroup {
      * @param regex expression to highlight
      * @param color color to highlight in
      */
-    public void addHighlight(String regex, Color color) {
+    public void addHighlight(final String regex, final Color color) {
         styleMap.put(regex, color);
     }
 
@@ -77,7 +78,7 @@ public class StyleGroup {
      * @param regexArray array of regular expressions
      * @param colors colors to highlight expressions in
      */
-    public void addHighlight(String[] regexArray, Color[] colors) {
+    public void addHighlight(final String[] regexArray, final Color[] colors) {
         if (regexArray.length == 0) return;
         if (regexArray.length != colors.length) {
             throw new IllegalArgumentException("unequal array lengths");
@@ -96,7 +97,7 @@ public class StyleGroup {
      * @param regexArray array of regular expressions
      * @param color color to highlight expressions in
      */
-    public void setHighlight(String[] regexArray, Color color) {
+    public void setHighlight(final String[] regexArray, final Color color) {
         styleMap.clear();
         addHighlight(regexArray, color);
     }
@@ -110,7 +111,7 @@ public class StyleGroup {
      * @param regexArray array of regular expressions
      * @param colors colors to highlight expressions in
      */
-    public void setHighlight(String[] regexArray, Color[] colors) {
+    public void setHighlight(final String[] regexArray, final Color[] colors) {
         if (regexArray.length == 0) return;
         styleMap.clear();
         addHighlight(regexArray, colors);
@@ -124,7 +125,7 @@ public class StyleGroup {
      * @param regex expression to highlight
      * @param color color to highlight in
      */
-    public void setHighlight(String regex, Color color) {
+    public void setHighlight(final String regex, final Color color) {
         styleMap.clear();
         addHighlight(regex, color);
     }
