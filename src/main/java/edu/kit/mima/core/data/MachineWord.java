@@ -10,29 +10,31 @@ public class MachineWord {
     private boolean[] bits;
     private boolean unsigned;
 
-    public MachineWord(int value, final int wordLength) {
+    public MachineWord(final int value, final int wordLength) {
         this(value, wordLength, false);
     }
 
-    public MachineWord(boolean[] bits, boolean unsigned) {
+    public MachineWord(final boolean[] bits, final boolean unsigned) {
+        super();
         this.unsigned = unsigned;
         this.wordLength = bits.length;
         this.bits = bits;
     }
 
-    public MachineWord(int value, int wordLength, boolean unsigned) {
+    public MachineWord(final int value, final int wordLength, final boolean unsigned) {
+        super();
         this.wordLength = wordLength;
         setValue(value);
     }
 
-    public MachineWord(boolean[] bits) {
+    public MachineWord(final boolean[] bits) {
         this(bits, false);
     }
 
-    public static MachineWord cast(MachineWord word, int wordLength) {
+    public static MachineWord cast(final MachineWord word, final int wordLength) {
         try {
             return new MachineWord(word.intValue(), wordLength, word.unsigned);
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             throw new IllegalArgumentException("not enough space to cast");
         }
     }
@@ -51,9 +53,9 @@ public class MachineWord {
 
     public int intValue() {
         int value = 0;
-        boolean isNegative = MSB() == 1;
+        final boolean isNegative = MSB() == 1;
         if (isNegative) value++;
-        for (int i = 0; i < wordLength - 2; i++) {
+        for (int i = 0; i < (wordLength - 2); i++) {
             if (isNegative ^ bits[i]) value += Math.pow(2, i);
         }
         if (isNegative) value *= -1;
@@ -64,11 +66,11 @@ public class MachineWord {
         return bits.clone();
     }
 
-    public void setBits(boolean[] bits) {
+    public void setBits(final boolean[] bits) {
         this.bits = bits;
     }
 
-    final public void invert() {
+    public final void invert() {
         for (int i = 0; i < wordLength; i++) {
             bits[i] = !bits[i];
         }
@@ -82,22 +84,22 @@ public class MachineWord {
         return bits[wordLength - 1] ? 1 : 0;
     }
 
-    public void setValue(int value) {
+    public void setValue(final int value) {
         if (unsigned) {
-            if (value > Math.pow(2, wordLength) - 1) {
+            if (value > (Math.pow(2, wordLength) - 1)) {
                 throw new IllegalArgumentException("invalid value");
             }
         } else {
-            if (value > Math.pow(2, wordLength - 1) - 1 || value < -1 * Math.pow(2, wordLength - 1)) {
+            if ((value > (Math.pow(2, wordLength - 1) - 1)) || (value < (-1 * Math.pow(2, wordLength - 1)))) {
                 throw new IllegalArgumentException("value must be > 0 for unsigned data");
             }
         }
-        int digits = unsigned ? wordLength + 1 : wordLength;
+        final int digits = unsigned ? (wordLength + 1) : wordLength;
         this.bits = new boolean[wordLength];
-        boolean isNegative = value < 0;
+        final boolean isNegative = value < 0;
         int val = Math.abs(value);
         if (isNegative) val--;
-        String bitValue = new StringBuilder(Integer.toBinaryString(val)).reverse().toString();
+        final String bitValue = new StringBuilder(Integer.toBinaryString(val)).reverse().toString();
         for (int i = 0; i < Math.min(digits, bitValue.length()); i++) {
             bits[i] = bitValue.charAt(i) == '1';
         }

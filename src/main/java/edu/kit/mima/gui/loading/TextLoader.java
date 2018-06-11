@@ -22,7 +22,8 @@ public class TextLoader {
      * @param parent parent component for dialogs
      * @param manager underlying load manager
      */
-    public TextLoader(Component parent, LoadManager manager) {
+    public TextLoader(final Component parent, final LoadManager manager) {
+        super();
         this.manager = manager;
         this.parent = parent;
     }
@@ -35,7 +36,7 @@ public class TextLoader {
      * @param extension allowed file extension
      * @param abortHandler action to perform if request was aborted
      */
-    public void requestSave(String text, String searchPath, String extension, Runnable abortHandler) {
+    public void requestSave(final String text, final String searchPath, final String extension, final Runnable abortHandler) {
         String path = requestPath(searchPath, new String[]{extension}, abortHandler);
         if (path == null) return;
         if (!path.endsWith(extension)) path += "." + extension;
@@ -43,7 +44,7 @@ public class TextLoader {
         manager.onSave(path);
         try (final PrintWriter writer = new PrintWriter(path, "ISO-8859-1")) {
             if (text != null) writer.write(text);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             manager.onFail(e.getMessage());
         }
         manager.afterSave();
@@ -57,8 +58,8 @@ public class TextLoader {
      * @param abortHandler action to perform if request was aborted
      * @return loaded text
      */
-    public String requestLoad(String searchPath, String[] extensions, Runnable abortHandler) {
-        String path = requestPath(searchPath, extensions, abortHandler);
+    public String requestLoad(final String searchPath, final String[] extensions, final Runnable abortHandler) {
+        final String path = requestPath(searchPath, extensions, abortHandler);
         if (path == null) {
             abortHandler.run();
             throw new IllegalArgumentException("path is null");
@@ -69,7 +70,7 @@ public class TextLoader {
         try (final BufferedReader reader = new BufferedReader(
                 new InputStreamReader(new FileInputStream(path), "ISO-8859-1"))) {
             text = reader.lines().collect(Collectors.joining("\n"));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             manager.onFail(e.getMessage());
         }
         manager.afterLoad();
@@ -79,14 +80,14 @@ public class TextLoader {
     /*
      * Request the path form user using JFileChooser
      */
-    private String requestPath(String savedPath, String[] extensions, Runnable abortHandler) {
+    private String requestPath(final String savedPath, final String[] extensions, final Runnable abortHandler) {
         String path = null;
-        JFileChooser chooser = new JFileChooser(savedPath);
-        FileNameExtensionFilter filter = new FileNameExtensionFilter(extensions[0], extensions);
+        final JFileChooser chooser = new JFileChooser(savedPath);
+        final FileNameExtensionFilter filter = new FileNameExtensionFilter(extensions[0], extensions);
         chooser.setFileFilter(filter);
-        int value = chooser.showDialog(parent, "Choose File");
+        final int value = chooser.showDialog(parent, "Choose File");
         if (value == JFileChooser.APPROVE_OPTION) {
-            File file = chooser.getSelectedFile();
+            final File file = chooser.getSelectedFile();
             path = file.getAbsolutePath();
             manager.afterRequest(file);
         } else {

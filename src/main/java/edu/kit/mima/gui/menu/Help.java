@@ -39,6 +39,7 @@ public final class Help extends JFrame {
      * Construct the Help Screen
      */
     private Help() {
+        super();
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("mima.png")));
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         setSize((int) SIZE.getHeight() / 3, (int) SIZE.getWidth() / 3);
@@ -65,20 +66,27 @@ public final class Help extends JFrame {
         return instance;
     }
 
-    private static void showHtml(String htmlSource) {
+    private static void showHtml(final String htmlSource) {
         Platform.runLater(() -> {
-            WebView webView = new WebView();
+            final WebView webView = new WebView();
             webView.getEngine().loadContent("<html> Html loaded");
             webView.getEngine().loadContent(htmlSource);
             jfxPanel.setScene(new Scene(webView));
         });
     }
 
+    /**
+     * Close the Help Window
+     */
     public static void close() {
-        Thread stop = loadSource;
-        loadSource = null;
-        stop.interrupt();
-        instance.dispose();
+        if (loadSource != null) {
+            final Thread stop = loadSource;
+            loadSource = null;
+            stop.interrupt();
+        }
+        if (instance != null) {
+            instance.dispose();
+        }
     }
 
     /*
@@ -86,20 +94,19 @@ public final class Help extends JFrame {
      */
     private String loadMarkdown() {
         try {
-            URLConnection c = new URL(HELP_WEB).openConnection();
+            final URLConnection c = new URL(HELP_WEB).openConnection();
 
             // set the connection timeout to 3 seconds and the read timeout to 5 seconds
             c.setConnectTimeout(3000);
             c.setReadTimeout(5000);
 
             // get a stream to read data from
-            BufferedReader reader = new BufferedReader(new InputStreamReader(c.getInputStream()));
-            String markdown = reader.lines().collect(Collectors.joining("\n"));
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(c.getInputStream()));
+            final String markdown = reader.lines().collect(Collectors.joining("\n"));
             loadedFromWeb = true;
             return markdown;
-        } catch (IOException e) {
-            System.out.println("exception");
-            return source == null ? loadFallback() : null;
+        } catch (final IOException e) {
+            return (source == null) ? loadFallback() : null;
         }
     }
 
@@ -115,10 +122,10 @@ public final class Help extends JFrame {
     /*
      * Render the markdown to HTML
      */
-    private String renderMarkdown(String text) {
-        Parser parser = Parser.builder().build();
-        Node document = parser.parse(text);
-        HtmlRenderer renderer = HtmlRenderer.builder().build();
+    private String renderMarkdown(final String text) {
+        final Parser parser = Parser.builder().build();
+        final Node document = parser.parse(text);
+        final HtmlRenderer renderer = HtmlRenderer.builder().build();
         return renderer.render(document);
     }
 
@@ -126,9 +133,8 @@ public final class Help extends JFrame {
         boolean alive = true;
         int attempts = 0;
         showHtml(renderMarkdown(loadMarkdown()));
-        while (!loadedFromWeb && alive && attempts < MAXIMUM_ATTEMPTS) {
-            System.out.print("awake");
-            String htmlSource = loadMarkdown();
+        while (!loadedFromWeb && alive && (attempts < MAXIMUM_ATTEMPTS)) {
+            final String htmlSource = loadMarkdown();
             if (htmlSource != null) {
                 source = htmlSource;
                 showHtml(renderMarkdown(source));
@@ -136,7 +142,7 @@ public final class Help extends JFrame {
             try {
                 Thread.sleep(20000);
                 attempts++;
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 alive = false;
             }
         }

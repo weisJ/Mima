@@ -39,7 +39,8 @@ public class FileManager implements AutoCloseable {
      * @param saveDirectory path to saveDirectory
      * @param extensions allowed file extensions
      */
-    public FileManager(Component parent, String saveDirectory, String[] extensions) {
+    public FileManager(final Component parent, final String saveDirectory, final String[] extensions) {
+        super();
         optionsLoader = new OptionsLoader(saveDirectory);
         saveHandler = new SaveHandler(saveDirectory);
         this.extensions = extensions;
@@ -47,7 +48,7 @@ public class FileManager implements AutoCloseable {
 
         textLoader = new TextLoader(this.parent, new LogLoadManager() {
             @Override
-            public void afterRequest(File chosenFile) {
+            public void afterRequest(final File chosenFile) {
                 setLastExtension(chosenFile);
                 lastFile = chosenFile.getAbsolutePath();
                 directory = chosenFile.getParentFile().getAbsolutePath();
@@ -61,10 +62,10 @@ public class FileManager implements AutoCloseable {
      */
     private void loadOptions() {
         try {
-            String[] options = optionsLoader.loadOptions();
+            final String[] options = optionsLoader.loadOptions();
             this.lastFile = options[0];
             this.directory = new File(lastFile).getParentFile().getAbsolutePath();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             this.directory = System.getProperty("user.home");
         }
     }
@@ -85,7 +86,7 @@ public class FileManager implements AutoCloseable {
             text = saveHandler.loadFile(lastFile);
             setLastExtension(lastFile);
             fileHash = text.hashCode();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             firstFile();
         }
     }
@@ -103,7 +104,7 @@ public class FileManager implements AutoCloseable {
      */
     private void firstFile() {
         try {
-            int response = JOptionPane
+            final int response = JOptionPane
                     .showOptionDialog(parent, "Create/Load File", "Create/Load File", JOptionPane.DEFAULT_OPTION,
                                       JOptionPane.PLAIN_MESSAGE,
                                       null, new String[]{"Load", "New"}, "Load");
@@ -114,7 +115,7 @@ public class FileManager implements AutoCloseable {
             } else { //Abort
                 System.exit(0);
             }
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             error(e.getMessage());
         }
     }
@@ -123,9 +124,9 @@ public class FileManager implements AutoCloseable {
      * Create a new File. Requests user to chose file type
      */
     public void newFile() {
-        String response = (String) JOptionPane.showInputDialog(parent, "Choose file type", "New File",
-                                                   JOptionPane.QUESTION_MESSAGE,
-                                                    null, extensions, extensions[0]);
+        final String response = (String) JOptionPane.showInputDialog(parent, "Choose file type", "New File",
+                                                                     JOptionPane.QUESTION_MESSAGE,
+                                                                     null, extensions, extensions[0]);
         if (response == null) return;
         setLastExtension(response);
         text = "#New File\n";
@@ -149,7 +150,7 @@ public class FileManager implements AutoCloseable {
     public void saveAs() {
         try {
             textLoader.requestSave(text, directory, lastExtension, () -> { throw new IllegalArgumentException(); });
-        } catch (IllegalArgumentException ignored) { }
+        } catch (final IllegalArgumentException ignored) { }
         isNewFile = false;
         fileHash = text.hashCode();
     }
@@ -158,16 +159,16 @@ public class FileManager implements AutoCloseable {
      * Asks the user if he wants to save the file
      */
     public void savePopUp() {
-        int response = JOptionPane.showOptionDialog(parent, "Do you want to save?", "Unsaved File",
-                                                    JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
-                                                    null, new String[]{"Save", "Save as", "Don't save"}, "Save");
+        final int response = JOptionPane.showOptionDialog(parent, "Do you want to save?", "Unsaved File",
+                                                          JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
+                                                          null, new String[]{"Save", "Save as", "Don't save"}, "Save");
         if (response == 0) {
             if (isNewFile) {
                 saveAs();
             } else {
                 try {
                     save();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     error(e.getMessage());
                 }
             }
@@ -192,7 +193,7 @@ public class FileManager implements AutoCloseable {
      *
      * @param text text
      */
-    public void setText(String text) {
+    public void setText(final String text) {
         this.text = text;
     }
 
@@ -211,7 +212,7 @@ public class FileManager implements AutoCloseable {
      * @return true if file has not changed
      */
     public boolean isSaved() {
-        return !isNewFile && fileHash == text.hashCode();
+        return !isNewFile && (fileHash == text.hashCode());
     }
 
     /**
@@ -244,8 +245,8 @@ public class FileManager implements AutoCloseable {
     /*
      * Set the extension used by loaded file
      */
-    private void setLastExtension(String file) {
-        for (String s : extensions) {
+    private void setLastExtension(final String file) {
+        for (final String s : extensions) {
             if (file.endsWith(s)) {
                 lastExtension = s;
             }
@@ -255,7 +256,7 @@ public class FileManager implements AutoCloseable {
     /*
      * Set the extension used by file
      */
-    private void setLastExtension(File file) {
+    private void setLastExtension(final File file) {
         setLastExtension(file.getAbsolutePath());
     }
 
