@@ -1,8 +1,9 @@
 package edu.kit.mima.gui.loading;
 
-import java.io.*;
+import java.io.File;
 
-import static edu.kit.mima.gui.logging.Logger.*;
+import static edu.kit.mima.gui.logging.Logger.error;
+import static edu.kit.mima.gui.logging.Logger.log;
 
 /**
  * Implementation if LoadManager using the Logger
@@ -12,8 +13,8 @@ import static edu.kit.mima.gui.logging.Logger.*;
  */
 public class LogLoadManager implements LoadManager {
     @Override
-    public void onLoad(final String path) {
-        log("Loading: " + path + "...");
+    public void onLoad(final String filepath) {
+        log("Loading: " + filepath + "...");
     }
 
     @Override

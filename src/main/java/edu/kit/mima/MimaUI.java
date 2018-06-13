@@ -1,22 +1,33 @@
 package edu.kit.mima;
 
-import edu.kit.mima.core.*;
-import edu.kit.mima.core.parsing.*;
-import edu.kit.mima.gui.*;
-import edu.kit.mima.gui.button.*;
+import edu.kit.mima.core.Mima;
+import edu.kit.mima.core.parsing.Interpreter;
+import edu.kit.mima.gui.FileManager;
+import edu.kit.mima.gui.FixedScrollTable;
+import edu.kit.mima.gui.button.ButtonPanelFactory;
+import edu.kit.mima.gui.color.SyntaxColor;
 import edu.kit.mima.gui.console.Console;
-import edu.kit.mima.gui.editor.*;
-import edu.kit.mima.gui.logging.*;
-import edu.kit.mima.gui.menu.*;
+import edu.kit.mima.gui.editor.Editor;
+import edu.kit.mima.gui.editor.StyleGroup;
+import edu.kit.mima.gui.logging.Logger;
+import edu.kit.mima.gui.menu.Help;
+import edu.kit.mima.gui.menu.MenuBuilder;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.Toolkit;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.io.IOException;
 import java.util.List;
-import java.util.*;
+import java.util.Set;
 
-import static edu.kit.mima.gui.logging.Logger.*;
+import static edu.kit.mima.gui.logging.Logger.error;
+import static edu.kit.mima.gui.logging.Logger.log;
 
 /**
  * @author Jannis Weis
@@ -129,9 +140,12 @@ public final class MimaUI extends JFrame {
                         .addItem("Load", () -> changeFile(fileManager::load), "control L")
                         .separator()
                         .addItem("Save", () -> {
-                            if (!fileManager.isOnDisk()) fileManager.saveAs();
-                            else save();
-                        }, "control S")
+                                if (!fileManager.isOnDisk()) {
+                                    fileManager.saveAs();
+                                } else {
+                                    save();
+                                }
+                            }, "control S")
                         .addItem("Save as", fileManager::saveAs, "control shift S")
                 .addMenu("Edit")
                         .addItem("Undo", editor::undo, "control Z")
@@ -167,7 +181,9 @@ public final class MimaUI extends JFrame {
             @Override
             public void windowClosing(final WindowEvent e) {
                 try {
-                    if (!fileManager.isSaved()) fileManager.savePopUp();
+                    if (!fileManager.isSaved()) {
+                        fileManager.savePopUp();
+                    }
                     fileManager.close();
                     e.getWindow().dispose();
                     Help.close();
@@ -186,7 +202,9 @@ public final class MimaUI extends JFrame {
      * @param loadAction function that loads the new file
      */
     private void changeFile(final Runnable loadAction) {
-        if (!fileManager.isSaved()) fileManager.savePopUp();
+        if (!fileManager.isSaved()) {
+            fileManager.savePopUp();
+        }
         console.clear();
         loadAction.run();
         editor.setText(fileManager.getText());
@@ -299,22 +317,18 @@ public final class MimaUI extends JFrame {
      * Update the syntax highlighting according to the current instruction set
      */
     private void updateSyntaxHighlighting() {
-        final Color instructionsColor = new Color(27, 115, 207);
-        final Color keywordColor = new Color(168, 120, 43);
 
         syntaxStyle.setHighlight(Interpreter.getKeywords(), new Color[]{
-                keywordColor, //$define
-                keywordColor, //const
-                keywordColor, // :
-                keywordColor, // (
-                keywordColor, // )
-                new Color(37, 143, 148), //Numbers
-                new Color(165, 170, 56), //0b,
-                new Color(63, 135, 54), //Comments
+                SyntaxColor.KEYWORD.getColor(), //$define
+                SyntaxColor.KEYWORD.getColor(), //const
+                SyntaxColor.KEYWORD.getColor(), // :
+                SyntaxColor.KEYWORD.getColor(), // (
+                SyntaxColor.KEYWORD.getColor(), // )
+                SyntaxColor.NUMBER.getColor(),  //Numbers
+                SyntaxColor.BINARY.getColor(),  //0b,
+                SyntaxColor.COMMENT.getColor(), //Comments
         });
-        if (fileManager.getLastExtension().equals(FILE_EXTENSION_X)) {
-            syntaxStyle.addHighlight(Mima.getMimaXInstructionSet(), instructionsColor);
-        }
+        syntaxStyle.addHighlight(mima.getInstructionSet(), SyntaxColor.INSTRUCTION.getColor());
     }
 
     /**
@@ -322,20 +336,21 @@ public final class MimaUI extends JFrame {
      * Performs a silent compile on the instructions
      */
     private void updateReferenceHighlighting() {
-        if (mima == null) return;
+        if (mima == null) {
+            return;
+        }
         try {
             final List<Set<String>> references = mima.getReferences(fileManager.lines().clone());
 
-            referenceStyle.setHighlight(Mima.getInstructionSet(), new Color(27, 115, 207));
             final String[] constants = references.get(0)
                     .stream().map(s -> "(?<![^ \n])" + s + "(?![^ \n])").toArray(String[]::new);
-            referenceStyle.addHighlight(constants, new Color(255, 96, 179));
+            referenceStyle.addHighlight(constants, SyntaxColor.CONSTANT.getColor());
             final String[] instructionReferences = references.get(2)
                     .stream().map(s -> "(?<![^ \n])" + s + "(?![^ \n])").toArray(String[]::new);
-            referenceStyle.addHighlight(instructionReferences, new Color(63, 135, 54));
+            referenceStyle.addHighlight(instructionReferences, SyntaxColor.JUMP.getColor());
             final String[] memoryReferences = references.get(1)
                     .stream().map(s -> "(?<![^ \n])" + s + "(?![^ \n])").toArray(String[]::new);
-            referenceStyle.addHighlight(memoryReferences, new Color(136, 37, 170));
+            referenceStyle.addHighlight(memoryReferences, SyntaxColor.REFERENCE.getColor());
         } catch (final IllegalArgumentException ignored) { }
     }
 

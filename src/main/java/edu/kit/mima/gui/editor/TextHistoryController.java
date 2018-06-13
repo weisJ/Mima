@@ -27,8 +27,8 @@ public class TextHistoryController {
     public TextHistoryController(final JTextPane editorPane, final int historyLength) {
         super();
         this.editorPane = editorPane;
-        this.history = new History<>(historyLength);
-        this.active = true;
+        history = new History<>(historyLength);
+        active = true;
     }
 
     /**
@@ -96,6 +96,7 @@ public class TextHistoryController {
         try {
             text = editorPane.getDocument().getText(offset, length);
         } catch (final BadLocationException ignored) { }
+        assert text != null;
         if ((fhs != null)
                 && (text.length() == 1)
                 && !text.contains("\n") && !text.contains(" ")
@@ -114,26 +115,22 @@ public class TextHistoryController {
      * Undo last file change
      */
     public void undo() {
-        try {
-            final FileHistoryObject fhs = history.back();
-            final boolean isActive = active;
-            setActive(false);
-            fhs.undo();
-            setActive(isActive);
-        } catch (final IndexOutOfBoundsException ignored) { }
+        final FileHistoryObject fhs = history.back();
+        final boolean isActive = active;
+        setActive(false);
+        fhs.undo();
+        setActive(isActive);
     }
 
     /**
      * Redo the last undo
      */
     public void redo() {
-        try {
-            final FileHistoryObject fhs = history.forward();
-            final boolean isActive = active;
-            setActive(false);
-            fhs.redo();
-            setActive(isActive);
-        } catch (final IndexOutOfBoundsException ignored) { }
+        final FileHistoryObject fhs = history.forward();
+        final boolean isActive = active;
+        setActive(false);
+        fhs.redo();
+        setActive(isActive);
     }
 
     /**

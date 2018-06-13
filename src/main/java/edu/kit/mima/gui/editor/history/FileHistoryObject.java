@@ -29,13 +29,11 @@ public class FileHistoryObject {
     public FileHistoryObject(final JTextPane editor, final int caretOffset, final String newText, final String oldText,
                              final ChangeType type) {
         super();
-        if ((editor == null) || (newText == null) || (oldText == null) || (type == null)) {
-            throw new IllegalArgumentException("arguments must not be null");
-        }
+        assert (editor != null) && (newText != null) && (oldText != null) && (type != null) : "arguments must not be null";
         this.editor = editor;
         this.caretOffset = caretOffset;
-        this.text = newText;
-        this.old = oldText;
+        text = newText;
+        old = oldText;
         this.type = type;
     }
 
@@ -96,7 +94,7 @@ public class FileHistoryObject {
                     caret = caretOffset + old.length();
                     break;
                 default:
-                    assert false : "Illegal state";
+                    assert false : "illegal type";
                     break;
             }
             editor.setCaretPosition(caret);
@@ -124,7 +122,7 @@ public class FileHistoryObject {
                     caret = caretOffset + text.length();
                     break;
                 default:
-                    assert false : "Illegal state";
+                    assert false : "illegal type";
                     break;
             }
             editor.setCaretPosition(caret);

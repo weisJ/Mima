@@ -1,6 +1,6 @@
 package edu.kit.mima.gui.loading;
 
-import java.io.*;
+import java.io.File;
 
 /**
  * @author Jannis Weis

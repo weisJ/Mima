@@ -1,6 +1,11 @@
 package edu.kit.mima.gui.loading;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 
 /**
  * @author Jannis Weis
@@ -8,7 +13,6 @@ import java.io.*;
  */
 public class OptionsLoader {
 
-    private final String optionsDirectory;
     private final String optionsPath;
 
     /**
@@ -18,8 +22,7 @@ public class OptionsLoader {
      */
     public OptionsLoader(final String optionsDirectory) {
         super();
-        this.optionsDirectory = optionsDirectory;
-        this.optionsPath = optionsDirectory + "/.options";
+        optionsPath = optionsDirectory + "/.options";
         createDirectory();
     }
 
@@ -37,10 +40,12 @@ public class OptionsLoader {
      * @return lines of options file as array
      * @throws IOException may throw IOException during loading
      */
+    @SuppressWarnings("OverlyBroadThrowsClause")
     public String[] loadOptions() throws IOException {
-        final BufferedReader reader = new BufferedReader(
-                new InputStreamReader(new FileInputStream(optionsPath), "ISO-8859-1"));
-        return reader.lines().toArray(String[]::new);
+        try (final BufferedReader reader = new BufferedReader(
+                new InputStreamReader(new FileInputStream(optionsPath), "ISO-8859-1"))) {
+            return reader.lines().toArray(String[]::new);
+        }
     }
 
     /**
@@ -49,9 +54,10 @@ public class OptionsLoader {
      * @param save content to write to options file
      * @throws IOException may throw IOException during loading
      */
+    @SuppressWarnings("OverlyBroadThrowsClause")
     public void saveOptions(final String save) throws IOException {
-        final PrintWriter writer = new PrintWriter(optionsPath, "ISO-8859-1");
-        writer.write(save);
-        writer.close();
+        try (final PrintWriter writer = new PrintWriter(optionsPath, "ISO-8859-1")) {
+            writer.write(save);
+        }
     }
 }

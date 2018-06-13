@@ -1,7 +1,7 @@
 package edu.kit.mima.gui;
 
 import javax.swing.*;
-import javax.swing.table.*;
+import javax.swing.table.DefaultTableModel;
 
 /**
  * @author Jannis Weis

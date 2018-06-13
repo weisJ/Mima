@@ -1,12 +1,16 @@
 package edu.kit.mima.gui;
 
-import edu.kit.mima.gui.loading.*;
+import edu.kit.mima.gui.loading.LogLoadManager;
+import edu.kit.mima.gui.loading.OptionsLoader;
+import edu.kit.mima.gui.loading.SaveHandler;
+import edu.kit.mima.gui.loading.TextLoader;
 
 import javax.swing.*;
-import java.awt.*;
-import java.io.*;
+import java.awt.Component;
+import java.io.File;
+import java.io.IOException;
 
-import static edu.kit.mima.gui.logging.Logger.*;
+import static edu.kit.mima.gui.logging.Logger.error;
 
 /**
  * @author Jannis Weis
@@ -33,11 +37,11 @@ public class FileManager implements AutoCloseable {
     /**
      * Create new FileManager to control loading and saving of files.
      * Keeps track:  - if files are unsaved.
-     *               - last used file extension
+     * - last used file extension
      *
-     * @param parent parent component for dialogs
+     * @param parent        parent component for dialogs
      * @param saveDirectory path to saveDirectory
-     * @param extensions allowed file extensions
+     * @param extensions    allowed file extensions
      */
     public FileManager(final Component parent, final String saveDirectory, final String[] extensions) {
         super();
@@ -63,10 +67,10 @@ public class FileManager implements AutoCloseable {
     private void loadOptions() {
         try {
             final String[] options = optionsLoader.loadOptions();
-            this.lastFile = options[0];
-            this.directory = new File(lastFile).getParentFile().getAbsolutePath();
+            lastFile = options[0];
+            directory = new File(lastFile).getParentFile().getAbsolutePath();
         } catch (final IOException e) {
-            this.directory = System.getProperty("user.home");
+            directory = System.getProperty("user.home");
         }
     }
 
@@ -108,12 +112,15 @@ public class FileManager implements AutoCloseable {
                     .showOptionDialog(parent, "Create/Load File", "Create/Load File", JOptionPane.DEFAULT_OPTION,
                                       JOptionPane.PLAIN_MESSAGE,
                                       null, new String[]{"Load", "New"}, "Load");
-            if (response == 0) { //Load
-                load();
-            } else if (response == 1) { //New
-                newFile();
-            } else { //Abort
-                System.exit(0);
+            switch (response) {
+                case 0:  //Load
+                    load();
+                    break;
+                case 1:  //New
+                    newFile();
+                    break;
+                default:  //Abort
+                    System.exit(0);
             }
         } catch (final IllegalArgumentException e) {
             error(e.getMessage());
@@ -127,7 +134,9 @@ public class FileManager implements AutoCloseable {
         final String response = (String) JOptionPane.showInputDialog(parent, "Choose file type", "New File",
                                                                      JOptionPane.QUESTION_MESSAGE,
                                                                      null, extensions, extensions[0]);
-        if (response == null) return;
+        if (response == null) {
+            return;
+        }
         setLastExtension(response);
         text = "#New File\n";
         isNewFile = true;
@@ -149,7 +158,8 @@ public class FileManager implements AutoCloseable {
      */
     public void saveAs() {
         try {
-            textLoader.requestSave(text, directory, lastExtension, () -> { throw new IllegalArgumentException(); });
+            textLoader.requestSave(text, directory, lastExtension,
+                                   () -> { throw new IllegalArgumentException("aborted save"); });
         } catch (final IllegalArgumentException ignored) { }
         isNewFile = false;
         fileHash = text.hashCode();
@@ -162,20 +172,24 @@ public class FileManager implements AutoCloseable {
         final int response = JOptionPane.showOptionDialog(parent, "Do you want to save?", "Unsaved File",
                                                           JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
                                                           null, new String[]{"Save", "Save as", "Don't save"}, "Save");
-        if (response == 0) {
-            if (isNewFile) {
-                saveAs();
-            } else {
-                try {
-                    save();
-                } catch (final IOException e) {
-                    error(e.getMessage());
+        switch (response) {
+            case 0:
+                if (isNewFile) {
+                    saveAs();
+                } else {
+                    try {
+                        save();
+                    } catch (final IOException e) {
+                        error(e.getMessage());
+                    }
                 }
-            }
-        } else if (response == 1) {
-            saveAs();
-        } else if (response == JOptionPane.CLOSED_OPTION) {
-            throw new IllegalArgumentException("Window not closed");
+                break;
+            case 1:
+                saveAs();
+                break;
+            default:
+                assert response != JOptionPane.CLOSED_OPTION : "Window not closed";
+                break;
         }
     }
 
@@ -262,6 +276,6 @@ public class FileManager implements AutoCloseable {
 
     @Override
     public void close() throws IOException {
-      saveOptions();
+        saveOptions();
     }
 }

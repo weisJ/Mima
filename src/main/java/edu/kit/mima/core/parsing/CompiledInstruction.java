@@ -1,17 +1,17 @@
 package edu.kit.mima.core.parsing;
 
-import edu.kit.mima.core.data.*;
+import edu.kit.mima.core.data.MachineWord;
 
 /**
  * @author Jannis Weis
  * @since 2018
  */
-public class Command {
+public class CompiledInstruction {
     private final String command;
     private final MachineWord value;
     private final boolean isReference;
 
-    public Command(final String command, final MachineWord value, final boolean isReference) {
+    public CompiledInstruction(final String command, final MachineWord value, final boolean isReference) {
         super();
         this.command = command;
         this.value = value;
@@ -30,7 +30,7 @@ public class Command {
         return isReference;
     }
 
-    public boolean hasCommand() {
+    public boolean holdsValue() {
         return value != null;
     }
 }

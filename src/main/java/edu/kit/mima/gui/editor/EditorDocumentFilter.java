@@ -32,17 +32,18 @@ public class EditorDocumentFilter extends DocumentFilter {
     }
 
     @Override
-    public void insertString(final DocumentFilter.FilterBypass fb, final int offset, final String text,
+    public void insertString(final DocumentFilter.FilterBypass fb, final int offset, final String string,
                              final AttributeSet attr) throws BadLocationException {
-        editor.getHistoryController().addInsertHistory(offset, text);
-        super.insertString(fb, offset, text, attr);
+        editor.getHistoryController().addInsertHistory(offset, string);
+        super.insertString(fb, offset, string, attr);
 
         editor.notifyEdit();
-        editor.setCaretPosition(offset + text.length());
+        editor.setCaretPosition(offset + string.length());
     }
 
     @Override
-    public void remove(final DocumentFilter.FilterBypass fb, final int offset, final int length) throws BadLocationException {
+    public void remove(final DocumentFilter.FilterBypass fb, final int offset,
+                       final int length) throws BadLocationException {
         editor.getHistoryController().addRemoveHistory(offset, length);
         super.remove(fb, offset, length);
         editor.notifyEdit();

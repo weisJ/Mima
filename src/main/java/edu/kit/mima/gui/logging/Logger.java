@@ -1,10 +1,11 @@
 package edu.kit.mima.gui.logging;
 
-import edu.kit.mima.gui.console.*;
+import edu.kit.mima.gui.console.Console;
 
-import java.awt.*;
+import java.awt.Color;
 
-import static edu.kit.mima.gui.logging.Logger.LogLevel.*;
+import static edu.kit.mima.gui.logging.Logger.LogLevel.ERROR;
+import static edu.kit.mima.gui.logging.Logger.LogLevel.INFO;
 
 /**
  * @author Jannis Weis
@@ -12,33 +13,13 @@ import static edu.kit.mima.gui.logging.Logger.LogLevel.*;
  */
 public final class Logger {
 
-    /**
-     * LogLevel attributes
-     */
-    public enum LogLevel {
-        /**
-         * Log everything
-         */
-        INFO,
-        /**
-         * Log warnings and errors
-         */
-        WARNING,
-        /**
-         * Log only errors
-         */
-        ERROR
-    }
-
     private static Console console;
     private static LogLevel level = INFO;
-
     /*
      * Prevent instantiation
      */
     private Logger() {
-        super();
-        throw new RuntimeException("Logger should not be instantiated");
+        assert false : "Logger should not be instantiated";
     }
 
     /**
@@ -89,6 +70,24 @@ public final class Logger {
      */
     public static void error(final String message) {
         console.println(message, Color.RED);
+    }
+
+    /**
+     * LogLevel attributes
+     */
+    public enum LogLevel {
+        /**
+         * Log everything
+         */
+        INFO,
+        /**
+         * Log warnings and errors
+         */
+        WARNING,
+        /**
+         * Log only errors
+         */
+        ERROR
     }
 
 }
