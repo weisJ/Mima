@@ -25,22 +25,22 @@ public class ArithmeticLogicUnit {
 
     public MachineWord xor(final MachineWord x, final MachineWord y) {
         checkWord(x, y);
-        return new MachineWord(bitwise(x, y, (v, w) -> v ^ w));
+        return new MachineWord(bitwise(x, y, (v, w) -> v ^ w), machineWordLength);
     }
 
     public MachineWord and(final MachineWord x, final MachineWord y) {
         checkWord(x, y);
-        return new MachineWord(bitwise(x, y, (v, w) -> v & w));
+        return new MachineWord(bitwise(x, y, (v, w) -> v & w),machineWordLength);
     }
 
     public MachineWord or(final MachineWord x, final MachineWord y) {
         checkWord(x, y);
-        return new MachineWord(bitwise(x, y, (v, w) -> v | w));
+        return new MachineWord(bitwise(x, y, (v, w) -> v | w),machineWordLength);
     }
 
     public MachineWord equals(final MachineWord x, final MachineWord y) {
         checkWord(x, y);
-        final MachineWord comp = new MachineWord(bitwise(x, y, Objects::equals));
+        final MachineWord comp = new MachineWord(bitwise(x, y, Objects::equals), machineWordLength);
         return comp.intValue() == 0 ? new MachineWord(-1, machineWordLength)
                                     : new MachineWord(0, machineWordLength);
     }
@@ -51,7 +51,7 @@ public class ArithmeticLogicUnit {
         final boolean tmp = bits[0];
         System.arraycopy(bits, 1, bits, 2, machineWordLength - 1);
         bits[machineWordLength - 1] = tmp;
-        return new MachineWord(bits);
+        return new MachineWord(bits, machineWordLength);
     }
 
     private boolean[] bitwise(final MachineWord x, final MachineWord y, final BinaryOperator<Boolean> operator) {

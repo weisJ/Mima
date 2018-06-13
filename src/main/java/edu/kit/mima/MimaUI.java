@@ -1,7 +1,7 @@
 package edu.kit.mima;
 
 import edu.kit.mima.core.Mima;
-import edu.kit.mima.core.parsing.Interpreter;
+import edu.kit.mima.core.parsing.legacy.Interpreter;
 import edu.kit.mima.gui.FileManager;
 import edu.kit.mima.gui.FixedScrollTable;
 import edu.kit.mima.gui.button.ButtonPanelFactory;
@@ -317,6 +317,29 @@ public final class MimaUI extends JFrame {
      * Update the syntax highlighting according to the current instruction set
      */
     private void updateSyntaxHighlighting() {
+
+     //Future Code
+      /*  syntaxStyle.setHighlight(TokenStream.PUNCTUATION, new Color[]{
+                SyntaxColor.KEYWORD.getColor(), //$
+                SyntaxColor.KEYWORD.getColor(), // :
+                SyntaxColor.KEYWORD.getColor(), // (
+                SyntaxColor.KEYWORD.getColor(), // )
+                SyntaxColor.BINARY.getColor(),  //~
+                SyntaxColor.COMMENT.getColor(), //Comments
+        });
+        syntaxStyle.addHighlight(TokenStream.KEYWORDS, new Color[]{
+                SyntaxColor.KEYWORD.getColor(), //define
+                SyntaxColor.KEYWORD.getColor(), //const
+        });
+        syntaxStyle.addHighlight(Symbol.NUMBERS.getSymbols(), SyntaxColor.NUMBER.getColor());
+
+        return new String[]{"(?<![^ \n])" + DEFINITION + "(?![^ \n])"
+                , "(?<![^ \n])" + CONST + "(?![^ \n])"
+                , "(?<![^ \n]):(?![^ \n])"
+                , "\\(", "\\)"
+                , "(?<![^ \n])-?[0-9]+(?![^ (\n])"
+                , "0b[01]*"
+                , "#[^\n]*\n?"}; */
 
         syntaxStyle.setHighlight(Interpreter.getKeywords(), new Color[]{
                 SyntaxColor.KEYWORD.getColor(), //$define
