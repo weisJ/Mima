@@ -1,4 +1,4 @@
-package edu.kit.mima.core.parsing;
+package edu.kit.mima.core.parsing.legacy;
 
 import edu.kit.mima.core.data.MachineWord;
 

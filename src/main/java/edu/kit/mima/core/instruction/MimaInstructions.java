@@ -3,8 +3,8 @@ package edu.kit.mima.core.instruction;
 import edu.kit.mima.core.ArithmeticLogicUnit;
 import edu.kit.mima.core.Mima;
 import edu.kit.mima.core.data.MachineWord;
-import edu.kit.mima.core.parsing.CompiledInstruction;
-import edu.kit.mima.core.parsing.InterpretationException;
+import edu.kit.mima.core.parsing.legacy.CompiledInstruction;
+import edu.kit.mima.core.parsing.legacy.InterpretationException;
 
 /**
  * @author Jannis Weis
@@ -102,7 +102,7 @@ public enum MimaInstructions implements Instruction {
     /**
      * Add with accumulator
      */
-    ADD("add") {
+    ADD("ADD") {
         @Override
         public void run(CompiledInstruction instruction) {
             if (!instruction.isReference() && (instruction.getValue().intValue() < 0)) {
@@ -115,7 +115,7 @@ public enum MimaInstructions implements Instruction {
     /**
      * And bitwise with accumulator
      */
-    AND("and") {
+    AND("AND") {
         @Override
         public void run(CompiledInstruction instruction) {
             if (!instruction.isReference() && (instruction.getValue().intValue() < 0)) {
@@ -128,7 +128,7 @@ public enum MimaInstructions implements Instruction {
     /**
      * or bitwise with accumulator
      */
-    OR("or") {
+    OR("OR") {
         @Override
         public void run(CompiledInstruction instruction) {
             if (!instruction.isReference() && (instruction.getValue().intValue() < 0)) {
@@ -141,7 +141,7 @@ public enum MimaInstructions implements Instruction {
     /**
      * xor bitwise with accumulator
      */
-    XOR("xor") {
+    XOR("XOR") {
         @Override
         public void run(CompiledInstruction instruction) {
             if (!instruction.isReference() && (instruction.getValue().intValue() < 0)) {
@@ -154,7 +154,7 @@ public enum MimaInstructions implements Instruction {
     /**
      * Store -1 to accumulator if equals, else load 0
      */
-    EQL("equals") {
+    EQL("EQL") {
         @Override
         public void run(CompiledInstruction instruction) {
             if (!instruction.isReference() && (instruction.getValue().intValue() < 0)) {

@@ -4,9 +4,9 @@ import edu.kit.mima.core.data.MachineWord;
 import edu.kit.mima.core.data.Memory;
 import edu.kit.mima.core.instruction.MimaInstructions;
 import edu.kit.mima.core.instruction.MimaXInstructions;
-import edu.kit.mima.core.parsing.CompiledInstruction;
-import edu.kit.mima.core.parsing.InterpretationException;
-import edu.kit.mima.core.parsing.Interpreter;
+import edu.kit.mima.core.parsing.legacy.CompiledInstruction;
+import edu.kit.mima.core.parsing.legacy.InterpretationException;
+import edu.kit.mima.core.parsing.legacy.Interpreter;
 
 import java.util.Arrays;
 import java.util.List;

@@ -1,6 +1,6 @@
 package edu.kit.mima.core.instruction;
 
-import edu.kit.mima.core.parsing.CompiledInstruction;
+import edu.kit.mima.core.parsing.legacy.CompiledInstruction;
 
 /**
  * @author Jannis Weis

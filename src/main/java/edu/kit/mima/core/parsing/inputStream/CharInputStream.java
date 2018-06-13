@@ -1,4 +1,6 @@
-package edu.kit.mima.core.parsing;
+package edu.kit.mima.core.parsing.inputStream;
+
+import edu.kit.mima.core.parsing.ParserException;
 
 /**
  * @author Jannis Weis
@@ -46,6 +48,6 @@ public class CharInputStream {
     }
 
     public void error(String message) {
-        throw new IllegalArgumentException(message + "(" + line + ":" + col + ")"); //Todo exception
+        throw new ParserException(message, line, col);
     }
 }

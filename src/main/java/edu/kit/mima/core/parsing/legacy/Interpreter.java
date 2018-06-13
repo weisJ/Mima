@@ -1,4 +1,4 @@
-package edu.kit.mima.core.parsing;
+package edu.kit.mima.core.parsing.legacy;
 
 import edu.kit.mima.core.data.MachineWord;
 
@@ -318,7 +318,7 @@ public class Interpreter {
         for (int i = 0; i < digits.length(); i++) {
             bits[i] = digits.charAt(i) == '1';
         }
-        return new MachineWord(bits).intValue();
+        return new MachineWord(bits, wordLength).intValue();
     }
 
     public int getInstructionPointer() {

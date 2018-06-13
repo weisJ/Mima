@@ -1,4 +1,4 @@
-package edu.kit.mima.core.parsing;
+package edu.kit.mima.core.parsing.legacy;
 
 import org.jetbrains.annotations.Nullable;
 

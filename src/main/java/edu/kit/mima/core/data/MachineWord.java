@@ -11,9 +11,24 @@ public class MachineWord {
     private final int wordLength;
     private boolean[] bits;
 
-    public MachineWord(final boolean[] bits) {
-        wordLength = bits.length;
-        this.bits = bits;
+    public MachineWord(final boolean[] bits, final int wordLength) {
+        if (wordLength > bits.length) {
+            throw new IllegalArgumentException("too many bits");
+        }
+        this.wordLength = wordLength;
+        this.bits = new boolean[wordLength];
+        System.arraycopy(bits, 0, this.bits, 0, bits.length);
+    }
+
+    public MachineWord(final Boolean[] bits, final int wordLength) {
+        if (wordLength > bits.length) {
+            throw new IllegalArgumentException("too many bits");
+        }
+        this.wordLength = wordLength;
+        this.bits = new boolean[wordLength];
+        for (int i = 0; i < bits.length; i++) {
+            this.bits[i] = bits[i];
+        }
     }
 
     public MachineWord(final int value, final int wordLength) {
@@ -68,7 +83,7 @@ public class MachineWord {
     }
 
     public MachineWord copy() {
-        return new MachineWord(bits);
+        return new MachineWord(bits, wordLength);
     }
 
     public int msb() {
