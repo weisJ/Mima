@@ -24,7 +24,7 @@ public class Stylizer {
     /**
      * Document stylizer using regular expressions
      *
-     * @param document Document to stylize
+     * @param document  Document to stylize
      * @param textColor default text color
      */
     public Stylizer(final StyledDocument document, final Color textColor) {
@@ -65,10 +65,9 @@ public class Stylizer {
         for (final String regex : regexSet) {
             final Style style = context.addStyle("Style " + index, null);
             style.addAttribute(StyleConstants.Foreground, group.getColor(regex));
-            final Pattern pattern = Pattern.compile(regex);
-            final Matcher matcher;
             try {
-                matcher = pattern.matcher(document.getText(0, document.getLength()));
+                final Pattern pattern = Pattern.compile(regex);
+                final Matcher matcher = pattern.matcher(document.getText(0, document.getLength()));
                 while (matcher.find()) {
                     document.setCharacterAttributes(matcher.start(), matcher.group().length(), style, true);
                 }

@@ -1,7 +1,7 @@
 package edu.kit.mima.gui.button;
 
 import javax.swing.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
 
 /**
  * @author Jannis Weis

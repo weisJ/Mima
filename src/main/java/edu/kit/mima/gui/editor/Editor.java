@@ -72,7 +72,7 @@ public class Editor extends JScrollPane {
         final boolean historyLock = historyController.isActive();
         historyController.setActive(false);
         final int caret = editorPane.getCaretPosition();
-        editorPane.setText(editorPane.getText().replaceAll("(\r\n?|" + nLine + ")", "\n"));
+        editorPane.setText(editorPane.getText().replaceAll("(\r\n?|" + nLine + ')', "\n"));
         if (replaceTabs) {
             setText(getText().replaceAll("\t", "    "));
         }
@@ -128,7 +128,7 @@ public class Editor extends JScrollPane {
      * @param action action to perform after edit
      */
     public void addAfterEditAction(final Runnable action) {
-        this.afterEditActions.add(action);
+        afterEditActions.add(action);
     }
 
     /**
@@ -173,7 +173,7 @@ public class Editor extends JScrollPane {
      * @param useTabs whether to useTabs
      */
     public void useTabs(final boolean useTabs) {
-        this.replaceTabs = !useTabs;
+        replaceTabs = !useTabs;
     }
 
     /**

@@ -15,7 +15,7 @@ public final class MenuBuilder {
      */
     public MenuBuilder() {
         super();
-        this.menuBar = new JMenuBar();
+        menuBar = new JMenuBar();
     }
 
     /**
@@ -28,22 +28,22 @@ public final class MenuBuilder {
         return new SubMenuBuilder(title, this);
     }
 
-    public final class SubMenuBuilder {
+    public static final class SubMenuBuilder {
 
         private final JMenu menu;
         private final MenuBuilder parent;
 
         private SubMenuBuilder(final String title, final MenuBuilder parent) {
             super();
-            this.menu = new JMenu(title);
+            menu = new JMenu(title);
             this.parent = parent;
         }
 
         /**
          * Add new MenuItem
          *
-         * @param title label
-         * @param action action to perform when pressed
+         * @param title       label
+         * @param action      action to perform when pressed
          * @param accelerator key combination to trigger clicked event
          * @return this
          */
@@ -58,7 +58,7 @@ public final class MenuBuilder {
         /**
          * Add new MenuItem
          *
-         * @param title label
+         * @param title  label
          * @param action action to perform when pressed
          * @return this
          */

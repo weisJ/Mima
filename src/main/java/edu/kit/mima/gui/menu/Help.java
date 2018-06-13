@@ -1,18 +1,23 @@
 package edu.kit.mima.gui.menu;
 
-import javafx.application.*;
-import javafx.embed.swing.*;
-import javafx.scene.*;
-import javafx.scene.web.*;
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.Scene;
+import javafx.scene.web.WebView;
 import org.commonmark.node.Node;
-import org.commonmark.parser.*;
-import org.commonmark.renderer.html.*;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.awt.*;
-import java.io.*;
-import java.net.*;
-import java.util.stream.*;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.stream.Collectors;
 
 /**
  * @author Jannis Weis
@@ -20,14 +25,19 @@ import java.util.stream.*;
  */
 public final class Help extends JFrame {
 
-    private static final String HELP_LOCALE = "Help.md";
+    private static final String HELP_LOCAL = "Help.md";
     private static final String HELP_WEB = "https://raw.githubusercontent.com/weisJ/Mima/master/README.md";
     private static final int MAXIMUM_ATTEMPTS = 20;
+
+    private static final int CONNECTION_TIMEOUT = 3000;
+    private static final int READ_TIMEOUT = 5000;
+    private static final int RETRY_TIMEOUT = 20000;
 
     private static final Dimension SIZE = Toolkit.getDefaultToolkit().getScreenSize();
 
     private static Help instance;
 
+    @Nullable
     private static Thread loadSource;
     private static boolean loadedFromWeb;
 
@@ -92,20 +102,21 @@ public final class Help extends JFrame {
     /*
      * Load ReadME from github
      */
+    @SuppressWarnings("OverlyBroadCatchBlock")
     private String loadMarkdown() {
         try {
-            final URLConnection c = new URL(HELP_WEB).openConnection();
+            final URLConnection urlConnection = new URL(HELP_WEB).openConnection();
 
-            // set the connection timeout to 3 seconds and the read timeout to 5 seconds
-            c.setConnectTimeout(3000);
-            c.setReadTimeout(5000);
+            urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
+            urlConnection.setReadTimeout(READ_TIMEOUT);
 
-            // get a stream to read data from
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(c.getInputStream()));
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(urlConnection.getInputStream(), "ISO-8859-1")
+            );
             final String markdown = reader.lines().collect(Collectors.joining("\n"));
             loadedFromWeb = true;
             return markdown;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             return (source == null) ? loadFallback() : null;
         }
     }
@@ -114,15 +125,16 @@ public final class Help extends JFrame {
      * Load local fallback option
      */
     private String loadFallback() {
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(
-                getClass().getClassLoader().getResourceAsStream(HELP_LOCALE)));
-        return reader.lines().collect(Collectors.joining("\n"));
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(
+                getClass().getClassLoader().getResourceAsStream(HELP_LOCAL), "ISO-8859-1"))) {
+            return reader.lines().collect(Collectors.joining("\n"));
+        } catch (IOException e) { return null; }
     }
 
     /*
      * Render the markdown to HTML
      */
-    private String renderMarkdown(final String text) {
+    private static String renderMarkdown(final String text) {
         final Parser parser = Parser.builder().build();
         final Node document = parser.parse(text);
         final HtmlRenderer renderer = HtmlRenderer.builder().build();
@@ -130,9 +142,9 @@ public final class Help extends JFrame {
     }
 
     private void fetchFromWebSource() {
+        showHtml(renderMarkdown(loadMarkdown()));
         boolean alive = true;
         int attempts = 0;
-        showHtml(renderMarkdown(loadMarkdown()));
         while (!loadedFromWeb && alive && (attempts < MAXIMUM_ATTEMPTS)) {
             final String htmlSource = loadMarkdown();
             if (htmlSource != null) {
@@ -140,7 +152,7 @@ public final class Help extends JFrame {
                 showHtml(renderMarkdown(source));
             }
             try {
-                Thread.sleep(20000);
+                Thread.sleep(RETRY_TIMEOUT);
                 attempts++;
             } catch (final InterruptedException e) {
                 alive = false;

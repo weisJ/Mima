@@ -1,7 +1,12 @@
 package edu.kit.mima.gui.loading;
 
-import java.io.*;
-import java.util.stream.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.util.stream.Collectors;
 
 /**
  * @author Jannis Weis
@@ -9,7 +14,6 @@ import java.util.stream.*;
  */
 public class SaveHandler {
 
-    private final String saveDirectory;
     private final String tmpFile;
 
     /**
@@ -19,8 +23,7 @@ public class SaveHandler {
      */
     public SaveHandler(final String saveDirectory) {
         super();
-        this.saveDirectory = saveDirectory;
-        this.tmpFile = saveDirectory + "/save.tmp";
+        tmpFile = saveDirectory + "/save.tmp";
     }
 
     /**
@@ -30,10 +33,12 @@ public class SaveHandler {
      * @return content of file
      * @throws IOException may throw IOException during loading process if the file does not exist
      */
+    @SuppressWarnings("OverlyBroadThrowsClause")
     public String loadFile(final String file) throws IOException {
-        final BufferedReader reader = new BufferedReader(
-                new InputStreamReader(new FileInputStream(file), "ISO-8859-1"));
-        return reader.lines().collect(Collectors.joining("\n"));
+        try (final BufferedReader reader = new BufferedReader(
+                new InputStreamReader(new FileInputStream(file), "ISO-8859-1"))) {
+            return reader.lines().collect(Collectors.joining("\n"));
+        }
     }
 
     /**
@@ -43,10 +48,11 @@ public class SaveHandler {
      * @param path path to file
      * @throws IOException may throw IOException during saving process
      */
+    @SuppressWarnings("OverlyBroadThrowsClause")
     public void saveFile(final String text, final String path) throws IOException {
-        final PrintWriter writer = new PrintWriter(path, "ISO-8859-1");
-        writer.write(text);
-        writer.close();
+        try (final PrintWriter writer = new PrintWriter(path, "ISO-8859-1")) {
+            writer.write(text);
+        }
     }
 
     /**
@@ -55,10 +61,12 @@ public class SaveHandler {
      * @return content of temporary
      * @throws IOException may throw IOException during loading process if the file does not exist
      */
+    @SuppressWarnings("OverlyBroadThrowsClause")
     public String loadTmp() throws IOException {
-        final BufferedReader reader = new BufferedReader(
-                new InputStreamReader(new FileInputStream(tmpFile), "ISO-8859-1"));
-        return reader.lines().collect(Collectors.joining("\n"));
+        try (final BufferedReader reader = new BufferedReader(
+                new InputStreamReader(new FileInputStream(tmpFile), "ISO-8859-1"))) {
+            return reader.lines().collect(Collectors.joining("\n"));
+        }
     }
 
     /**
@@ -67,10 +75,11 @@ public class SaveHandler {
      * @param text text to save in file
      * @throws IOException may throw IOException during saving process
      */
+    @SuppressWarnings("OverlyBroadThrowsClause")
     public void saveTmp(final String text) throws IOException {
-        final PrintWriter writer = new PrintWriter(tmpFile, "ISO-8859-1");
-        writer.write(text);
-        writer.close();
+        try (final PrintWriter writer = new PrintWriter(tmpFile, "ISO-8859-1")) {
+            writer.write(text);
+        }
     }
 
     /**

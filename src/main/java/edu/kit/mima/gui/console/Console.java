@@ -1,13 +1,20 @@
 package edu.kit.mima.gui.console;
 
 import javax.swing.*;
-import javax.swing.text.*;
-import java.awt.*;
-import java.awt.event.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
+import java.awt.Adjustable;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 
 public class Console extends JScrollPane {
 
     private static final Color DEFAULT_COLOR = Color.LIGHT_GRAY;
+    private static final int FONT_SIZE = 12;
     private final JTextPane textPane;
     private final StyledDocument document;
     private final Style style;
@@ -19,7 +26,7 @@ public class Console extends JScrollPane {
         super();
         textPane = new JTextPane();
         textPane.setBackground(Color.BLACK);
-        textPane.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        textPane.setFont(new Font(Font.MONOSPACED, Font.PLAIN, FONT_SIZE));
         textPane.setEditable(false);
         document = textPane.getStyledDocument();
 
@@ -42,7 +49,7 @@ public class Console extends JScrollPane {
      * Print message and jump to next line.
      *
      * @param message Message to print
-     * @param color color to print in
+     * @param color   color to print in
      */
     public void println(final String message, final Color color) {
         print(message, color);
@@ -61,12 +68,12 @@ public class Console extends JScrollPane {
      * Print message.
      *
      * @param message Message to print
-     * @param color color to print in
+     * @param color   color to print in
      */
     public void print(final String message, final Color color) {
         try {
             StyleConstants.setForeground(style, color);
-            document.insertString(document.getLength(), message + "\n", style);
+            document.insertString(document.getLength(), message + '\n', style);
         } catch (final BadLocationException ignored) { }
         scrollToBottom();
     }

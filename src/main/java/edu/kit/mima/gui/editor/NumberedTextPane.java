@@ -1,14 +1,19 @@
 package edu.kit.mima.gui.editor;
 
 import javax.swing.*;
-import javax.swing.text.*;
-import java.awt.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Point;
 
 /**
  * @author Jannis Weis
  * @since 2018
  */
 public class NumberedTextPane extends JPanel {
+
+    private static final Dimension NUMBER_SIZE = new Dimension(30, 30);
 
     private final JTextPane pane;
     private final JScrollPane scrollPane;
@@ -18,11 +23,11 @@ public class NumberedTextPane extends JPanel {
      */
     public NumberedTextPane() {
         super();
-        setMinimumSize(new Dimension(30, 30));
-        setPreferredSize(new Dimension(30, 30));
-        setMinimumSize(new Dimension(30, 30));
+        setMinimumSize(NUMBER_SIZE);
+        setPreferredSize(NUMBER_SIZE);
         pane = new JTextPane() // we need to override paint so that the
         {
+            @Override
             public void paint(final Graphics g) {
                 super.paint(g);
                 NumberedTextPane.this.repaint();
@@ -36,6 +41,7 @@ public class NumberedTextPane extends JPanel {
      *
      * @param g Graphics object
      */
+    @Override
     public void paint(final Graphics g) {
         super.paint(g);
 

@@ -1,6 +1,6 @@
 package edu.kit.mima.gui.editor.history;
 
-import java.util.*;
+import java.util.LinkedList;
 
 /**
  * @author Jannis Weis
@@ -29,13 +29,15 @@ public class History<T> {
      *
      * @return string representation
      */
+    @Override
     public String toString() {
-        return history.toString() + "[" + head + "]";
+        return history.toString() + '[' + head + "]";
     }
 
     /**
      * Add to history. If history reaches maximum capacity oldest object will be deleted
      * If there are elements in front of the current one they too will be deleted
+     *
      * @param element element to add
      */
     public void add(final T element) {
@@ -83,9 +85,7 @@ public class History<T> {
      * @return element at new history position
      */
     public T back() {
-        if (head >= length()) {
-            throw new IndexOutOfBoundsException("reached end of history");
-        }
+        assert head < length() : "reached end of history";
         return history.get(head++);
     }
 
@@ -95,9 +95,7 @@ public class History<T> {
      * @return element at new history position
      */
     public T forward() {
-        if (head == 0) {
-            throw new IndexOutOfBoundsException("already on newest version");
-        }
+        assert head != 0 : "already on newest version";
         head--;
         return history.get(head);
     }
@@ -127,9 +125,7 @@ public class History<T> {
      * @param capacity new capacity
      */
     public void setCapacity(final int capacity) {
-        if (capacity < maxCapacity) {
-            throw new IllegalArgumentException("Can't crop history. Too small capacity");
-        }
-        this.maxCapacity = capacity;
+        assert capacity >= maxCapacity : "Can't crop history. Too small capacity";
+        maxCapacity = capacity;
     }
 }

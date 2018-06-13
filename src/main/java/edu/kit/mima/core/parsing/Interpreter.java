@@ -1,9 +1,14 @@
 package edu.kit.mima.core.parsing;
 
-import edu.kit.mima.core.data.*;
+import edu.kit.mima.core.data.MachineWord;
 
-import java.util.*;
-import java.util.regex.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Jannis Weis
@@ -155,7 +160,8 @@ public class Interpreter {
         return true;
     }
 
-    private void parseDefinition(final MatchResult matcher, final Map<String, Integer> table, final boolean allowNegative) {
+    private void parseDefinition(final MatchResult matcher, final Map<String, Integer> table,
+                                 final boolean allowNegative) {
         final String reference = matcher.group(1);
         if (reference.isEmpty()) {
             throw new InterpretationException("missing identifier", instructionPointer + 1);
@@ -181,7 +187,8 @@ public class Interpreter {
         table.put(reference, value);
     }
 
-    private void setupInstructionLookup(final String[] lines, final int startIndex, final Map<String, Integer> instructionMap) {
+    private void setupInstructionLookup(final String[] lines, final int startIndex,
+                                        final Map<String, Integer> instructionMap) {
         if (lines.length == 0) return;
         for (int i = startIndex; i < lines.length; i++) {
             String line = lines[i];
@@ -248,13 +255,13 @@ public class Interpreter {
         }
     }
 
-    public Command nextInstruction() throws IllegalArgumentException {
+    public CompiledInstruction nextInstruction() throws IllegalArgumentException {
         if (!hasInstructions()) {
             throw new IllegalStateException("No more instructions");
         }
         final String line = instructions[instructionPointer];
         instructionPointer++;
-        final Command command = parseCommand(line);
+        final CompiledInstruction command = parseCommand(line);
 
         if (command == null) { //Ignore empty lines
             return nextInstruction();
@@ -263,7 +270,7 @@ public class Interpreter {
         }
     }
 
-    private Command parseCommand(final String l) {
+    private CompiledInstruction parseCommand(final String l) {
         if ("§".equals(l)) {
             return null;
         }
@@ -273,7 +280,7 @@ public class Interpreter {
         }
         //No argument command
         if ((matcher.group(2) == null) || matcher.group(2).isEmpty()) {
-            return new Command(matcher.group(1), null, false);
+            return new CompiledInstruction(matcher.group(1), null, false);
         }
 
         //Argument command
@@ -289,7 +296,7 @@ public class Interpreter {
             throw new InterpretationException("parameter is neither an integer value nor a memory reference",
                                               instructionPointer + 1);
         }
-        return new Command(matcher.group(1), new MachineWord(value, wordLength), isReference);
+        return new CompiledInstruction(matcher.group(1), new MachineWord(value, wordLength), isReference);
     }
 
     private int parseBinary(final String sVal) {
