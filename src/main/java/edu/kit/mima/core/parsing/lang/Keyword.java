@@ -4,18 +4,19 @@ package edu.kit.mima.core.parsing.lang;
  * @author Jannis Weis
  * @since 2018
  */
-public enum Keyword {
+public class Keyword {
 
-    DEFINITION("define"),
-    CONSTANT("const");
+    public static final String DEFINITION = "define";
+    public static final String CONSTANT = "const";
 
-    private final String keyword;
-
-    Keyword(String keyword) {
-        this.keyword = keyword;
+    private Keyword() {
+        assert false : "utility constructor";
     }
 
-    public String getKeyword() {
-        return keyword;
+    public static String[] getKeywords() {
+        return new String[] {
+                DEFINITION,
+                CONSTANT
+        };
     }
 }

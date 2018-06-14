@@ -1,45 +1,43 @@
 package edu.kit.mima.core.parsing.inputStream;
 
 import edu.kit.mima.core.instruction.MimaInstructions;
+import edu.kit.mima.core.instruction.MimaXInstructions;
 import edu.kit.mima.core.parsing.lang.Keyword;
 import edu.kit.mima.core.parsing.lang.Punctuation;
 import edu.kit.mima.core.parsing.lang.Symbol;
-import edu.kit.mima.core.parsing.token.AtomarToken;
+import edu.kit.mima.core.parsing.token.AtomToken;
 import edu.kit.mima.core.parsing.token.Token;
 import edu.kit.mima.core.parsing.token.TokenType;
 
 import java.util.Arrays;
+import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * @author Jannis Weis
  * @since 2018
  */
 public class TokenStream {
-    public static final String[] KEYWORDS = Arrays.stream(Keyword.values())
-            .map(Keyword::getKeyword)
-            .toArray(String[]::new);
-    public static final String[] INSTRUCTIONS = Arrays.stream(MimaInstructions.values())
-            .map(MimaInstructions::toString)
-            .toArray(String[]::new);
-    public static final String[] PUNCTUATION = Arrays.stream(Punctuation.values())
-            .map(Punctuation::getPunctuation)
-            .toArray(String[]::new);
-    private static final String PUNCTUATION_STRING = String.valueOf(Punctuation.BINARY_PREFIX.getPunctuation())
-            + Punctuation.CLOSED_BRACKET.getPunctuation()
-            + Punctuation.DEFINITION_BEGIN.getPunctuation()
-            + Punctuation.INSTRUCTION_END.getPunctuation()
-            + Punctuation.OPEN_BRACKET.getPunctuation();
+    private static final String[] KEYWORDS = Keyword.getKeywords();
+    private static final String[] INSTRUCTIONS = loadInstructions();
+    private static final String PUNCTUATION_STRING = String.valueOf(Punctuation.getPunctuation());
     private static final String WHITESPACE = " \t\n\r\f";
     private static final char NEW_LINE = '\n';
-
     private Token current;
     private CharInputStream input;
-
 
     public TokenStream(String input) {
         this.input = new CharInputStream(input);
         this.current = null;
+    }
+
+    private static String[] loadInstructions() {
+        Set<String> instructions = Arrays.stream(MimaInstructions.values()).map(MimaInstructions::toString)
+                .collect(Collectors.toSet());
+        instructions.addAll(Arrays.stream(MimaXInstructions.values()).map(MimaXInstructions::toString)
+                                    .collect(Collectors.toSet()));
+        return instructions.toArray(new String[0]);
     }
 
     public Token next() {
@@ -69,24 +67,24 @@ public class TokenStream {
             return null;
         }
         char c = input.peek();
-        if (c == Punctuation.COMMENT.getPunctuation()) {
+        if (c == Punctuation.COMMENT) {
             input.next();
             skipComment();
             return readNext();
         }
-        if (isDigit(c)) {
+        if (isDigitStart(c)) {
             return readNumber();
         }
         if (isRefStart(c)) {
             return readIdentification();
         }
-        if (c == Punctuation.BINARY_PREFIX.getPunctuation()) {
+        if (c == Punctuation.BINARY_PREFIX) {
             input.next();
             return readBinary();
         }
         if (isPunctuationChar(c)) {
             input.next();
-            return new AtomarToken(TokenType.PUNCTUATION, String.valueOf(c));
+            return new AtomToken(TokenType.PUNCTUATION, String.valueOf(c));
         }
         return error("Can't handle character: " + c);
     }
@@ -100,7 +98,7 @@ public class TokenStream {
     }
 
     private void skipComment() {
-        readWhile(c -> c != NEW_LINE && c != Punctuation.COMMENT.getPunctuation());
+        readWhile(c -> c != NEW_LINE && c != Punctuation.COMMENT);
         input.next();
     }
 
@@ -108,12 +106,16 @@ public class TokenStream {
         return WHITESPACE.indexOf(c) >= 0;
     }
 
+    private boolean isDigitStart(char c) {
+        return String.valueOf(c).matches(Symbol.NUMBER_SIGNED);
+    }
+
     private boolean isDigit(char c) {
-        return String.valueOf(c).matches(Symbol.NUMBERS.getSymbols());
+        return String.valueOf(c).matches(Symbol.NUMBERS);
     }
 
     private boolean isRefStart(char c) {
-        return String.valueOf(c).matches(Symbol.LETTERS.getSymbols());
+        return String.valueOf(c).matches(Symbol.LETTERS);
     }
 
     private boolean isPunctuationChar(char c) {
@@ -121,7 +123,7 @@ public class TokenStream {
     }
 
     private boolean isIdentification(char c) {
-        return isRefStart(c) || Symbol.ALLOWED_SYMBOLS.getSymbols().indexOf(c) >= 0;
+        return isRefStart(c) || Symbol.ALLOWED_SYMBOLS.indexOf(c) >= 0;
     }
 
     private boolean isKeyword(String identifier) {
@@ -143,22 +145,22 @@ public class TokenStream {
     }
 
     private Token readNumber() {
-        String number = readWhile(this::isDigit);
-        return new AtomarToken(TokenType.NUMBER, number);
+        String number = input.next() + readWhile(this::isDigit);
+        return new AtomToken(TokenType.NUMBER, number);
     }
 
     private Token readIdentification() {
         String identifier = readWhile(this::isIdentification);
         if (isKeyword(identifier)) {
-            return new AtomarToken(TokenType.KEYWORD, identifier);
+            return new AtomToken(TokenType.KEYWORD, identifier);
         } else if (isInstruction(identifier)) {
-            return new AtomarToken(TokenType.INSTRUCTION, identifier);
+            return new AtomToken(TokenType.INSTRUCTION, identifier);
         }
-        return new AtomarToken(TokenType.IDENTIFICATION, identifier);
+        return new AtomToken(TokenType.IDENTIFICATION, identifier);
     }
 
     private Token readBinary() {
         String binary = readWhile(c -> c == '0' || c == '1');
-        return new AtomarToken(TokenType.BINARY, binary);
+        return new AtomToken(TokenType.BINARY, binary);
     }
 }

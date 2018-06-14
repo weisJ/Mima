@@ -77,7 +77,7 @@ public enum MimaXInstructions implements Instruction {
     /**
      * Store value to stack pointer with disposition
      */
-    STVRSP("STVR(SP)") {
+    STVRSP("STVR") {
         @Override
         public void run(CompiledInstruction instruction) {
             if (instruction.isReference()) {
@@ -93,7 +93,7 @@ public enum MimaXInstructions implements Instruction {
     /**
      * Load value from stack pointer with disposition
      */
-    LDVRSP("LDVR(SP)") {
+    LDVRSP("LDVR") {
         @Override
         public void run(CompiledInstruction instruction) {
             if (instruction.isReference()) {

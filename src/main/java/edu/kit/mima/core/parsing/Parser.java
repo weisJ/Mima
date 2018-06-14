@@ -1,12 +1,11 @@
 package edu.kit.mima.core.parsing;
 
-import edu.kit.mima.core.data.MachineWord;
 import edu.kit.mima.core.parsing.inputStream.CharInputStream;
 import edu.kit.mima.core.parsing.inputStream.TokenStream;
 import edu.kit.mima.core.parsing.lang.Keyword;
 import edu.kit.mima.core.parsing.lang.Punctuation;
+import edu.kit.mima.core.parsing.token.ArrayToken;
 import edu.kit.mima.core.parsing.token.BinaryToken;
-import edu.kit.mima.core.parsing.token.ObjectToken;
 import edu.kit.mima.core.parsing.token.ProgramToken;
 import edu.kit.mima.core.parsing.token.Token;
 import edu.kit.mima.core.parsing.token.TokenType;
@@ -22,11 +21,24 @@ import java.util.function.Supplier;
 public class Parser {
 
     private TokenStream input;
-    private int wordLength;
 
-    public Parser(String input, int wordLength) {
+    public Parser(String input) {
         this.input = new TokenStream(input);
-        this.wordLength = wordLength;
+    }
+
+    public static void main(String[] args) {
+        ProgramToken programToken = new Parser("#Put Code here\n"
+                                                       + "§define const x : -3;\n"
+                                                       + "§define tmp : -1;\n"
+                                                       + "§define y : 2;\n"
+                                                       + "LDC x; \n"
+                                                       + "Halt : STSP;\n"
+                                                       + "LDC 2;\n"
+                                                       + "STVR 0(SP);\n"
+                                                       + "LDC 3;\n"
+                                                       + "LDVR 0(SP);\n"
+                                                       + "#testtesttest").parse();
+        System.out.print(programToken);
     }
 
     public ProgramToken parse() {
@@ -38,121 +50,109 @@ public class Parser {
         while (!input.isEmpty()) {
             program.add(parseExpression());
             if (!input.isEmpty()) {
-                skipPunctuation(Punctuation.INSTRUCTION_END.getPunctuation());
+                skipPunctuation(Punctuation.INSTRUCTION_END);
             }
         }
         return new ProgramToken(program.toArray(new Token[0]));
     }
 
     private Token parseExpression() {
-        if (isPunctuation(Punctuation.DEFINITION_BEGIN.getPunctuation())) {
-            input.next();
-            return maybeConstant();
-        }
-        if (isValue()) {
-            return parseValue();
-        }
-        Token token = input.peek();
-        if (token != null && token.getType() == TokenType.IDENTIFICATION) {
-            input.next();
-            skipPunctuation(Punctuation.DEFINITION_DELIMITER.getPunctuation());
-            return new BinaryToken(TokenType.JUMP_POINT, token, parseInstruction());
-        }
-        if (token != null && token.getType() == TokenType.INSTRUCTION) {
-            return parseInstruction();
-        }
-        return unexpected();
+        return maybeJumpAssociation(() -> maybeCall(this::parseAtomic));
     }
 
+    private Token parseAtomic() {
+        return maybeCall(() -> {
+            if (isPunctuation(Punctuation.OPEN_BRACKET)) {
+                input.next();
+                Token expression = parseExpression();
+                skipPunctuation(Punctuation.CLOSED_BRACKET);
+                return expression;
+            }
+            if (isPunctuation(Punctuation.DEFINITION_BEGIN)) {
+                input.next();
+                return maybeConstant();
+            }
+            Token token = input.peek();
+            if (token != null && token.getType() == TokenType.INSTRUCTION) {
+                return parseInstruction();
+            }
+            if (token != null
+                    && (token.getType() == TokenType.IDENTIFICATION
+                    || token.getType() == TokenType.BINARY
+                    || token.getType() == TokenType.NUMBER)) {
+                input.next();
+                return token;
+            }
+            return unexpected();
+        });
+    }
 
     private Token unexpected() {
         return input.error("Unexpected token: " + input.peek().toString());
     }
 
+    private Token maybeJumpAssociation(Supplier<Token> supplier) {
+        Token expression = supplier.get();
+        if (isPunctuation(Punctuation.DEFINITION_DELIMITER)) {
+            input.next();
+            return new BinaryToken<>(TokenType.JUMP_POINT, expression, parseExpression());
+        } else {
+            return expression;
+        }
+    }
+
+    private Token maybeCall(Supplier<Token> supplier) {
+        Token expression = supplier.get();
+        return isPunctuation(Punctuation.OPEN_BRACKET) ? parseCall(expression) : expression;
+    }
+
+    private Token parseCall(Token reference) {
+        return new BinaryToken<>(TokenType.FUNCTION, reference, delimited(Punctuation.OPEN_BRACKET,
+                                                                          Punctuation.CLOSED_BRACKET,
+                                                                          Punctuation.COMMA,
+                                                                          this::parseExpression));
+    }
+
     private Token parseInstruction() {
         Token instruction = input.next();
-        Token value = input.peek();
-        if (value != null && value.getType() == TokenType.IDENTIFICATION) {
-            input.next();
-            return new BinaryToken(TokenType.CALL, instruction, value);
-        } else if (isValue()) {
-            return new BinaryToken(TokenType.CALL, instruction, parseValue());
-        } else if (isPunctuation(Punctuation.INSTRUCTION_END.getPunctuation())) {
-            return new BinaryToken(TokenType.CALL, instruction);
+        if (isPunctuation(Punctuation.INSTRUCTION_END)) {
+            return new BinaryToken<>(TokenType.CALL, instruction, BinaryToken.EMPTY_TOKEN);
         }
-        return input.error("Expected number, reference or no value");
+        return new BinaryToken<>(TokenType.CALL, instruction, parseExpression());
     }
 
     private Token maybeConstant() {
-        skipKeyword(Keyword.DEFINITION.getKeyword());
-        if (isKeyword(Keyword.CONSTANT.getKeyword())) {
+        skipKeyword(Keyword.DEFINITION);
+        if (isKeyword(Keyword.CONSTANT)) {
+            input.next();
             return parseConstant();
         } else {
             return parseDefinition();
         }
     }
 
+    private BinaryToken parseConstant() {
+        Token reference = input.next();
+        skipPunctuation(Punctuation.DEFINITION_DELIMITER);
+        Token value = parseExpression();
+        return new BinaryToken<>(TokenType.CONSTANT, reference, value);
+    }
 
     private BinaryToken parseDefinition() {
         Token reference = input.next();
         if (reference != null && reference.getType() == TokenType.IDENTIFICATION) {
-            Token[] tokens = delimited(CharInputStream.EMPTY_CHAR
-                    , Punctuation.INSTRUCTION_END.getPunctuation()
-                    , Punctuation.DEFINITION_DELIMITER.getPunctuation(), this::parseExpression);
-            if (tokens.length == 0) {
-                return new BinaryToken(TokenType.DEFINITION, reference);
-            } else if (tokens.length == 1) {
-                return new BinaryToken(TokenType.DEFINITION, reference, tokens[0]);
+            if (isPunctuation(Punctuation.DEFINITION_DELIMITER)) {
+                input.next();
+                Token value = parseExpression();
+                return new BinaryToken<>(TokenType.DEFINITION, reference, value);
+            } else {
+                return new BinaryToken<>(TokenType.DEFINITION, reference, BinaryToken.EMPTY_TOKEN);
             }
         }
-        return input.error("Too many definition components");
+        return input.error("expected identifier");
     }
 
-    private BinaryToken parseConstant() {
-        Token reference = input.next();
-        if (reference != null && reference.getType() == TokenType.IDENTIFICATION) {
-            Token[] tokens = delimited(CharInputStream.EMPTY_CHAR
-                    , Punctuation.INSTRUCTION_END.getPunctuation()
-                    , Punctuation.DEFINITION_DELIMITER.getPunctuation(), this::parseExpression);
-            if (tokens.length == 2) {
-                return new BinaryToken(TokenType.CONSTANT, tokens[0], tokens[1]);
-            }
-        }
-        return input.error("Expected value");
-    }
-
-    private Token parseValue() {
-        Token token = input.peek();
-        if (token != null && token.getType() == TokenType.NUMBER) {
-            return new ObjectToken<>(parseNumber(token));
-        } else if (token != null && token.getType() == TokenType.BINARY) {
-            return new ObjectToken<>(parseBinary(token));
-        }
-        return input.error("Expected number");
-    }
-
-    private MachineWord parseNumber(Token token) {
-        try {
-            input.next();
-            return new MachineWord(Integer.parseInt(token.getValue().toString()), wordLength);
-        } catch (IllegalArgumentException e) {
-            return input.error("Malformed number: \"" + token.getValue() + "\" " + "\"" + e.getMessage() + "\"");
-        }
-    }
-
-    private MachineWord parseBinary(Token token) {
-        try {
-            input.next();
-            Boolean[] bits = token.getValue().toString().chars().mapToObj((c) -> (char) c == '1')
-                    .toArray(Boolean[]::new);
-            return new MachineWord(bits, wordLength);
-        } catch (IllegalArgumentException e) {
-            return input.error("Malformed number: \"" + token.getValue() + "\" " + "\"" + e.getMessage() + "\"");
-        }
-    }
-
-
-    private Token[] delimited(char start, char stop, char separator, Supplier<Token> parser) {
+    private ArrayToken delimited(char start, char stop, char separator, Supplier<Token> parser) {
         List<Token> tokens = new ArrayList<>();
         boolean first = true;
         if (start != CharInputStream.EMPTY_CHAR) {
@@ -168,7 +168,8 @@ public class Parser {
             if (isPunctuation(stop)) break;
             tokens.add(parser.get());
         }
-        return tokens.toArray(new Token[0]);
+        skipPunctuation(stop);
+        return new ArrayToken<>(tokens.toArray(new Token[0]));
     }
 
     private boolean isPunctuation(char expected) {
@@ -183,12 +184,6 @@ public class Parser {
         return token != null
                 && (token.getType() == TokenType.KEYWORD)
                 && (token.getValue().equals(keyword));
-    }
-
-    private boolean isValue() {
-        Token token = input.peek();
-        return token.getType() == TokenType.NUMBER
-                || token.getType() == TokenType.BINARY;
     }
 
     private void skipPunctuation(char c) {
