@@ -12,8 +12,8 @@ public enum TokenType {
 
     KEYWORD,
     PUNCTUATION,
+    FUNCTION,
 
-    OBJECT,
     NUMBER,
     BINARY,
 
@@ -22,5 +22,6 @@ public enum TokenType {
     DEFINITION,
     CONSTANT,
 
-    EMPTY
+    ARRAY,
+    EMPTY,
 }

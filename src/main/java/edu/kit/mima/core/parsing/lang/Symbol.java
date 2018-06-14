@@ -4,19 +4,24 @@ package edu.kit.mima.core.parsing.lang;
  * @author Jannis Weis
  * @since 2018
  */
-public enum Symbol {
+public class Symbol {
 
-    ALLOWED_SYMBOLS("?!-_<>=0123456789"),
-    NUMBERS("[0-9"),
-    LETTERS("[a-zA-Z");
+    public static final String ALLOWED_SYMBOLS = "?!-_<>=0123456789";
+    public static final String NUMBERS = "[0-9]";
+    public static final String NUMBER_SIGNED = "[-0-9]";
+    public static final String LETTERS = "[a-zA-Z]";
 
-    private final String symbols;
 
-    Symbol(String symbols) {
-        this.symbols = symbols;
+    private Symbol() {
+        assert false : "utility constructor";
     }
 
-    public String getSymbols() {
-        return symbols;
+    public static String[] getSymbols() {
+        return new String[]{
+                ALLOWED_SYMBOLS,
+                NUMBERS,
+                NUMBER_SIGNED,
+                LETTERS,
+        };
     }
 }

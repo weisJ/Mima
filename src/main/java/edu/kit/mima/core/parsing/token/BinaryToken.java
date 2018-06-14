@@ -4,9 +4,9 @@ package edu.kit.mima.core.parsing.token;
  * @author Jannis Weis
  * @since 2018
  */
-public class BinaryToken implements Token {
+public class BinaryToken<T, K> implements Token {
 
-    private static final Token EMPTY_TOKEN = new Token() {
+    public static final Token EMPTY_TOKEN = new Token() {
         @Override
         public Object getValue() {
             return null;
@@ -24,29 +24,25 @@ public class BinaryToken implements Token {
     };
 
     private final TokenType type;
-    private final Token first;
-    private final Token second;
+    private final T first;
+    private final K second;
 
-    public BinaryToken(TokenType type, Token first, Token second) {
+    public BinaryToken(TokenType type, T first, K second) {
         this.type = type;
         this.first = first;
         this.second = second;
     }
 
-    public BinaryToken(TokenType type, Token first) {
-        this(type, first, EMPTY_TOKEN);
-    }
-
-    public Token getFirst() {
+    public T getFirst() {
         return first;
     }
 
-    public Token getSecond() {
+    public K getSecond() {
         return second;
     }
 
     @Override
-    public Token getValue() {
+    public T getValue() {
         return null;
     }
 
@@ -57,7 +53,7 @@ public class BinaryToken implements Token {
 
     @Override
     public String toString() {
-        return "[type=" + type + "] {" + "\n\t"
+        return "[type=" + type + "] {\n\t"
                 + first.toString().replaceAll("\n", "\n\t")
                 + "\n\t"
                 + second.toString().replaceAll("\n", "\n\t")

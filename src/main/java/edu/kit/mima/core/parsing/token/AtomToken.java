@@ -4,12 +4,12 @@ package edu.kit.mima.core.parsing.token;
  * @author Jannis Weis
  * @since 2018
  */
-public class AtomarToken implements Token {
+public class AtomToken<T> implements Token {
 
     private final TokenType type;
-    private final String value;
+    private final T value;
 
-    public AtomarToken(TokenType type, String value) {
+    public AtomToken(TokenType type, T value) {
         this.type = type;
         this.value = value;
     }
@@ -20,12 +20,12 @@ public class AtomarToken implements Token {
     }
 
     @Override
-    public String getValue() {
+    public T getValue() {
         return value;
     }
 
     @Override
     public String toString() {
-        return "[type=" + type + "]{ " + value + " }";
+        return "[type=" + type + "]{ " + value.toString() + " }";
     }
 }
