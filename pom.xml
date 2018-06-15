@@ -14,6 +14,12 @@
             <artifactId>commonmark</artifactId>
             <version>0.11.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>16.0.1</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

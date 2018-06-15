@@ -109,7 +109,7 @@ public enum MimaInstructions implements Instruction {
                 fail("illegal memory address", mima.getInstructionPointer() + 1);
             }
             mima.setAccumulator(arithmeticLogicUnit.add(MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
-                                                        mima.loadValue(instruction.getValue().intValue())));
+                    mima.loadValue(instruction.getValue().intValue())));
         }
     },
     /**
@@ -122,7 +122,7 @@ public enum MimaInstructions implements Instruction {
                 fail("illegal memory address", mima.getInstructionPointer() + 1);
             }
             mima.setAccumulator(arithmeticLogicUnit.and(MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
-                                                        mima.loadValue(instruction.getValue().intValue())));
+                    mima.loadValue(instruction.getValue().intValue())));
         }
     },
     /**
@@ -135,7 +135,7 @@ public enum MimaInstructions implements Instruction {
                 fail("illegal memory address", mima.getInstructionPointer() + 1);
             }
             mima.setAccumulator(arithmeticLogicUnit.or(MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
-                                                       mima.loadValue(instruction.getValue().intValue())));
+                    mima.loadValue(instruction.getValue().intValue())));
         }
     },
     /**
@@ -148,7 +148,7 @@ public enum MimaInstructions implements Instruction {
                 fail("illegal memory address", mima.getInstructionPointer() + 1);
             }
             mima.setAccumulator(arithmeticLogicUnit.xor(MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
-                                                        mima.loadValue(instruction.getValue().intValue())));
+                    mima.loadValue(instruction.getValue().intValue())));
         }
     },
     /**
@@ -160,8 +160,9 @@ public enum MimaInstructions implements Instruction {
             if (!instruction.isReference() && (instruction.getValue().intValue() < 0)) {
                 fail("illegal memory address", mima.getInstructionPointer() + 1);
             }
-            mima.setAccumulator(arithmeticLogicUnit.equals(MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
-                                                           mima.loadValue(instruction.getValue().intValue())));
+            mima.setAccumulator(arithmeticLogicUnit.equals(
+                    MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
+                    mima.loadValue(instruction.getValue().intValue())));
         }
     },
     /**
@@ -198,8 +199,11 @@ public enum MimaInstructions implements Instruction {
     };
 
 
+    @SuppressWarnings("NonFinalFieldInEnum")
     private static Mima mima;
+    @SuppressWarnings("NonFinalFieldInEnum")
     private static ArithmeticLogicUnit arithmeticLogicUnit;
+
     private final String instruction;
 
     /**

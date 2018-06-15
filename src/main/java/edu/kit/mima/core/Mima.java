@@ -1,7 +1,7 @@
 package edu.kit.mima.core;
 
 import edu.kit.mima.core.data.MachineWord;
-import edu.kit.mima.core.data.Memory;
+import edu.kit.mima.core.data.MemoryMap;
 import edu.kit.mima.core.instruction.MimaInstructions;
 import edu.kit.mima.core.instruction.MimaXInstructions;
 import edu.kit.mima.core.parsing.legacy.CompiledInstruction;
@@ -25,7 +25,7 @@ public class Mima {
     private static final int WORD_LENGTH = 24;
     private static final int WORD_LENGTH_CONST = 20;
 
-    private final Memory memory;
+    private final MemoryMap memoryMap;
     private final MachineWord stackPointer;
     private final Stack<Integer> returnStack;
     private MachineWord accumulator;
@@ -35,9 +35,9 @@ public class Mima {
 
     public Mima() {
         super();
-        memory = new Memory(WORD_LENGTH, 100);
+        memoryMap = new MemoryMap(WORD_LENGTH, 100);
         accumulator = new MachineWord(0, WORD_LENGTH);
-        stackPointer = accumulator.copy();
+        stackPointer = accumulator.clone();
         returnStack = new Stack<>();
     }
 
@@ -60,7 +60,7 @@ public class Mima {
 
     public void reset() {
         icu.reset();
-        memory.reset();
+        memoryMap.reset();
         accumulator.setValue(0);
     }
 
@@ -68,12 +68,12 @@ public class Mima {
         this.extendedInstructions = extendedInstructions;
         icu = extendedInstructions ? new Interpreter(lines, WORD_LENGTH, WORD_LENGTH)
                                    : new Interpreter(lines, WORD_LENGTH_CONST, WORD_LENGTH);
-        memory.empty();
+        memoryMap.empty();
         icu.compile();
     }
 
     public Object[][] memoryTable() {
-        final Map<Integer, MachineWord> values = memory.getMemory();
+        final Map<Integer, MachineWord> values = memoryMap.getMemoryMap();
         final Map<String, Integer> associations = icu.getMemoryLookupTable();
         final Object[][] data = new Object[values.values().size() + 1][];
         data[0] = new Object[]{"accumulator", accumulator};
@@ -150,11 +150,11 @@ public class Mima {
     }
 
     public MachineWord loadValue(int address) {
-        return memory.loadValue(address);
+        return memoryMap.loadValue(address);
     }
 
     public MachineWord getAccumulator() {
-        return accumulator.copy();
+        return accumulator.clone();
     }
 
     public void setAccumulator(MachineWord value) {
@@ -162,7 +162,7 @@ public class Mima {
     }
 
     public void storeValue(int address, MachineWord value) {
-        memory.storeValue(address, value);
+        memoryMap.storeValue(address, value);
     }
 
     public void pushRoutine(int address) {
@@ -178,7 +178,7 @@ public class Mima {
     }
 
     public MachineWord getStackPointer() {
-        return stackPointer.copy();
+        return stackPointer.clone();
     }
 
     public void setStackPointer(int address) {

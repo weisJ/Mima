@@ -306,7 +306,7 @@ public final class MimaUI extends JFrame {
     }
 
     /**
-     * Update the Memory table with new values
+     * Update the MemoryMap table with new values
      */
     private void updateMemoryTable() {
         memoryView.setContent(mima.memoryTable());

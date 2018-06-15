@@ -48,11 +48,11 @@ public class Interpreter {
 
     public Interpreter(final String[] lines, final int constWordLength, final int wordLength) {
         super();
-        this.instructions = lines;
-        this.instructionPointer = 0;
+        instructions = lines;
+        instructionPointer = 0;
         this.constWordLength = constWordLength;
         this.wordLength = wordLength;
-        this.reservedIndex = -1;
+        reservedIndex = -1;
     }
 
     public static String[] getKeywords() {
@@ -66,9 +66,9 @@ public class Interpreter {
     }
 
     public void compile() {
-        this.memoryLookupTable = new HashMap<>();
-        this.instructionLookupTable = new HashMap<>();
-        this.constLookupTable = new HashMap<>();
+        memoryLookupTable = new HashMap<>();
+        instructionLookupTable = new HashMap<>();
+        constLookupTable = new HashMap<>();
         reservedIndex = -1;
         setInstructionPointer(0);
         final int index = removeComments(instructions);
@@ -97,7 +97,9 @@ public class Interpreter {
     }
 
     private int removeComments(final String[] lines) {
-        if (lines.length == 0) return 0;
+        if (lines.length == 0) {
+            return 0;
+        }
         boolean foundFirstNonComment = false;
         int firstNonComment = 0;
         for (int i = 0; i < lines.length; i++) {
@@ -122,7 +124,9 @@ public class Interpreter {
 
     private int setupDefinitions(final String[] lines, final int startIndex, final Map<String, Integer> memoryMap,
                                  final Map<String, Integer> constMap) {
-        if (lines.length == 0) return startIndex;
+        if (lines.length == 0) {
+            return startIndex;
+        }
         int index = startIndex;
         while (lines[index].startsWith(DEFINITION)) {
             try {
@@ -136,7 +140,9 @@ public class Interpreter {
                 }
                 index++;
             } catch (final InterpretationException e) {
-                if (!isSilent) throw e;
+                if (!isSilent) {
+                    throw e;
+                }
             }
         }
         return index;
@@ -189,7 +195,9 @@ public class Interpreter {
 
     private void setupInstructionLookup(final String[] lines, final int startIndex,
                                         final Map<String, Integer> instructionMap) {
-        if (lines.length == 0) return;
+        if (lines.length == 0) {
+            return;
+        }
         for (int i = startIndex; i < lines.length; i++) {
             String line = lines[i];
             if (line.contains(":")) {
@@ -348,19 +356,27 @@ public class Interpreter {
      * Mute Errors while fetching references
      */
     private void fail(final String message, final String line, final int lineNumber) {
-        if (!isSilent) throw new InterpretationException(message, line, lineNumber);
+        if (!isSilent) {
+            throw new InterpretationException(message, line, lineNumber);
+        }
     }
 
     private void fail(final String message, final int lineNumber) {
-        if (!isSilent) throw new InterpretationException(message, lineNumber);
+        if (!isSilent) {
+            throw new InterpretationException(message, lineNumber);
+        }
     }
 
     private void fail(final String message, final String line) {
-        if (!isSilent) throw new InterpretationException(message, line);
+        if (!isSilent) {
+            throw new InterpretationException(message, line);
+        }
     }
 
     private void fail(final String message) {
-        if (!isSilent) throw new InterpretationException(message);
+        if (!isSilent) {
+            throw new InterpretationException(message);
+        }
     }
 
 }
