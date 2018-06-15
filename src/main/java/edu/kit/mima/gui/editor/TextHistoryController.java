@@ -25,7 +25,6 @@ public class TextHistoryController {
      * @param historyLength how many events the history should date back
      */
     public TextHistoryController(final JTextPane editorPane, final int historyLength) {
-        super();
         this.editorPane = editorPane;
         history = new History<>(historyLength);
         active = true;

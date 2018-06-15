@@ -29,7 +29,6 @@ public class TextLoader {
      * @param manager underlying load manager
      */
     public TextLoader(final Component parent, final LoadManager manager) {
-        super();
         this.manager = manager;
         this.parent = parent;
     }

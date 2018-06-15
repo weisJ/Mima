@@ -23,7 +23,6 @@ public class Console extends JScrollPane {
      * Create new Console
      */
     public Console() {
-        super();
         textPane = new JTextPane();
         textPane.setBackground(Color.BLACK);
         textPane.setFont(new Font(Font.MONOSPACED, Font.PLAIN, FONT_SIZE));

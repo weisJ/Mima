@@ -19,7 +19,7 @@ public final class Logger {
      * Prevent instantiation
      */
     private Logger() {
-        assert false : "Logger should not be instantiated";
+        assert false : "utility constructor";
     }
 
     /**

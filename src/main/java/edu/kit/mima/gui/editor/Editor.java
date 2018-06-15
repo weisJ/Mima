@@ -31,7 +31,6 @@ public class Editor extends JScrollPane {
      * Editor that supports highlighting and text history
      */
     public Editor() {
-        super();
         final JPanel textPanel = new JPanel();
         final NumberedTextPane numberedTextPane = new NumberedTextPane();
         editorPane = numberedTextPane.getPane();

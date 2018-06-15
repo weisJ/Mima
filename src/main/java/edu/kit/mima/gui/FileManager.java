@@ -44,7 +44,6 @@ public class FileManager implements AutoCloseable {
      * @param extensions    allowed file extensions
      */
     public FileManager(final Component parent, final String saveDirectory, final String[] extensions) {
-        super();
         optionsLoader = new OptionsLoader(saveDirectory);
         saveHandler = new SaveHandler(saveDirectory);
         this.extensions = extensions;

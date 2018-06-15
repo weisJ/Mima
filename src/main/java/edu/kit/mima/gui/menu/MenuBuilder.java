@@ -14,7 +14,6 @@ public final class MenuBuilder {
      * Create new MenuBuilder
      */
     public MenuBuilder() {
-        super();
         menuBar = new JMenuBar();
     }
 

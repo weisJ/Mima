@@ -49,7 +49,6 @@ public final class Help extends JFrame {
      * Construct the Help Screen
      */
     private Help() {
-        super();
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("mima.png")));
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         setSize((int) SIZE.getHeight() / 3, (int) SIZE.getWidth() / 3);

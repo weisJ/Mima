@@ -17,7 +17,6 @@ public class ClickAction extends AbstractAction {
      * @param button Button
      */
     public ClickAction(final JButton button) {
-        super();
         this.button = button;
     }
 

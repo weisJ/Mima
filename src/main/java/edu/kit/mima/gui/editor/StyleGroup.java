@@ -22,7 +22,6 @@ public class StyleGroup {
      * To ensure this add the expression the second time in its own StyleGroup
      */
     public StyleGroup() {
-        super();
         styleMap = new HashMap<>();
     }
 

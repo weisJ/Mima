@@ -9,12 +9,11 @@ import org.jetbrains.annotations.Nullable;
 public class InterpretationException extends IllegalArgumentException {
 
     private final String message;
-    @Nullable
-    private final String line;
+    private final @Nullable String line;
     private final int lineNumber;
     private final boolean number;
 
-    public InterpretationException(final String message, @Nullable final String line, final int lineNumber) {
+    public InterpretationException(final String message, final @Nullable String line, final int lineNumber) {
         super();
         this.message = message;
         this.line = line;
@@ -30,7 +29,7 @@ public class InterpretationException extends IllegalArgumentException {
         number = true;
     }
 
-    public InterpretationException(final String message, @Nullable final String line) {
+    public InterpretationException(final String message, final @Nullable String line) {
         super();
         this.message = message;
         this.line = line;

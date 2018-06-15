@@ -22,7 +22,6 @@ public final class ButtonPanelFactory {
      * Create new ButtonPanelFactory
      */
     public ButtonPanelFactory() {
-        super();
         buttons = new LinkedList<>();
     }
 
@@ -76,7 +75,6 @@ public final class ButtonPanelFactory {
 
         private ButtonFactory(final String label, final Runnable action, final String accelerator,
                               final ButtonPanelFactory parent) {
-            super();
             button = new JButton(label);
             this.parent = parent;
             setAction(action);
@@ -85,7 +83,6 @@ public final class ButtonPanelFactory {
         }
 
         private ButtonFactory(final String label, final Runnable action, final ButtonPanelFactory parent) {
-            super();
             button = new JButton(label);
             this.parent = parent;
             setAction(action);
@@ -93,14 +90,12 @@ public final class ButtonPanelFactory {
         }
 
         private ButtonFactory(final String label, final ButtonPanelFactory parent) {
-            super();
             button = new JButton(label);
             this.parent = parent;
             styleButton();
         }
 
         private ButtonFactory(final JButton button, final ButtonPanelFactory parent) {
-            super();
             this.button = button;
             this.parent = parent;
             styleButton();
