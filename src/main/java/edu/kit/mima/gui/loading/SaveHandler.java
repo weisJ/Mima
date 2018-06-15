@@ -22,7 +22,6 @@ public class SaveHandler {
      * @param saveDirectory save directory for temporary file
      */
     public SaveHandler(final String saveDirectory) {
-        super();
         tmpFile = saveDirectory + "/save.tmp";
     }
 

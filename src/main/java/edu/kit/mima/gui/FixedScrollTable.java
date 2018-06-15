@@ -19,7 +19,6 @@ public class FixedScrollTable extends JScrollPane {
      * @param tableHeader header of table
      */
     public FixedScrollTable(final String[] tableHeader) {
-        super();
         this.tableHeader = tableHeader;
         table = new JTable(new DefaultTableModel(tableHeader, 0)) {
             @Override

@@ -28,7 +28,6 @@ public class Stylizer {
      * @param textColor default text color
      */
     public Stylizer(final StyledDocument document, final Color textColor) {
-        super();
         this.document = document;
         this.textColor = textColor;
         styles = new HashSet<>();

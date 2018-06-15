@@ -18,7 +18,6 @@ public class EditorDocumentFilter extends DocumentFilter {
      * @param editor editor to use with Filter
      */
     public EditorDocumentFilter(final Editor editor) {
-        super();
         this.editor = editor;
     }
 

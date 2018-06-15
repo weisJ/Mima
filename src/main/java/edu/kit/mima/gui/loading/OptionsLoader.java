@@ -21,7 +21,6 @@ public class OptionsLoader {
      * @param optionsDirectory path to options directory
      */
     public OptionsLoader(final String optionsDirectory) {
-        super();
         optionsPath = optionsDirectory + "/.options";
         createDirectory();
     }

@@ -22,7 +22,6 @@ public class NumberedTextPane extends JPanel {
      * Create a new JPanel containing a JTextPane with lineNumbering
      */
     public NumberedTextPane() {
-        super();
         setMinimumSize(NUMBER_SIZE);
         setPreferredSize(NUMBER_SIZE);
         pane = new JTextPane() // we need to override paint so that the

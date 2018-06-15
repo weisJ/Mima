@@ -12,9 +12,9 @@ import edu.kit.mima.core.parsing.legacy.InterpretationException;
 public enum MimaXInstructions implements Instruction {
 
     /**
-     * CALL subroutine
+     * NATIVE_CALL subroutine
      */
-    CALL("CALL") {
+    CALL("NATIVE_CALL") {
         @Override
         public void run(CompiledInstruction instruction) {
             mima.pushRoutine(mima.getInstructionPointer() + 1);
@@ -108,8 +108,11 @@ public enum MimaXInstructions implements Instruction {
     };
 
 
+    @SuppressWarnings("NonFinalFieldInEnum")
     private static Mima mima;
+    @SuppressWarnings("NonFinalFieldInEnum")
     private static ArithmeticLogicUnit arithmeticLogicUnit;
+
     private final String instruction;
 
     /**
