@@ -8,11 +8,7 @@ import edu.kit.mima.core.parsing.legacy.CompiledInstruction;
 import edu.kit.mima.core.parsing.legacy.InterpretationException;
 import edu.kit.mima.core.parsing.legacy.Interpreter;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -51,8 +47,8 @@ public class Mima {
                 .collect(Collectors.toSet());
         if (extendedInstructions) {
             instructions.addAll(Arrays.stream(MimaXInstructions.values())
-                                        .map(MimaXInstructions::toString)
-                                        .collect(Collectors.toSet()));
+                    .map(MimaXInstructions::toString)
+                    .collect(Collectors.toSet()));
         }
         return instructions.toArray(new String[0]);
     }
@@ -66,7 +62,7 @@ public class Mima {
     public void loadProgram(final String[] lines, final boolean extendedInstructions) {
         this.extendedInstructions = extendedInstructions;
         icu = extendedInstructions ? new Interpreter(lines, WORD_LENGTH, WORD_LENGTH)
-                                   : new Interpreter(lines, WORD_LENGTH_CONST, WORD_LENGTH);
+                : new Interpreter(lines, WORD_LENGTH_CONST, WORD_LENGTH);
         memoryMap.empty();
         icu.compile();
     }
@@ -79,8 +75,8 @@ public class Mima {
         int index = 1;
         for (final Map.Entry<Integer, MachineWord> entry : values.entrySet()) {
             data[index] = associations.containsValue(entry.getKey())
-                          ? new Object[]{getAssociation(associations, entry.getKey()), entry.getValue().intValue()}
-                          : new Object[]{entry.getKey(), entry.getValue().intValue()};
+                    ? new Object[]{getAssociation(associations, entry.getKey()), entry.getValue().intValue()}
+                    : new Object[]{entry.getKey(), entry.getValue().intValue()};
             if (entry.getKey() == stackPointer.intValue()) {
                 data[index][0] += "(SP)";
             }

@@ -2,19 +2,15 @@ package edu.kit.mima.gui.loading;
 
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
+import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Component;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.util.stream.Collectors;
 
 /**
+ * Reader/Writer that takes user input to determine the location the file is saved to
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -22,7 +18,7 @@ public class TextLoader {
 
     private final LoadManager manager;
     private final Component parent;
-
+    private final SaveHandler handler;
 
     /**
      * TextLoader to control loading and saving files as well as handling the request for file paths
@@ -33,6 +29,7 @@ public class TextLoader {
     public TextLoader(final Component parent, final LoadManager manager) {
         this.manager = manager;
         this.parent = parent;
+        this.handler = new SaveHandler(null);
     }
 
     /**
@@ -55,13 +52,9 @@ public class TextLoader {
         }
 
         manager.onSave(path);
-        try (final PrintWriter writer = new PrintWriter(path, "ISO-8859-1")) {
-            if (text != null) {
-                writer.write(text);
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (final IOException e) {
+        try {
+            handler.saveFile(text, path);
+        } catch (IOException e) {
             manager.onFail(e.getMessage());
         }
         manager.afterSave();
@@ -85,9 +78,8 @@ public class TextLoader {
 
         manager.onLoad(path);
         String text = null;
-        try (final BufferedReader reader = new BufferedReader(
-                new InputStreamReader(new FileInputStream(path), "ISO-8859-1"))) {
-            text = reader.lines().collect(Collectors.joining("\n"));
+        try {
+            text = handler.loadFile(path);
         } catch (final IOException e) {
             manager.onFail(e.getMessage());
         }

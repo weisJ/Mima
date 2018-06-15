@@ -1,11 +1,13 @@
 package edu.kit.mima.gui.editor.history;
 
 
-import javax.swing.*;
+import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 
 /**
+ * File change history Object
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -98,7 +100,8 @@ public class FileHistoryObject {
                     break;
             }
             editor.setCaretPosition(caret);
-        } catch (final BadLocationException ignored) { }
+        } catch (final BadLocationException ignored) {
+        }
     }
 
     /**
@@ -126,7 +129,8 @@ public class FileHistoryObject {
                     break;
             }
             editor.setCaretPosition(caret);
-        } catch (final BadLocationException ignored) { }
+        } catch (final BadLocationException ignored) {
+        }
     }
 
     public enum ChangeType {

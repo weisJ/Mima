@@ -1,6 +1,8 @@
 package edu.kit.mima.gui.editor;
 
-import javax.swing.*;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import java.awt.Dimension;
@@ -8,6 +10,8 @@ import java.awt.Graphics;
 import java.awt.Point;
 
 /**
+ * An LineNumber wrapper for a {@link JTextPane}
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -46,7 +50,7 @@ public class NumberedTextPane extends JPanel {
 
         final int start = pane.viewToModel(scrollPane.getViewport().getViewPosition()); //
         final int end = pane.viewToModel(new Point(scrollPane.getViewport().getViewPosition().x + pane.getWidth(),
-                                                   scrollPane.getViewport().getViewPosition().y + pane.getHeight()));
+                scrollPane.getViewport().getViewPosition().y + pane.getHeight()));
 
         final Document doc = pane.getDocument();
         final int startLine = doc.getDefaultRootElement().getElementIndex(start) + 1;
@@ -71,7 +75,7 @@ public class NumberedTextPane extends JPanel {
     /**
      * Get the JTextPane of the NumberedTextPane
      *
-     * @return JEditorPane with lineNumbers
+     * @return JTextPane with lineNumbers
      */
     public JTextPane getPane() {
         return pane;

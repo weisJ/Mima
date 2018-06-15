@@ -8,6 +8,8 @@ import static edu.kit.mima.gui.logging.Logger.LogLevel.ERROR;
 import static edu.kit.mima.gui.logging.Logger.LogLevel.INFO;
 
 /**
+ * Logger that outputs to a {@link Console}
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -15,6 +17,7 @@ public final class Logger {
 
     private static Console console;
     private static LogLevel level = INFO;
+
     /*
      * Prevent instantiation
      */

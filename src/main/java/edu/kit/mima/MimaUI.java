@@ -2,23 +2,22 @@ package edu.kit.mima;
 
 import edu.kit.mima.core.Mima;
 import edu.kit.mima.core.parsing.legacy.Interpreter;
-import edu.kit.mima.gui.FileManager;
-import edu.kit.mima.gui.FixedScrollTable;
-import edu.kit.mima.gui.button.ButtonPanelFactory;
+import edu.kit.mima.gui.button.ButtonPanelBuilder;
 import edu.kit.mima.gui.color.SyntaxColor;
 import edu.kit.mima.gui.console.Console;
 import edu.kit.mima.gui.editor.Editor;
 import edu.kit.mima.gui.editor.style.StyleGroup;
+import edu.kit.mima.gui.loading.FileManager;
 import edu.kit.mima.gui.logging.Logger;
 import edu.kit.mima.gui.menu.Help;
 import edu.kit.mima.gui.menu.MenuBuilder;
+import edu.kit.mima.gui.table.FixedScrollTable;
 
-import javax.swing.*;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Toolkit;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JMenuBar;
+import javax.swing.JPanel;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -30,6 +29,8 @@ import static edu.kit.mima.gui.logging.Logger.error;
 import static edu.kit.mima.gui.logging.Logger.log;
 
 /**
+ * Mima Editor Frame
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -133,22 +134,22 @@ public final class MimaUI extends JFrame {
         // @formatter:off
         final JMenuBar menuBar = new MenuBuilder()
                 .addMenu("Help")
-                        .addItem("Show Help", () -> Help.getInstance().setVisible(true))
+                .addItem("Show Help", () -> Help.getInstance().setVisible(true))
                 .addMenu("File")
-                        .addItem("New", () -> changeFile(fileManager::newFile), "control N")
-                        .addItem("Load", () -> changeFile(fileManager::load), "control L")
-                        .separator()
-                        .addItem("Save", () -> {
-                                if (!fileManager.isOnDisk()) {
-                                    fileManager.saveAs();
-                                } else {
-                                    save();
-                                }
-                            }, "control S")
-                        .addItem("Save as", fileManager::saveAs, "control shift S")
+                .addItem("New", () -> changeFile(fileManager::newFile), "control N")
+                .addItem("Load", () -> changeFile(fileManager::load), "control L")
+                .separator()
+                .addItem("Save", () -> {
+                    if (!fileManager.isOnDisk()) {
+                        fileManager.saveAs();
+                    } else {
+                        save();
+                    }
+                }, "control S")
+                .addItem("Save as", fileManager::saveAs, "control shift S")
                 .addMenu("Edit")
-                        .addItem("Undo", editor::undo, "control Z")
-                        .addItem("Redo", editor::redo, "control shift Z")
+                .addItem("Undo", editor::undo, "control Z")
+                .addItem("Redo", editor::redo, "control shift Z")
                 .get();
         setJMenuBar(menuBar);
         // @formatter:on
@@ -159,7 +160,7 @@ public final class MimaUI extends JFrame {
      */
     private void setupButtons() {
         // @formatter:off
-        final JPanel buttonPanel = new ButtonPanelFactory()
+        final JPanel buttonPanel = new ButtonPanelBuilder()
                 .addButton("COMPILE", this::compile, "alt R")
                 .addButton("RESET", this::reset, "alt shift R")
                 .addButton(step).addAccelerator("alt S").addAction(this::step).setEnabled(false)
@@ -186,7 +187,8 @@ public final class MimaUI extends JFrame {
                     fileManager.close();
                     e.getWindow().dispose();
                     Help.close();
-                } catch (final IllegalArgumentException | IOException ignored) { }
+                } catch (final IllegalArgumentException | IOException ignored) {
+                }
             }
         };
     }
@@ -317,7 +319,7 @@ public final class MimaUI extends JFrame {
      */
     private void updateSyntaxHighlighting() {
 
-     //Future Code
+        //Future Code
       /*  syntaxStyle.setHighlight(TokenStream.PUNCTUATION, new Color[]{
                 SyntaxColor.KEYWORD.getColor(), //$
                 SyntaxColor.KEYWORD.getColor(), // :
@@ -341,16 +343,16 @@ public final class MimaUI extends JFrame {
                 , "#[^\n]*\n?"}; */
 
         syntaxStyle.setHighlight(Interpreter.getKeywords(), new Color[]{
-                SyntaxColor.KEYWORD.getColor(), //$define
-                SyntaxColor.KEYWORD.getColor(), //const
-                SyntaxColor.KEYWORD.getColor(), // :
-                SyntaxColor.KEYWORD.getColor(), // (
-                SyntaxColor.KEYWORD.getColor(), // )
-                SyntaxColor.NUMBER.getColor(),  //Numbers
-                SyntaxColor.BINARY.getColor(),  //0b,
-                SyntaxColor.COMMENT.getColor(), //Comments
+                SyntaxColor.KEYWORD, //$define
+                SyntaxColor.KEYWORD, //const
+                SyntaxColor.KEYWORD, // :
+                SyntaxColor.KEYWORD, // (
+                SyntaxColor.KEYWORD, // )
+                SyntaxColor.NUMBER,  //Numbers
+                SyntaxColor.BINARY,  //0b,
+                SyntaxColor.COMMENT, //Comments
         });
-        syntaxStyle.addHighlight(mima.getInstructionSet(), SyntaxColor.INSTRUCTION.getColor());
+        syntaxStyle.addHighlight(mima.getInstructionSet(), SyntaxColor.INSTRUCTION);
     }
 
     /**
@@ -366,14 +368,15 @@ public final class MimaUI extends JFrame {
 
             final String[] constants = references.get(0)
                     .stream().map(s -> "(?<![^ \n])" + s + "(?![^ \n])").toArray(String[]::new);
-            referenceStyle.addHighlight(constants, SyntaxColor.CONSTANT.getColor());
+            referenceStyle.addHighlight(constants, SyntaxColor.CONSTANT);
             final String[] instructionReferences = references.get(2)
                     .stream().map(s -> "(?<![^ \n])" + s + "(?![^ \n])").toArray(String[]::new);
-            referenceStyle.addHighlight(instructionReferences, SyntaxColor.JUMP.getColor());
+            referenceStyle.addHighlight(instructionReferences, SyntaxColor.JUMP);
             final String[] memoryReferences = references.get(1)
                     .stream().map(s -> "(?<![^ \n])" + s + "(?![^ \n])").toArray(String[]::new);
-            referenceStyle.addHighlight(memoryReferences, SyntaxColor.REFERENCE.getColor());
-        } catch (final IllegalArgumentException ignored) { }
+            referenceStyle.addHighlight(memoryReferences, SyntaxColor.REFERENCE);
+        } catch (final IllegalArgumentException ignored) {
+        }
     }
 
 }

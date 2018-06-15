@@ -1,8 +1,14 @@
 package edu.kit.mima.gui.menu;
 
-import javax.swing.*;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.KeyStroke;
+import java.awt.MenuBar;
 
 /**
+ * Builder for creating simple {@link MenuBar}
+ *
  * @author Jannis Weis
  * @since 2018
  */

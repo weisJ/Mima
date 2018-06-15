@@ -6,7 +6,7 @@ import static edu.kit.mima.gui.logging.Logger.error;
 import static edu.kit.mima.gui.logging.Logger.log;
 
 /**
- * Implementation if LoadManager using the Logger
+ * Implementation of LoadManager using the Logger
  *
  * @author Jannis Weis
  * @since 2018

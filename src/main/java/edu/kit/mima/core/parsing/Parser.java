@@ -4,11 +4,7 @@ import edu.kit.mima.core.parsing.inputStream.CharInputStream;
 import edu.kit.mima.core.parsing.inputStream.TokenStream;
 import edu.kit.mima.core.parsing.lang.Keyword;
 import edu.kit.mima.core.parsing.lang.Punctuation;
-import edu.kit.mima.core.parsing.token.ArrayToken;
-import edu.kit.mima.core.parsing.token.BinaryToken;
-import edu.kit.mima.core.parsing.token.ProgramToken;
-import edu.kit.mima.core.parsing.token.Token;
-import edu.kit.mima.core.parsing.token.TokenType;
+import edu.kit.mima.core.parsing.token.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -41,16 +37,16 @@ public class Parser {
      */
     public static void main(String[] args) {
         ProgramToken programToken = new Parser("#Put Code here\n"
-                                                       + "§define const x : -3;\n"
-                                                       + "§define tmp : -1;\n"
-                                                       + "§define y : 2;\n"
-                                                       + "LDC x; \n"
-                                                       + "Halt : STSP;\n"
-                                                       + "LDC 2;\n"
-                                                       + "STVR 0(SP);\n"
-                                                       + "LDC 3;\n"
-                                                       + "LDVR 0(SP);\n"
-                                                       + "#testtesttest").parse();
+                + "§define const x : -3;\n"
+                + "§define tmp : -1;\n"
+                + "§define y : 2;\n"
+                + "LDC x; \n"
+                + "Halt : STSP;\n"
+                + "LDC 2;\n"
+                + "STVR 0(SP);\n"
+                + "LDC 3;\n"
+                + "LDVR 0(SP);\n"
+                + "#testtesttest").parse();
         System.out.print(programToken);
     }
 
@@ -146,9 +142,9 @@ public class Parser {
      */
     private Token parseCall(Token reference) {
         return new BinaryToken<>(TokenType.FUNCTION, reference, delimited(Punctuation.OPEN_BRACKET,
-                                                                          Punctuation.CLOSED_BRACKET,
-                                                                          Punctuation.COMMA,
-                                                                          this::parseExpression));
+                Punctuation.CLOSED_BRACKET,
+                Punctuation.COMMA,
+                this::parseExpression));
     }
 
     /*

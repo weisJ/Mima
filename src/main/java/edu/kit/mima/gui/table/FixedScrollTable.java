@@ -1,9 +1,12 @@
-package edu.kit.mima.gui;
+package edu.kit.mima.gui.table;
 
-import javax.swing.*;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 /**
+ * Table with scroll bar that can't be edited by the user
+ *
  * @author Jannis Weis
  * @since 2018
  */

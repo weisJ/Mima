@@ -5,6 +5,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 
 /**
+ * Document filter for use with {@link Editor}
+ *
  * @author Jannis Weis
  * @since 2018
  */

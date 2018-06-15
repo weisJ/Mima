@@ -4,10 +4,12 @@ import edu.kit.mima.gui.editor.history.FileHistoryObject;
 import edu.kit.mima.gui.editor.history.FileHistoryObject.ChangeType;
 import edu.kit.mima.gui.editor.history.History;
 
-import javax.swing.*;
+import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
 
 /**
+ * Controls the change history of {@link Editor}
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -51,7 +53,8 @@ public class TextHistoryController {
                 } else {
                     history.add(new FileHistoryObject(editorPane, offset, text, old, ChangeType.REPLACE));
                 }
-            } catch (final BadLocationException ignored) { }
+            } catch (final BadLocationException ignored) {
+            }
         }
     }
 
@@ -74,7 +77,7 @@ public class TextHistoryController {
                 && (fhs.getText().length() < MAXIMUM_AMEND_LENGTH)) {
             history.setCurrent(
                     new FileHistoryObject(editorPane, fhs.getCaretOffset(), fhs.getText() + text, "",
-                                          ChangeType.INSERT));
+                            ChangeType.INSERT));
         } else {
             history.add(new FileHistoryObject(editorPane, offset, text, "", ChangeType.INSERT));
         }
@@ -94,7 +97,8 @@ public class TextHistoryController {
         String text = null;
         try {
             text = editorPane.getDocument().getText(offset, length);
-        } catch (final BadLocationException ignored) { }
+        } catch (final BadLocationException ignored) {
+        }
         assert text != null;
         if ((fhs != null)
                 && (text.length() == 1)
@@ -104,7 +108,7 @@ public class TextHistoryController {
                 && (fhs.getOldText().length() < MAXIMUM_AMEND_LENGTH)) {
             history.setCurrent(
                     new FileHistoryObject(editorPane, offset, "", text + fhs.getOldText(),
-                                          ChangeType.REMOVE));
+                            ChangeType.REMOVE));
         } else {
             history.add(new FileHistoryObject(editorPane, offset, "", text, ChangeType.REMOVE));
         }

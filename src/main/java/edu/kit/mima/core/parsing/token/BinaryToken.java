@@ -37,8 +37,8 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
     /**
      * Token that holds two values independent of each others type
      *
-     * @param type type of the token
-     * @param first first value
+     * @param type   type of the token
+     * @param first  first value
      * @param second second value
      */
     public BinaryToken(TokenType type, T first, K second) {

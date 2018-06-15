@@ -1,10 +1,6 @@
 package edu.kit.mima.gui.editor.style;
 
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Style;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
-import javax.swing.text.StyledDocument;
+import javax.swing.text.*;
 import java.awt.Color;
 import java.util.HashSet;
 import java.util.Set;
@@ -12,6 +8,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Operates on a document and highlights it according to the {@link StyleGroup}
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -70,7 +68,8 @@ public class Stylizer {
                 while (matcher.find()) {
                     document.setCharacterAttributes(matcher.start(), matcher.group().length(), style, true);
                 }
-            } catch (final BadLocationException ignored) { }
+            } catch (final BadLocationException ignored) {
+            }
         }
     }
 

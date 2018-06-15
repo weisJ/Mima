@@ -1,9 +1,12 @@
 package edu.kit.mima.gui.button;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.JButton;
 import java.awt.event.ActionEvent;
 
 /**
+ * Wrapper for a button click action
+ *
  * @author Jannis Weis
  * @since 2018
  */

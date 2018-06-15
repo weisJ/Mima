@@ -17,12 +17,12 @@ import java.util.regex.Pattern;
 public class Interpreter {
 
     // @formatter:off
-    private static final String  POINTER = "\\([^()]*\\)";
-    private static final String  DEFINITION = "§define";
-    private static final String  REFERENCE = "([^ :§]+)(?: )*(?:|:(?: )*([^ \n])*)";
-    private static final String  CONST = "const";
-    private static final String  BINARY_PREFIX = "0b";
-    private static final String  REFERENCE_PREFIX = "&";
+    private static final String POINTER = "\\([^()]*\\)";
+    private static final String DEFINITION = "§define";
+    private static final String REFERENCE = "([^ :§]+)(?: )*(?:|:(?: )*([^ \n])*)";
+    private static final String CONST = "const";
+    private static final String BINARY_PREFIX = "0b";
+    private static final String REFERENCE_PREFIX = "&";
 
     private static final Pattern COMMAND_PATTERN = Pattern.compile("^(?: )*([a-zA-Z]*(?:" + POINTER + ")?)(?: )*([^ :§]*)?(?: )*$");
     private static final Pattern COMMAND_LOOKUP = Pattern.compile("^(?: )*([^ :§]+)(?: )*:(?: )*([^\n]*)$");
@@ -88,10 +88,12 @@ public class Interpreter {
         isSilent = true;
         try {
             index = setupDefinitions(lines, index, memoryTable, constTable);
-        } catch (final InterpretationException ignored) { }
+        } catch (final InterpretationException ignored) {
+        }
         try {
             setupInstructionLookup(lines, index, instructionTable);
-        } catch (final InterpretationException ignored) { }
+        } catch (final InterpretationException ignored) {
+        }
         isSilent = false;
         return List.of(constTable.keySet(), memoryTable.keySet(), instructionTable.keySet());
     }
@@ -188,7 +190,7 @@ public class Interpreter {
         }
         if (table.containsKey(reference)) {
             throw new InterpretationException("reference <" + reference + "> already defined",
-                                              instructionPointer + 1);
+                    instructionPointer + 1);
         }
         table.put(reference, value);
     }
@@ -302,7 +304,7 @@ public class Interpreter {
             value = Integer.parseInt(sVal);
         } catch (final NumberFormatException e) {
             throw new InterpretationException("parameter is neither an integer value nor a memory reference",
-                                              instructionPointer + 1);
+                    instructionPointer + 1);
         }
         return new CompiledInstruction(matcher.group(1), new MachineWord(value, wordLength), isReference);
     }
