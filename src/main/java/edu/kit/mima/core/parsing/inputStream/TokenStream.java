@@ -103,7 +103,7 @@ public class TokenStream {
      * Read the next token
      */
     private @Nullable Token readNext() {
-        readWhile(TokenStream::isWhitespace);
+        readWhile(this::isWhitespace);
         if (input.isEmpty()) {
             return null;
         }
@@ -146,35 +146,35 @@ public class TokenStream {
         input.next();
     }
 
-    private static boolean isWhitespace(char c) {
+    private boolean isWhitespace(char c) {
         return WHITESPACE.indexOf(c) >= 0;
     }
 
-    private static boolean isDigitStart(char c) {
+    private boolean isDigitStart(char c) {
         return String.valueOf(c).matches(Symbol.NUMBER_SIGNED);
     }
 
-    private static boolean isDigit(char c) {
+    private boolean isDigit(char c) {
         return String.valueOf(c).matches(Symbol.NUMBERS);
     }
 
-    private static boolean isIdentificationStart(char c) {
+    private boolean isIdentificationStart(char c) {
         return String.valueOf(c).matches(Symbol.LETTERS);
     }
 
-    private static boolean isPunctuationChar(char c) {
+    private boolean isPunctuationChar(char c) {
         return PUNCTUATION_STRING.indexOf(c) >= 0;
     }
 
-    private static boolean isIdentification(char c) {
+    private boolean isIdentification(char c) {
         return isIdentificationStart(c) || Symbol.ALLOWED_SYMBOLS.indexOf(c) >= 0;
     }
 
-    private static boolean isKeyword(String identifier) {
+    private boolean isKeyword(String identifier) {
         return Arrays.stream(KEYWORDS).anyMatch(keyword -> keyword.equals(identifier));
     }
 
-    private static boolean isInstruction(String identifier) {
+    private boolean isInstruction(String identifier) {
         return Arrays.stream(INSTRUCTIONS).anyMatch(instruction -> instruction.equals(identifier));
     }
 
@@ -182,7 +182,7 @@ public class TokenStream {
      * Read a number value
      */
     private Token readNumber() {
-        String number = input.next() + readWhile(TokenStream::isDigit);
+        String number = input.next() + readWhile(this::isDigit);
         return new AtomToken<>(TokenType.NUMBER, number);
     }
 
