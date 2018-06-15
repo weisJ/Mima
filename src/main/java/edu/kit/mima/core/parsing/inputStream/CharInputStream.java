@@ -3,11 +3,17 @@ package edu.kit.mima.core.parsing.inputStream;
 import edu.kit.mima.core.parsing.ParserException;
 
 /**
+ * The CharInputStream reads single characters from a line and
+ * is responsible for keeping track in which line and column the parser currently is
+ *
  * @author Jannis Weis
  * @since 2018
  */
 public class CharInputStream {
 
+    /**
+     * Empty character
+     */
     public static final char EMPTY_CHAR = Character.MIN_VALUE;
 
     private final String input;
@@ -16,6 +22,11 @@ public class CharInputStream {
     private int line;
     private int col;
 
+    /**
+     * Create CharInputStream from string
+     *
+     * @param input input string
+     */
     public CharInputStream(String input) {
         this.input = input;
         position = 0;
@@ -23,6 +34,11 @@ public class CharInputStream {
         col = 0;
     }
 
+    /**
+     * Get the next character
+     *
+     * @return next character
+     */
     public char next() {
         char character = peek();
         position++;
@@ -35,6 +51,12 @@ public class CharInputStream {
         return character;
     }
 
+    /**
+     * View next character but not move forward in input
+     *
+     * @return next character
+     */
+    @SuppressWarnings("ProhibitedExceptionCaught")
     public char peek() {
         try {
             return input.charAt(position);
@@ -43,10 +65,20 @@ public class CharInputStream {
         }
     }
 
+    /**
+     * Check whether the reader is at the end of input
+     *
+     * @return true if no more input can be read
+     */
     public boolean isEmpty() {
         return peek() == EMPTY_CHAR;
     }
 
+    /**
+     * Throw an error containing the current position of the reader
+     *
+     * @param message error message
+     */
     public void error(String message) {
         throw new ParserException(message, line, col);
     }
