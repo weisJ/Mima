@@ -1,11 +1,6 @@
-package edu.kit.mima.gui;
+package edu.kit.mima.gui.loading;
 
-import edu.kit.mima.gui.loading.LogLoadManager;
-import edu.kit.mima.gui.loading.OptionsLoader;
-import edu.kit.mima.gui.loading.SaveHandler;
-import edu.kit.mima.gui.loading.TextLoader;
-
-import javax.swing.*;
+import javax.swing.JOptionPane;
 import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +8,8 @@ import java.io.IOException;
 import static edu.kit.mima.gui.logging.Logger.error;
 
 /**
+ * Responsible for saving/loading/creating files
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -21,7 +18,7 @@ public class FileManager implements AutoCloseable {
     private final Component parent;
 
     private final TextLoader textLoader;
-    private final OptionsLoader optionsLoader;
+    private final OptionsHandler optionsHandler;
     private final SaveHandler saveHandler;
 
     private final String[] extensions;
@@ -44,7 +41,7 @@ public class FileManager implements AutoCloseable {
      * @param extensions    allowed file extensions
      */
     public FileManager(final Component parent, final String saveDirectory, final String[] extensions) {
-        optionsLoader = new OptionsLoader(saveDirectory);
+        optionsHandler = new OptionsHandler(saveDirectory);
         saveHandler = new SaveHandler(saveDirectory);
         this.extensions = extensions;
         this.parent = parent;
@@ -65,7 +62,7 @@ public class FileManager implements AutoCloseable {
      */
     private void loadOptions() {
         try {
-            final String[] options = optionsLoader.loadOptions();
+            final String[] options = optionsHandler.loadOptions();
             lastFile = options[0];
             directory = new File(lastFile).getParentFile().getAbsolutePath();
         } catch (final IOException e) {
@@ -77,7 +74,7 @@ public class FileManager implements AutoCloseable {
      * Save the last used directory to the options
      */
     private void saveOptions() throws IOException {
-        optionsLoader.saveOptions(lastFile);
+        optionsHandler.saveOptions(lastFile);
     }
 
     /**
@@ -98,7 +95,9 @@ public class FileManager implements AutoCloseable {
      * Load the text form last used file path
      */
     public void load() {
-        text = textLoader.requestLoad(directory, extensions, () -> { });
+        text = textLoader.requestLoad(directory, extensions, () -> {
+        });
+        assert text != null;
         fileHash = text.hashCode();
     }
 
@@ -109,8 +108,8 @@ public class FileManager implements AutoCloseable {
         try {
             final int response = JOptionPane
                     .showOptionDialog(parent, "Create/Load File", "Create/Load File", JOptionPane.DEFAULT_OPTION,
-                                      JOptionPane.PLAIN_MESSAGE,
-                                      null, new String[]{"Load", "New"}, "Load");
+                            JOptionPane.PLAIN_MESSAGE,
+                            null, new String[]{"Load", "New"}, "Load");
             switch (response) {
                 case 0:  //Load
                     load();
@@ -131,8 +130,8 @@ public class FileManager implements AutoCloseable {
      */
     public void newFile() {
         final String response = (String) JOptionPane.showInputDialog(parent, "Choose file type", "New File",
-                                                                     JOptionPane.QUESTION_MESSAGE,
-                                                                     null, extensions, extensions[0]);
+                JOptionPane.QUESTION_MESSAGE,
+                null, extensions, extensions[0]);
         if (response == null) {
             return;
         }
@@ -158,8 +157,11 @@ public class FileManager implements AutoCloseable {
     public void saveAs() {
         try {
             textLoader.requestSave(text, directory, lastExtension,
-                                   () -> { throw new IllegalArgumentException("aborted save"); });
-        } catch (final IllegalArgumentException ignored) { }
+                    () -> {
+                        throw new IllegalArgumentException("aborted save");
+                    });
+        } catch (final IllegalArgumentException ignored) {
+        }
         isNewFile = false;
         fileHash = text.hashCode();
     }
@@ -169,8 +171,8 @@ public class FileManager implements AutoCloseable {
      */
     public void savePopUp() {
         final int response = JOptionPane.showOptionDialog(parent, "Do you want to save?", "Unsaved File",
-                                                          JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
-                                                          null, new String[]{"Save", "Save as", "Don't save"}, "Save");
+                JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
+                null, new String[]{"Save", "Save as", "Don't save"}, "Save");
         switch (response) {
             case 0:
                 if (isNewFile) {

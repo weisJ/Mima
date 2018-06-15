@@ -30,7 +30,7 @@ public final class Keyword {
      * @return array of keywords in definition order
      */
     public static String[] getKeywords() {
-        return new String[] {
+        return new String[]{
                 DEFINITION,
                 CONSTANT
         };

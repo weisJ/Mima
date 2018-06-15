@@ -5,6 +5,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.LinkedList;
 
 /**
+ * History containing arbitrary objects
+ *
  * @author Jannis Weis
  * @since 2018
  */

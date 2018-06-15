@@ -1,14 +1,11 @@
 package edu.kit.mima.gui.loading;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.stream.Collectors;
 
 /**
+ * Reader/Writer for saving and writing files as well as writing temporary files
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -28,14 +25,14 @@ public class SaveHandler {
     /**
      * Load file from path
      *
-     * @param file file path
+     * @param path file path
      * @return content of file
      * @throws IOException may throw IOException during loading process if the file does not exist
      */
     @SuppressWarnings("OverlyBroadThrowsClause")
-    public String loadFile(final String file) throws IOException {
+    public String loadFile(final String path) throws IOException {
         try (final BufferedReader reader = new BufferedReader(
-                new InputStreamReader(new FileInputStream(file), "ISO-8859-1"))) {
+                new InputStreamReader(new FileInputStream(path), "ISO-8859-1"))) {
             return reader.lines().collect(Collectors.joining("\n"));
         }
     }

@@ -1,7 +1,7 @@
 package edu.kit.mima.core.parsing.token;
 
-import edu.kit.mima.core.parsing.inputStream.TokenStream;
 import edu.kit.mima.core.parsing.Parser;
+import edu.kit.mima.core.parsing.inputStream.TokenStream;
 
 /**
  * Token to used in {@link TokenStream}

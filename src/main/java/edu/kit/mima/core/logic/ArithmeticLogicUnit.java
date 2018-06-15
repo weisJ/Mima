@@ -1,5 +1,6 @@
-package edu.kit.mima.core;
+package edu.kit.mima.core.logic;
 
+import edu.kit.mima.core.Mima;
 import edu.kit.mima.core.data.MachineWord;
 
 import java.util.Objects;

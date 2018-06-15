@@ -14,7 +14,7 @@ public class AtomToken<T> implements Token<T> {
     /**
      * Plain Token that holds any value type
      *
-     * @param type type of token
+     * @param type  type of token
      * @param value value of token
      */
     public AtomToken(TokenType type, T value) {

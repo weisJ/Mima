@@ -1,6 +1,8 @@
 package edu.kit.mima.gui.console;
 
-import javax.swing.*;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
@@ -11,6 +13,12 @@ import java.awt.Font;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 
+/**
+ * Swing Console
+ *
+ * @author Jannis Weis
+ * @since 2018
+ */
 public class Console extends JScrollPane {
 
     private static final Color DEFAULT_COLOR = Color.LIGHT_GRAY;
@@ -73,7 +81,8 @@ public class Console extends JScrollPane {
         try {
             StyleConstants.setForeground(style, color);
             document.insertString(document.getLength(), message + '\n', style);
-        } catch (final BadLocationException ignored) { }
+        } catch (final BadLocationException ignored) {
+        }
         scrollToBottom();
     }
 

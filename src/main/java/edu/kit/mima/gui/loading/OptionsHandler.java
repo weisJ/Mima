@@ -1,26 +1,26 @@
 package edu.kit.mima.gui.loading;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 
 /**
+ * Writer/Reader for options file
+ *
  * @author Jannis Weis
  * @since 2018
  */
-public class OptionsLoader {
+public class OptionsHandler {
 
     private final String optionsPath;
+    private final SaveHandler handler;
 
     /**
      * Load/Save options to a specific directory
      *
      * @param optionsDirectory path to options directory
      */
-    public OptionsLoader(final String optionsDirectory) {
+    public OptionsHandler(final String optionsDirectory) {
+        handler = new SaveHandler(optionsDirectory);
         optionsPath = optionsDirectory + "/.options";
         createDirectory();
     }
@@ -41,22 +41,17 @@ public class OptionsLoader {
      */
     @SuppressWarnings("OverlyBroadThrowsClause")
     public String[] loadOptions() throws IOException {
-        try (final BufferedReader reader = new BufferedReader(
-                new InputStreamReader(new FileInputStream(optionsPath), "ISO-8859-1"))) {
-            return reader.lines().toArray(String[]::new);
-        }
+        return handler.loadFile(optionsPath).split("\n");
     }
 
     /**
      * Save the options file
      *
-     * @param save content to write to options file
+     * @param text content to write to options file
      * @throws IOException may throw IOException during loading
      */
     @SuppressWarnings("OverlyBroadThrowsClause")
-    public void saveOptions(final String save) throws IOException {
-        try (final PrintWriter writer = new PrintWriter(optionsPath, "ISO-8859-1")) {
-            writer.write(save);
-        }
+    public void saveOptions(final String text) throws IOException {
+        handler.saveFile(text, optionsPath);
     }
 }

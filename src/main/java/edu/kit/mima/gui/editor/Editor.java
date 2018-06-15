@@ -3,7 +3,9 @@ package edu.kit.mima.gui.editor;
 import edu.kit.mima.gui.editor.style.StyleGroup;
 import edu.kit.mima.gui.editor.style.Stylizer;
 
-import javax.swing.*;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextPane;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.StyledDocument;
 import java.awt.BorderLayout;
@@ -12,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Editor that supports highlighting and text history
+ *
  * @author Jannis Weis
  * @since 2018
  */

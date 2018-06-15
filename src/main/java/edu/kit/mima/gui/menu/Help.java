@@ -1,5 +1,6 @@
 package edu.kit.mima.gui.menu;
 
+import edu.kit.mima.MimaUI;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
@@ -9,8 +10,9 @@ import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JFrame;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,6 +21,8 @@ import java.net.URLConnection;
 import java.util.stream.Collectors;
 
 /**
+ * Help menu frame for {@link MimaUI}
+ *
  * @author Jannis Weis
  * @since 2018
  */

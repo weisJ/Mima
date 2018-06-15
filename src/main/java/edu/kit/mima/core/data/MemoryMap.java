@@ -22,7 +22,7 @@ public class MemoryMap implements Memory<MachineWord> {
      * Has an initial capacity
      *
      * @param machineWordLength number of bits in machineWord
-     * @param initialCapacity initial capacity
+     * @param initialCapacity   initial capacity
      */
     public MemoryMap(final int machineWordLength, final int initialCapacity) {
         assert !(initialCapacity >= Math.pow(2, machineWordLength)) : "not enough bits to reach all values";

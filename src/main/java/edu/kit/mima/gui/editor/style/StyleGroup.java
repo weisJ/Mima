@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * Style Group for associating colours with regular expressions
+ *
  * @author Jannis Weis
  * @since 2018
  */
