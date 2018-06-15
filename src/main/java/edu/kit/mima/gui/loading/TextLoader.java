@@ -1,5 +1,7 @@
 package edu.kit.mima.gui.loading;
 
+import org.jetbrains.annotations.Nullable;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Component;
@@ -41,6 +43,7 @@ public class TextLoader {
      * @param extension    allowed file extension
      * @param abortHandler action to perform if request was aborted
      */
+    @SuppressWarnings("OverlyBroadCatchBlock")
     public void requestSave(final String text, final String searchPath, final String extension,
                             final Runnable abortHandler) {
         String path = requestPath(searchPath, new String[]{extension}, abortHandler);
@@ -73,7 +76,7 @@ public class TextLoader {
      * @return loaded text
      */
     @SuppressWarnings("OverlyBroadCatchBlock")
-    public String requestLoad(final String searchPath, final String[] extensions, final Runnable abortHandler) {
+    public @Nullable String requestLoad(final String searchPath, final String[] extensions, final Runnable abortHandler) {
         final String path = requestPath(searchPath, extensions, abortHandler);
         if (path == null) {
             abortHandler.run();
@@ -95,7 +98,7 @@ public class TextLoader {
     /*
      * Request the path form user using JFileChooser
      */
-    private String requestPath(final String savedPath, final String[] extensions, final Runnable abortHandler) {
+    private @Nullable String requestPath(final String savedPath, final String[] extensions, final Runnable abortHandler) {
         final JFileChooser chooser = new JFileChooser(savedPath);
         final FileNameExtensionFilter filter = new FileNameExtensionFilter(extensions[0], extensions);
         chooser.setFileFilter(filter);

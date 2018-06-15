@@ -1,5 +1,8 @@
 package edu.kit.mima.gui.editor;
 
+import edu.kit.mima.gui.editor.style.StyleGroup;
+import edu.kit.mima.gui.editor.style.Stylizer;
+
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.StyledDocument;

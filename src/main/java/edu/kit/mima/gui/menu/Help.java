@@ -10,8 +10,7 @@ import org.commonmark.renderer.html.HtmlRenderer;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.awt.Dimension;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -37,8 +36,7 @@ public final class Help extends JFrame {
 
     private static Help instance;
 
-    @Nullable
-    private static Thread loadSource;
+    private static @Nullable Thread loadSource;
     private static boolean loadedFromWeb;
 
     private static JFXPanel jfxPanel;
@@ -99,22 +97,33 @@ public final class Help extends JFrame {
     }
 
     /*
+     * Render the markdown to HTML
+     */
+    private static String renderMarkdown(final String text) {
+        final Parser parser = Parser.builder().build();
+        final Node document = parser.parse(text);
+        final HtmlRenderer renderer = HtmlRenderer.builder().build();
+        return renderer.render(document);
+    }
+
+    /*
      * Load ReadME from github
      */
     @SuppressWarnings("OverlyBroadCatchBlock")
-    private String loadMarkdown() {
+    private @Nullable String loadMarkdown() {
         try {
             final URLConnection urlConnection = new URL(HELP_WEB).openConnection();
 
             urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
             urlConnection.setReadTimeout(READ_TIMEOUT);
 
-            BufferedReader reader = new BufferedReader(
+            try (final BufferedReader reader = new BufferedReader(
                     new InputStreamReader(urlConnection.getInputStream(), "ISO-8859-1")
-            );
-            final String markdown = reader.lines().collect(Collectors.joining("\n"));
-            loadedFromWeb = true;
-            return markdown;
+            )) {
+                final String markdown = reader.lines().collect(Collectors.joining("\n"));
+                loadedFromWeb = true;
+                return markdown;
+            }
         } catch (IOException e) {
             return (source == null) ? loadFallback() : null;
         }
@@ -123,21 +132,14 @@ public final class Help extends JFrame {
     /*
      * Load local fallback option
      */
+    @SuppressWarnings("OverlyBroadCatchBlock")
     private String loadFallback() {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(
                 getClass().getClassLoader().getResourceAsStream(HELP_LOCAL), "ISO-8859-1"))) {
             return reader.lines().collect(Collectors.joining("\n"));
-        } catch (IOException e) { return null; }
-    }
-
-    /*
-     * Render the markdown to HTML
-     */
-    private static String renderMarkdown(final String text) {
-        final Parser parser = Parser.builder().build();
-        final Node document = parser.parse(text);
-        final HtmlRenderer renderer = HtmlRenderer.builder().build();
-        return renderer.render(document);
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     private void fetchFromWebSource() {
