@@ -1,4 +1,4 @@
-package edu.kit.mima.gui.editor;
+package edu.kit.mima.gui.editor.style;
 
 
 import java.awt.Color;

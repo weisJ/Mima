@@ -1,5 +1,7 @@
 package edu.kit.mima.gui.editor.history;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.LinkedList;
 
 /**
@@ -31,7 +33,7 @@ public class History<T> {
      */
     @Override
     public String toString() {
-        return history.toString() + '[' + head + "]";
+        return history.toString() + '[' + head + ']';
     }
 
     /**
@@ -66,7 +68,7 @@ public class History<T> {
      *
      * @return current object
      */
-    public T getCurrent() {
+    public @Nullable T getCurrent() {
         return (head < history.size()) ? history.get(head) : null;
     }
 

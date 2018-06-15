@@ -8,7 +8,7 @@ import edu.kit.mima.gui.button.ButtonPanelFactory;
 import edu.kit.mima.gui.color.SyntaxColor;
 import edu.kit.mima.gui.console.Console;
 import edu.kit.mima.gui.editor.Editor;
-import edu.kit.mima.gui.editor.StyleGroup;
+import edu.kit.mima.gui.editor.style.StyleGroup;
 import edu.kit.mima.gui.logging.Logger;
 import edu.kit.mima.gui.menu.Help;
 import edu.kit.mima.gui.menu.MenuBuilder;

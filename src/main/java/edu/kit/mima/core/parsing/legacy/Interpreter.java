@@ -103,7 +103,7 @@ public class Interpreter {
         boolean foundFirstNonComment = false;
         int firstNonComment = 0;
         for (int i = 0; i < lines.length; i++) {
-            if ((lines[i] != null) && (lines[i].length() > 0)) {
+            if ((lines[i] != null) && (!lines[i].isEmpty())) {
                 if (lines[i].charAt(0) == '#') {
                     lines[i] = "";
                 } else if (lines[i].contains("#")) {
@@ -239,7 +239,7 @@ public class Interpreter {
             }
             final String command = (matcher.group(1) != null) ? matcher.group(1) : "";
             String value = (matcher.group(2) != null) ? matcher.group(2) : "";
-            if (value.length() > 0) {
+            if (!value.isEmpty()) {
                 if (memoryLookupTable.containsKey(value)) {
                     value = REFERENCE_PREFIX + String.valueOf(memoryLookupTable.get(value));
                 } else if (instructionLookupTable.containsKey(value)) {

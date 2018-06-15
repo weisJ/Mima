@@ -1,4 +1,4 @@
-package edu.kit.mima.gui.editor;
+package edu.kit.mima.gui.editor.style;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
