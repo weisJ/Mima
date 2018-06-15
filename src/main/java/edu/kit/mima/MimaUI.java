@@ -57,7 +57,6 @@ public final class MimaUI extends JFrame {
      * Create a new Mima UI window
      */
     private MimaUI() {
-        super();
         fileManager = new FileManager(this, MIMA_DIR, new String[]{FILE_EXTENSION, FILE_EXTENSION_X});
         editor = new Editor();
         console = new Console();

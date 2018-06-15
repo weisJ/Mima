@@ -34,7 +34,6 @@ public class Mima {
     private boolean extendedInstructions;
 
     public Mima() {
-        super();
         memoryMap = new MemoryMap(WORD_LENGTH, 100);
         accumulator = new MachineWord(0, WORD_LENGTH);
         stackPointer = accumulator.clone();

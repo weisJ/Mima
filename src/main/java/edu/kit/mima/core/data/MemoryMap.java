@@ -25,7 +25,6 @@ public class MemoryMap implements Memory<MachineWord> {
      * @param initialCapacity initial capacity
      */
     public MemoryMap(final int machineWordLength, final int initialCapacity) {
-        super();
         assert !(initialCapacity >= Math.pow(2, machineWordLength)) : "not enough bits to reach all values";
         this.machineWordLength = machineWordLength;
         this.initialCapacity = initialCapacity;
