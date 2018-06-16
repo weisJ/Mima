@@ -60,19 +60,66 @@ public class Environment {
     }
 
     /**
-     * Returns the environment for which the given name is defined
-     * either as a function or a variable
+     * Returns the environment for which the given variable is defined
      *
-     * @param name name of function or variable
+     * @param name name of variable
      * @return Environment with "name" defined. Null if name is not defined
      */
-    public @Nullable Environment lookup(Token name) {
+    public @Nullable Environment lookupVariable(Token name) {
         Environment scope = this;
         while (scope != null) {
-            if (scope.variables.containsKey(name)
-                    || scope.constants.containsKey(name)
-                    || scope.functions.containsKey(name)
-                    || scope.jumps.containsKey(name)) {
+            if (scope.variables.containsKey(name)) {
+                return scope;
+            }
+            scope = scope.parent;
+        }
+        return null;
+    }
+
+    /**
+     * Returns the environment for which the given constant is defined
+     *
+     * @param name name of constant
+     * @return Environment with "name" defined. Null if name is not defined
+     */
+    public @Nullable Environment lookupConstant(Token name) {
+        Environment scope = this;
+        while (scope != null) {
+            if (scope.constants.containsKey(name)) {
+                return scope;
+            }
+            scope = scope.parent;
+        }
+        return null;
+    }
+
+    /**
+     * Returns the environment for which the given function is defined
+     *
+     * @param name name of function
+     * @return Environment with "name" defined. Null if name is not defined
+     */
+    public @Nullable Environment lookupFunction(Token name) {
+        Environment scope = this;
+        while (scope != null) {
+            if (scope.functions.containsKey(name)) {
+                return scope;
+            }
+            scope = scope.parent;
+        }
+        return null;
+    }
+
+    /**
+     * Returns the environment for which the given jump is defined
+     *
+     * @param name name of jump
+     * @return Environment with "name" defined. Null if name is not defined
+     */
+    public @Nullable Environment lookupJump(Token name) {
+        Environment scope = this;
+        while (scope != null) {
+            if (scope.jumps.containsKey(name)) {
                 return scope;
             }
             scope = scope.parent;
@@ -99,7 +146,7 @@ public class Environment {
         if (variables.containsKey(name)) {
             return variables.get(name);
         }
-        Environment scope = lookup(name);
+        Environment scope = lookupVariable(name);
         if (scope == null) {
             throw new IllegalArgumentException("Undefined variable: " + name);
         }
@@ -116,7 +163,7 @@ public class Environment {
         if (constants.containsKey(name)) {
             return constants.get(name);
         }
-        Environment scope = lookup(name);
+        Environment scope = lookupConstant(name);
         if (scope == null) {
             throw new IllegalArgumentException("Undefined variable: " + name);
         }
@@ -133,7 +180,7 @@ public class Environment {
         if (functions.containsKey(name)) {
             return functions.get(name);
         }
-        Environment scope = lookup(name);
+        Environment scope = lookupFunction(name);
         if (scope == null) {
             throw new IllegalArgumentException("Undefined variable: " + name);
         }
@@ -151,7 +198,7 @@ public class Environment {
         if (jumps.containsKey(name)) {
             return jumps.get(name);
         }
-        Environment scope = lookup(name);
+        Environment scope = lookupJump(name);
         if (scope == null) {
             throw new IllegalArgumentException("Undefined variable: " + name);
         }
@@ -165,7 +212,7 @@ public class Environment {
      * @param value new value of variable
      */
     public void setVariable(Token name, MachineWord value) {
-        Environment scope = lookup(name);
+        Environment scope = lookupVariable(name);
         if (scope == null) {
             throw new IllegalArgumentException("Undefined variable: " + name);
         }
@@ -182,7 +229,7 @@ public class Environment {
      * @param function new function body of variable
      */
     public void setFunction(Token name, Function<List<Value<MachineWord>>, MachineWord> function) {
-        Environment scope = lookup(name);
+        Environment scope = lookupFunction(name);
         if (scope == null) {
             throw new IllegalArgumentException("Undefined function: " + name);
         }

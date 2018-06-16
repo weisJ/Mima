@@ -25,7 +25,6 @@ public class TokenStream {
     private static final Pattern NUMBER_START = Pattern.compile(Symbol.NUMBER_SIGNED);
     private static final Pattern NUMBER = Pattern.compile(Symbol.NUMBERS);
     private static final Pattern LETTER = Pattern.compile(Symbol.LETTERS);
-    private static final Pattern SYMBOLS = Pattern.compile('\\' + Symbol.ALLOWED_SYMBOLS);
     private static final Pattern PUNCTUATION = Pattern.compile('['
             + String.valueOf(Punctuation.getPunctuation()) + ']');
 
@@ -158,7 +157,7 @@ public class TokenStream {
     }
 
     private boolean isIdentification(char c) {
-        return isIdentificationStart(c) || SYMBOLS.matcher(String.valueOf(c)).matches();
+        return isIdentificationStart(c) || (Symbol.ALLOWED_SYMBOLS.indexOf(c) >= 0);
     }
 
     private boolean isKeyword(String identifier) {

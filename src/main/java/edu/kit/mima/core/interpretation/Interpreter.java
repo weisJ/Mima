@@ -30,9 +30,13 @@ public class Interpreter {
 
     private final int wordLength;
     private int reservedIndex;
+    private int expressionScopeIndex;
+    private boolean running;
+
+    //Jump//
     private Environment lastReferencedEnvironment;
     private boolean jumped;
-    private boolean running;
+    //---//
 
     /**
      * @param program    program input
@@ -42,6 +46,7 @@ public class Interpreter {
         this.program = program;
         this.wordLength = wordLength;
         reservedIndex = -1;
+        expressionScopeIndex = 0;
         running = true;
         jumped = false;
     }
@@ -58,7 +63,7 @@ public class Interpreter {
         while (running) {
             value = evaluate(programToken, environment);
             if (jumped) {
-                environment = lastReferencedEnvironment;
+                environment = lastReferencedEnvironment.returnToParent();
                 programToken = lastReferencedEnvironment.getProgramToken();
                 jumped = false;
             }
@@ -92,7 +97,7 @@ public class Interpreter {
             }
             var argument = args.get(0);
             jumped = true;
-            lastReferencedEnvironment.setExpressionIndex(argument.getValue().intValue());
+            expressionScopeIndex = argument.getValue().intValue();
             return null;
         });
         //Jump if negative Instruction
@@ -103,7 +108,7 @@ public class Interpreter {
             if (mima.getAccumulator().msb() == 1) {
                 var argument = args.get(0);
                 jumped = true;
-                lastReferencedEnvironment.setExpressionIndex(argument.getValue().intValue());
+                expressionScopeIndex = argument.getValue().intValue();
             }
             return null;
         });
@@ -115,14 +120,9 @@ public class Interpreter {
         for (int i = 0; i < tokens.length; i++) {
             Token token = tokens[i];
             if (token.getType() == TokenType.JUMP_POINT) {
-                resolveJumpPoint((Tuple<Token, Token>) token, environment, i);
+                environment.defineJump(((Tuple<Token, Token>) token).getFirst(), i);
             }
         }
-    }
-
-    private void resolveJumpPoint(Tuple<Token, Token> expression, Environment environment, int index) {
-        environment.defineJump(expression.getFirst(), index);
-        ((BinaryToken<Token, Token>) expression).setType(TokenType.RESOLVED_JUMP_POINT);
     }
 
     /**
@@ -154,7 +154,7 @@ public class Interpreter {
                 return null;
             case CALL:
                 return evaluateFunction((BinaryToken<Token, ArrayToken<Token>>) expression, environment);
-            case RESOLVED_JUMP_POINT:
+            case JUMP_POINT:
                 return evaluate(((Tuple<Token, Token>) expression).getSecond(), environment);
             default:
                 throw new IllegalArgumentException("Can't evaluate: " + expression);
@@ -163,6 +163,8 @@ public class Interpreter {
 
     private Value<MachineWord> evaluateProgram(ProgramToken programToken, Environment environment) {
         Environment scope = environment.extend(programToken); //Extend to own scope
+        scope.setExpressionIndex(expressionScopeIndex);
+
         int reserved = reservedIndex; //Remember index for auto created memory cells
 
         Token[] tokens = programToken.getValue();
@@ -170,14 +172,15 @@ public class Interpreter {
 
         //Evaluate
         Value<MachineWord> value = null;
-        while (environment.getExpressionIndex() < tokens.length) {
-            value = evaluate(tokens[environment.getExpressionIndex()], scope);
-            environment.setExpressionIndex(environment.getExpressionIndex() + 1);
+        while (scope.getExpressionIndex() < tokens.length) {
+            value = evaluate(tokens[scope.getExpressionIndex()], scope);
+            scope.setExpressionIndex(scope.getExpressionIndex() + 1);
             if (jumped) {
                 return null;
             }
         }
 
+        expressionScopeIndex = 0;
         reservedIndex = reserved; //Release auto created memory cells
         return value; //Automatically return to parent scope
     }
@@ -213,7 +216,7 @@ public class Interpreter {
             } catch (IllegalArgumentException e2) {
                 value = new MachineWord(environment.getJump(token), wordLength);
                 type = ValueType.JUMP_REFERENCE;
-                lastReferencedEnvironment = environment.lookup(token);
+                lastReferencedEnvironment = environment.lookupJump(token);
             }
         }
         return new Value<>(type, value);
