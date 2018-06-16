@@ -2,11 +2,11 @@ package edu.kit.mima.core;
 
 import edu.kit.mima.core.data.MachineWord;
 import edu.kit.mima.core.data.MemoryMap;
-import edu.kit.mima.core.instruction.MimaInstructions;
-import edu.kit.mima.core.instruction.MimaXInstructions;
-import edu.kit.mima.core.parsing.legacy.CompiledInstruction;
-import edu.kit.mima.core.parsing.legacy.InterpretationException;
-import edu.kit.mima.core.parsing.legacy.Interpreter;
+import edu.kit.mima.core.legacy.instruction.MimaInstructions;
+import edu.kit.mima.core.legacy.instruction.MimaXInstructions;
+import edu.kit.mima.core.legacy.intepretation.CompiledInstruction;
+import edu.kit.mima.core.legacy.intepretation.InterpretationException;
+import edu.kit.mima.core.legacy.intepretation.Interpreter;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -149,7 +149,7 @@ public class Mima {
     }
 
     public MachineWord getAccumulator() {
-        return accumulator.clone();
+        return accumulator;
     }
 
     public void setAccumulator(MachineWord value) {

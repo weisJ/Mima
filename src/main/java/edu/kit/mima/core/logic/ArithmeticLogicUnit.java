@@ -3,7 +3,6 @@ package edu.kit.mima.core.logic;
 import edu.kit.mima.core.Mima;
 import edu.kit.mima.core.data.MachineWord;
 
-import java.util.Objects;
 import java.util.function.BinaryOperator;
 
 /**
@@ -83,9 +82,8 @@ public class ArithmeticLogicUnit {
      */
     public MachineWord equals(final MachineWord x, final MachineWord y) {
         checkWord(x, y);
-        final MachineWord comp = new MachineWord(bitwise(x, y, Objects::equals), machineWordLength);
-        return comp.intValue() == 0 ? new MachineWord(-1, machineWordLength)
-                : new MachineWord(0, machineWordLength);
+        final MachineWord comp = new MachineWord(bitwise(x, y, (a, b) -> a && b || !a && !b), machineWordLength);
+        return comp.intValue() == -1 ? comp : new MachineWord(0, machineWordLength);
     }
 
     /**
@@ -121,7 +119,9 @@ public class ArithmeticLogicUnit {
      */
     private void checkWord(final MachineWord... var) {
         for (final MachineWord w : var) {
-            assert w.getWordLength() == machineWordLength : "machine words must match mima word length";
+            if (w.getWordLength() != machineWordLength) {
+                throw new IllegalArgumentException("machine words must match mima word length");
+            }
         }
     }
 }

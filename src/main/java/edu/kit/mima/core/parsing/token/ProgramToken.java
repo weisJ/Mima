@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
  */
 public class ProgramToken implements Token<Token[]> {
 
-    private final Token[] program;
+    private Token[] program;
 
     /**
      * Program token that holds an array of Tokens
@@ -29,6 +29,11 @@ public class ProgramToken implements Token<Token[]> {
     }
 
     @Override
+    public void setValue(Token[] value) {
+        this.program = value;
+    }
+
+    @Override
     public TokenType getType() {
         return TokenType.PROGRAM;
     }
@@ -38,5 +43,18 @@ public class ProgramToken implements Token<Token[]> {
         return Arrays.stream(program)
                 .map(t -> '\t' + t.toString().replaceAll("\n", "\n\t") + '\n')
                 .collect(Collectors.joining("", "[prog]{\n", "}"));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ProgramToken that = (ProgramToken) o;
+        return Arrays.equals(program, that.program);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(program);
     }
 }

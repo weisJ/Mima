@@ -1,7 +1,5 @@
 package edu.kit.mima.core.parsing.inputStream;
 
-import edu.kit.mima.core.instruction.MimaInstructions;
-import edu.kit.mima.core.instruction.MimaXInstructions;
 import edu.kit.mima.core.parsing.lang.Keyword;
 import edu.kit.mima.core.parsing.lang.Punctuation;
 import edu.kit.mima.core.parsing.lang.Symbol;
@@ -11,9 +9,7 @@ import edu.kit.mima.core.parsing.token.TokenType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * The TokenStream uses an {@link CharInputStream} to construct
@@ -24,7 +20,6 @@ import java.util.stream.Collectors;
  */
 public class TokenStream {
     private static final String[] KEYWORDS = Keyword.getKeywords();
-    private static final String[] INSTRUCTIONS = loadInstructions();
     private static final String PUNCTUATION_STRING = String.valueOf(Punctuation.getPunctuation());
     private static final String WHITESPACE = " \t\n\r\f";
     private static final char NEW_LINE = '\n';
@@ -40,17 +35,6 @@ public class TokenStream {
     public TokenStream(String input) {
         this.input = new CharInputStream(input);
         current = null;
-    }
-
-    /*
-     * Load all allowed native instructions
-     */
-    private static String[] loadInstructions() {
-        Set<String> instructions = Arrays.stream(MimaInstructions.values()).map(MimaInstructions::toString)
-                .collect(Collectors.toSet());
-        instructions.addAll(Arrays.stream(MimaXInstructions.values()).map(MimaXInstructions::toString)
-                .collect(Collectors.toSet()));
-        return instructions.toArray(new String[0]);
     }
 
     /**
@@ -174,10 +158,6 @@ public class TokenStream {
         return Arrays.stream(KEYWORDS).anyMatch(keyword -> keyword.equals(identifier));
     }
 
-    private boolean isInstruction(String identifier) {
-        return Arrays.stream(INSTRUCTIONS).anyMatch(instruction -> instruction.equals(identifier));
-    }
-
     /*
      * Read a number value
      */
@@ -202,9 +182,6 @@ public class TokenStream {
         String identifier = readWhile(this::isIdentification);
         if (isKeyword(identifier)) {
             return new AtomToken<>(TokenType.KEYWORD, identifier);
-        }
-        if (isInstruction(identifier)) {
-            return new AtomToken<>(TokenType.INSTRUCTION, identifier);
         }
         return new AtomToken<>(TokenType.IDENTIFICATION, identifier);
     }

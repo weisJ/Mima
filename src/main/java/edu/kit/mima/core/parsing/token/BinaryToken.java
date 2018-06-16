@@ -2,6 +2,8 @@ package edu.kit.mima.core.parsing.token;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 /**
  * Implementation of a {@link Token} that holds two values
  *
@@ -20,6 +22,10 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
         }
 
         @Override
+        public void setValue(Object value) {
+        }
+
+        @Override
         public TokenType getType() {
             return TokenType.EMPTY;
         }
@@ -30,9 +36,9 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
         }
     };
 
-    private final TokenType type;
-    private final T first;
-    private final K second;
+    private TokenType type;
+    private T first;
+    private K second;
 
     /**
      * Token that holds two values independent of each others type
@@ -58,8 +64,18 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
     }
 
     @Override
+    public void setFirst(T first) {
+        this.first = first;
+    }
+
+    @Override
     public K getSecond() {
         return second;
+    }
+
+    @Override
+    public void setSecond(K second) {
+        this.second = second;
     }
 
     @Override
@@ -68,8 +84,22 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
     }
 
     @Override
+    public void setValue(T value) {
+        this.first = value;
+    }
+
+    @Override
     public TokenType getType() {
         return type;
+    }
+
+    /**
+     * Set the type of this binary token
+     *
+     * @param type type
+     */
+    public void setType(TokenType type) {
+        this.type = type;
     }
 
     @Override
@@ -79,5 +109,20 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
                 + "\n\t"
                 + second.toString().replaceAll("\n", "\n\t")
                 + "\n}";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BinaryToken<?, ?> that = (BinaryToken<?, ?>) o;
+        return type == that.type
+                && Objects.equals(first, that.first)
+                && Objects.equals(second, that.second);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, first, second);
     }
 }

@@ -97,7 +97,7 @@ public class MachineWord {
      * @return bits array
      */
     public boolean[] getBits() {
-        return bits.clone();
+        return bits;
     }
 
     /**
