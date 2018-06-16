@@ -2,33 +2,34 @@ package edu.kit.mima.core.instruction;
 
 import edu.kit.mima.core.Mima;
 import edu.kit.mima.core.data.MachineWord;
+import edu.kit.mima.core.interpretation.Environment;
 import edu.kit.mima.core.interpretation.Value;
 import edu.kit.mima.core.interpretation.ValueType;
 import edu.kit.mima.core.logic.ArithmeticLogicUnit;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  * @author Jannis Weis
  * @since 2018
  */
-public enum MimaInstruction implements Function<List<Value<MachineWord>>, MachineWord> {
+public enum MimaInstruction implements BiFunction<List<Value<MachineWord>>, Environment, MachineWord> {
 
     /**
      * Load Constant to accumulator
      */
     LDC("LDC") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args) {
+        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
             checkArgNumber(args, 1);
             var argument = args.get(0);
             if (argument.getType() != ValueType.CONSTANT && argument.getType() != ValueType.NUMBER) {
                 fail("can't pass a reference");
             }
             MachineWord value = argument.getValue();
-            if (!(mima.getWordLength() == mima.getWordLengthConst()) && (value.intValue() < 0)) {
+            if (!(mima.getWordLength() == mima.getConstWordLength()) && (value.intValue() < 0)) {
                 fail("can't pass negative values");
             }
             mima.setAccumulator(value);
@@ -40,10 +41,10 @@ public enum MimaInstruction implements Function<List<Value<MachineWord>>, Machin
      */
     LDV("LDV") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args) {
+        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
             checkArgNumber(args, 1);
             var argument = args.get(0);
-            checkReference(argument);
+            checkMemoryReference(argument);
             mima.setAccumulator(mima.loadValue(argument.getValue().intValue()));
             return null;
         }
@@ -53,10 +54,10 @@ public enum MimaInstruction implements Function<List<Value<MachineWord>>, Machin
      */
     STV("STV") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args) {
+        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
             checkArgNumber(args, 1);
             var argument = args.get(0);
-            checkReference(argument);
+            checkMemoryReference(argument);
             mima.storeValue(argument.getValue().intValue(), mima.getAccumulator());
             return null;
         }
@@ -66,10 +67,10 @@ public enum MimaInstruction implements Function<List<Value<MachineWord>>, Machin
      */
     LDIV("LDIV") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args) {
+        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
             checkArgNumber(args, 1);
             var argument = args.get(0);
-            checkReference(argument);
+            checkMemoryReference(argument);
             mima.setAccumulator(mima.loadValue(mima.loadValue(argument.getValue().intValue()).intValue()));
             return null;
         }
@@ -79,10 +80,10 @@ public enum MimaInstruction implements Function<List<Value<MachineWord>>, Machin
      */
     STIV("STIV") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args) {
+        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
             checkArgNumber(args, 1);
             var argument = args.get(0);
-            checkReference(argument);
+            checkMemoryReference(argument);
             mima.storeValue(mima.loadValue(argument.getValue().intValue()).intValue(), mima.getAccumulator());
             return null;
         }
@@ -92,7 +93,7 @@ public enum MimaInstruction implements Function<List<Value<MachineWord>>, Machin
      */
     RAR("RAR") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args) {
+        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
             checkArgNumber(args, 0);
             mima.setAccumulator(arithmeticLogicUnit.rar(mima.getAccumulator()));
             return null;
@@ -103,7 +104,7 @@ public enum MimaInstruction implements Function<List<Value<MachineWord>>, Machin
      */
     NOT("NOT") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args) {
+        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
             checkArgNumber(args, 0);
             mima.setAccumulator(mima.getAccumulator().invert());
             return null;
@@ -114,10 +115,10 @@ public enum MimaInstruction implements Function<List<Value<MachineWord>>, Machin
      */
     ADD("ADD") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args) {
+        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
             checkArgNumber(args, 1);
             var argument = args.get(0);
-            checkReference(argument);
+            checkMemoryReference(argument);
             mima.setAccumulator(arithmeticLogicUnit.add(
                     MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
                     mima.loadValue(argument.getValue().intValue())));
@@ -129,10 +130,10 @@ public enum MimaInstruction implements Function<List<Value<MachineWord>>, Machin
      */
     AND("AND") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args) {
+        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
             checkArgNumber(args, 1);
             var argument = args.get(0);
-            checkReference(argument);
+            checkMemoryReference(argument);
             mima.setAccumulator(arithmeticLogicUnit.and(
                     MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
                     mima.loadValue(argument.getValue().intValue())));
@@ -144,10 +145,10 @@ public enum MimaInstruction implements Function<List<Value<MachineWord>>, Machin
      */
     OR("OR") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args) {
+        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
             checkArgNumber(args, 1);
             var argument = args.get(0);
-            checkReference(argument);
+            checkMemoryReference(argument);
             mima.setAccumulator(arithmeticLogicUnit.or(
                     MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
                     mima.loadValue(argument.getValue().intValue())));
@@ -159,10 +160,10 @@ public enum MimaInstruction implements Function<List<Value<MachineWord>>, Machin
      */
     XOR("XOR") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args) {
+        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
             checkArgNumber(args, 1);
             var argument = args.get(0);
-            checkReference(argument);
+            checkMemoryReference(argument);
             mima.setAccumulator(arithmeticLogicUnit.xor(
                     MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
                     mima.loadValue(argument.getValue().intValue())));
@@ -174,10 +175,10 @@ public enum MimaInstruction implements Function<List<Value<MachineWord>>, Machin
      */
     EQL("EQL") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args) {
+        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
             checkArgNumber(args, 1);
             var argument = args.get(0);
-            checkReference(argument);
+            checkMemoryReference(argument);
             mima.setAccumulator(arithmeticLogicUnit.equals(
                     MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
                     mima.loadValue(argument.getValue().intValue())));
@@ -212,24 +213,40 @@ public enum MimaInstruction implements Function<List<Value<MachineWord>>, Machin
         arithmeticLogicUnit = new ArithmeticLogicUnit(mima.getWordLength());
     }
 
+    /**
+     * Throw error with given message
+     *
+     * @param message fail message
+     */
     protected void fail(final String message) {
-        mima.stop();
         throw new IllegalArgumentException(message);
     }
 
+    /**
+     * Check the argument for given number of arguemnts
+     *
+     * @param args                   arguments list
+     * @param expectedArgumentNumber expected number of arguments
+     */
     protected void checkArgNumber(List<Value<MachineWord>> args, int expectedArgumentNumber) {
         if (args.size() != expectedArgumentNumber) {
             fail("invalid number of arguments");
         }
     }
 
-    protected void checkReference(Value<MachineWord> argument) {
+    /**
+     * Check whether argument is a memory reference and if it is, whether the value is legal address
+     *
+     * @param argument argument
+     */
+    protected void checkMemoryReference(Value<MachineWord> argument) {
         if (argument == null
                 || !(argument.getType() == ValueType.NUMBER
                              || argument.getType() == ValueType.CONSTANT
                              || argument.getType() == ValueType.MEMORY_REFERENCE)) {
             fail("must pass a memory address");
         }
+        assert argument != null;
         if (!(argument.getType() == ValueType.MEMORY_REFERENCE) && argument.getValue().intValue() < 0) {
             fail("illegal memory address");
         }
@@ -241,6 +258,6 @@ public enum MimaInstruction implements Function<List<Value<MachineWord>>, Machin
     }
 
     @Override
-    public abstract @Nullable MachineWord apply(List<Value<MachineWord>> args);
+    public abstract @Nullable MachineWord apply(List<Value<MachineWord>> args, Environment environment);
 
 }

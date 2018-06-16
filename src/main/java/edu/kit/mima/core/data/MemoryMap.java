@@ -1,6 +1,6 @@
 package edu.kit.mima.core.data;
 
-import edu.kit.mima.core.Mima;
+import edu.kit.mima.core.legacy.Mima;
 
 import java.util.HashMap;
 import java.util.Map;

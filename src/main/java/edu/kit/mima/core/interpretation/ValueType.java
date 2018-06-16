@@ -5,10 +5,24 @@ package edu.kit.mima.core.interpretation;
  * @since 2018
  */
 public enum ValueType {
-
+    /**
+     * Constant value type
+     */
     CONSTANT,
+    /**
+     * jump reference value type
+     */
     JUMP_REFERENCE,
+    /**
+     * memory reference value type
+     */
     MEMORY_REFERENCE,
+    /**
+     * number value type
+     */
     NUMBER,
-    EMPTY
+    /**
+     * void value type
+     */
+    VOID
 }
