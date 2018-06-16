@@ -19,10 +19,6 @@ public enum TokenType {
      * Jump point type
      */
     JUMP_POINT,
-    /**
-     * Resolved JumpPoint type
-     */
-    RESOLVED_JUMP_POINT,
 
     /*Lower level types*/
     /**

@@ -67,15 +67,6 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
         return type;
     }
 
-    /**
-     * Set the type of this binary token
-     *
-     * @param type type
-     */
-    public void setType(TokenType type) {
-        this.type = type;
-    }
-
     @Override
     public String toString() {
         return "[type=" + type + "] {\n\t"

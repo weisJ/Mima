@@ -43,17 +43,19 @@ public class Parser {
      */
     public static void main(String[] args) {
         ProgramToken programToken = new Parser("#Memory associations;\n"
-                + "§define minus_eins; #inline comment#\n"
+                + "§define zero;"
+                + "§define abs;"
+                + "{§define minus_eins; #inline comment#\n"
                 + "§define eins;\n"
-                + "§define zero;\n"
+                + "{§define zero2;}\n"
                 + "§define val;\n"
                 + '\n'
                 + "#Instructions\n"
                 + "#This is a comment\n"
                 + "LDC(5);\n"
-                + "STV(val);\n"
+                + "STV(abs);\n"
                 + "LDC(0);\n"
-                + "STV(zero);\n"
+                + "STV(zero1);\n"
                 + "LDC(1);\n"
                 + "STV(eins);\n"
                 + "NOT();\n"
@@ -66,7 +68,8 @@ public class Parser {
                 + "ADD(minus_eins);\n"
                 + "STV(val);\n"
                 + "JMP(Loop);\n"
-                + "Stop : HALT();").parse();
+                + "Stop : HALT();"
+                + "}").parse();
         Interpreter interpreter = new Interpreter(programToken, 24);
         interpreter.evaluate();
         System.out.print(programToken);
@@ -108,9 +111,10 @@ public class Parser {
     private Token parseAtomic() {
         return maybeCall(() -> {
             if (isPunctuation(Punctuation.SCOPE_OPEN)) {
-                Token programToken = parseTopLevel();
-                skipPunctuation(Punctuation.CLOSED_BRACKET);
-                return programToken;
+                return new ProgramToken(delimited(Punctuation.SCOPE_OPEN,
+                        Punctuation.SCOPE_CLOSED,
+                        Punctuation.INSTRUCTION_END,
+                        () -> maybeJumpAssociation(this::parseExpression)).getValue());
             }
             if (isPunctuation(Punctuation.OPEN_BRACKET)) {
                 input.next();
@@ -231,7 +235,11 @@ public class Parser {
             if (isPunctuation(stop)) {
                 break;
             }
-            tokens.add(parser.get());
+            Token token = parser.get();
+            if (token.getType() == TokenType.PROGRAM) {
+                first = true;
+            }
+            tokens.add(token);
         }
         skipPunctuation(stop);
         return new ArrayToken<>(tokens.toArray(new Token[0]));
