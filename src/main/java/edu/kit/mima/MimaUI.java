@@ -1,6 +1,6 @@
 package edu.kit.mima;
 
-import edu.kit.mima.core.Mima;
+import edu.kit.mima.core.legacy.Mima;
 import edu.kit.mima.core.legacy.intepretation.Interpreter;
 import edu.kit.mima.gui.button.ButtonPanelBuilder;
 import edu.kit.mima.gui.color.SyntaxColor;
@@ -17,7 +17,11 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;

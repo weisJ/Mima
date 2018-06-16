@@ -1,7 +1,7 @@
 package edu.kit.mima.core.logic;
 
-import edu.kit.mima.core.Mima;
 import edu.kit.mima.core.data.MachineWord;
+import edu.kit.mima.core.legacy.Mima;
 
 import java.util.function.BinaryOperator;
 

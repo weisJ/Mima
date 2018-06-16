@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  * @author Jannis Weis
@@ -19,7 +19,7 @@ public class Environment {
     private final ProgramToken programToken;
     private final HashMap<Token, MachineWord> variables;
     private final HashMap<Token, MachineWord> constants;
-    private final HashMap<Token, Function<List<Value<MachineWord>>, MachineWord>> functions;
+    private final HashMap<Token, BiFunction<List<Value<MachineWord>>, Environment, MachineWord>> functions;
     private final HashMap<Token, Integer> jumps;
 
     private int expressionIndex;
@@ -127,10 +127,20 @@ public class Environment {
         return null;
     }
 
+    /**
+     * Get the current expression index
+     *
+     * @return expression index
+     */
     public int getExpressionIndex() {
         return expressionIndex;
     }
 
+    /**
+     * Set the expression index of the scope
+     *
+     * @param expressionIndex expression index of scope
+     */
     public void setExpressionIndex(int expressionIndex) {
         assert expressionIndex >= 0 : "negative expression index";
         this.expressionIndex = expressionIndex;
@@ -176,7 +186,7 @@ public class Environment {
      * @param name name of variable
      * @return function associated with variable
      */
-    public Function<List<Value<MachineWord>>, MachineWord> getFunction(Token name) {
+    public BiFunction<List<Value<MachineWord>>, Environment, MachineWord> getFunction(Token name) {
         if (functions.containsKey(name)) {
             return functions.get(name);
         }
@@ -228,7 +238,7 @@ public class Environment {
      * @param name     name of variable
      * @param function new function body of variable
      */
-    public void setFunction(Token name, Function<List<Value<MachineWord>>, MachineWord> function) {
+    public void setFunction(Token name, BiFunction<List<Value<MachineWord>>, Environment, MachineWord> function) {
         Environment scope = lookupFunction(name);
         if (scope == null) {
             throw new IllegalArgumentException("Undefined function: " + name);
@@ -258,7 +268,7 @@ public class Environment {
      * @param name     name of function
      * @param function function body
      */
-    public void defineFunction(Token name, Function<List<Value<MachineWord>>, MachineWord> function) {
+    public void defineFunction(Token name, BiFunction<List<Value<MachineWord>>, Environment, MachineWord> function) {
         if (functions.containsKey(name)) {
             throw new IllegalArgumentException("function: \"" + name.getValue() + "\" already defined in scope");
         }
