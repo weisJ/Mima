@@ -10,4 +10,5 @@ public enum ValueType {
     JUMP_REFERENCE,
     MEMORY_REFERENCE,
     NUMBER,
+    EMPTY
 }

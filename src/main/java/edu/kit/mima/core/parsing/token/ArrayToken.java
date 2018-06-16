@@ -32,7 +32,7 @@ public class ArrayToken<T> implements Token<T[]> {
 
     @Override
     public void setValue(T[] value) {
-        this.values = value;
+        values = value;
     }
 
     @Override
@@ -50,10 +50,14 @@ public class ArrayToken<T> implements Token<T[]> {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ArrayToken<?> that = (ArrayToken<?>) o;
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        ArrayToken<?> that = (ArrayToken<?>) obj;
         return Arrays.equals(values, that.values)
                 && Objects.equals(className, that.className);
     }

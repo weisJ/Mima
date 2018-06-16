@@ -82,7 +82,7 @@ public class ArithmeticLogicUnit {
      */
     public MachineWord equals(final MachineWord x, final MachineWord y) {
         checkWord(x, y);
-        final MachineWord comp = new MachineWord(bitwise(x, y, (a, b) -> a && b || !a && !b), machineWordLength);
+        final MachineWord comp = new MachineWord(bitwise(x, y, (v, w) -> v ? w : !w), machineWordLength);
         return comp.intValue() == -1 ? comp : new MachineWord(0, machineWordLength);
     }
 

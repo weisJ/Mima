@@ -5,6 +5,7 @@ import edu.kit.mima.core.data.MachineWord;
 import edu.kit.mima.core.interpretation.Value;
 import edu.kit.mima.core.interpretation.ValueType;
 import edu.kit.mima.core.logic.ArithmeticLogicUnit;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Function;
@@ -240,6 +241,6 @@ public enum MimaInstruction implements Function<List<Value<MachineWord>>, Machin
     }
 
     @Override
-    public abstract MachineWord apply(List<Value<MachineWord>> args);
+    public abstract @Nullable MachineWord apply(List<Value<MachineWord>> args);
 
 }

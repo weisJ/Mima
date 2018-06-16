@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 /**
  * The TokenStream uses an {@link CharInputStream} to construct
@@ -20,8 +21,14 @@ import java.util.function.Predicate;
  */
 public class TokenStream {
     private static final String[] KEYWORDS = Keyword.getKeywords();
-    private static final String PUNCTUATION_STRING = String.valueOf(Punctuation.getPunctuation());
-    private static final String WHITESPACE = " \t\n\r\f";
+    private static final Pattern WHITESPACE = Pattern.compile("[ \t\n\r\f]");
+    private static final Pattern NUMBER_START = Pattern.compile(Symbol.NUMBER_SIGNED);
+    private static final Pattern NUMBER = Pattern.compile(Symbol.NUMBERS);
+    private static final Pattern LETTER = Pattern.compile(Symbol.LETTERS);
+    private static final Pattern SYMBOLS = Pattern.compile('\\' + Symbol.ALLOWED_SYMBOLS);
+    private static final Pattern PUNCTUATION = Pattern.compile('['
+            + String.valueOf(Punctuation.getPunctuation()) + ']');
+
     private static final char NEW_LINE = '\n';
     private final CharInputStream input;
 
@@ -131,27 +138,27 @@ public class TokenStream {
     }
 
     private boolean isWhitespace(char c) {
-        return WHITESPACE.indexOf(c) >= 0;
+        return WHITESPACE.matcher(String.valueOf(c)).matches();
     }
 
     private boolean isDigitStart(char c) {
-        return String.valueOf(c).matches(Symbol.NUMBER_SIGNED);
+        return NUMBER_START.matcher(String.valueOf(c)).matches();
     }
 
     private boolean isDigit(char c) {
-        return String.valueOf(c).matches(Symbol.NUMBERS);
+        return NUMBER.matcher(String.valueOf(c)).matches();
     }
 
     private boolean isIdentificationStart(char c) {
-        return String.valueOf(c).matches(Symbol.LETTERS);
+        return LETTER.matcher(String.valueOf(c)).matches();
     }
 
     private boolean isPunctuationChar(char c) {
-        return PUNCTUATION_STRING.indexOf(c) >= 0;
+        return PUNCTUATION.matcher(String.valueOf(c)).matches();
     }
 
     private boolean isIdentification(char c) {
-        return isIdentificationStart(c) || Symbol.ALLOWED_SYMBOLS.indexOf(c) >= 0;
+        return isIdentificationStart(c) || SYMBOLS.matcher(String.valueOf(c)).matches();
     }
 
     private boolean isKeyword(String identifier) {

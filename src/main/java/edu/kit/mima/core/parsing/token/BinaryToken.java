@@ -1,7 +1,5 @@
 package edu.kit.mima.core.parsing.token;
 
-import org.jetbrains.annotations.Nullable;
-
 import java.util.Objects;
 
 /**
@@ -11,30 +9,6 @@ import java.util.Objects;
  * @since 2018
  */
 public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
-
-    /**
-     * Empty token to use with binary tokens that should explicitly not have any second value
-     */
-    public static final Token EMPTY_TOKEN = new Token() {
-        @Override
-        public @Nullable Object getValue() {
-            return null;
-        }
-
-        @Override
-        public void setValue(Object value) {
-        }
-
-        @Override
-        public TokenType getType() {
-            return TokenType.EMPTY;
-        }
-
-        @Override
-        public String toString() {
-            return "[type=EMPTY] { }";
-        }
-    };
 
     private TokenType type;
     private T first;
@@ -85,7 +59,7 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
 
     @Override
     public void setValue(T value) {
-        this.first = value;
+        first = value;
     }
 
     @Override
@@ -112,10 +86,14 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        BinaryToken<?, ?> that = (BinaryToken<?, ?>) o;
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        BinaryToken<?, ?> that = (BinaryToken<?, ?>) obj;
         return type == that.type
                 && Objects.equals(first, that.first)
                 && Objects.equals(second, that.second);
