@@ -1,6 +1,6 @@
 package edu.kit.mima.core.legacy.instruction;
 
-import edu.kit.mima.core.Mima;
+import edu.kit.mima.core.legacy.Mima;
 import edu.kit.mima.core.legacy.intepretation.CompiledInstruction;
 import edu.kit.mima.core.legacy.intepretation.InterpretationException;
 import edu.kit.mima.core.logic.ArithmeticLogicUnit;

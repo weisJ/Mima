@@ -1,7 +1,7 @@
 package edu.kit.mima.core.legacy.instruction;
 
-import edu.kit.mima.core.Mima;
 import edu.kit.mima.core.data.MachineWord;
+import edu.kit.mima.core.legacy.Mima;
 import edu.kit.mima.core.legacy.intepretation.CompiledInstruction;
 import edu.kit.mima.core.legacy.intepretation.InterpretationException;
 import edu.kit.mima.core.logic.ArithmeticLogicUnit;
@@ -10,7 +10,7 @@ import edu.kit.mima.core.logic.ArithmeticLogicUnit;
  * @author Jannis Weis
  * @since 2018
  */
-public enum MimaInstructions implements Instruction {
+public enum MimaInstruction implements Instruction {
 
     /**
      * Load Constant to accumulator
@@ -211,7 +211,7 @@ public enum MimaInstructions implements Instruction {
      *
      * @param instruction instruction keyword
      */
-    MimaInstructions(String instruction) {
+    MimaInstruction(String instruction) {
         this.instruction = instruction;
     }
 
@@ -221,7 +221,7 @@ public enum MimaInstructions implements Instruction {
      * @param mima Mima
      */
     public static void setMima(Mima mima) {
-        MimaInstructions.mima = mima;
+        MimaInstruction.mima = mima;
         arithmeticLogicUnit = new ArithmeticLogicUnit(mima.getWordLength());
     }
 

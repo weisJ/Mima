@@ -1,12 +1,8 @@
 package edu.kit.mima.core.interpretation;
 
-import edu.kit.mima.core.Mima;
 import edu.kit.mima.core.data.MachineWord;
-import edu.kit.mima.core.instruction.MimaInstruction;
-import edu.kit.mima.core.instruction.MimaXInstruction;
 import edu.kit.mima.core.parsing.Parser;
 import edu.kit.mima.core.parsing.token.ArrayToken;
-import edu.kit.mima.core.parsing.token.AtomToken;
 import edu.kit.mima.core.parsing.token.BinaryToken;
 import edu.kit.mima.core.parsing.token.ProgramToken;
 import edu.kit.mima.core.parsing.token.Token;
@@ -26,24 +22,20 @@ import java.util.stream.Collectors;
  */
 public class Interpreter {
 
-    private final ProgramToken program;
-
     private final int wordLength;
     private int reservedIndex;
-    private int expressionScopeIndex;
     private boolean running;
 
-    //Jump//
-    private Environment lastReferencedEnvironment;
+    //------------Jump----------------//
+    private Environment jumpEnvironment;
+    private int expressionScopeIndex;
     private boolean jumped;
-    //---//
+    //--------------------------------//
 
     /**
-     * @param program    program input
-     * @param wordLength number of bits in MachineWord
+     * @param wordLength number of bits in arguments
      */
-    public Interpreter(final ProgramToken program, final int wordLength) {
-        this.program = program;
+    public Interpreter(final int wordLength) {
         this.wordLength = wordLength;
         reservedIndex = -1;
         expressionScopeIndex = 0;
@@ -54,69 +46,72 @@ public class Interpreter {
     /**
      * Evaluate the Program.
      *
+     * @param program           program input created by {@link Parser}
+     * @param globalEnvironment the global runtime environment
      * @return last evaluated result. If null then the last output had return-type void
      */
-    public @Nullable Value<MachineWord> evaluate() {
-        Environment environment = setupGlobalEnvironment();
+    public @Nullable Value<MachineWord> evaluateTopLevel(final ProgramToken program,
+                                                         final Environment globalEnvironment) {
+        Environment runtimeEnvironment = globalEnvironment;
         Value<MachineWord> value = null;
-        ProgramToken programToken = program;
+        ProgramToken runtimeToken = program;
+        boolean firstScope = true;
         while (running) {
-            value = evaluate(programToken, environment);
+            /*
+             * First call has to create own scope that releases memory.
+             * As calls/jumps can only go up in scopes the scope doesn't need to be renewed, and
+             * memory doesn't need to be released. Clearing memory will be done by the first
+             * environment call.
+             */
+            value = evaluateProgram(runtimeToken, runtimeEnvironment, firstScope, !firstScope, expressionScopeIndex);
+            if (firstScope) {
+                firstScope = false;
+            }
             if (jumped) {
-                environment = lastReferencedEnvironment.returnToParent();
-                programToken = lastReferencedEnvironment.getProgramToken();
+                runtimeEnvironment = jumpEnvironment;
+                runtimeToken = jumpEnvironment.getProgramToken();
                 jumped = false;
             }
         }
         return value;
     }
 
-    /*
-     * Define the global instructions
+    /**
+     * Set the environment the next jump falls in
+     *
+     * @param jumpEnvironment destination Environment
      */
-    private Environment setupGlobalEnvironment() {
-        Environment globalEnv = new Environment(null, program);
-        Mima mima = new Mima();
-        MimaInstruction.setMima(mima);
-        MimaXInstruction.setMima(mima);
-        for (MimaInstruction instruction : MimaInstruction.values()) {
-            globalEnv.defineFunction(new AtomToken<>(TokenType.IDENTIFICATION, instruction.toString()), instruction);
-        }
-        //Halt Instruction
-        globalEnv.defineFunction(new AtomToken<>(TokenType.IDENTIFICATION, "HALT"), (args) -> {
-            if (!args.isEmpty()) {
-                throw new IllegalArgumentException("invalid number of arguments");
-            }
-            running = false;
-            return null;
-        });
-        //Jump Instruction
-        globalEnv.defineFunction(new AtomToken<>(TokenType.IDENTIFICATION, "JMP"), (args) -> {
-            if (args.size() != 1) {
-                throw new IllegalArgumentException("invalid number of arguments");
-            }
-            var argument = args.get(0);
-            jumped = true;
-            expressionScopeIndex = argument.getValue().intValue();
-            return null;
-        });
-        //Jump if negative Instruction
-        globalEnv.defineFunction(new AtomToken<>(TokenType.IDENTIFICATION, "JMN"), (args) -> {
-            if (args.size() != 1) {
-                throw new IllegalArgumentException("invalid number of arguments");
-            }
-            if (mima.getAccumulator().msb() == 1) {
-                var argument = args.get(0);
-                jumped = true;
-                expressionScopeIndex = argument.getValue().intValue();
-            }
-            return null;
-        });
-        return globalEnv;
+    public void prepareJump(Environment jumpEnvironment) {
+        this.jumpEnvironment = jumpEnvironment;
     }
 
+    /**
+     * Performs the jump to the given index
+     *
+     * @param instructionIndex index in jump environment
+     */
+    public void performJump(int instructionIndex) {
+        jumped = true;
+        expressionScopeIndex = instructionIndex;
+    }
+
+    /**
+     * Set the current running status of the interpreter.
+     * If false no statements will be evaluated. Is not a pause method, stopping
+     * the interpreter yields in returning out of the evaluateTopLevel() method.
+     *
+     * @param running running status
+     */
+    public void setRunning(boolean running) {
+        this.running = running;
+    }
+
+    /*
+     * Create jump associations for the given environment based on the tokens
+     * This needs to be done as forward referencing is allowed for jumps
+     */
     @SuppressWarnings("unchecked")
-    private void resolveJumpPoints(Token[] tokens, Environment environment) {
+    private void resolveJumpPoints(final Token[] tokens, final Environment environment) {
         for (int i = 0; i < tokens.length; i++) {
             Token token = tokens[i];
             if (token.getType() == TokenType.JUMP_POINT) {
@@ -125,23 +120,25 @@ public class Interpreter {
         }
     }
 
-    /**
-     * @param expression  expression to evaluate
-     * @param environment variable environment
-     * @return MachineWord evaluation
+    /*
+     * Evaluate different tokens
      */
     @SuppressWarnings("unchecked")
-    public @Nullable Value<MachineWord> evaluate(Token expression, Environment environment) {
+    private @Nullable Value<MachineWord> evaluate(final Token expression, final Environment environment) {
         if (!running) {
             return null;
         }
         switch (expression.getType()) {
             case PROGRAM:
-                return evaluateProgram((ProgramToken) expression, environment);
+                /*
+                 * Subprograms need to have own scope for variable shadowing.
+                 * They should also release their memory and start at index 0
+                 */
+                return evaluateProgram((ProgramToken) expression, environment, true, true, 0);
             case NUMBER:
                 return evaluateNumber((String) expression.getValue());
             case EMPTY:
-                return new Value<>(ValueType.EMPTY, (MachineWord) expression.getValue());
+                return new Value<>(ValueType.VOID, (MachineWord) expression.getValue());
             case BINARY:
                 return evaluateBinary((String) expression.getValue());
             case IDENTIFICATION:
@@ -161,36 +158,55 @@ public class Interpreter {
         }
     }
 
-    private Value<MachineWord> evaluateProgram(ProgramToken programToken, Environment environment) {
-        Environment scope = environment.extend(programToken); //Extend to own scope
-        scope.setExpressionIndex(expressionScopeIndex);
-
-        int reserved = reservedIndex; //Remember index for auto created memory cells
-
+    /**
+     * Evaluate a program Token
+     *
+     * @param programToken  the program token to be evaluated
+     * @param environment   run environment
+     * @param ownScope      whether the program should be contained in an own scope.
+     * @param releaseMemory whether the memory addresses should be released after execution
+     * @param scopeIndex    startIndex in scope
+     * @return last evaluated statement
+     */
+    private Value<MachineWord> evaluateProgram(final ProgramToken programToken, final Environment environment,
+                                               boolean ownScope, boolean releaseMemory, int scopeIndex) {
+        Environment scope = environment;
         Token[] tokens = programToken.getValue();
-        resolveJumpPoints(tokens, scope);
+        if (ownScope) {
+            scope = environment.extend(programToken); //Extend to own scope
+            resolveJumpPoints(tokens, scope);
+        }
+        scope.setExpressionIndex(scopeIndex);
+        int reserved = reservedIndex; //Remember index for auto created memory cells
 
         //Evaluate
         Value<MachineWord> value = null;
-        while (scope.getExpressionIndex() < tokens.length) {
+        while (!jumped && running && scope.getExpressionIndex() < tokens.length) {
             value = evaluate(tokens[scope.getExpressionIndex()], scope);
             scope.setExpressionIndex(scope.getExpressionIndex() + 1);
-            if (jumped) {
-                return null;
-            }
         }
 
-        expressionScopeIndex = 0;
-        reservedIndex = reserved; //Release auto created memory cells
-        return value; //Automatically return to parent scope
+        if (!jumped) {
+            expressionScopeIndex = 0;
+        }
+        if (releaseMemory) {
+            reservedIndex = reserved; //Release auto created memory cells
+        }
+        return jumped ? null : value; //Automatically return to parent scope
     }
 
+    /*
+     * Evaluate a binary string
+     */
     private Value<MachineWord> evaluateBinary(String binary) {
         Boolean[] bits = new StringBuilder(binary).reverse().toString()
                 .chars().mapToObj(i -> i == '1').toArray(Boolean[]::new);
         return new Value<>(ValueType.NUMBER, new MachineWord(bits, wordLength));
     }
 
+    /*
+     * Evaluate a number string
+     */
     private Value<MachineWord> evaluateNumber(String value) {
         try {
             return new Value<>(ValueType.NUMBER, new MachineWord(Integer.parseInt(value), wordLength));
@@ -199,11 +215,17 @@ public class Interpreter {
         }
     }
 
+    /*
+     * Evaluate a number value
+     */
     private Value<MachineWord> evaluateNumber(int value) {
         return new Value<>(ValueType.NUMBER, new MachineWord(value, wordLength));
     }
 
-    private Value<MachineWord> evaluateIdentification(Token token, Environment environment) {
+    /*
+     * Evaluate a Identification reference
+     */
+    private Value<MachineWord> evaluateIdentification(final Token token, final Environment environment) {
         MachineWord value;
         ValueType type;
         try {
@@ -216,12 +238,15 @@ public class Interpreter {
             } catch (IllegalArgumentException e2) {
                 value = new MachineWord(environment.getJump(token), wordLength);
                 type = ValueType.JUMP_REFERENCE;
-                lastReferencedEnvironment = environment.lookupJump(token);
+                prepareJump(environment.lookupJump(token));
             }
         }
         return new Value<>(type, value);
     }
 
+    /*
+     + Evaluate constant definitions
+     */
     private void evaluateConstant(BinaryToken<Token, Token> definition, Environment environment) {
         var expressionValue = evaluate(definition.getSecond(), environment);
         if (expressionValue == null) {
@@ -230,6 +255,9 @@ public class Interpreter {
         environment.defineConstant(definition.getFirst(), expressionValue.getValue());
     }
 
+    /*
+     * Evaluate memory reference definitions
+     */
     private void evaluateDefinition(BinaryToken<Token, Token> definition, Environment environment) {
         if (definition.getSecond().getType() == TokenType.EMPTY) {
             environment.defineVariable(definition.getFirst(), evaluateNumber(reservedIndex).getValue());
@@ -246,12 +274,15 @@ public class Interpreter {
         }
     }
 
+    /*
+     * Evaluate a function call
+     */
     @SuppressWarnings("unchecked")
     private Value<MachineWord> evaluateFunction(BinaryToken<Token, ArrayToken<Token>> value, Environment environment) {
         var function = environment.getFunction(value.getFirst());
         Token[] arguments = value.getSecond().getValue();
         List<Value<MachineWord>> args = Arrays.stream(arguments)
                 .map(argument -> evaluate(argument, environment)).collect(Collectors.toList());
-        return new Value<>(ValueType.NUMBER, function.apply(args));
+        return new Value<>(ValueType.NUMBER, function.apply(args, environment));
     }
 }
