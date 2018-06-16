@@ -10,7 +10,7 @@ import java.util.Objects;
  */
 public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
 
-    private TokenType type;
+    private final TokenType type;
     private T first;
     private K second;
 

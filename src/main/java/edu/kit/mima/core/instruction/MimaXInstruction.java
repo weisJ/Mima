@@ -1,51 +1,35 @@
 package edu.kit.mima.core.instruction;
 
 import edu.kit.mima.core.Mima;
-import edu.kit.mima.core.legacy.intepretation.CompiledInstruction;
-import edu.kit.mima.core.legacy.intepretation.InterpretationException;
+import edu.kit.mima.core.data.MachineWord;
+import edu.kit.mima.core.interpretation.Environment;
+import edu.kit.mima.core.interpretation.Value;
+import edu.kit.mima.core.interpretation.ValueType;
 import edu.kit.mima.core.logic.ArithmeticLogicUnit;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.function.BiFunction;
 
 /**
  * @author Jannis Weis
  * @since 2018
  */
-public enum MimaXInstruction implements Instruction {
+public enum MimaXInstruction implements BiFunction<List<Value<MachineWord>>, Environment, MachineWord> {
 
-    /**
-     * NATIVE_CALL subroutine
-     */
-    CALL("NATIVE_CALL") {
-        @Override
-        public void run(CompiledInstruction instruction) {
-            mima.pushRoutine(mima.getInstructionPointer() + 1);
-            mima.setInstructionPointer(instruction.getValue().intValue() - 1);
-        }
-    },
-    /**
-     * RETurn from subroutine
-     */
-    RET("RET") {
-        @Override
-        public void run(CompiledInstruction instruction) {
-            if (instruction.holdsValue()) {
-                fail("unexpected argument", mima.getInstructionPointer() + 1);
-            }
-            if (!mima.canReturn()) {
-                fail("nowhere to return to", mima.getInstructionPointer() + 1);
-            }
-            mima.setInstructionPointer(mima.returnRoutine());
-        }
-    },
     /**
      * Add constant to accumulator
      */
     ADC("ADC") {
         @Override
-        public void run(CompiledInstruction instruction) {
-            if (instruction.isReference()) {
-                fail("can't pass a reference", mima.getInstructionPointer() + 1);
+        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
+            checkArgNumber(args, 0);
+            var argument = args.get(0);
+            if (argument.getType() != ValueType.CONSTANT && argument.getType() != ValueType.NUMBER) {
+                fail("can't pass a reference");
             }
-            mima.setAccumulator(arithmeticLogicUnit.add(mima.getAccumulator(), instruction.getValue()));
+            mima.setAccumulator(arithmeticLogicUnit.add(mima.getAccumulator(), argument.getValue()));
+            return null;
         }
     },
     /**
@@ -53,11 +37,10 @@ public enum MimaXInstruction implements Instruction {
      */
     LDSP("LDSP") {
         @Override
-        public void run(CompiledInstruction instruction) {
-            if (instruction.holdsValue()) {
-                fail("unexpected argument", mima.getInstructionPointer() + 1);
-            }
+        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
+            checkArgNumber(args, 0);
             mima.setAccumulator(mima.getStackPointer());
+            return null;
         }
     },
     /**
@@ -65,45 +48,64 @@ public enum MimaXInstruction implements Instruction {
      */
     STSP("STSP") {
         @Override
-        public void run(CompiledInstruction instruction) {
-            if (instruction.holdsValue()) {
-                fail("unexpected argument", mima.getInstructionPointer() + 1);
-            }
+        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
+            checkArgNumber(args, 0);
             int address = mima.getAccumulator().intValue();
-            mima.storeValue(address, mima.loadValue(address));
+            mima.storeValue(address, mima.loadValue(address)); //Make sure there is an memory entry for <SP>
             mima.setStackPointer(address);
+            return null;
+        }
+    },
+    /**
+     * Returns the stack pointer
+     */
+    SP("SP") {
+        @Override
+        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
+            checkArgNumber(args, 0);
+            return mima.getStackPointer();
         }
     },
     /**
      * Store value to stack pointer with disposition
      */
-    STVRSP("STVR") {
+    STVR("STVR") {
         @Override
-        public void run(CompiledInstruction instruction) {
-            if (instruction.isReference()) {
-                fail("can't pass a reference", mima.getInstructionPointer() + 1);
+        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
+            checkArgNumber(args, 2);
+            var first = args.get(0);
+            var second = args.get(1);
+            if ((first.getType() != ValueType.CONSTANT && first.getType() != ValueType.NUMBER)
+                    || (second.getType() != ValueType.CONSTANT && second.getType() != ValueType.NUMBER)) {
+                fail("can't pass a reference");
             }
-            int address = mima.getStackPointer().intValue() + instruction.getValue().intValue();
+            int address = first.getValue().intValue() + second.getValue().intValue();
             if (address < 0) {
-                fail("illegal memory address", mima.getInstructionPointer() + 1);
+                fail("illegal memory address");
             }
             mima.storeValue(address, mima.getAccumulator());
+            return null;
         }
     },
     /**
      * Load value from stack pointer with disposition
      */
-    LDVRSP("LDVR") {
+    LDVR("LDVR") {
         @Override
-        public void run(CompiledInstruction instruction) {
-            if (instruction.isReference()) {
-                fail("can't pass a reference", mima.getInstructionPointer() + 1);
+        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
+            checkArgNumber(args, 2);
+            var first = args.get(0);
+            var second = args.get(1);
+            if ((first.getType() != ValueType.CONSTANT && first.getType() != ValueType.NUMBER)
+                    || (second.getType() != ValueType.CONSTANT && second.getType() != ValueType.NUMBER)) {
+                fail("can't pass a reference");
             }
-            int address = mima.getStackPointer().intValue() + instruction.getValue().intValue();
+            int address = first.getValue().intValue() + second.getValue().intValue();
             if (address < 0) {
-                fail("illegal memory address", mima.getInstructionPointer() + 1);
+                fail("illegal memory address");
             }
             mima.setAccumulator(mima.loadValue(address));
+            return null;
         }
     };
 
@@ -116,7 +118,7 @@ public enum MimaXInstruction implements Instruction {
     private final String instruction;
 
     /**
-     * MimaX Instructions
+     * Mima Instructions
      *
      * @param instruction instruction keyword
      */
@@ -134,9 +136,25 @@ public enum MimaXInstruction implements Instruction {
         arithmeticLogicUnit = new ArithmeticLogicUnit(mima.getWordLength());
     }
 
-    private static void fail(final String message, final int lineNumber) {
-        mima.stop();
-        throw new InterpretationException(message, lineNumber);
+    /**
+     * Throw error with given message
+     *
+     * @param message fail message
+     */
+    protected void fail(final String message) {
+        throw new IllegalArgumentException(message);
+    }
+
+    /**
+     * Check the argument for given number of arguemnts
+     *
+     * @param args                   arguments list
+     * @param expectedArgumentNumber expected number of arguments
+     */
+    protected void checkArgNumber(List<Value<MachineWord>> args, int expectedArgumentNumber) {
+        if (args.size() != expectedArgumentNumber) {
+            fail("invalid number of arguments");
+        }
     }
 
     @Override
@@ -145,11 +163,6 @@ public enum MimaXInstruction implements Instruction {
     }
 
     @Override
-    public boolean matches(String instruction) {
-        return this.instruction.matches(instruction);
-    }
-
-    @Override
-    public abstract void run(CompiledInstruction instruction);
+    public abstract @Nullable MachineWord apply(List<Value<MachineWord>> args, Environment environment);
 
 }

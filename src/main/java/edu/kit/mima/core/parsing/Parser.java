@@ -1,6 +1,5 @@
 package edu.kit.mima.core.parsing;
 
-import edu.kit.mima.core.interpretation.Interpreter;
 import edu.kit.mima.core.parsing.inputStream.CharInputStream;
 import edu.kit.mima.core.parsing.inputStream.TokenStream;
 import edu.kit.mima.core.parsing.lang.Keyword;
@@ -36,44 +35,6 @@ public class Parser {
         this.input = new TokenStream(input);
     }
 
-    /**
-     * temporary Test method
-     *
-     * @param args ignored
-     */
-    public static void main(String[] args) {
-        ProgramToken programToken = new Parser("#Memory associations;\n"
-                + "§define zero;"
-                + "§define abs;"
-                + "{§define minus_eins; #inline comment#\n"
-                + "§define eins;\n"
-                + "{§define zero2;}\n"
-                + "§define val;\n"
-                + '\n'
-                + "#Instructions\n"
-                + "#This is a comment\n"
-                + "LDC(5);\n"
-                + "STV(abs);\n"
-                + "LDC(0);\n"
-                + "STV(zero1);\n"
-                + "LDC(1);\n"
-                + "STV(eins);\n"
-                + "NOT();\n"
-                + "ADD(eins);\n"
-                + "STV(minus_eins);\n"
-                + "Loop : LDV(val);\n"
-                + "EQL(zero);\n"
-                + "JMN(Stop);\n"
-                + "LDV(val);\n"
-                + "ADD(minus_eins);\n"
-                + "STV(val);\n"
-                + "JMP(Loop);\n"
-                + "Stop : HALT();"
-                + "}").parse();
-        Interpreter interpreter = new Interpreter(programToken, 24);
-        interpreter.evaluate();
-        System.out.print(programToken);
-    }
 
     /**
      * Parse the whole input
