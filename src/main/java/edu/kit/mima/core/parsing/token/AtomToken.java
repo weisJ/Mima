@@ -45,10 +45,14 @@ public class AtomToken<T> implements Token<T> {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AtomToken<?> atomToken = (AtomToken<?>) o;
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        AtomToken<?> atomToken = (AtomToken<?>) obj;
         return type == atomToken.type
                 && Objects.equals(value, atomToken.value);
     }

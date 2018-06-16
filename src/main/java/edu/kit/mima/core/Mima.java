@@ -8,7 +8,11 @@ import edu.kit.mima.core.legacy.intepretation.CompiledInstruction;
 import edu.kit.mima.core.legacy.intepretation.InterpretationException;
 import edu.kit.mima.core.legacy.intepretation.Interpreter;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 

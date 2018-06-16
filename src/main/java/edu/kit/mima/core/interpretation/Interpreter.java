@@ -5,11 +5,18 @@ import edu.kit.mima.core.data.MachineWord;
 import edu.kit.mima.core.instruction.MimaInstruction;
 import edu.kit.mima.core.instruction.MimaXInstruction;
 import edu.kit.mima.core.parsing.Parser;
-import edu.kit.mima.core.parsing.token.*;
+import edu.kit.mima.core.parsing.token.ArrayToken;
+import edu.kit.mima.core.parsing.token.AtomToken;
+import edu.kit.mima.core.parsing.token.BinaryToken;
+import edu.kit.mima.core.parsing.token.ProgramToken;
+import edu.kit.mima.core.parsing.token.Token;
+import edu.kit.mima.core.parsing.token.TokenType;
+import edu.kit.mima.core.parsing.token.Tuple;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Interprets the result of {@link Parser}
@@ -72,7 +79,7 @@ public class Interpreter {
         }
         //Halt Instruction
         globalEnv.defineFunction(new AtomToken<>(TokenType.IDENTIFICATION, "HALT"), (args) -> {
-            if (args.size() != 0) {
+            if (!args.isEmpty()) {
                 throw new IllegalArgumentException("invalid number of arguments");
             }
             running = false;
@@ -134,7 +141,7 @@ public class Interpreter {
             case NUMBER:
                 return evaluateNumber((String) expression.getValue());
             case EMPTY:
-                return new Value<>(null, (MachineWord) expression.getValue());
+                return new Value<>(ValueType.EMPTY, (MachineWord) expression.getValue());
             case BINARY:
                 return evaluateBinary((String) expression.getValue());
             case IDENTIFICATION:
@@ -156,8 +163,12 @@ public class Interpreter {
 
     private Value<MachineWord> evaluateProgram(ProgramToken programToken, Environment environment) {
         Environment scope = environment.extend(programToken); //Extend to own scope
+        int reserved = reservedIndex; //Remember index for auto created memory cells
+
         Token[] tokens = programToken.getValue();
         resolveJumpPoints(tokens, scope);
+
+        //Evaluate
         Value<MachineWord> value = null;
         while (environment.getExpressionIndex() < tokens.length) {
             value = evaluate(tokens[environment.getExpressionIndex()], scope);
@@ -166,6 +177,8 @@ public class Interpreter {
                 return null;
             }
         }
+
+        reservedIndex = reserved; //Release auto created memory cells
         return value; //Automatically return to parent scope
     }
 
@@ -179,7 +192,7 @@ public class Interpreter {
         try {
             return new Value<>(ValueType.NUMBER, new MachineWord(Integer.parseInt(value), wordLength));
         } catch (NumberFormatException e) {
-            throw new NumberFormatException("Not an integer: " + value);
+            throw new NumberFormatException(e.getMessage());
         }
     }
 
@@ -234,10 +247,8 @@ public class Interpreter {
     private Value<MachineWord> evaluateFunction(BinaryToken<Token, ArrayToken<Token>> value, Environment environment) {
         var function = environment.getFunction(value.getFirst());
         Token[] arguments = value.getSecond().getValue();
-        List<Value<MachineWord>> args = new ArrayList<>();
-        for (Token argument : arguments) {
-            args.add(evaluate(argument, environment));
-        }
+        List<Value<MachineWord>> args = Arrays.stream(arguments)
+                .map(argument -> evaluate(argument, environment)).collect(Collectors.toList());
         return new Value<>(ValueType.NUMBER, function.apply(args));
     }
 }

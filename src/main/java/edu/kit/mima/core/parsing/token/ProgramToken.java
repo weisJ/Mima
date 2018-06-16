@@ -30,7 +30,7 @@ public class ProgramToken implements Token<Token[]> {
 
     @Override
     public void setValue(Token[] value) {
-        this.program = value;
+        program = value;
     }
 
     @Override
@@ -46,10 +46,14 @@ public class ProgramToken implements Token<Token[]> {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ProgramToken that = (ProgramToken) o;
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        ProgramToken that = (ProgramToken) obj;
         return Arrays.equals(program, that.program);
     }
 

@@ -5,7 +5,12 @@ import edu.kit.mima.core.parsing.inputStream.CharInputStream;
 import edu.kit.mima.core.parsing.inputStream.TokenStream;
 import edu.kit.mima.core.parsing.lang.Keyword;
 import edu.kit.mima.core.parsing.lang.Punctuation;
-import edu.kit.mima.core.parsing.token.*;
+import edu.kit.mima.core.parsing.token.ArrayToken;
+import edu.kit.mima.core.parsing.token.BinaryToken;
+import edu.kit.mima.core.parsing.token.EmptyToken;
+import edu.kit.mima.core.parsing.token.ProgramToken;
+import edu.kit.mima.core.parsing.token.Token;
+import edu.kit.mima.core.parsing.token.TokenType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -42,7 +47,7 @@ public class Parser {
                 + "§define eins;\n"
                 + "§define zero;\n"
                 + "§define val;\n"
-                + "\n"
+                + '\n'
                 + "#Instructions\n"
                 + "#This is a comment\n"
                 + "LDC(5);\n"
@@ -200,7 +205,7 @@ public class Parser {
                 Token value = parseExpression();
                 return new BinaryToken<>(TokenType.DEFINITION, reference, value);
             }
-            return new BinaryToken<>(TokenType.DEFINITION, reference, BinaryToken.EMPTY_TOKEN);
+            return new BinaryToken<>(TokenType.DEFINITION, reference, new EmptyToken());
         }
         return input.error("expected identifier");
     }

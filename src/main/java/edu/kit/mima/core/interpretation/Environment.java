@@ -33,10 +33,10 @@ public class Environment {
     public Environment(@Nullable Environment parent, ProgramToken programToken) {
         this.parent = parent;
         this.programToken = programToken;
-        this.variables = new HashMap<>();
-        this.constants = new HashMap<>();
-        this.functions = new HashMap<>();
-        this.jumps = new HashMap<>();
+        variables = new HashMap<>();
+        constants = new HashMap<>();
+        functions = new HashMap<>();
+        jumps = new HashMap<>();
         expressionIndex = 0;
     }
 
@@ -66,7 +66,7 @@ public class Environment {
      * @param name name of function or variable
      * @return Environment with "name" defined. Null if name is not defined
      */
-    public Environment lookup(Token name) {
+    public @Nullable Environment lookup(Token name) {
         Environment scope = this;
         while (scope != null) {
             if (scope.variables.containsKey(name)
@@ -98,13 +98,12 @@ public class Environment {
     public MachineWord getVariable(Token name) {
         if (variables.containsKey(name)) {
             return variables.get(name);
-        } else {
-            Environment scope = lookup(name);
-            if (scope == null) {
-                throw new IllegalArgumentException("Undefined variable: " + name);
-            }
-            return scope.getVariable(name);
         }
+        Environment scope = lookup(name);
+        if (scope == null) {
+            throw new IllegalArgumentException("Undefined variable: " + name);
+        }
+        return scope.getVariable(name);
     }
 
     /**
@@ -116,13 +115,12 @@ public class Environment {
     public MachineWord getConstant(Token name) {
         if (constants.containsKey(name)) {
             return constants.get(name);
-        } else {
-            Environment scope = lookup(name);
-            if (scope == null) {
-                throw new IllegalArgumentException("Undefined variable: " + name);
-            }
-            return scope.getConstant(name);
         }
+        Environment scope = lookup(name);
+        if (scope == null) {
+            throw new IllegalArgumentException("Undefined variable: " + name);
+        }
+        return scope.getConstant(name);
     }
 
     /**
@@ -134,13 +132,12 @@ public class Environment {
     public Function<List<Value<MachineWord>>, MachineWord> getFunction(Token name) {
         if (functions.containsKey(name)) {
             return functions.get(name);
-        } else {
-            Environment scope = lookup(name);
-            if (scope == null) {
-                throw new IllegalArgumentException("Undefined variable: " + name);
-            }
-            return scope.getFunction(name);
         }
+        Environment scope = lookup(name);
+        if (scope == null) {
+            throw new IllegalArgumentException("Undefined variable: " + name);
+        }
+        return scope.getFunction(name);
     }
 
     /**
@@ -153,13 +150,12 @@ public class Environment {
     public Integer getJump(Token name) {
         if (jumps.containsKey(name)) {
             return jumps.get(name);
-        } else {
-            Environment scope = lookup(name);
-            if (scope == null) {
-                throw new IllegalArgumentException("Undefined variable: " + name);
-            }
-            return scope.getJump(name);
         }
+        Environment scope = lookup(name);
+        if (scope == null) {
+            throw new IllegalArgumentException("Undefined variable: " + name);
+        }
+        return scope.getJump(name);
     }
 
     /**
@@ -169,7 +165,7 @@ public class Environment {
      * @param value new value of variable
      */
     public void setVariable(Token name, MachineWord value) {
-        Environment scope = this.lookup(name);
+        Environment scope = lookup(name);
         if (scope == null) {
             throw new IllegalArgumentException("Undefined variable: " + name);
         }
@@ -186,7 +182,7 @@ public class Environment {
      * @param function new function body of variable
      */
     public void setFunction(Token name, Function<List<Value<MachineWord>>, MachineWord> function) {
-        Environment scope = this.lookup(name);
+        Environment scope = lookup(name);
         if (scope == null) {
             throw new IllegalArgumentException("Undefined function: " + name);
         }
@@ -206,7 +202,7 @@ public class Environment {
         if (parent == null) {
             throw new IllegalStateException("No parent environment defined");
         }
-        return this.parent;
+        return parent;
     }
 
     /**
@@ -214,10 +210,12 @@ public class Environment {
      *
      * @param name     name of function
      * @param function function body
-     * @return true if there was no previous binding to the function name
      */
-    public boolean defineFunction(Token name, Function<List<Value<MachineWord>>, MachineWord> function) {
-        return this.functions.put(name, function) != null;
+    public void defineFunction(Token name, Function<List<Value<MachineWord>>, MachineWord> function) {
+        if (functions.containsKey(name)) {
+            throw new IllegalArgumentException("function: \"" + name.getValue() + "\" already defined in scope");
+        }
+        functions.put(name, function);
     }
 
     /**
@@ -230,7 +228,7 @@ public class Environment {
         if (variables.containsKey(name) || constants.containsKey(name)) {
             throw new IllegalArgumentException("reference: \"" + name.getValue() + "\" already defined in scope");
         }
-        this.variables.put(name, value);
+        variables.put(name, value);
     }
 
     /**
@@ -243,7 +241,7 @@ public class Environment {
         if (variables.containsKey(name) || constants.containsKey(name)) {
             throw new IllegalArgumentException("reference: \"" + name.getValue() + "\" already defined in scope");
         }
-        this.constants.put(name, value);
+        constants.put(name, value);
     }
 
     /**
@@ -253,10 +251,10 @@ public class Environment {
      * @param index index of expression in Environment
      */
     public void defineJump(Token name, Integer index) {
-        if (functions.containsKey(name)) {
-            throw new IllegalArgumentException("function: \"" + name.getValue() + "\" already defined in scope");
+        if (jumps.containsKey(name)) {
+            throw new IllegalArgumentException("jump: \"" + name.getValue() + "\" already defined in scope");
         }
-        this.jumps.put(name, index);
+        jumps.put(name, index);
     }
 
 }
