@@ -1,5 +1,7 @@
 package edu.kit.mima.core.parsing.token;
 
+import java.util.Objects;
+
 /**
  * Implementation of a {@link Token} that holds a single value
  *
@@ -9,7 +11,7 @@ package edu.kit.mima.core.parsing.token;
 public class AtomToken<T> implements Token<T> {
 
     private final TokenType type;
-    private final T value;
+    private T value;
 
     /**
      * Plain Token that holds any value type
@@ -33,7 +35,26 @@ public class AtomToken<T> implements Token<T> {
     }
 
     @Override
+    public void setValue(T value) {
+        this.value = value;
+    }
+
+    @Override
     public String toString() {
         return "[type=" + type + "]{ " + value + " }";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AtomToken<?> atomToken = (AtomToken<?>) o;
+        return type == atomToken.type
+                && Objects.equals(value, atomToken.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, value);
     }
 }

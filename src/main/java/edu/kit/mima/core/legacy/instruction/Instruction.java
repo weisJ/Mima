@@ -1,4 +1,4 @@
-package edu.kit.mima.core.instruction;
+package edu.kit.mima.core.legacy.instruction;
 
 import edu.kit.mima.core.legacy.intepretation.CompiledInstruction;
 

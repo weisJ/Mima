@@ -12,13 +12,17 @@ public enum TokenType {
      */
     PROGRAM,
     /**
-     * Native instruction call type
+     * Function type
      */
-    NATIVE_CALL,
+    CALL,
     /**
      * Jump point type
      */
     JUMP_POINT,
+    /**
+     * Resolved JumpPoint type
+     */
+    RESOLVED_JUMP_POINT,
 
     /*Lower level types*/
     /**
@@ -30,10 +34,6 @@ public enum TokenType {
      */
     PUNCTUATION,
     /**
-     * Function type
-     */
-    FUNCTION,
-    /**
      * Number type
      */
     NUMBER,
@@ -42,10 +42,6 @@ public enum TokenType {
      */
     BINARY,
 
-    /**
-     * Instruction type
-     */
-    INSTRUCTION,
     /**
      * Identification type
      */

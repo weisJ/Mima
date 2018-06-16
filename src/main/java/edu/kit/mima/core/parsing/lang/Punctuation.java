@@ -43,6 +43,14 @@ public final class Punctuation {
      * comma for arguments separation
      */
     public static final char COMMA = ',';
+    /**
+     * open scope bracket
+     */
+    public static final char SCOPE_OPEN = '{';
+    /**
+     * open scope bracket
+     */
+    public static final char SCOPE_CLOSED = '}';
 
     private Punctuation() {
         assert false : "utility constructor";
@@ -63,6 +71,8 @@ public final class Punctuation {
                 BINARY_PREFIX,
                 COMMENT,
                 COMMA,
+                SCOPE_OPEN,
+                SCOPE_CLOSED
         };
     }
 }

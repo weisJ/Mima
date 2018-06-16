@@ -20,6 +20,13 @@ public interface Token<T> {
     T getValue();
 
     /**
+     * Set the value of the Token
+     *
+     * @param value new value
+     */
+    void setValue(T value);
+
+    /**
      * get the type of the token.
      * Types are defined in {@link TokenType}
      *

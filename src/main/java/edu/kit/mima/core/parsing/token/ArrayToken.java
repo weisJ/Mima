@@ -1,6 +1,7 @@
 package edu.kit.mima.core.parsing.token;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -11,8 +12,8 @@ import java.util.stream.Collectors;
  */
 public class ArrayToken<T> implements Token<T[]> {
 
-    private final T[] values;
     private final String className;
+    private T[] values;
 
     /**
      * Token that holds an array of values
@@ -30,6 +31,11 @@ public class ArrayToken<T> implements Token<T[]> {
     }
 
     @Override
+    public void setValue(T[] value) {
+        this.values = value;
+    }
+
+    @Override
     public TokenType getType() {
         return TokenType.ARRAY;
     }
@@ -41,5 +47,19 @@ public class ArrayToken<T> implements Token<T[]> {
                 .map(t -> t.toString().replaceAll("\n", "\n\t"))
                 .collect(Collectors.joining("\n"))
                 + "\n}";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ArrayToken<?> that = (ArrayToken<?>) o;
+        return Arrays.equals(values, that.values)
+                && Objects.equals(className, that.className);
+    }
+
+    @Override
+    public int hashCode() {
+        return className.hashCode() + Arrays.hashCode(values);
     }
 }

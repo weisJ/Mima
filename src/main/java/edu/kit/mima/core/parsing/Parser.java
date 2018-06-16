@@ -1,5 +1,6 @@
 package edu.kit.mima.core.parsing;
 
+import edu.kit.mima.core.interpretation.Interpreter;
 import edu.kit.mima.core.parsing.inputStream.CharInputStream;
 import edu.kit.mima.core.parsing.inputStream.TokenStream;
 import edu.kit.mima.core.parsing.lang.Keyword;
@@ -36,17 +37,33 @@ public class Parser {
      * @param args ignored
      */
     public static void main(String[] args) {
-        ProgramToken programToken = new Parser("#Put Code here\n"
-                + "§define const x : -3;\n"
-                + "§define tmp : -1;\n"
-                + "§define y : 2;\n"
-                + "LDC x; \n"
-                + "Halt : STSP;\n"
-                + "LDC 2;\n"
-                + "STVR 0(SP);\n"
-                + "LDC 3;\n"
-                + "LDVR 0(SP);\n"
-                + "#testtesttest").parse();
+        ProgramToken programToken = new Parser("#Memory associations;\n"
+                + "§define minus_eins; #inline comment#\n"
+                + "§define eins;\n"
+                + "§define zero;\n"
+                + "§define val;\n"
+                + "\n"
+                + "#Instructions\n"
+                + "#This is a comment\n"
+                + "LDC(5);\n"
+                + "STV(val);\n"
+                + "LDC(0);\n"
+                + "STV(zero);\n"
+                + "LDC(1);\n"
+                + "STV(eins);\n"
+                + "NOT();\n"
+                + "ADD(eins);\n"
+                + "STV(minus_eins);\n"
+                + "Loop : LDV(val);\n"
+                + "EQL(zero);\n"
+                + "JMN(Stop);\n"
+                + "LDV(val);\n"
+                + "ADD(minus_eins);\n"
+                + "STV(val);\n"
+                + "JMP(Loop);\n"
+                + "Stop : HALT();").parse();
+        Interpreter interpreter = new Interpreter(programToken, 24);
+        interpreter.evaluate();
         System.out.print(programToken);
     }
 
@@ -85,6 +102,11 @@ public class Parser {
      */
     private Token parseAtomic() {
         return maybeCall(() -> {
+            if (isPunctuation(Punctuation.SCOPE_OPEN)) {
+                Token programToken = parseTopLevel();
+                skipPunctuation(Punctuation.CLOSED_BRACKET);
+                return programToken;
+            }
             if (isPunctuation(Punctuation.OPEN_BRACKET)) {
                 input.next();
                 Token expression = parseExpression();
@@ -96,13 +118,10 @@ public class Parser {
                 return maybeConstant();
             }
             Token token = input.peek();
-            if (token != null && token.getType() == TokenType.INSTRUCTION) {
-                return parseInstruction();
-            }
             if (token != null
                     && (token.getType() == TokenType.IDENTIFICATION
-                    || token.getType() == TokenType.BINARY
-                    || token.getType() == TokenType.NUMBER)) {
+                                || token.getType() == TokenType.BINARY
+                                || token.getType() == TokenType.NUMBER)) {
                 input.next();
                 return token;
             }
@@ -141,23 +160,10 @@ public class Parser {
      * Parse a function call
      */
     private Token parseCall(Token reference) {
-        return new BinaryToken<>(TokenType.FUNCTION, reference, delimited(Punctuation.OPEN_BRACKET,
+        return new BinaryToken<>(TokenType.CALL, reference, delimited(Punctuation.OPEN_BRACKET,
                 Punctuation.CLOSED_BRACKET,
                 Punctuation.COMMA,
                 this::parseExpression));
-    }
-
-    /*
-     * Parse native instruction call
-     */
-    private Token parseInstruction() {
-        Token instruction = input.next();
-        if (isPunctuation(Punctuation.INSTRUCTION_END)) {
-            assert instruction != null;
-            return new BinaryToken<>(TokenType.NATIVE_CALL, instruction, BinaryToken.EMPTY_TOKEN);
-        }
-        assert instruction != null;
-        return new BinaryToken<>(TokenType.NATIVE_CALL, instruction, parseExpression());
     }
 
     /*
@@ -202,7 +208,7 @@ public class Parser {
     /*
      * Return expressions contained in the delimiters as ArrayToken
      */
-    private ArrayToken delimited(char start, char stop, char separator, Supplier<Token> parser) {
+    private ArrayToken<Token> delimited(char start, char stop, char separator, Supplier<Token> parser) {
         if (start != CharInputStream.EMPTY_CHAR) {
             skipPunctuation(start);
         }

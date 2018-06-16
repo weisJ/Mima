@@ -1,7 +1,7 @@
 package edu.kit.mima;
 
 import edu.kit.mima.core.Mima;
-import edu.kit.mima.core.parsing.legacy.Interpreter;
+import edu.kit.mima.core.legacy.intepretation.Interpreter;
 import edu.kit.mima.gui.button.ButtonPanelBuilder;
 import edu.kit.mima.gui.color.SyntaxColor;
 import edu.kit.mima.gui.console.Console;
