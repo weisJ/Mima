@@ -7,6 +7,7 @@ import edu.kit.mima.core.parsing.token.Token;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Jannis Weis
@@ -37,6 +38,42 @@ public class Environment {
         functions = new HashMap<>();
         jumps = new HashMap<>();
         expressionIndex = 0;
+    }
+
+    /**
+     * Get the variable associations
+     *
+     * @return variables associations
+     */
+    public Map<Token, MachineWord> getVariables() {
+        return variables;
+    }
+
+    /**
+     * Get the constants associations
+     *
+     * @return constants associations
+     */
+    public Map<Token, MachineWord> getConstants() {
+        return constants;
+    }
+
+    /**
+     * Get the jump associations
+     *
+     * @return jump associations
+     */
+    public Map<Token, Integer> getJumps() {
+        return jumps;
+    }
+
+    /**
+     * Get the function associations
+     *
+     * @return function associations
+     */
+    public Map<Token, Instruction> getFunctions() {
+        return functions;
     }
 
     /**

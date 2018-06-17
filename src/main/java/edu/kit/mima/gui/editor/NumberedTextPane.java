@@ -48,8 +48,8 @@ public class NumberedTextPane extends JPanel {
     public void paint(final Graphics g) {
         super.paint(g);
 
-        final int start = pane.viewToModel(scrollPane.getViewport().getViewPosition()); //
-        final int end = pane.viewToModel(new Point(scrollPane.getViewport().getViewPosition().x + pane.getWidth(),
+        final int start = pane.viewToModel2D(scrollPane.getViewport().getViewPosition()); //
+        final int end = pane.viewToModel2D(new Point(scrollPane.getViewport().getViewPosition().x + pane.getWidth(),
                 scrollPane.getViewport().getViewPosition().y + pane.getHeight()));
 
         final Document doc = pane.getDocument();
@@ -61,7 +61,7 @@ public class NumberedTextPane extends JPanel {
         int startingY = -1;
 
         try {
-            startingY = ((pane.modelToView(start).y - scrollPane.getViewport()
+            startingY = (((int) pane.modelToView2D(start).getY() - scrollPane.getViewport()
                     .getViewPosition().y) + fontHeight) - fontDesc;
         } catch (final BadLocationException e1) {
             e1.printStackTrace();

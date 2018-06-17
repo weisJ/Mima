@@ -1,6 +1,6 @@
 package edu.kit.mima.core.data;
 
-import edu.kit.mima.core.legacy.Mima;
+import edu.kit.mima.core.Mima;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -60,7 +60,7 @@ public class MemoryMap implements Memory<MachineWord> {
     public void empty() {
         memory = new HashMap<>();
         for (int i = 0; i < initialCapacity; i++) {
-            memory.put(i, new MachineWord(i, machineWordLength));
+            memory.put(i, new MachineWord(0, machineWordLength));
         }
     }
 

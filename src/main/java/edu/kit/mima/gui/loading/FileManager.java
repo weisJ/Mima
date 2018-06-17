@@ -95,8 +95,7 @@ public class FileManager implements AutoCloseable {
      * Load the text form last used file path
      */
     public void load() {
-        text = textLoader.requestLoad(directory, extensions, () -> {
-        });
+        text = textLoader.requestLoad(directory, extensions, () -> { });
         assert text != null;
         fileHash = text.hashCode();
     }
@@ -213,12 +212,13 @@ public class FileManager implements AutoCloseable {
     }
 
     /**
-     * Get the lines array of getText()
+     * Get the split array of getText()
      *
-     * @return array of lines
+     * @param delimiter delimiter to split on
+     * @return array of split
      */
-    public String[] lines() {
-        return text.split("\n");
+    public String[] split(String delimiter) {
+        return text.split(delimiter);
     }
 
     /**
@@ -227,6 +227,9 @@ public class FileManager implements AutoCloseable {
      * @return true if file has not changed
      */
     public boolean isSaved() {
+        if (text == null) {
+            return true;
+        }
         return !isNewFile && (fileHash == text.hashCode());
     }
 

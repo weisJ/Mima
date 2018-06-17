@@ -97,6 +97,17 @@ public final class MenuBuilder {
         }
 
         /**
+         * Set the Mnemonic for this menu
+         *
+         * @param mnemonic mnemonic char
+         * @return this
+         */
+        public SubMenuBuilder setMnemonic(int mnemonic) {
+            menu.setMnemonic(mnemonic);
+            return this;
+        }
+
+        /**
          * Add a new Menu to the MenuBar
          *
          * @param title label

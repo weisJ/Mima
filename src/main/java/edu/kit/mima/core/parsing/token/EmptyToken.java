@@ -24,4 +24,9 @@ public class EmptyToken implements Token {
     public TokenType getType() {
         return TokenType.EMPTY;
     }
+
+    @Override
+    public String toString() {
+        return "[type=empty]{ }";
+    }
 }

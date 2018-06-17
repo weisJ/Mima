@@ -2,9 +2,10 @@ package edu.kit.mima.gui.editor.style;
 
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Style Group for associating colours with regular expressions
@@ -15,6 +16,7 @@ import java.util.Set;
 public class StyleGroup {
 
     private final Map<String, Color> styleMap;
+    private final List<String> regexList;
 
     /**
      * Create new StyleGroup for use with Editor.
@@ -25,6 +27,7 @@ public class StyleGroup {
      */
     public StyleGroup() {
         styleMap = new HashMap<>();
+        regexList = new ArrayList<>();
     }
 
     /**
@@ -32,8 +35,8 @@ public class StyleGroup {
      *
      * @return set of regular expressions
      */
-    public Set<String> regexSet() {
-        return styleMap.keySet();
+    public List<String> regexList() {
+        return regexList;
     }
 
     /**
@@ -74,6 +77,7 @@ public class StyleGroup {
      */
     public void addHighlight(final String regex, final Color color) {
         styleMap.put(regex, color);
+        regexList.add(regex);
     }
 
     /**

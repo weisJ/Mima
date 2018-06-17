@@ -36,7 +36,7 @@ public class OptionsHandler {
     /**
      * Load the options file
      *
-     * @return lines of options file as array
+     * @return split of options file as array
      * @throws IOException may throw IOException during loading
      */
     @SuppressWarnings("OverlyBroadThrowsClause")

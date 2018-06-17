@@ -21,9 +21,9 @@ public enum MimaXInstruction implements Instruction {
      */
     ADC("ADC") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
-            checkArgNumber(args, 0);
-            var argument = args.get(0);
+        public MachineWord apply(List<Value<MachineWord>> arguments, Environment environment) {
+            checkArgNumber(arguments, 0);
+            var argument = arguments.get(0);
             if (argument.getType() != ValueType.CONSTANT && argument.getType() != ValueType.NUMBER) {
                 fail("can't pass a reference");
             }
@@ -36,8 +36,8 @@ public enum MimaXInstruction implements Instruction {
      */
     LDSP("LDSP") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
-            checkArgNumber(args, 0);
+        public MachineWord apply(List<Value<MachineWord>> arguments, Environment environment) {
+            checkArgNumber(arguments, 0);
             mima.setAccumulator(mima.getStackPointer());
             return null;
         }
@@ -47,8 +47,8 @@ public enum MimaXInstruction implements Instruction {
      */
     STSP("STSP") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
-            checkArgNumber(args, 0);
+        public MachineWord apply(List<Value<MachineWord>> arguments, Environment environment) {
+            checkArgNumber(arguments, 0);
             int address = mima.getAccumulator().intValue();
             mima.storeValue(address, mima.loadValue(address)); //Make sure there is an memory entry for <SP>
             mima.setStackPointer(address);
@@ -60,8 +60,8 @@ public enum MimaXInstruction implements Instruction {
      */
     SP("SP") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
-            checkArgNumber(args, 0);
+        public MachineWord apply(List<Value<MachineWord>> arguments, Environment environment) {
+            checkArgNumber(arguments, 0);
             return mima.getStackPointer();
         }
     },
@@ -70,10 +70,10 @@ public enum MimaXInstruction implements Instruction {
      */
     STVR("STVR") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
-            checkArgNumber(args, 2);
-            var first = args.get(0);
-            var second = args.get(1);
+        public MachineWord apply(List<Value<MachineWord>> arguments, Environment environment) {
+            checkArgNumber(arguments, 2);
+            var first = arguments.get(0);
+            var second = arguments.get(1);
             if ((first.getType() != ValueType.CONSTANT && first.getType() != ValueType.NUMBER)
                     || (second.getType() != ValueType.CONSTANT && second.getType() != ValueType.NUMBER)) {
                 fail("can't pass a reference");
@@ -91,10 +91,10 @@ public enum MimaXInstruction implements Instruction {
      */
     LDVR("LDVR") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
-            checkArgNumber(args, 2);
-            var first = args.get(0);
-            var second = args.get(1);
+        public MachineWord apply(List<Value<MachineWord>> arguments, Environment environment) {
+            checkArgNumber(arguments, 2);
+            var first = arguments.get(0);
+            var second = arguments.get(1);
             if ((first.getType() != ValueType.CONSTANT && first.getType() != ValueType.NUMBER)
                     || (second.getType() != ValueType.CONSTANT && second.getType() != ValueType.NUMBER)) {
                 fail("can't pass a reference");
@@ -145,7 +145,7 @@ public enum MimaXInstruction implements Instruction {
     }
 
     /**
-     * Check the argument for given number of arguemnts
+     * Check the argument for given number of arguments
      *
      * @param args                   arguments list
      * @param expectedArgumentNumber expected number of arguments
@@ -162,6 +162,6 @@ public enum MimaXInstruction implements Instruction {
     }
 
     @Override
-    public abstract @Nullable MachineWord apply(List<Value<MachineWord>> args, Environment environment);
+    public abstract @Nullable MachineWord apply(List<Value<MachineWord>> arguments, Environment environment);
 
 }

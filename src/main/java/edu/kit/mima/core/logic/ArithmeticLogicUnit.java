@@ -1,7 +1,7 @@
 package edu.kit.mima.core.logic;
 
+import edu.kit.mima.core.Mima;
 import edu.kit.mima.core.data.MachineWord;
-import edu.kit.mima.core.legacy.Mima;
 
 import java.util.function.BinaryOperator;
 
@@ -80,7 +80,7 @@ public class ArithmeticLogicUnit {
      * @param y second value
      * @return -1 if x == y else 0
      */
-    public MachineWord equals(final MachineWord x, final MachineWord y) {
+    public MachineWord negativeIfEquals(final MachineWord x, final MachineWord y) {
         checkWord(x, y);
         final MachineWord comp = new MachineWord(bitwise(x, y, (v, w) -> v ? w : !w), machineWordLength);
         return comp.intValue() == -1 ? comp : new MachineWord(0, machineWordLength);

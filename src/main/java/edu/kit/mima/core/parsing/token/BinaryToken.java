@@ -1,6 +1,7 @@
 package edu.kit.mima.core.parsing.token;
 
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 /**
  * Implementation of a {@link Token} that holds two values
@@ -10,6 +11,8 @@ import java.util.Objects;
  */
 public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
 
+    private static final Pattern INDENT = Pattern.compile("\n");
+    private static final String INDENT_REPLACEMENT = "\n\t";
     private final TokenType type;
     private T first;
     private K second;
@@ -70,9 +73,9 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
     @Override
     public String toString() {
         return "[type=" + type + "] {\n\t"
-                + first.toString().replaceAll("\n", "\n\t")
+                + INDENT.matcher(first.toString()).replaceAll(INDENT_REPLACEMENT)
                 + "\n\t"
-                + second.toString().replaceAll("\n", "\n\t")
+                + INDENT.matcher(second.toString()).replaceAll(INDENT_REPLACEMENT)
                 + "\n}";
     }
 

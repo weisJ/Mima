@@ -31,7 +31,8 @@ public class FileHistoryObject {
     public FileHistoryObject(final JTextPane editor, final int caretOffset, final String newText, final String oldText,
                              final ChangeType type) {
         super();
-        assert (editor != null) && (newText != null) && (oldText != null) && (type != null) : "arguments must not be null";
+        assert (editor != null) && (newText != null) && (oldText != null) && (type != null)
+                : "arguments must not be null";
         this.editor = editor;
         this.caretOffset = caretOffset;
         text = newText;

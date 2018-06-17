@@ -10,6 +10,7 @@ import javax.swing.text.AbstractDocument;
 import javax.swing.text.StyledDocument;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Font;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,9 +22,10 @@ import java.util.List;
  */
 public class Editor extends JScrollPane {
 
-    private static final Color BACKGROUND_COLOR = new Color(50, 51, 50);
-    private static final Color TEXT_COLOR = Color.LIGHT_GRAY;
-    private final String nLine = java.lang.System.getProperty("line.separator");
+    private static final Color BACKGROUND_COLOR = new Color(43, 43, 43);
+    private static final Color TEXT_COLOR = new Color(216, 216, 216);
+    private static final int FONT_SIZE = 12;
+    private static final int DEFAULT_HISTORY_LENGTH = 20;
 
     private final JTextPane editorPane;
     private final Stylizer stylizer;
@@ -31,7 +33,6 @@ public class Editor extends JScrollPane {
     private final List<Runnable> afterEditActions;
 
     private boolean stylize;
-    private boolean replaceTabs;
     private boolean changeLock;
 
     /**
@@ -41,6 +42,7 @@ public class Editor extends JScrollPane {
         final JPanel textPanel = new JPanel();
         final NumberedTextPane numberedTextPane = new NumberedTextPane();
         editorPane = numberedTextPane.getPane();
+        editorPane.setFont(new Font(Font.MONOSPACED, Font.PLAIN, FONT_SIZE));
         textPanel.setLayout(new BorderLayout());
         textPanel.add(numberedTextPane, BorderLayout.LINE_START);
         textPanel.add(editorPane, BorderLayout.CENTER);
@@ -48,7 +50,7 @@ public class Editor extends JScrollPane {
 
         final StyledDocument document = editorPane.getStyledDocument();
         stylizer = new Stylizer(document, TEXT_COLOR);
-        historyController = new TextHistoryController(editorPane, 20);
+        historyController = new TextHistoryController(editorPane, DEFAULT_HISTORY_LENGTH);
         historyController.setActive(false);
         afterEditActions = new ArrayList<>();
 
@@ -78,10 +80,6 @@ public class Editor extends JScrollPane {
         final boolean historyLock = historyController.isActive();
         historyController.setActive(false);
         final int caret = editorPane.getCaretPosition();
-        editorPane.setText(editorPane.getText().replaceAll("(\r\n?|" + nLine + ')', "\n"));
-        if (replaceTabs) {
-            setText(getText().replaceAll("\t", "    "));
-        }
         if (stylize) {
             stylizer.stylize();
         }
@@ -109,6 +107,26 @@ public class Editor extends JScrollPane {
     //////////////////////////////////////////////////||
     ///            Getter and Setters                /||
     //////////////////////////////////////////////////||
+
+
+    /**
+     * Get the current font size
+     *
+     * @return current font size in points
+     */
+    public int getFontSize() {
+        return editorPane.getFont().getSize();
+    }
+
+    /**
+     * Set the current font size
+     *
+     * @param fontSize font size to use
+     */
+    public void setFontSize(int fontSize) {
+        Font font = editorPane.getFont();
+        editorPane.setFont(new Font(font.getName(), font.getStyle(), fontSize));
+    }
 
     /**
      * Set whether the text should be stylized
@@ -171,15 +189,6 @@ public class Editor extends JScrollPane {
      */
     public TextHistoryController getHistoryController() {
         return historyController;
-    }
-
-    /**
-     * Sets whether tabs or spaces should be used for indentations
-     *
-     * @param useTabs whether to useTabs
-     */
-    public void useTabs(final boolean useTabs) {
-        replaceTabs = !useTabs;
     }
 
     /**

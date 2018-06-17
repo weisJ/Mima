@@ -1,7 +1,9 @@
 package edu.kit.mima;
 
-import edu.kit.mima.core.legacy.Mima;
-import edu.kit.mima.core.legacy.intepretation.Interpreter;
+import edu.kit.mima.core.controller.InstructionSet;
+import edu.kit.mima.core.controller.MimaController;
+import edu.kit.mima.core.parsing.lang.Keyword;
+import edu.kit.mima.core.parsing.lang.Punctuation;
 import edu.kit.mima.gui.button.ButtonPanelBuilder;
 import edu.kit.mima.gui.color.SyntaxColor;
 import edu.kit.mima.gui.console.Console;
@@ -18,7 +20,6 @@ import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
@@ -46,7 +47,10 @@ public final class MimaUI extends JFrame {
     private static final String FILE_EXTENSION_X = "mimax";
     private static final String MIMA_DIR = System.getProperty("user.home") + "/.mima";
 
-    private final Mima mima;
+    private static final int HISTORY_CAPACITY = 100;
+
+    private final MimaController controller;
+
     private final FileManager fileManager;
     private final Console console;
     private final FixedScrollTable memoryView;
@@ -62,10 +66,13 @@ public final class MimaUI extends JFrame {
      * Create a new Mima UI window
      */
     private MimaUI() {
+        controller = new MimaController();
         fileManager = new FileManager(this, MIMA_DIR, new String[]{FILE_EXTENSION, FILE_EXTENSION_X});
         editor = new Editor();
         console = new Console();
         memoryView = new FixedScrollTable(new String[]{"Address", "Value"});
+        syntaxStyle = new StyleGroup();
+        referenceStyle = new StyleGroup();
         Logger.setConsole(console);
 
         setupWindow();
@@ -77,24 +84,21 @@ public final class MimaUI extends JFrame {
         setupMenu();
         add(editor, BorderLayout.CENTER);
 
-        mima = new Mima();
-        fileManager.loadLastFile();
-        editor.setText(fileManager.getText());
-        reloadMima();
+        updateFile(fileManager::loadLastFile);
 
-        syntaxStyle = new StyleGroup();
-        referenceStyle = new StyleGroup();
         editor.addStyleGroup(syntaxStyle);
         editor.addStyleGroup(referenceStyle);
-        editor.useTabs(true);
-        updateSyntaxHighlighting();
-        updateReferenceHighlighting();
         editor.addAfterEditAction(() -> fileManager.setText(editor.getText()));
+        editor.addAfterEditAction(() -> {
+            try { parse(editor.getText()); } catch (IllegalArgumentException | IllegalStateException ignored) { }
+        });
         editor.addAfterEditAction(this::updateReferenceHighlighting);
-
         editor.useStyle(true);
         editor.clean();
-        editor.useHistory(true, 100);
+        editor.useHistory(true, HISTORY_CAPACITY);
+
+        updateSyntaxHighlighting();
+        updateReferenceHighlighting();
     }
 
     /**
@@ -103,12 +107,6 @@ public final class MimaUI extends JFrame {
      * @param args command line arguments (ignored)
      */
     public static void main(final String[] args) {
-//        try {
-//            UIManager.setLookAndFeel(WebLookAndFeel.class.getCanonicalName());
-//        } catch (ClassNotFoundException | IllegalAccessException
-//                | InstantiationException | UnsupportedLookAndFeelException e) {
-//            e.printStackTrace();
-//        }
         final MimaUI frame = new MimaUI();
         frame.setVisible(true);
         frame.repaint();
@@ -135,13 +133,10 @@ public final class MimaUI extends JFrame {
      * Setup the MenuBar with all of its components
      */
     private void setupMenu() {
-        // @formatter:off
         final JMenuBar menuBar = new MenuBuilder()
-                .addMenu("Help")
-                .addItem("Show Help", () -> Help.getInstance().setVisible(true))
-                .addMenu("File")
-                .addItem("New", () -> changeFile(fileManager::newFile), "control N")
-                .addItem("Load", () -> changeFile(fileManager::load), "control L")
+                .addMenu("File").setMnemonic('F')
+                .addItem("New", () -> updateFile(fileManager::newFile), "control N")
+                .addItem("Load", () -> updateFile(fileManager::load), "control L")
                 .separator()
                 .addItem("Save", () -> {
                     if (!fileManager.isOnDisk()) {
@@ -151,19 +146,23 @@ public final class MimaUI extends JFrame {
                     }
                 }, "control S")
                 .addItem("Save as", fileManager::saveAs, "control shift S")
-                .addMenu("Edit")
+                .addItem("Quit", this::quit)
+                .addMenu("Edit").setMnemonic('E')
                 .addItem("Undo", editor::undo, "control Z")
                 .addItem("Redo", editor::redo, "control shift Z")
+                .addMenu("View").setMnemonic('V')
+                .addItem("Zoom In", () -> editor.setFontSize(editor.getFontSize() + 1), "control PLUS")
+                .addItem("Zoom Out", () -> editor.setFontSize(editor.getFontSize() - 1), "control MINUS")
+                .addMenu("Help").setMnemonic('H')
+                .addItem("Show Help", () -> Help.getInstance().setVisible(true))
                 .get();
         setJMenuBar(menuBar);
-        // @formatter:on
     }
 
     /**
      * Setup the the action buttons
      */
     private void setupButtons() {
-        // @formatter:off
         final JPanel buttonPanel = new ButtonPanelBuilder()
                 .addButton("COMPILE", this::compile, "alt R")
                 .addButton("RESET", this::reset, "alt shift R")
@@ -171,7 +170,6 @@ public final class MimaUI extends JFrame {
                 .addButton(run).addAccelerator("alt R").addAction(this::run).setEnabled(false)
                 .get();
         add(buttonPanel, BorderLayout.PAGE_START);
-        // @formatter:on
         add(buttonPanel, BorderLayout.PAGE_START);
     }
 
@@ -184,17 +182,24 @@ public final class MimaUI extends JFrame {
         return new WindowAdapter() {
             @Override
             public void windowClosing(final WindowEvent e) {
-                try {
-                    if (!fileManager.isSaved()) {
-                        fileManager.savePopUp();
-                    }
-                    fileManager.close();
-                    e.getWindow().dispose();
-                    Help.close();
-                } catch (final IllegalArgumentException | IOException ignored) {
-                }
+                quit();
             }
         };
+    }
+
+    /**
+     * Quit the program
+     */
+    private void quit() {
+        try {
+            if (!fileManager.isSaved()) {
+                fileManager.savePopUp();
+            }
+            fileManager.close();
+            dispose();
+            Help.close();
+            controller.stop();
+        } catch (final IllegalArgumentException | IOException ignored) { }
     }
 
     ////////////////////////////////////////////////////////////////////////||
@@ -206,17 +211,32 @@ public final class MimaUI extends JFrame {
      *
      * @param loadAction function that loads the new file
      */
-    private void changeFile(final Runnable loadAction) {
+    private void updateFile(final Runnable loadAction) {
         if (!fileManager.isSaved()) {
             fileManager.savePopUp();
         }
         console.clear();
         loadAction.run();
-        editor.setText(fileManager.getText());
+        String text = fileManager.getText();
+        editor.setText(text);
+        try {
+            parse(text);
+        } catch (IllegalArgumentException | IllegalStateException ignored) {
+        }
         updateSyntaxHighlighting();
         updateReferenceHighlighting();
         editor.resetHistory();
         editor.clean();
+    }
+
+    /*
+     * Parse the current text file
+     */
+    private void parse(String text) {
+        InstructionSet instructionSet = fileManager.getLastExtension().equals(FILE_EXTENSION_X)
+                ? InstructionSet.MIMA_X
+                : InstructionSet.MIMA;
+        controller.parse(text, instructionSet);
     }
 
     /**
@@ -225,11 +245,11 @@ public final class MimaUI extends JFrame {
     private void step() {
         try {
             log("Step!");
-            mima.step();
+            controller.step();
             run.setEnabled(false);
-            log("Instruction: " + fileManager.lines()[mima.getCurrentLineIndex() - 1]);
+            log("Instruction: " + controller.getCurrent());
             updateMemoryTable();
-            step.setEnabled(mima.isRunning());
+            step.setEnabled(controller.isRunning());
         } catch (final IllegalArgumentException | IllegalStateException e) {
             error(e.getMessage());
             step.setEnabled(false);
@@ -245,7 +265,7 @@ public final class MimaUI extends JFrame {
         run.setEnabled(false);
         log("Running program: " + fileManager.getLastFile() + "...");
         try {
-            mima.run();
+            controller.run();
             updateMemoryTable();
         } catch (final IllegalArgumentException | IllegalStateException e) {
             error(e.getMessage());
@@ -260,23 +280,11 @@ public final class MimaUI extends JFrame {
      * Reset the mima to begin of program.
      */
     private void reset() {
-        mima.reset();
+        controller.reset();
         run.setEnabled(true);
         step.setEnabled(true);
         updateMemoryTable();
-    }
-
-    /**
-     * Load new program into mima
-     */
-    private void reloadMima() {
-        try {
-            mima.loadProgram(fileManager.lines().clone(), fileManager.getLastExtension().equals(FILE_EXTENSION_X));
-            run.setEnabled(false);
-            step.setEnabled(false);
-        } catch (final IllegalArgumentException e) {
-            error(e.getMessage());
-        }
+        console.clear();
     }
 
     /**
@@ -298,7 +306,7 @@ public final class MimaUI extends JFrame {
     private void compile() {
         log("Compiling: " + fileManager.getLastFile() + "...");
         try {
-            reloadMima();
+            parse(editor.getText());
             updateMemoryTable();
             run.setEnabled(true);
             step.setEnabled(true);
@@ -314,7 +322,7 @@ public final class MimaUI extends JFrame {
      * Update the MemoryMap table with new values
      */
     private void updateMemoryTable() {
-        memoryView.setContent(mima.memoryTable());
+        memoryView.setContent(controller.getMemoryTable());
         repaint();
     }
 
@@ -322,41 +330,23 @@ public final class MimaUI extends JFrame {
      * Update the syntax highlighting according to the current instruction set
      */
     private void updateSyntaxHighlighting() {
+        syntaxStyle.setHighlight(Keyword.getKeywords(), SyntaxColor.KEYWORD);
 
-        //Future Code
-      /*  syntaxStyle.setHighlight(TokenStream.PUNCTUATION, new Color[]{
-                SyntaxColor.KEYWORD.getColor(), //$
-                SyntaxColor.KEYWORD.getColor(), // :
-                SyntaxColor.KEYWORD.getColor(), // (
-                SyntaxColor.KEYWORD.getColor(), // )
-                SyntaxColor.BINARY.getColor(),  //~
-                SyntaxColor.COMMENT.getColor(), //Comments
-        });
-        syntaxStyle.addHighlight(TokenStream.KEYWORDS, new Color[]{
-                SyntaxColor.KEYWORD.getColor(), //define
-                SyntaxColor.KEYWORD.getColor(), //const
-        });
-        syntaxStyle.addHighlight(Symbol.NUMBERS.getSymbols(), SyntaxColor.NUMBER.getColor());
+        syntaxStyle.addHighlight('\\' + String.valueOf(Punctuation.OPEN_BRACKET), SyntaxColor.TEXT);
+        syntaxStyle.addHighlight('\\' + String.valueOf(Punctuation.CLOSED_BRACKET), SyntaxColor.TEXT);
+        syntaxStyle.addHighlight('\\' + String.valueOf(Punctuation.SCOPE_OPEN), SyntaxColor.TEXT);
+        syntaxStyle.addHighlight('\\' + String.valueOf(Punctuation.SCOPE_CLOSED), SyntaxColor.TEXT);
+        syntaxStyle.addHighlight(String.valueOf(Punctuation.DEFINITION_BEGIN), SyntaxColor.KEYWORD);
+        syntaxStyle.addHighlight(String.valueOf(Punctuation.DEFINITION_DELIMITER), SyntaxColor.KEYWORD);
+        syntaxStyle.addHighlight(String.valueOf(Punctuation.INSTRUCTION_END), SyntaxColor.KEYWORD);
+        syntaxStyle.addHighlight(String.valueOf(Punctuation.COMMA), SyntaxColor.KEYWORD);
 
-        return new String[]{"(?<![^ \n])" + DEFINITION + "(?![^ \n])"
-                , "(?<![^ \n])" + CONST + "(?![^ \n])"
-                , "(?<![^ \n]):(?![^ \n])"
-                , "\\(", "\\)"
-                , "(?<![^ \n])-?[0-9]+(?![^ (\n])"
-                , "0b[01]*"
-                , "#[^\n]*\n?"}; */
-
-        syntaxStyle.setHighlight(Interpreter.getKeywords(), new Color[]{
-                SyntaxColor.KEYWORD, //$define
-                SyntaxColor.KEYWORD, //const
-                SyntaxColor.KEYWORD, // :
-                SyntaxColor.KEYWORD, // (
-                SyntaxColor.KEYWORD, // )
-                SyntaxColor.NUMBER,  //Numbers
-                SyntaxColor.BINARY,  //0b,
-                SyntaxColor.COMMENT, //Comments
-        });
-        syntaxStyle.addHighlight(mima.getInstructionSet(), SyntaxColor.INSTRUCTION);
+        syntaxStyle.addHighlight("-?[0-9]+", SyntaxColor.NUMBER);
+        syntaxStyle.addHighlight(Punctuation.BINARY_PREFIX + "[10]*", SyntaxColor.BINARY);
+        syntaxStyle.addHighlight(controller.getInstructionSet().getInstructions(), SyntaxColor.INSTRUCTION);
+        syntaxStyle.addHighlight("HALT", SyntaxColor.WARNING);
+        syntaxStyle.addHighlight(Punctuation.COMMENT + "[^\n" + Punctuation.COMMENT + "]*" + Punctuation.COMMENT + '?',
+                SyntaxColor.COMMENT);
     }
 
     /**
@@ -364,23 +354,19 @@ public final class MimaUI extends JFrame {
      * Performs a silent compile on the instructions
      */
     private void updateReferenceHighlighting() {
-        if (mima == null) {
-            return;
-        }
         try {
-            final List<Set<String>> references = mima.getReferences(fileManager.lines().clone());
+            final List<Set<String>> references = controller.getReferences();
 
             final String[] constants = references.get(0)
-                    .stream().map(s -> "(?<![^ \n])" + s + "(?![^ \n])").toArray(String[]::new);
+                    .stream().map(s -> "(?:[\\s(, ](\\s)*)" + s + "(?:(\\s)*[\\),:;])").toArray(String[]::new);
             referenceStyle.addHighlight(constants, SyntaxColor.CONSTANT);
-            final String[] instructionReferences = references.get(2)
-                    .stream().map(s -> "(?<![^ \n])" + s + "(?![^ \n])").toArray(String[]::new);
-            referenceStyle.addHighlight(instructionReferences, SyntaxColor.JUMP);
-            final String[] memoryReferences = references.get(1)
-                    .stream().map(s -> "(?<![^ \n])" + s + "(?![^ \n])").toArray(String[]::new);
+            final String[] jumpReferences = references.get(1)
+                    .stream().map(s -> "(?:[\\s(, ](\\s)*)" + s + "(?:(\\s)*[\\),:;])").toArray(String[]::new);
+            referenceStyle.addHighlight(jumpReferences, SyntaxColor.JUMP);
+            final String[] memoryReferences = references.get(2)
+                    .stream().map(s -> "(?:[\\s(, ](\\s)*)" + s + "(?:(\\s)*[\\),:;])").toArray(String[]::new);
             referenceStyle.addHighlight(memoryReferences, SyntaxColor.REFERENCE);
-        } catch (final IllegalArgumentException ignored) {
-        }
+        } catch (final IllegalArgumentException ignored) { }
     }
 
 }
