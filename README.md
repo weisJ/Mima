@@ -76,10 +76,10 @@ __MimaX:__
     - __"ref"__ __:__ __...__ (use with e.g. JMP "ref")
 - Statements must be terminated with __;__
 - Arguments are passed within parenthesis (e.g. STV(5), LDVR(1,SP())
-- __SP__ is a function call, so it has to be used by typing __SP()__ and __**not**__ __SP__
+- __SP__ is a function call, so it has to be used by typing __"SP()"__ and **not** __"SP"__
 - You can use scopes "__{ ... }__" for variable shadowing.
   Variables are lost after the scope except they explicitly define a memory cell.
   Constants are lost indefinitely
 - Variables must be defined before they can be used. Jumps are the only exception for this.
-- You can **not** jump into an inner scope only within the same or an outer scope.
+- You can **not** jump into an inner scope. Jumps can only occur within the same or an outer scope.
 
