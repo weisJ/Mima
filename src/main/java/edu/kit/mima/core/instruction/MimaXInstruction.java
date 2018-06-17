@@ -9,13 +9,12 @@ import edu.kit.mima.core.logic.ArithmeticLogicUnit;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.function.BiFunction;
 
 /**
  * @author Jannis Weis
  * @since 2018
  */
-public enum MimaXInstruction implements BiFunction<List<Value<MachineWord>>, Environment, MachineWord> {
+public enum MimaXInstruction implements Instruction {
 
     /**
      * Add constant to accumulator

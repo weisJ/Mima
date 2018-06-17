@@ -1,13 +1,12 @@
 package edu.kit.mima.core.interpretation;
 
 import edu.kit.mima.core.data.MachineWord;
+import edu.kit.mima.core.instruction.Instruction;
 import edu.kit.mima.core.parsing.token.ProgramToken;
 import edu.kit.mima.core.parsing.token.Token;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
-import java.util.List;
-import java.util.function.BiFunction;
 
 /**
  * @author Jannis Weis
@@ -19,7 +18,7 @@ public class Environment {
     private final ProgramToken programToken;
     private final HashMap<Token, MachineWord> variables;
     private final HashMap<Token, MachineWord> constants;
-    private final HashMap<Token, BiFunction<List<Value<MachineWord>>, Environment, MachineWord>> functions;
+    private final HashMap<Token, Instruction> functions;
     private final HashMap<Token, Integer> jumps;
 
     private int expressionIndex;
@@ -186,7 +185,7 @@ public class Environment {
      * @param name name of variable
      * @return function associated with variable
      */
-    public BiFunction<List<Value<MachineWord>>, Environment, MachineWord> getFunction(Token name) {
+    public Instruction getFunction(Token name) {
         if (functions.containsKey(name)) {
             return functions.get(name);
         }
@@ -238,7 +237,7 @@ public class Environment {
      * @param name     name of variable
      * @param function new function body of variable
      */
-    public void setFunction(Token name, BiFunction<List<Value<MachineWord>>, Environment, MachineWord> function) {
+    public void setFunction(Token name, Instruction function) {
         Environment scope = lookupFunction(name);
         if (scope == null) {
             throw new IllegalArgumentException("Undefined function: " + name);
@@ -268,7 +267,7 @@ public class Environment {
      * @param name     name of function
      * @param function function body
      */
-    public void defineFunction(Token name, BiFunction<List<Value<MachineWord>>, Environment, MachineWord> function) {
+    public void defineFunction(Token name, Instruction function) {
         if (functions.containsKey(name)) {
             throw new IllegalArgumentException("function: \"" + name.getValue() + "\" already defined in scope");
         }
