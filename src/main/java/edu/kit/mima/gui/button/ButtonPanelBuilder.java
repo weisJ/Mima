@@ -4,11 +4,8 @@ import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -21,6 +18,9 @@ import java.util.Queue;
  */
 public final class ButtonPanelBuilder {
 
+    private static final Font BUTTON_FONT = new Font(Font.MONOSPACED, Font.BOLD, 14);
+    private static final Color BUTTON_COLOR = new Color(0x009682);
+    private static final Color BUTTON_COLOR_TEXT = Color.WHITE;
     private final Queue<JButton> buttons;
 
     /**
@@ -102,17 +102,16 @@ public final class ButtonPanelBuilder {
 
         private ButtonBuilder(final JButton button, final ButtonPanelBuilder parent) {
             this.button = button;
+            this.button.setUI(new StyledButtonUI());
             this.parent = parent;
             styleButton();
         }
 
         private void styleButton() {
-            button.setForeground(Color.BLACK);
-            final Border line = new LineBorder(Color.DARK_GRAY);
-            final Border margin = new EmptyBorder(5, 15, 5, 15);
-            final Border compound = new CompoundBorder(line, margin);
-            button.setBorder(compound);
-            button.setFocusPainted(false);
+            button.setFont(BUTTON_FONT);
+            button.setBackground(BUTTON_COLOR);
+            button.setForeground(BUTTON_COLOR_TEXT);
+            button.setUI(new StyledButtonUI());
         }
 
         /**
