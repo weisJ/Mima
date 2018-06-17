@@ -21,7 +21,8 @@ import java.awt.event.AdjustmentListener;
  */
 public class Console extends JScrollPane {
 
-    private static final Color DEFAULT_COLOR = Color.LIGHT_GRAY;
+    private static final Color BACKGROUND = new Color(43, 43, 43);
+    private static final Color DEFAULT_COLOR = new Color(216, 216, 216);
     private static final int FONT_SIZE = 12;
     private final JTextPane textPane;
     private final StyledDocument document;
@@ -32,7 +33,7 @@ public class Console extends JScrollPane {
      */
     public Console() {
         textPane = new JTextPane();
-        textPane.setBackground(Color.BLACK);
+        textPane.setBackground(BACKGROUND);
         textPane.setFont(new Font(Font.MONOSPACED, Font.PLAIN, FONT_SIZE));
         textPane.setEditable(false);
         document = textPane.getStyledDocument();
