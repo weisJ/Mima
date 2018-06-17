@@ -8,6 +8,8 @@
     <artifactId>Mima</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <!--Build with: maven clean compile assembly:single -->
+
     <dependencies>
         <dependency>
             <groupId>com.atlassian.commonmark</groupId>
