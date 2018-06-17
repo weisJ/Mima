@@ -5,6 +5,15 @@ This mima runs on 24bit machine words in memory and 20 bits addresses / constant
 
 __Note:__ mimaX programs also run 24bit addresses/constants
 
+# Supports:
+- simple syntax highlighting
+- memory address variables
+- instruction address variables
+- constant value references
+
+# How to use
+You can run either the jar or executable from .\build. No further installation is needed.
+
 # Instructions:
 
 __<a\>__ denotes the value in memory at address __a__
@@ -49,8 +58,8 @@ __MimaX:__
 - __LDSP__ : sp → accu
 - __STSP__ : accu → sp
 
-- __STVR__ __disp(SP)__ : accu → <<sp> + disp>
-- __LDVR__ __disp(SP)__ : <<sp> + disp> → accu
+- __STVR__ __disp,SP__ : accu → <<sp> + disp>
+- __LDVR__ __disp,SP__ : <<sp> + disp> → accu
 
 - all instructions from Mima
 
@@ -59,6 +68,14 @@ __MimaX:__
 - Comments: __#...__ or __#...#__
 - Definitions:
     - __§define__ __"def"__ __:__ __"value"__ (use with e.g. STV "def")
-    - __§define__ __const__ __"def"__ : __"value"__ (use with e.g. LDC "def")
-    - __"def"__ __:__ __...__ (use with e.g. JMP "def")
+    - __§define__ __const__ __"ref"__ : __"value"__ (use with e.g. LDC("ref"))
+    - __"ref"__ __:__ __...__ (use with e.g. JMP "ref")
+- Statements must be terminated with __;__
+- Arguments are passed within parenthesis (e.g. STV(5), LDVR(1,SP())
+- __SP__ is a function call, so it has to be used by typing __SP()__ and __**not**__ __SP__
+- You can use scopes "__{ ... }__" for variable shadowing.
+  Variables are lost after the scope except they explicitly define a memory cell.
+  Constants are lost indefinitely
+- Variables must be defined before they can be used. Jumps are the only exception for this.
+- You can **not** jump into an inner scope only within the same or an outer scope.
 
