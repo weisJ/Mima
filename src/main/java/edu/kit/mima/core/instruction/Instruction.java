@@ -1,6 +1,10 @@
 package edu.kit.mima.core.instruction;
 
-import edu.kit.mima.core.legacy.intepretation.CompiledInstruction;
+import edu.kit.mima.core.data.MachineWord;
+import edu.kit.mima.core.interpretation.Environment;
+import edu.kit.mima.core.interpretation.Value;
+
+import java.util.List;
 
 /**
  * @author Jannis Weis
@@ -9,17 +13,11 @@ import edu.kit.mima.core.legacy.intepretation.CompiledInstruction;
 public interface Instruction {
 
     /**
-     * Check if an given input matches the instruction
+     * Apply the function
      *
-     * @param instruction instruction to match against
-     * @return true if matches
+     * @param arguments function argument
+     * @param environment runtime environment
+     * @return return value of function
      */
-    boolean matches(String instruction);
-
-    /**
-     * Execute the instruction
-     *
-     * @param instruction passed value. May be null
-     */
-    void run(CompiledInstruction instruction);
+    MachineWord apply(List<Value<MachineWord>> arguments, Environment environment);
 }

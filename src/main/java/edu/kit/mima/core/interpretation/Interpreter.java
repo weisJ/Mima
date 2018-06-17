@@ -179,8 +179,8 @@ public class Interpreter {
         scope.setExpressionIndex(scopeIndex);
         int reserved = reservedIndex; //Remember index for auto created memory cells
 
-        //Evaluate
         Value<MachineWord> value = null;
+        //Todo intercept here for stepwise execution using threads
         while (!jumped && running && scope.getExpressionIndex() < tokens.length) {
             value = evaluate(tokens[scope.getExpressionIndex()], scope);
             scope.setExpressionIndex(scope.getExpressionIndex() + 1);
