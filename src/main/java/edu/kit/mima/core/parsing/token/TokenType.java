@@ -60,4 +60,8 @@ public enum TokenType {
      * Empty type
      */
     EMPTY,
+    /**
+     * Error type. Used internally for signalling the parsing failed
+     */
+    ERROR
 }

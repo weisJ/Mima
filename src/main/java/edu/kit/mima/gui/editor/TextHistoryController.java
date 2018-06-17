@@ -53,8 +53,7 @@ public class TextHistoryController {
                 } else {
                     history.add(new FileHistoryObject(editorPane, offset, text, old, ChangeType.REPLACE));
                 }
-            } catch (final BadLocationException ignored) {
-            }
+            } catch (final BadLocationException ignored) { }
         }
     }
 

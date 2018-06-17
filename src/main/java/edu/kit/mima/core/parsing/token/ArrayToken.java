@@ -2,6 +2,7 @@ package edu.kit.mima.core.parsing.token;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -12,6 +13,8 @@ import java.util.stream.Collectors;
  */
 public class ArrayToken<T> implements Token<T[]> {
 
+    private static final Pattern INDENT = Pattern.compile("\n");
+    private static final String INDENT_REPLACEMENT = "\n\t";
     private final String className;
     private T[] values;
 
@@ -44,7 +47,7 @@ public class ArrayToken<T> implements Token<T[]> {
     public String toString() {
         return "[type=array, data=" + className + "] {\n\t"
                 + Arrays.stream(values)
-                .map(t -> t.toString().replaceAll("\n", "\n\t"))
+                .map(t -> INDENT.matcher(t.toString()).replaceAll(INDENT_REPLACEMENT))
                 .collect(Collectors.joining("\n"))
                 + "\n}";
     }

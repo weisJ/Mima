@@ -5,6 +5,7 @@ import edu.kit.mima.core.parsing.inputStream.TokenStream;
 import edu.kit.mima.core.parsing.lang.Keyword;
 import edu.kit.mima.core.parsing.lang.Punctuation;
 import edu.kit.mima.core.parsing.token.ArrayToken;
+import edu.kit.mima.core.parsing.token.AtomToken;
 import edu.kit.mima.core.parsing.token.BinaryToken;
 import edu.kit.mima.core.parsing.token.EmptyToken;
 import edu.kit.mima.core.parsing.token.ProgramToken;
@@ -50,11 +51,15 @@ public class Parser {
      */
     private ProgramToken parseTopLevel() {
         List<Token> program = new ArrayList<>();
-        while (!input.isEmpty()) {
-            program.add(maybeJumpAssociation(this::parseExpression));
-            if (!input.isEmpty()) {
-                skipPunctuation(Punctuation.INSTRUCTION_END);
+        try {
+            while (!input.isEmpty()) {
+                program.add(maybeJumpAssociation(this::parseExpression));
+                if (!input.isEmpty()) {
+                    skipPunctuation(Punctuation.INSTRUCTION_END);
+                }
             }
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            program.add(new AtomToken<>(TokenType.ERROR, e.getMessage()));
         }
         return new ProgramToken(program.toArray(new Token[0]));
     }

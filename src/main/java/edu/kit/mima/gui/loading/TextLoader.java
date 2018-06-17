@@ -29,7 +29,7 @@ public class TextLoader {
     public TextLoader(final Component parent, final LoadManager manager) {
         this.manager = manager;
         this.parent = parent;
-        this.handler = new SaveHandler(null);
+        handler = new SaveHandler(null);
     }
 
     /**
@@ -69,7 +69,8 @@ public class TextLoader {
      * @return loaded text
      */
     @SuppressWarnings("OverlyBroadCatchBlock")
-    public @Nullable String requestLoad(final String searchPath, final String[] extensions, final Runnable abortHandler) {
+    public @Nullable String requestLoad(final String searchPath, final String[] extensions,
+                                        final Runnable abortHandler) {
         final String path = requestPath(searchPath, extensions, abortHandler);
         if (path == null) {
             abortHandler.run();
@@ -90,7 +91,8 @@ public class TextLoader {
     /*
      * Request the path form user using JFileChooser
      */
-    private @Nullable String requestPath(final String savedPath, final String[] extensions, final Runnable abortHandler) {
+    private @Nullable String requestPath(final String savedPath, final String[] extensions,
+                                         final Runnable abortHandler) {
         final JFileChooser chooser = new JFileChooser(savedPath);
         final FileNameExtensionFilter filter = new FileNameExtensionFilter(extensions[0], extensions);
         chooser.setFileFilter(filter);

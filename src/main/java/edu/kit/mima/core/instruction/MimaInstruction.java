@@ -21,9 +21,9 @@ public enum MimaInstruction implements Instruction {
      */
     LDC("LDC") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
-            checkArgNumber(args, 1);
-            var argument = args.get(0);
+        public MachineWord apply(List<Value<MachineWord>> arguments, Environment environment) {
+            checkArgNumber(arguments, 1);
+            var argument = arguments.get(0);
             if (argument.getType() != ValueType.CONSTANT && argument.getType() != ValueType.NUMBER) {
                 fail("can't pass a reference");
             }
@@ -40,9 +40,9 @@ public enum MimaInstruction implements Instruction {
      */
     LDV("LDV") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
-            checkArgNumber(args, 1);
-            var argument = args.get(0);
+        public MachineWord apply(List<Value<MachineWord>> arguments, Environment environment) {
+            checkArgNumber(arguments, 1);
+            var argument = arguments.get(0);
             checkMemoryReference(argument);
             mima.setAccumulator(mima.loadValue(argument.getValue().intValue()));
             return null;
@@ -53,9 +53,9 @@ public enum MimaInstruction implements Instruction {
      */
     STV("STV") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
-            checkArgNumber(args, 1);
-            var argument = args.get(0);
+        public MachineWord apply(List<Value<MachineWord>> arguments, Environment environment) {
+            checkArgNumber(arguments, 1);
+            var argument = arguments.get(0);
             checkMemoryReference(argument);
             mima.storeValue(argument.getValue().intValue(), mima.getAccumulator());
             return null;
@@ -66,9 +66,9 @@ public enum MimaInstruction implements Instruction {
      */
     LDIV("LDIV") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
-            checkArgNumber(args, 1);
-            var argument = args.get(0);
+        public MachineWord apply(List<Value<MachineWord>> arguments, Environment environment) {
+            checkArgNumber(arguments, 1);
+            var argument = arguments.get(0);
             checkMemoryReference(argument);
             mima.setAccumulator(mima.loadValue(mima.loadValue(argument.getValue().intValue()).intValue()));
             return null;
@@ -79,9 +79,9 @@ public enum MimaInstruction implements Instruction {
      */
     STIV("STIV") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
-            checkArgNumber(args, 1);
-            var argument = args.get(0);
+        public MachineWord apply(List<Value<MachineWord>> arguments, Environment environment) {
+            checkArgNumber(arguments, 1);
+            var argument = arguments.get(0);
             checkMemoryReference(argument);
             mima.storeValue(mima.loadValue(argument.getValue().intValue()).intValue(), mima.getAccumulator());
             return null;
@@ -92,8 +92,8 @@ public enum MimaInstruction implements Instruction {
      */
     RAR("RAR") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
-            checkArgNumber(args, 0);
+        public MachineWord apply(List<Value<MachineWord>> arguments, Environment environment) {
+            checkArgNumber(arguments, 0);
             mima.setAccumulator(arithmeticLogicUnit.rar(mima.getAccumulator()));
             return null;
         }
@@ -103,8 +103,8 @@ public enum MimaInstruction implements Instruction {
      */
     NOT("NOT") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
-            checkArgNumber(args, 0);
+        public MachineWord apply(List<Value<MachineWord>> arguments, Environment environment) {
+            checkArgNumber(arguments, 0);
             mima.setAccumulator(mima.getAccumulator().invert());
             return null;
         }
@@ -114,9 +114,9 @@ public enum MimaInstruction implements Instruction {
      */
     ADD("ADD") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
-            checkArgNumber(args, 1);
-            var argument = args.get(0);
+        public MachineWord apply(List<Value<MachineWord>> arguments, Environment environment) {
+            checkArgNumber(arguments, 1);
+            var argument = arguments.get(0);
             checkMemoryReference(argument);
             mima.setAccumulator(arithmeticLogicUnit.add(
                     MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
@@ -129,9 +129,9 @@ public enum MimaInstruction implements Instruction {
      */
     AND("AND") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
-            checkArgNumber(args, 1);
-            var argument = args.get(0);
+        public MachineWord apply(List<Value<MachineWord>> arguments, Environment environment) {
+            checkArgNumber(arguments, 1);
+            var argument = arguments.get(0);
             checkMemoryReference(argument);
             mima.setAccumulator(arithmeticLogicUnit.and(
                     MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
@@ -144,9 +144,9 @@ public enum MimaInstruction implements Instruction {
      */
     OR("OR") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
-            checkArgNumber(args, 1);
-            var argument = args.get(0);
+        public MachineWord apply(List<Value<MachineWord>> arguments, Environment environment) {
+            checkArgNumber(arguments, 1);
+            var argument = arguments.get(0);
             checkMemoryReference(argument);
             mima.setAccumulator(arithmeticLogicUnit.or(
                     MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
@@ -159,9 +159,9 @@ public enum MimaInstruction implements Instruction {
      */
     XOR("XOR") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
-            checkArgNumber(args, 1);
-            var argument = args.get(0);
+        public MachineWord apply(List<Value<MachineWord>> arguments, Environment environment) {
+            checkArgNumber(arguments, 1);
+            var argument = arguments.get(0);
             checkMemoryReference(argument);
             mima.setAccumulator(arithmeticLogicUnit.xor(
                     MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
@@ -170,15 +170,15 @@ public enum MimaInstruction implements Instruction {
         }
     },
     /**
-     * Store -1 to accumulator if equals, else load 0
+     * Store -1 to accumulator if negativeIfEquals, else load 0
      */
     EQL("EQL") {
         @Override
-        public MachineWord apply(List<Value<MachineWord>> args, Environment environment) {
-            checkArgNumber(args, 1);
-            var argument = args.get(0);
+        public MachineWord apply(List<Value<MachineWord>> arguments, Environment environment) {
+            checkArgNumber(arguments, 1);
+            var argument = arguments.get(0);
             checkMemoryReference(argument);
-            mima.setAccumulator(arithmeticLogicUnit.equals(
+            mima.setAccumulator(arithmeticLogicUnit.negativeIfEquals(
                     MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
                     mima.loadValue(argument.getValue().intValue())));
             return null;
@@ -222,7 +222,7 @@ public enum MimaInstruction implements Instruction {
     }
 
     /**
-     * Check the argument for given number of arguemnts
+     * Check the argument for given number of arguments
      *
      * @param args                   arguments list
      * @param expectedArgumentNumber expected number of arguments
@@ -257,6 +257,6 @@ public enum MimaInstruction implements Instruction {
     }
 
     @Override
-    public abstract @Nullable MachineWord apply(List<Value<MachineWord>> args, Environment environment);
+    public abstract @Nullable MachineWord apply(List<Value<MachineWord>> arguments, Environment environment);
 
 }

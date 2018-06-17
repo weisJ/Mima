@@ -89,11 +89,55 @@ public class TokenStream {
         return null;
     }
 
+    private static boolean isWhitespace(char c) {
+        return WHITESPACE.matcher(String.valueOf(c)).matches();
+    }
+
+    /*
+     * Read while a predicate is true
+     */
+    private String readWhile(Predicate<Character> predicate) {
+        StringBuilder string = new StringBuilder();
+        while (!input.isEmpty() && predicate.test(input.peek())) {
+            string.append(input.next());
+        }
+        return string.toString();
+    }
+
+    private void skipComment() {
+        readWhile(c -> c != NEW_LINE && c != Punctuation.COMMENT);
+        input.next();
+    }
+
+    private static boolean isDigitStart(char c) {
+        return NUMBER_START.matcher(String.valueOf(c)).matches();
+    }
+
+    private static boolean isDigit(char c) {
+        return NUMBER.matcher(String.valueOf(c)).matches();
+    }
+
+    private static boolean isIdentificationStart(char c) {
+        return LETTER.matcher(String.valueOf(c)).matches();
+    }
+
+    private static boolean isPunctuationChar(char c) {
+        return PUNCTUATION.matcher(String.valueOf(c)).matches();
+    }
+
+    private static boolean isIdentification(char c) {
+        return isIdentificationStart(c) || (Symbol.ALLOWED_SYMBOLS.indexOf(c) >= 0);
+    }
+
+    private static boolean isKeyword(String identifier) {
+        return Arrays.stream(KEYWORDS).anyMatch(keyword -> keyword.equals(identifier));
+    }
+
     /*
      * Read the next token
      */
     private @Nullable Token readNext() {
-        readWhile(this::isWhitespace);
+        readWhile(TokenStream::isWhitespace);
         if (input.isEmpty()) {
             return null;
         }
@@ -121,54 +165,10 @@ public class TokenStream {
     }
 
     /*
-     * Read while a predicate is true
-     */
-    private String readWhile(Predicate<Character> predicate) {
-        StringBuilder string = new StringBuilder();
-        while (!input.isEmpty() && predicate.test(input.peek())) {
-            string.append(input.next());
-        }
-        return string.toString();
-    }
-
-    private void skipComment() {
-        readWhile(c -> c != NEW_LINE && c != Punctuation.COMMENT);
-        input.next();
-    }
-
-    private boolean isWhitespace(char c) {
-        return WHITESPACE.matcher(String.valueOf(c)).matches();
-    }
-
-    private boolean isDigitStart(char c) {
-        return NUMBER_START.matcher(String.valueOf(c)).matches();
-    }
-
-    private boolean isDigit(char c) {
-        return NUMBER.matcher(String.valueOf(c)).matches();
-    }
-
-    private boolean isIdentificationStart(char c) {
-        return LETTER.matcher(String.valueOf(c)).matches();
-    }
-
-    private boolean isPunctuationChar(char c) {
-        return PUNCTUATION.matcher(String.valueOf(c)).matches();
-    }
-
-    private boolean isIdentification(char c) {
-        return isIdentificationStart(c) || (Symbol.ALLOWED_SYMBOLS.indexOf(c) >= 0);
-    }
-
-    private boolean isKeyword(String identifier) {
-        return Arrays.stream(KEYWORDS).anyMatch(keyword -> keyword.equals(identifier));
-    }
-
-    /*
      * Read a number value
      */
     private Token readNumber() {
-        String number = input.next() + readWhile(this::isDigit);
+        String number = input.next() + readWhile(TokenStream::isDigit);
         return new AtomToken<>(TokenType.NUMBER, number);
     }
 
@@ -185,7 +185,7 @@ public class TokenStream {
      * and declares it as such
      */
     private Token readIdentification() {
-        String identifier = readWhile(this::isIdentification);
+        String identifier = readWhile(TokenStream::isIdentification);
         if (isKeyword(identifier)) {
             return new AtomToken<>(TokenType.KEYWORD, identifier);
         }

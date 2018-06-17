@@ -1,6 +1,13 @@
 package edu.kit.mima.gui.loading;
 
-import java.io.*;
+import org.jetbrains.annotations.Nullable;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.stream.Collectors;
 
 /**
@@ -18,8 +25,10 @@ public class SaveHandler {
      *
      * @param saveDirectory save directory for temporary file
      */
-    public SaveHandler(final String saveDirectory) {
-        tmpFile = saveDirectory + "/save.tmp";
+    public SaveHandler(final @Nullable String saveDirectory) {
+        tmpFile = saveDirectory == null
+                ? System.getProperty("user.home") + "/save.tmp"
+                : saveDirectory + "/save.tmp";
     }
 
     /**

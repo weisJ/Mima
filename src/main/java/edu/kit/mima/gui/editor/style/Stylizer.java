@@ -1,8 +1,13 @@
 package edu.kit.mima.gui.editor.style;
 
-import javax.swing.text.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
+import javax.swing.text.StyledDocument;
 import java.awt.Color;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -57,9 +62,9 @@ public class Stylizer {
      */
     private void stylize(final StyleGroup group) {
         final StyleContext context = new StyleContext();
-        final Set<String> regexSet = group.regexSet();
+        final List<String> regexList = group.regexList();
         final int index = 0;
-        for (final String regex : regexSet) {
+        for (final String regex : regexList) {
             final Style style = context.addStyle("Style " + index, null);
             style.addAttribute(StyleConstants.Foreground, group.getColor(regex));
             try {

@@ -1,6 +1,7 @@
 package edu.kit.mima.core.parsing.token;
 
 import java.util.Arrays;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -12,6 +13,8 @@ import java.util.stream.Collectors;
  */
 public class ProgramToken implements Token<Token[]> {
 
+    private static final Pattern INDENT = Pattern.compile("\n");
+    private static final String INDENT_REPLACEMENT = "\n\t";
     private Token[] program;
 
     /**
@@ -41,7 +44,7 @@ public class ProgramToken implements Token<Token[]> {
     @Override
     public String toString() {
         return Arrays.stream(program)
-                .map(t -> '\t' + t.toString().replaceAll("\n", "\n\t") + '\n')
+                .map(t -> '\t' + INDENT.matcher(t.toString()).replaceAll(INDENT_REPLACEMENT) + '\n')
                 .collect(Collectors.joining("", "[prog]{\n", "}"));
     }
 

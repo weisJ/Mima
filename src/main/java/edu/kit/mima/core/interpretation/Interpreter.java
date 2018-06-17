@@ -8,10 +8,10 @@ import edu.kit.mima.core.parsing.token.ProgramToken;
 import edu.kit.mima.core.parsing.token.Token;
 import edu.kit.mima.core.parsing.token.TokenType;
 import edu.kit.mima.core.parsing.token.Tuple;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -22,15 +22,17 @@ import java.util.stream.Collectors;
  */
 public class Interpreter {
 
-    private static final int SLEEP_DURATION = 20000;
+    private static final int SLEEP_TIME = 200;
+    private static final Value<MachineWord> VOID = new Value<>(ValueType.VOID, null);
 
     private final int wordLength;
     private int reservedIndex;
     private boolean running;
 
     //------------Debug---------------//
-    private Thread evaluationThread;
     private boolean debug;
+    private Token currentToken;
+    private Environment currentScope;
     //--------------------------------//
 
     //------------Jump----------------//
@@ -38,6 +40,12 @@ public class Interpreter {
     private int expressionScopeIndex;
     private boolean jumped;
     //--------------------------------//
+
+    //------------Thread--------------//
+    private Thread workingThread;
+    private boolean working;
+    //--------------------------------//
+
 
     /**
      * @param wordLength number of bits in arguments
@@ -47,41 +55,6 @@ public class Interpreter {
         reservedIndex = -1;
         expressionScopeIndex = 0;
         jumped = false;
-    }
-
-    /**
-     * Evaluate the Program.
-     *
-     * @param program           program input created by {@link Parser}
-     * @param globalEnvironment the global runtime environment
-     */
-    public void evaluateTopLevel(final ProgramToken program, final Environment globalEnvironment, boolean debug) {
-        this.debug = debug;
-        running = true;
-        evaluationThread = new Thread(() -> {
-
-            Environment runtimeEnvironment = globalEnvironment;
-            ProgramToken runtimeToken = program;
-            boolean firstScope = true;
-            while (running) {
-                /*
-                 * First call has to create own scope that releases memory.
-                 * As calls/jumps can only go up in scopes the scope doesn't need to be renewed, and
-                 * memory doesn't need to be released. Clearing memory will be done by the first
-                 * environment call.
-                 */
-                evaluateProgram(runtimeToken, runtimeEnvironment, firstScope, !firstScope, expressionScopeIndex);
-                if (firstScope) {
-                    firstScope = false;
-                }
-                if (jumped) {
-                    runtimeEnvironment = jumpEnvironment;
-                    runtimeToken = jumpEnvironment.getProgramToken();
-                    jumped = false;
-                }
-            }
-        });
-        evaluationThread.start();
     }
 
     /**
@@ -101,15 +74,6 @@ public class Interpreter {
     public void performJump(int instructionIndex) {
         jumped = true;
         expressionScopeIndex = instructionIndex;
-    }
-
-    /**
-     * Returns the evaluation thread
-     *
-     * @return the evaluation thread
-     */
-    public Thread getEvaluationThread() {
-        return evaluationThread;
     }
 
     /**
@@ -137,7 +101,7 @@ public class Interpreter {
      * This needs to be done as forward referencing is allowed for jumps
      */
     @SuppressWarnings("unchecked")
-    private void resolveJumpPoints(final Token[] tokens, final Environment environment) {
+    private static void resolveJumpPoints(final Token[] tokens, final Environment environment) {
         for (int i = 0; i < tokens.length; i++) {
             Token token = tokens[i];
             if (token.getType() == TokenType.JUMP_POINT) {
@@ -146,13 +110,69 @@ public class Interpreter {
         }
     }
 
+    /**
+     * Return the current token
+     *
+     * @return current Token
+     */
+    public Token getCurrentToken() {
+        return currentToken;
+    }
+
+    /**
+     * Get the current evaluation scope
+     *
+     * @return Environment object of current scope
+     */
+    public Environment getCurrentScope() {
+        return currentScope;
+    }
+
+    //-------------Evaluation--------------//
+
+    /**
+     * Evaluate the Program.
+     *
+     * @param program           program input created by {@link Parser}
+     * @param globalEnvironment the global runtime environment
+     * @param debug             whether the interpreter should pause after each statement
+     */
+    public void evaluateTopLevel(final ProgramToken program, final Environment globalEnvironment, boolean debug) {
+        this.debug = debug;
+        running = true;
+        workingThread = new Thread(() -> {
+            working = true;
+            Environment runtimeEnvironment = globalEnvironment;
+            ProgramToken runtimeToken = program;
+            boolean firstScope = true;
+            while (running) {
+                /*
+                 * First call has to create own scope that releases memory.
+                 * As calls/jumps can only go up in scopes the scope doesn't need to be renewed, and
+                 * memory doesn't need to be released. Clearing memory will be done by the first
+                 * environment call.
+                 */
+                evaluateProgram(runtimeToken, runtimeEnvironment, firstScope, !firstScope, expressionScopeIndex);
+                if (firstScope) {
+                    firstScope = false;
+                }
+                if (jumped) {
+                    runtimeEnvironment = jumpEnvironment;
+                    runtimeToken = jumpEnvironment.getProgramToken();
+                    jumped = false;
+                }
+            }
+        });
+        workingThread.start();
+    }
+
     /*
      * Evaluate different tokens
      */
     @SuppressWarnings("unchecked")
-    private @Nullable Value<MachineWord> evaluate(final Token expression, final Environment environment) {
+    private Value<MachineWord> evaluate(final Token expression, final Environment environment) {
         if (!running) {
-            return null;
+            return VOID;
         }
         switch (expression.getType()) {
             case PROGRAM:
@@ -164,17 +184,17 @@ public class Interpreter {
             case NUMBER:
                 return evaluateNumber((String) expression.getValue());
             case EMPTY:
-                return new Value<>(ValueType.VOID, (MachineWord) expression.getValue());
+                return VOID;
             case BINARY:
                 return evaluateBinary((String) expression.getValue());
             case IDENTIFICATION:
                 return evaluateIdentification(expression, environment);
             case DEFINITION:
                 evaluateDefinition((BinaryToken<Token, Token>) expression, environment);
-                return null;
+                return VOID;
             case CONSTANT:
                 evaluateConstant((BinaryToken<Token, Token>) expression, environment);
-                return null;
+                return VOID;
             case CALL:
                 return evaluateFunction((BinaryToken<Token, ArrayToken<Token>>) expression, environment);
             case JUMP_POINT:
@@ -205,12 +225,14 @@ public class Interpreter {
         scope.setExpressionIndex(scopeIndex);
         int reserved = reservedIndex; //Remember index for auto created memory cells
 
-        Value<MachineWord> value = null;
-        if (debug) {
-            pause();
-        }
+        Value<MachineWord> value = VOID;
         while (!jumped && running && scope.getExpressionIndex() < tokens.length) {
-            value = evaluate(tokens[scope.getExpressionIndex()], scope);
+            currentToken = tokens[scope.getExpressionIndex()];
+            if (debug) {
+                pause();
+            }
+            currentScope = scope;
+            value = evaluate(currentToken, scope);
             scope.setExpressionIndex(scope.getExpressionIndex() + 1);
         }
 
@@ -220,18 +242,7 @@ public class Interpreter {
         if (releaseMemory) {
             reservedIndex = reserved; //Release auto created memory cells
         }
-        return jumped ? null : value; //Automatically return to parent scope
-    }
-
-    private void pause() {
-        boolean interrupted = false;
-        while (!interrupted) {
-            try {
-                Thread.sleep(SLEEP_DURATION);
-            } catch (InterruptedException e) {
-                interrupted = true;
-            }
-        }
+        return jumped ? VOID : value; //Automatically return to parent scope
     }
 
     /*
@@ -247,11 +258,7 @@ public class Interpreter {
      * Evaluate a number string
      */
     private Value<MachineWord> evaluateNumber(String value) {
-        try {
-            return new Value<>(ValueType.NUMBER, new MachineWord(Integer.parseInt(value), wordLength));
-        } catch (NumberFormatException e) {
-            throw new NumberFormatException(e.getMessage());
-        }
+        return new Value<>(ValueType.NUMBER, new MachineWord(Integer.parseInt(value), wordLength));
     }
 
     /*
@@ -288,7 +295,7 @@ public class Interpreter {
      */
     private void evaluateConstant(BinaryToken<Token, Token> definition, Environment environment) {
         var expressionValue = evaluate(definition.getSecond(), environment);
-        if (expressionValue == null) {
+        if (Objects.equals(expressionValue, VOID)) {
             throw new IllegalArgumentException("Not a definition body: " + definition.getSecond());
         }
         environment.defineConstant(definition.getFirst(), expressionValue.getValue());
@@ -303,7 +310,7 @@ public class Interpreter {
             reservedIndex--;
         } else {
             var expressionValue = evaluate(definition.getSecond(), environment);
-            if (expressionValue == null) {
+            if (Objects.equals(expressionValue, VOID)) {
                 throw new IllegalArgumentException("Not a definition body: " + definition.getSecond());
             }
             if (expressionValue.getValue().intValue() < 0) {
@@ -324,4 +331,41 @@ public class Interpreter {
                 .map(argument -> evaluate(argument, environment)).collect(Collectors.toList());
         return new Value<>(ValueType.NUMBER, function.apply(args, environment));
     }
+    //-------------------------------------//
+
+    //----------------Thread----------------//
+    private void pause() {
+        working = false;
+        boolean interrupted = false;
+        while (!interrupted) {
+            try {
+                Thread.sleep(SLEEP_TIME);
+            } catch (InterruptedException e) {
+                interrupted = true;
+            }
+        }
+        working = true;
+    }
+
+    /**
+     * Returns whether the interpreter is currently working.
+     * The result of this method is linked to the outcome of {@link #isRunning()} as follows:
+     * if {@link #isRunning()} evaluates to false so will this method
+     * if this method evaluates to false {@link #isRunning()} can still evaluate to true
+     *
+     * @return true if working
+     */
+    public boolean isWorking() {
+        return working;
+    }
+
+    /**
+     * Notify the working thread to evaluate the next statement
+     */
+    public void notifyThread() {
+        if (workingThread != null) {
+            workingThread.interrupt();
+        }
+    }
+    //-------------------------------------//
 }
