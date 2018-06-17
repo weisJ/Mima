@@ -39,6 +39,44 @@ public class MimaController {
     }
 
     /**
+     * Tmp test method
+     *
+     * @param args ignored
+     */
+    public static void main(String[] args) {
+        MimaController controller = new MimaController();
+        controller.parse("#Memory associations;\n"
+                + "§define minus_eins; #inline comment#\n"
+                + "§define eins;\n"
+                + "§define zero;\n"
+                + "§define val;\n"
+                + "\n"
+                + "#Instructions\n"
+                + "#This is a comment\n"
+                + "LDC(5);\n"
+                + "STV(val);\n"
+                + "LDC(0);\n"
+                + "STV(zero);\n"
+                + "LDC(1);\n"
+                + "STV(eins);\n"
+                + "NOT();\n"
+                + "ADD(eins);\n"
+                + "STV(minus_eins);\n"
+                + "Loop : LDV(val);\n"
+                + "EQL(zero);\n"
+                + "JMN(Stop);\n"
+                + "LDV(val);\n"
+                + "ADD(minus_eins);\n"
+                + "STV(val);\n"
+                + "JMP(Loop);\n"
+                + "Stop : HALT();");
+        controller.step();
+        while (controller.interpreter.isRunning()) {
+            controller.step();
+        }
+    }
+
+    /**
      * Parse the program given program. Can then be run using the
      * run() method
      *
@@ -52,7 +90,27 @@ public class MimaController {
      * Run the program
      */
     public void run() {
-        interpreter.evaluateTopLevel(programToken, setupGlobalEnvironment(programToken));
+        if (!interpreter.isRunning()) {
+            start(false);
+        }
+    }
+
+    /**
+     * Perform one step of the program
+     */
+    public void step() {
+        if (!interpreter.isRunning()) {
+            start(true);
+        } else {
+            interpreter.getEvaluationThread().interrupt();
+        }
+    }
+
+    /*
+     * Start the interpreter, with globalEnvironment
+     */
+    private void start(boolean debug) {
+        interpreter.evaluateTopLevel(programToken, setupGlobalEnvironment(programToken), debug);
     }
 
     /*
