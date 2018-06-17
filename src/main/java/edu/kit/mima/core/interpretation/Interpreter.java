@@ -22,9 +22,16 @@ import java.util.stream.Collectors;
  */
 public class Interpreter {
 
+    private static final int SLEEP_DURATION = 20000;
+
     private final int wordLength;
     private int reservedIndex;
     private boolean running;
+
+    //------------Debug---------------//
+    private Thread evaluationThread;
+    private boolean debug;
+    //--------------------------------//
 
     //------------Jump----------------//
     private Environment jumpEnvironment;
@@ -39,7 +46,6 @@ public class Interpreter {
         this.wordLength = wordLength;
         reservedIndex = -1;
         expressionScopeIndex = 0;
-        running = true;
         jumped = false;
     }
 
@@ -48,32 +54,34 @@ public class Interpreter {
      *
      * @param program           program input created by {@link Parser}
      * @param globalEnvironment the global runtime environment
-     * @return last evaluated result. If null then the last output had return-type void
      */
-    public @Nullable Value<MachineWord> evaluateTopLevel(final ProgramToken program,
-                                                         final Environment globalEnvironment) {
-        Environment runtimeEnvironment = globalEnvironment;
-        Value<MachineWord> value = null;
-        ProgramToken runtimeToken = program;
-        boolean firstScope = true;
-        while (running) {
-            /*
-             * First call has to create own scope that releases memory.
-             * As calls/jumps can only go up in scopes the scope doesn't need to be renewed, and
-             * memory doesn't need to be released. Clearing memory will be done by the first
-             * environment call.
-             */
-            value = evaluateProgram(runtimeToken, runtimeEnvironment, firstScope, !firstScope, expressionScopeIndex);
-            if (firstScope) {
-                firstScope = false;
+    public void evaluateTopLevel(final ProgramToken program, final Environment globalEnvironment, boolean debug) {
+        this.debug = debug;
+        running = true;
+        evaluationThread = new Thread(() -> {
+
+            Environment runtimeEnvironment = globalEnvironment;
+            ProgramToken runtimeToken = program;
+            boolean firstScope = true;
+            while (running) {
+                /*
+                 * First call has to create own scope that releases memory.
+                 * As calls/jumps can only go up in scopes the scope doesn't need to be renewed, and
+                 * memory doesn't need to be released. Clearing memory will be done by the first
+                 * environment call.
+                 */
+                evaluateProgram(runtimeToken, runtimeEnvironment, firstScope, !firstScope, expressionScopeIndex);
+                if (firstScope) {
+                    firstScope = false;
+                }
+                if (jumped) {
+                    runtimeEnvironment = jumpEnvironment;
+                    runtimeToken = jumpEnvironment.getProgramToken();
+                    jumped = false;
+                }
             }
-            if (jumped) {
-                runtimeEnvironment = jumpEnvironment;
-                runtimeToken = jumpEnvironment.getProgramToken();
-                jumped = false;
-            }
-        }
-        return value;
+        });
+        evaluationThread.start();
     }
 
     /**
@@ -93,6 +101,24 @@ public class Interpreter {
     public void performJump(int instructionIndex) {
         jumped = true;
         expressionScopeIndex = instructionIndex;
+    }
+
+    /**
+     * Returns the evaluation thread
+     *
+     * @return the evaluation thread
+     */
+    public Thread getEvaluationThread() {
+        return evaluationThread;
+    }
+
+    /**
+     * Returns whether the interpreter is running
+     *
+     * @return true if running
+     */
+    public boolean isRunning() {
+        return running;
     }
 
     /**
@@ -180,7 +206,9 @@ public class Interpreter {
         int reserved = reservedIndex; //Remember index for auto created memory cells
 
         Value<MachineWord> value = null;
-        //Todo intercept here for stepwise execution using threads
+        if (debug) {
+            pause();
+        }
         while (!jumped && running && scope.getExpressionIndex() < tokens.length) {
             value = evaluate(tokens[scope.getExpressionIndex()], scope);
             scope.setExpressionIndex(scope.getExpressionIndex() + 1);
@@ -193,6 +221,17 @@ public class Interpreter {
             reservedIndex = reserved; //Release auto created memory cells
         }
         return jumped ? null : value; //Automatically return to parent scope
+    }
+
+    private void pause() {
+        boolean interrupted = false;
+        while (!interrupted) {
+            try {
+                Thread.sleep(SLEEP_DURATION);
+            } catch (InterruptedException e) {
+                interrupted = true;
+            }
+        }
     }
 
     /*
