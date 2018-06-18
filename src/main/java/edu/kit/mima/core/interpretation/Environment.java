@@ -7,6 +7,7 @@ import edu.kit.mima.core.parsing.token.Token;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -41,39 +42,13 @@ public class Environment {
     }
 
     /**
-     * Get the variable associations
+     * Get the variable and constants associations as follows
+     * {{variables},{constants}}
      *
-     * @return variables associations
+     * @return list of variables and constant associations maps
      */
-    public Map<Token, MachineWord> getVariables() {
-        return variables;
-    }
-
-    /**
-     * Get the constants associations
-     *
-     * @return constants associations
-     */
-    public Map<Token, MachineWord> getConstants() {
-        return constants;
-    }
-
-    /**
-     * Get the jump associations
-     *
-     * @return jump associations
-     */
-    public Map<Token, Integer> getJumps() {
-        return jumps;
-    }
-
-    /**
-     * Get the function associations
-     *
-     * @return function associations
-     */
-    public Map<Token, Instruction> getFunctions() {
-        return functions;
+    public List<Map<Token, MachineWord>> getDefinitions() {
+        return List.of(variables, constants);
     }
 
     /**
@@ -249,40 +224,6 @@ public class Environment {
             throw new IllegalArgumentException("Undefined variable: " + name);
         }
         return scope.getJump(name);
-    }
-
-    /**
-     * Set the value of the given variable
-     *
-     * @param name  name of variable
-     * @param value new value of variable
-     */
-    public void setVariable(Token name, MachineWord value) {
-        Environment scope = lookupVariable(name);
-        if (scope == null) {
-            throw new IllegalArgumentException("Undefined variable: " + name);
-        }
-        if (scope.parent == null) {
-            throw new IllegalArgumentException("Can't override global variables");
-        }
-        scope.variables.put(name, value);
-    }
-
-    /**
-     * Set the function body of the given variable
-     *
-     * @param name     name of variable
-     * @param function new function body of variable
-     */
-    public void setFunction(Token name, Instruction function) {
-        Environment scope = lookupFunction(name);
-        if (scope == null) {
-            throw new IllegalArgumentException("Undefined function: " + name);
-        }
-        if (scope.parent == null) {
-            throw new IllegalArgumentException("Can't override global function");
-        }
-        scope.functions.put(name, function);
     }
 
 
