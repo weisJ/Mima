@@ -73,7 +73,7 @@ public final class MimaUI extends JFrame {
         fileManager = new FileManager(this, MIMA_DIR, new String[]{FILE_EXTENSION, FILE_EXTENSION_X});
         editor = new Editor();
         console = new Console();
-        memoryView = new FixedScrollTable(new String[]{"Address", "Value"});
+        memoryView = new FixedScrollTable(new String[]{"Address", "Value"}, 100);
         syntaxStyle = new StyleGroup();
         referenceStyle = new StyleGroup();
         Logger.setConsole(console);
@@ -96,7 +96,9 @@ public final class MimaUI extends JFrame {
         editor.addAfterEditAction(() -> fileManager.setText(editor.getText()));
         editor.addAfterEditAction(() -> {
             /* no need to error while writing*/
-            try { parse(editor.getText()); } catch (IllegalArgumentException | IllegalStateException ignored) { }
+            try {
+                controller.parse(editor.getText(), getInstructionSet());
+            } catch (IllegalArgumentException | IllegalStateException ignored) { }
         });
         editor.addAfterEditAction(this::updateReferenceHighlighting);
         editor.useStyle(true);
@@ -233,7 +235,7 @@ public final class MimaUI extends JFrame {
         String text = fileManager.getText();
         editor.setText(text);
         try {
-            parse(text);
+            controller.parse(text, getInstructionSet());
         } catch (IllegalArgumentException | IllegalStateException e) {
             Logger.error(e.getMessage());
         }
@@ -244,13 +246,12 @@ public final class MimaUI extends JFrame {
     }
 
     /*
-     * Parse the current text file
+     * Get the current instruction set
      */
-    private void parse(String text) {
-        InstructionSet instructionSet = fileManager.getLastExtension().equals(FILE_EXTENSION_X)
+    private InstructionSet getInstructionSet() {
+        return fileManager.getLastExtension().equals(FILE_EXTENSION_X)
                 ? InstructionSet.MIMA_X
                 : InstructionSet.MIMA;
-        controller.parse(text, instructionSet);
     }
 
     /**
@@ -259,10 +260,10 @@ public final class MimaUI extends JFrame {
     private void step() {
         try {
             controller.step();
-            run.setEnabled(false);
-            if (controller.getCurrent() != null) {
-                Logger.log("Instruction: " + controller.getCurrent().simpleName());
+            if (controller.getCurrentStatement() != null) {
+                Logger.log("Instruction: " + controller.getCurrentStatement().simpleName());
             }
+            run.setEnabled(false);
             updateMemoryTable();
             run.setEnabled(!controller.isRunning());
         } catch (final InterpreterException e) {
@@ -312,7 +313,7 @@ public final class MimaUI extends JFrame {
         controller.stop();
         Logger.log("Compiling: " + fileManager.getLastFile().replaceAll("\\s", "") + "...");
         try {
-            parse(editor.getText());
+            controller.parse(editor.getText(), getInstructionSet());
             updateMemoryTable();
             run.setEnabled(true);
             step.setEnabled(true);
@@ -349,7 +350,7 @@ public final class MimaUI extends JFrame {
 
         syntaxStyle.addHighlight("-?[0-9]+", SyntaxColor.NUMBER);
         syntaxStyle.addHighlight(Punctuation.BINARY_PREFIX + "[10]*", SyntaxColor.BINARY);
-        syntaxStyle.addHighlight(controller.getInstructionSet().getInstructions(), SyntaxColor.INSTRUCTION);
+        syntaxStyle.addHighlight(getInstructionSet().getInstructions(), SyntaxColor.INSTRUCTION);
         syntaxStyle.addHighlight("HALT", SyntaxColor.WARNING);
         syntaxStyle.addHighlight(Punctuation.COMMENT + "[^\n" + Punctuation.COMMENT + "]*" + Punctuation.COMMENT + '?',
                 SyntaxColor.COMMENT);

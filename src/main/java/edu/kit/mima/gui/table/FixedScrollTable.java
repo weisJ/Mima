@@ -20,8 +20,9 @@ public class FixedScrollTable extends JScrollPane {
      * The fields of this table can not be edited by the user
      *
      * @param tableHeader header of table
+     * @param i
      */
-    public FixedScrollTable(final String[] tableHeader) {
+    public FixedScrollTable(final String[] tableHeader, int initialEntries) {
         super();
         this.tableHeader = tableHeader;
         table = new JTable(new DefaultTableModel(tableHeader, 0)) {
@@ -34,6 +35,8 @@ public class FixedScrollTable extends JScrollPane {
         table.getTableHeader().setReorderingAllowed(false);
         table.setFillsViewportHeight(true);
         setViewportView(table);
+        Object[][] data = new Object[initialEntries][tableHeader.length - 1];
+        setContent(data);
     }
 
     /**
