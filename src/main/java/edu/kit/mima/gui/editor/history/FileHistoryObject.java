@@ -1,6 +1,8 @@
 package edu.kit.mima.gui.editor.history;
 
 
+import edu.kit.mima.gui.logging.Logger;
+
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
@@ -101,7 +103,8 @@ public class FileHistoryObject {
                     break;
             }
             editor.setCaretPosition(caret);
-        } catch (final BadLocationException ignored) {
+        } catch (final BadLocationException e) {
+            Logger.error(e.getMessage());
         }
     }
 
@@ -130,7 +133,8 @@ public class FileHistoryObject {
                     break;
             }
             editor.setCaretPosition(caret);
-        } catch (final BadLocationException ignored) {
+        } catch (final BadLocationException e) {
+            Logger.error(e.getMessage());
         }
     }
 

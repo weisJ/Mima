@@ -1,5 +1,7 @@
 package edu.kit.mima.gui.loading;
 
+import edu.kit.mima.gui.logging.Logger;
+
 import javax.swing.JOptionPane;
 import java.awt.Component;
 import java.io.File;
@@ -159,7 +161,8 @@ public class FileManager implements AutoCloseable {
                     () -> {
                         throw new IllegalArgumentException("aborted save");
                     });
-        } catch (final IllegalArgumentException ignored) {
+        } catch (final IllegalArgumentException e) {
+            Logger.error(e.getMessage());
         }
         isNewFile = false;
         fileHash = text.hashCode();
@@ -209,16 +212,6 @@ public class FileManager implements AutoCloseable {
      */
     public void setText(final String text) {
         this.text = text;
-    }
-
-    /**
-     * Get the split array of getText()
-     *
-     * @param delimiter delimiter to split on
-     * @return array of split
-     */
-    public String[] split(String delimiter) {
-        return text.split(delimiter);
     }
 
     /**

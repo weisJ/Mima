@@ -1,5 +1,7 @@
 package edu.kit.mima.gui.console;
 
+import edu.kit.mima.gui.logging.Logger;
+
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
@@ -82,7 +84,8 @@ public class Console extends JScrollPane {
         try {
             StyleConstants.setForeground(style, color);
             document.insertString(document.getLength(), message + '\n', style);
-        } catch (final BadLocationException ignored) {
+        } catch (final BadLocationException e) {
+            Logger.error(e.getMessage());
         }
         scrollToBottom();
     }

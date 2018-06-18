@@ -3,6 +3,7 @@ package edu.kit.mima.gui.editor;
 import edu.kit.mima.gui.editor.history.FileHistoryObject;
 import edu.kit.mima.gui.editor.history.FileHistoryObject.ChangeType;
 import edu.kit.mima.gui.editor.history.History;
+import edu.kit.mima.gui.logging.Logger;
 
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
@@ -53,7 +54,9 @@ public class TextHistoryController {
                 } else {
                     history.add(new FileHistoryObject(editorPane, offset, text, old, ChangeType.REPLACE));
                 }
-            } catch (final BadLocationException ignored) { }
+            } catch (final BadLocationException e) {
+                Logger.error(e.getMessage());
+            }
         }
     }
 
@@ -96,7 +99,8 @@ public class TextHistoryController {
         String text = null;
         try {
             text = editorPane.getDocument().getText(offset, length);
-        } catch (final BadLocationException ignored) {
+        } catch (final BadLocationException e) {
+            Logger.error(e.getMessage());
         }
         assert text != null;
         if ((fhs != null)
