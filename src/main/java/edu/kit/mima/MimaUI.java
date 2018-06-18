@@ -244,7 +244,6 @@ public final class MimaUI extends JFrame {
      */
     private void step() {
         try {
-            Logger.log("Step!");
             controller.step();
             run.setEnabled(false);
             if (controller.getCurrent() != null) {
