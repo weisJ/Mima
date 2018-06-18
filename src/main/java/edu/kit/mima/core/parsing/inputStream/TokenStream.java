@@ -8,7 +8,8 @@ import edu.kit.mima.core.parsing.token.Token;
 import edu.kit.mima.core.parsing.token.TokenType;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -20,7 +21,7 @@ import java.util.regex.Pattern;
  * @since 2018
  */
 public class TokenStream {
-    private static final String[] KEYWORDS = Keyword.getKeywords();
+    private static final List<String> KEYWORDS = Collections.unmodifiableList(List.of(Keyword.getKeywords()));
     private static final Pattern WHITESPACE = Pattern.compile("[ \t\n\r\f]");
     private static final Pattern NUMBER_START = Pattern.compile(Symbol.NUMBER_SIGNED);
     private static final Pattern NUMBER = Pattern.compile(Symbol.NUMBERS);
@@ -130,7 +131,7 @@ public class TokenStream {
     }
 
     private static boolean isKeyword(String identifier) {
-        return Arrays.stream(KEYWORDS).anyMatch(keyword -> keyword.equals(identifier));
+        return KEYWORDS.stream().anyMatch(keyword -> keyword.equals(identifier));
     }
 
     /*

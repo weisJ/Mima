@@ -106,7 +106,7 @@ public class MimaController {
         if (!interpreter.isRunning()) {
             start(true);
         }
-        interpreter.notifyThread();
+        interpreter.resume();
         while (interpreter.isWorking()) {
             Thread.onSpinWait();
         }
@@ -129,7 +129,7 @@ public class MimaController {
      */
     public void stop() {
         interpreter.setRunning(false);
-        interpreter.notifyThread();
+        interpreter.resume();
     }
 
     /**

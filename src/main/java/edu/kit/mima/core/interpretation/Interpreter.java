@@ -128,8 +128,6 @@ public class Interpreter {
         return currentScope;
     }
 
-    //-------------Evaluation--------------//
-
     /**
      * Evaluate the Program.
      *
@@ -152,7 +150,7 @@ public class Interpreter {
                  * memory doesn't need to be released. Clearing memory will be done by the first
                  * environment call.
                  */
-                evaluateProgram(runtimeToken, runtimeEnvironment, firstScope, !firstScope, expressionScopeIndex);
+                evaluateProgram(runtimeToken, runtimeEnvironment, firstScope, expressionScopeIndex);
                 if (firstScope) {
                     firstScope = false;
                 }
@@ -180,7 +178,10 @@ public class Interpreter {
                  * Subprograms need to have own scope for variable shadowing.
                  * They should also release their memory and start at index 0
                  */
-                return evaluateProgram((ProgramToken) expression, environment, true, true, 0);
+                ProgramToken programToken = (ProgramToken) expression;
+                Environment scope = environment.extend(programToken);
+                resolveJumpPoints(programToken.getValue(), scope);
+                return evaluateProgram(programToken, environment, true, 0);
             case NUMBER:
                 return evaluateNumber((String) expression.getValue());
             case EMPTY:
@@ -208,20 +209,14 @@ public class Interpreter {
      * Evaluate a program Token
      *
      * @param programToken  the program token to be evaluated
-     * @param environment   run environment
-     * @param ownScope      whether the program should be contained in an own scope.
+     * @param scope   run environment
      * @param releaseMemory whether the memory addresses should be released after execution
      * @param scopeIndex    startIndex in scope
      * @return last evaluated statement
      */
-    private Value<MachineWord> evaluateProgram(final ProgramToken programToken, final Environment environment,
-                                               boolean ownScope, boolean releaseMemory, int scopeIndex) {
-        Environment scope = environment;
+    private Value<MachineWord> evaluateProgram(final ProgramToken programToken, final Environment scope,
+                                               boolean releaseMemory, int scopeIndex) {
         Token[] tokens = programToken.getValue();
-        if (ownScope) {
-            scope = environment.extend(programToken); //Extend to own scope
-            resolveJumpPoints(tokens, scope);
-        }
         scope.setExpressionIndex(scopeIndex);
         int reserved = reservedIndex; //Remember index for auto created memory cells
 
@@ -274,18 +269,18 @@ public class Interpreter {
     private Value<MachineWord> evaluateIdentification(final Token token, final Environment environment) {
         MachineWord value;
         ValueType type;
-        try {
+        if (environment.lookupVariable(token) != null) {
             value = environment.getVariable(token);
             type = ValueType.MEMORY_REFERENCE;
-        } catch (IllegalArgumentException e1) {
-            try {
-                value = environment.getConstant(token);
-                type = ValueType.CONSTANT;
-            } catch (IllegalArgumentException e2) {
-                value = new MachineWord(environment.getJump(token), wordLength);
-                type = ValueType.JUMP_REFERENCE;
-                prepareJump(environment.lookupJump(token));
-            }
+        } else if (environment.lookupConstant(token) != null) {
+            value = environment.getConstant(token);
+            type = ValueType.CONSTANT;
+        } else if (environment.lookupJump(token) != null) {
+            value = new MachineWord(environment.getJump(token), wordLength);
+            type = ValueType.JUMP_REFERENCE;
+            prepareJump(environment.lookupJump(token));
+        } else {
+            throw new IllegalArgumentException("Undefined Identification" + token.getValue());
         }
         return new Value<>(type, value);
     }
@@ -331,9 +326,7 @@ public class Interpreter {
                 .map(argument -> evaluate(argument, environment)).collect(Collectors.toList());
         return new Value<>(ValueType.NUMBER, function.apply(args, environment));
     }
-    //-------------------------------------//
 
-    //----------------Thread----------------//
     private void pause() {
         working = false;
         boolean interrupted = false;
@@ -362,10 +355,9 @@ public class Interpreter {
     /**
      * Notify the working thread to evaluate the next statement
      */
-    public void notifyThread() {
+    public void resume() {
         if (workingThread != null) {
             workingThread.interrupt();
         }
     }
-    //-------------------------------------//
 }

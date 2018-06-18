@@ -30,9 +30,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
-import static edu.kit.mima.gui.logging.Logger.error;
-import static edu.kit.mima.gui.logging.Logger.log;
-
 /**
  * Mima Editor Frame
  *
@@ -90,7 +87,11 @@ public final class MimaUI extends JFrame {
         editor.addStyleGroup(referenceStyle);
         editor.addAfterEditAction(() -> fileManager.setText(editor.getText()));
         editor.addAfterEditAction(() -> {
-            try { parse(editor.getText()); } catch (IllegalArgumentException | IllegalStateException ignored) { }
+            try {
+                parse(editor.getText());
+            } catch (IllegalArgumentException | IllegalStateException e) {
+                Logger.error(e.getMessage());
+            }
         });
         editor.addAfterEditAction(this::updateReferenceHighlighting);
         editor.useStyle(true);
@@ -199,7 +200,9 @@ public final class MimaUI extends JFrame {
             dispose();
             Help.close();
             controller.stop();
-        } catch (final IllegalArgumentException | IOException ignored) { }
+        } catch (final IllegalArgumentException | IOException e) {
+            Logger.error(e.getMessage());
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////||
@@ -221,7 +224,8 @@ public final class MimaUI extends JFrame {
         editor.setText(text);
         try {
             parse(text);
-        } catch (IllegalArgumentException | IllegalStateException ignored) {
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            Logger.error(e.getMessage());
         }
         updateSyntaxHighlighting();
         updateReferenceHighlighting();
@@ -244,14 +248,14 @@ public final class MimaUI extends JFrame {
      */
     private void step() {
         try {
-            log("Step!");
+            Logger.log("Step!");
             controller.step();
             run.setEnabled(false);
-            log("Instruction: " + controller.getCurrent());
+            Logger.log("Instruction: " + controller.getCurrent());
             updateMemoryTable();
             step.setEnabled(controller.isRunning());
         } catch (final IllegalArgumentException | IllegalStateException e) {
-            error(e.getMessage());
+            Logger.error(e.getMessage());
             step.setEnabled(false);
             run.setEnabled(false);
         }
@@ -263,17 +267,17 @@ public final class MimaUI extends JFrame {
     private void run() {
         step.setEnabled(false);
         run.setEnabled(false);
-        log("Running program: " + fileManager.getLastFile() + "...");
+        Logger.log("Running program: " + fileManager.getLastFile() + "...");
         try {
             controller.run();
             updateMemoryTable();
         } catch (final IllegalArgumentException | IllegalStateException e) {
-            error(e.getMessage());
+            Logger.error(e.getMessage());
             reset();
         }
         step.setEnabled(true);
         run.setEnabled(true);
-        log("done");
+        Logger.log("done");
     }
 
     /**
@@ -292,11 +296,11 @@ public final class MimaUI extends JFrame {
      */
     private void save() {
         try {
-            log("saving...");
+            Logger.log("saving...");
             fileManager.save();
-            log("done");
+            Logger.log("done");
         } catch (final IOException e) {
-            error("failed to save: " + e.getMessage());
+            Logger.error("failed to save: " + e.getMessage());
         }
     }
 
@@ -304,18 +308,18 @@ public final class MimaUI extends JFrame {
      * Compile mima program
      */
     private void compile() {
-        log("Compiling: " + fileManager.getLastFile() + "...");
+        Logger.log("Compiling: " + fileManager.getLastFile() + "...");
         try {
             parse(editor.getText());
             updateMemoryTable();
             run.setEnabled(true);
             step.setEnabled(true);
         } catch (final IllegalArgumentException e) {
-            error(e.getMessage());
+            Logger.error(e.getMessage());
             run.setEnabled(false);
             step.setEnabled(false);
         }
-        log("done");
+        Logger.log("done");
     }
 
     /**
@@ -366,7 +370,9 @@ public final class MimaUI extends JFrame {
             final String[] memoryReferences = references.get(2)
                     .stream().map(s -> "(?:[\\s(, ](\\s)*)" + s + "(?:(\\s)*[\\),:;])").toArray(String[]::new);
             referenceStyle.addHighlight(memoryReferences, SyntaxColor.REFERENCE);
-        } catch (final IllegalArgumentException ignored) { }
+        } catch (final IllegalArgumentException e) {
+            Logger.error(e.getMessage());
+        }
     }
 
 }
