@@ -67,7 +67,7 @@ public class Mima {
             try {
                 int value = Integer.parseInt(element[0].toString());
                 skip = value < 0;
-            } catch (NumberFormatException ignored) {
+            } catch (NumberFormatException e) {
                 data.add(element);
                 skip = true;
             }
