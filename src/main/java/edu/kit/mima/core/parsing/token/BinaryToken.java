@@ -1,5 +1,8 @@
 package edu.kit.mima.core.parsing.token;
 
+import edu.kit.mima.core.parsing.lang.Keyword;
+import edu.kit.mima.core.parsing.lang.Punctuation;
+
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -81,7 +84,22 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
 
     @Override
     public String simpleName() {
-        return first.toString() + second.toString();
+        String firstName = first instanceof Token ? ((Token) first).simpleName() : first.toString();
+        String secondName = second instanceof Token ? ((Token) second).simpleName() : second.toString();
+        if (type == TokenType.JUMP_POINT) {
+            return firstName + ' ' + Punctuation.DEFINITION_DELIMITER + ' ' + secondName;
+        } else if (type == TokenType.DEFINITION || type == TokenType.CONSTANT) {
+            StringBuilder sb = new StringBuilder(String.valueOf(Punctuation.DEFINITION_BEGIN))
+                    .append(Keyword.DEFINITION).append(' ').append(firstName);
+            if (!secondName.isEmpty()) {
+                sb.append(' ').append(Punctuation.DEFINITION_DELIMITER).append(' ').append(secondName);
+            }
+            return sb.toString();
+        } else if (type == TokenType.CALL) {
+            return firstName + secondName;
+        } else {
+            return firstName + ' ' + secondName;
+        }
     }
 
     @Override

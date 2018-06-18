@@ -51,7 +51,7 @@ public final class Logger {
      */
     public static void log(final String message) {
         if (level == INFO) {
-            console.println("[INFO]" + message);
+            console.println("[INFO] " + message);
         }
     }
 

@@ -115,7 +115,6 @@ public class MimaController implements ExceptionListener {
     }
 
     private void checkForException() {
-        System.out.println(interpreter.isWorking());
         while (interpreter.isWorking()) {
             Thread.onSpinWait();
         }
