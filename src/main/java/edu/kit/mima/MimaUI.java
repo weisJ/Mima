@@ -1,5 +1,6 @@
 package edu.kit.mima;
 
+import com.bulenkov.darcula.DarculaLaf;
 import edu.kit.mima.core.controller.InstructionSet;
 import edu.kit.mima.core.controller.MimaController;
 import edu.kit.mima.core.interpretation.InterpreterException;
@@ -20,6 +21,9 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.plaf.ColorUIResource;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -57,6 +61,7 @@ public final class MimaUI extends JFrame {
     private final StyleGroup syntaxStyle;
     private final StyleGroup referenceStyle;
 
+    private final JPanel controlPanel = new JPanel(new BorderLayout());
     private final JButton run = new JButton("RUN");
     private final JButton step = new JButton("STEP");
 
@@ -77,9 +82,11 @@ public final class MimaUI extends JFrame {
         final JPanel memoryConsole = new JPanel(new GridLayout(2, 1));
         memoryConsole.add(memoryView);
         memoryConsole.add(console);
-        add(memoryConsole, BorderLayout.LINE_START);
+        controlPanel.add(memoryConsole, BorderLayout.LINE_START);
         setupButtons();
         setupMenu();
+
+        add(controlPanel, BorderLayout.LINE_START);
         add(editor, BorderLayout.CENTER);
 
         updateFile(fileManager::loadLastFile);
@@ -106,6 +113,13 @@ public final class MimaUI extends JFrame {
      * @param args command line arguments (ignored)
      */
     public static void main(final String[] args) {
+        try {
+            UIManager.setLookAndFeel(DarculaLaf.class.getCanonicalName());
+            UIManager.put("ToolTip.background", new ColorUIResource(169, 183, 198));
+        } catch (ClassNotFoundException | InstantiationException
+                | UnsupportedLookAndFeelException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
         final MimaUI frame = new MimaUI();
         Logger.setLevel(Logger.LogLevel.INFO);
         frame.setLocationRelativeTo(null);
@@ -167,8 +181,8 @@ public final class MimaUI extends JFrame {
                 .addButton(step).addAccelerator("alt S").addAction(this::step).setEnabled(false)
                 .addButton(run).addAccelerator("alt R").addAction(this::run).setEnabled(false)
                 .get();
-        add(buttonPanel, BorderLayout.PAGE_START);
-        add(buttonPanel, BorderLayout.PAGE_START);
+        controlPanel.add(buttonPanel, BorderLayout.PAGE_START);
+        controlPanel.add(buttonPanel, BorderLayout.PAGE_START);
     }
 
     /**
@@ -295,6 +309,7 @@ public final class MimaUI extends JFrame {
      * Compile mima program
      */
     private void compile() {
+        controller.stop();
         Logger.log("Compiling: " + fileManager.getLastFile().replaceAll("\\s", "") + "...");
         try {
             parse(editor.getText());

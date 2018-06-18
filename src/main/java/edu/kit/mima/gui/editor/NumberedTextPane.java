@@ -5,7 +5,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
 
@@ -21,11 +23,18 @@ public class NumberedTextPane extends JPanel {
 
     private final JTextPane pane;
     private final JScrollPane scrollPane;
+    private final Font font;
+    private final Color color;
 
     /**
      * Create a new JPanel containing a JTextPane with lineNumbering
+     *
+     * @param font  Font of line number
+     * @param color Color of line number
      */
-    public NumberedTextPane() {
+    public NumberedTextPane(Font font, Color color) {
+        this.font = font;
+        this.color = color;
         setMinimumSize(NUMBER_SIZE);
         setPreferredSize(NUMBER_SIZE);
         pane = new JTextPane() // we need to override paint so that the
@@ -47,7 +56,6 @@ public class NumberedTextPane extends JPanel {
     @Override
     public void paint(final Graphics g) {
         super.paint(g);
-
         final int start = pane.viewToModel2D(scrollPane.getViewport().getViewPosition()); //
         final int end = pane.viewToModel2D(new Point(scrollPane.getViewport().getViewPosition().x + pane.getWidth(),
                 scrollPane.getViewport().getViewPosition().y + pane.getHeight()));
@@ -67,6 +75,8 @@ public class NumberedTextPane extends JPanel {
             e1.printStackTrace();
         }
 
+        g.setFont(font);
+        g.setColor(color);
         for (int line = startLine, y = startingY; line <= endLine; y += fontHeight, line++) {
             g.drawString(Integer.toString(line), 0, y);
         }

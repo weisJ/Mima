@@ -22,6 +22,11 @@
             <version>16.0.1</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>darcula</groupId>
+            <artifactId>darcula.laf</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>

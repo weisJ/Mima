@@ -45,7 +45,7 @@ public final class SyntaxColor {
     /**
      * Color for Text
      */
-    public static final Color TEXT = Color.LIGHT_GRAY;
+    public static final Color TEXT = new Color(216, 216, 216);
 
     /**
      * Color for warning
