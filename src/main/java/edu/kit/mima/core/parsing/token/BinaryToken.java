@@ -80,6 +80,11 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
     }
 
     @Override
+    public String simpleName() {
+        return first.toString() + second.toString();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;

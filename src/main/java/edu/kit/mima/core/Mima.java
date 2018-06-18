@@ -184,14 +184,4 @@ public class Mima {
     public void setStackPointer(int address) {
         stackPointer.setValue(address);
     }
-
-    /**
-     * Reset the mima.
-     */
-    public void reset() {
-        accumulator.setValue(0);
-        stackPointer.setValue(0);
-        memoryMap.reset();
-        returnStack.clear();
-    }
 }

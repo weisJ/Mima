@@ -2,6 +2,7 @@ package edu.kit.mima;
 
 import edu.kit.mima.core.controller.InstructionSet;
 import edu.kit.mima.core.controller.MimaController;
+import edu.kit.mima.core.interpretation.InterpreterException;
 import edu.kit.mima.core.parsing.lang.Keyword;
 import edu.kit.mima.core.parsing.lang.Punctuation;
 import edu.kit.mima.gui.button.ButtonPanelBuilder;
@@ -87,11 +88,8 @@ public final class MimaUI extends JFrame {
         editor.addStyleGroup(referenceStyle);
         editor.addAfterEditAction(() -> fileManager.setText(editor.getText()));
         editor.addAfterEditAction(() -> {
-            try {
-                parse(editor.getText());
-            } catch (IllegalArgumentException | IllegalStateException e) {
-                Logger.error(e.getMessage());
-            }
+            /* no need to error while writing*/
+            try { parse(editor.getText()); } catch (IllegalArgumentException | IllegalStateException ignored) { }
         });
         editor.addAfterEditAction(this::updateReferenceHighlighting);
         editor.useStyle(true);
@@ -109,14 +107,13 @@ public final class MimaUI extends JFrame {
      */
     public static void main(final String[] args) {
         final MimaUI frame = new MimaUI();
+        Logger.setLevel(Logger.LogLevel.INFO);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
         frame.repaint();
     }
 
-    //////////////////////////////////////////////////////////////////////////
-    ///                         Window Setup                               ///
-    //////////////////////////////////////////////////////////////////////////
+    /*------------Window-Setup------------*/
 
     /**
      * Setup general Frame properties
@@ -166,8 +163,7 @@ public final class MimaUI extends JFrame {
      */
     private void setupButtons() {
         final JPanel buttonPanel = new ButtonPanelBuilder()
-                .addButton("COMPILE", this::compile, "alt R")
-                .addButton("RESET", this::reset, "alt shift R")
+                .addButton("COMPILE", this::compile, "alt C")
                 .addButton(step).addAccelerator("alt S").addAction(this::step).setEnabled(false)
                 .addButton(run).addAccelerator("alt R").addAction(this::run).setEnabled(false)
                 .get();
@@ -206,9 +202,8 @@ public final class MimaUI extends JFrame {
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////||
-    ///                         Functionality                              /||
-    ////////////////////////////////////////////////////////////////////////||
+    /*------------Functionality------------*/
+
 
     /**
      * Wrapper function for changing a file
@@ -252,10 +247,12 @@ public final class MimaUI extends JFrame {
             Logger.log("Step!");
             controller.step();
             run.setEnabled(false);
-            Logger.log("Instruction: " + controller.getCurrent());
+            if (controller.getCurrent() != null) {
+                Logger.log("Instruction: " + controller.getCurrent().simpleName());
+            }
             updateMemoryTable();
-            step.setEnabled(controller.isRunning());
-        } catch (final IllegalArgumentException | IllegalStateException e) {
+            run.setEnabled(!controller.isRunning());
+        } catch (final InterpreterException e) {
             Logger.error(e.getMessage());
             step.setEnabled(false);
             run.setEnabled(false);
@@ -272,24 +269,14 @@ public final class MimaUI extends JFrame {
         try {
             controller.run();
             updateMemoryTable();
-        } catch (final IllegalArgumentException | IllegalStateException e) {
+            step.setEnabled(true);
+            run.setEnabled(true);
+            Logger.log("done");
+        } catch (final InterpreterException e) {
             Logger.error(e.getMessage());
-            reset();
+            step.setEnabled(false);
+            run.setEnabled(false);
         }
-        step.setEnabled(true);
-        run.setEnabled(true);
-        Logger.log("done");
-    }
-
-    /**
-     * Reset the mima to begin of program.
-     */
-    private void reset() {
-        controller.reset();
-        run.setEnabled(true);
-        step.setEnabled(true);
-        updateMemoryTable();
-        console.clear();
     }
 
     /**
@@ -315,12 +302,12 @@ public final class MimaUI extends JFrame {
             updateMemoryTable();
             run.setEnabled(true);
             step.setEnabled(true);
-        } catch (final IllegalArgumentException e) {
+            Logger.log("done");
+        } catch (final IllegalArgumentException | IllegalStateException e) {
             Logger.error(e.getMessage());
             run.setEnabled(false);
             step.setEnabled(false);
         }
-        Logger.log("done");
     }
 
     /**
@@ -363,13 +350,13 @@ public final class MimaUI extends JFrame {
             final List<Set<String>> references = controller.getReferences();
 
             final String[] constants = references.get(0)
-                    .stream().map(s -> "(?:[\\s(, ](\\s)*)" + s + "(?:(\\s)*[\\),:;])").toArray(String[]::new);
+                    .stream().map(s -> "(?<=[\\s\\(,])(\\s)*" + s + "(\\s)*(?=[\\),:;])").toArray(String[]::new);
             referenceStyle.addHighlight(constants, SyntaxColor.CONSTANT);
             final String[] jumpReferences = references.get(1)
-                    .stream().map(s -> "(?:[\\s(, ](\\s)*)" + s + "(?:(\\s)*[\\),:;])").toArray(String[]::new);
+                    .stream().map(s -> "(?<=[\\s\\(,])(\\s)*" + s + "(\\s)*(?=[\\),:;])").toArray(String[]::new);
             referenceStyle.addHighlight(jumpReferences, SyntaxColor.JUMP);
             final String[] memoryReferences = references.get(2)
-                    .stream().map(s -> "(?:[\\s(, ](\\s)*)" + s + "(?:(\\s)*[\\),:;])").toArray(String[]::new);
+                    .stream().map(s -> "(?<=[\\s\\(,])(\\s)*" + s + "(\\s)*(?=[\\),:;])").toArray(String[]::new);
             referenceStyle.addHighlight(memoryReferences, SyntaxColor.REFERENCE);
         } catch (final IllegalArgumentException e) {
             Logger.error(e.getMessage());

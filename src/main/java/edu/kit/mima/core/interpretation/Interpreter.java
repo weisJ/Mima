@@ -43,6 +43,7 @@ public class Interpreter {
 
     //------------Thread--------------//
     private Thread workingThread;
+    private ExceptionListener exceptionListener;
     private boolean working;
     //--------------------------------//
 
@@ -55,6 +56,24 @@ public class Interpreter {
         reservedIndex = -1;
         expressionScopeIndex = 0;
         jumped = false;
+    }
+
+    /*
+     * Create jump associations for the given environment based on the tokens
+     * This needs to be done as forward referencing is allowed for jumps
+     */
+    @SuppressWarnings("unchecked")
+    private void resolveJumpPoints(final Token[] tokens, final Environment environment) {
+        try {
+            for (int i = 0; i < tokens.length; i++) {
+                Token token = tokens[i];
+                if (token.getType() == TokenType.JUMP_POINT) {
+                    environment.defineJump(((Tuple<Token, Token>) token).getFirst(), i);
+                }
+            }
+        } catch (IllegalArgumentException e) {
+            fail(e.getMessage());
+        }
     }
 
     /**
@@ -96,20 +115,6 @@ public class Interpreter {
         this.running = running;
     }
 
-    /*
-     * Create jump associations for the given environment based on the tokens
-     * This needs to be done as forward referencing is allowed for jumps
-     */
-    @SuppressWarnings("unchecked")
-    private static void resolveJumpPoints(final Token[] tokens, final Environment environment) {
-        for (int i = 0; i < tokens.length; i++) {
-            Token token = tokens[i];
-            if (token.getType() == TokenType.JUMP_POINT) {
-                environment.defineJump(((Tuple<Token, Token>) token).getFirst(), i);
-            }
-        }
-    }
-
     /**
      * Return the current token
      *
@@ -134,14 +139,23 @@ public class Interpreter {
      * @param program           program input created by {@link Parser}
      * @param globalEnvironment the global runtime environment
      * @param debug             whether the interpreter should pause after each statement
+     * @param exceptionListener the listener for exceptions
      */
-    public void evaluateTopLevel(final ProgramToken program, final Environment globalEnvironment, boolean debug) {
+    public void evaluateTopLevel(final ProgramToken program, final Environment globalEnvironment,
+                                 boolean debug, ExceptionListener exceptionListener) {
+        /*Initializer*/
         this.debug = debug;
         running = true;
+        working = true;
+        jumped = false;
+        reservedIndex = -1;
+        expressionScopeIndex = 0;
+
+        /*Working Thread*/
         workingThread = new Thread(() -> {
-            working = true;
-            Environment runtimeEnvironment = globalEnvironment;
+            Environment runtimeEnvironment = globalEnvironment.extend(program);
             ProgramToken runtimeToken = program;
+            resolveJumpPoints(program.getValue(), runtimeEnvironment);
             boolean firstScope = true;
             while (running) {
                 /*
@@ -160,7 +174,10 @@ public class Interpreter {
                     jumped = false;
                 }
             }
+            working = false;
+            running = false;
         });
+        this.exceptionListener = exceptionListener;
         workingThread.start();
     }
 
@@ -201,7 +218,7 @@ public class Interpreter {
             case JUMP_POINT:
                 return evaluate(((Tuple<Token, Token>) expression).getSecond(), environment);
             default:
-                throw new IllegalArgumentException("Can't evaluate: " + expression);
+                return fail("Can't evaluate: " + expression);
         }
     }
 
@@ -209,7 +226,7 @@ public class Interpreter {
      * Evaluate a program Token
      *
      * @param programToken  the program token to be evaluated
-     * @param scope   run environment
+     * @param scope         run environment
      * @param releaseMemory whether the memory addresses should be released after execution
      * @param scopeIndex    startIndex in scope
      * @return last evaluated statement
@@ -280,7 +297,7 @@ public class Interpreter {
             type = ValueType.JUMP_REFERENCE;
             prepareJump(environment.lookupJump(token));
         } else {
-            throw new IllegalArgumentException("Undefined Identification" + token.getValue());
+            return fail("Undefined Identification: " + token.getValue());
         }
         return new Value<>(type, value);
     }
@@ -291,7 +308,7 @@ public class Interpreter {
     private void evaluateConstant(BinaryToken<Token, Token> definition, Environment environment) {
         var expressionValue = evaluate(definition.getSecond(), environment);
         if (Objects.equals(expressionValue, VOID)) {
-            throw new IllegalArgumentException("Not a definition body: " + definition.getSecond());
+            fail("Not a definition body: " + definition.getSecond());
         }
         environment.defineConstant(definition.getFirst(), expressionValue.getValue());
     }
@@ -306,10 +323,10 @@ public class Interpreter {
         } else {
             var expressionValue = evaluate(definition.getSecond(), environment);
             if (Objects.equals(expressionValue, VOID)) {
-                throw new IllegalArgumentException("Not a definition body: " + definition.getSecond());
+                fail("Not a definition body: " + definition.getSecond());
             }
             if (expressionValue.getValue().intValue() < 0) {
-                throw new IllegalArgumentException("Can't have negative memory references");
+                fail("Can't have negative memory references");
             }
             environment.defineVariable(definition.getFirst(), expressionValue.getValue());
         }
@@ -340,6 +357,13 @@ public class Interpreter {
         working = true;
     }
 
+    private Value<MachineWord> fail(String message) {
+        exceptionListener.notifyException(new InterpreterException(message));
+        working = false;
+        running = false;
+        return VOID;
+    }
+
     /**
      * Returns whether the interpreter is currently working.
      * The result of this method is linked to the outcome of {@link #isRunning()} as follows:
@@ -356,8 +380,9 @@ public class Interpreter {
      * Notify the working thread to evaluate the next statement
      */
     public void resume() {
-        if (workingThread != null) {
-            workingThread.interrupt();
+        if (workingThread == null) {
+            return;
         }
+        workingThread.interrupt();
     }
 }

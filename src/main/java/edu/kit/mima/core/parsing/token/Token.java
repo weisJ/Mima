@@ -41,4 +41,11 @@ public interface Token<T> {
      */
     @Override
     String toString();
+
+    /**
+     * Returns the simple name of the token consisting of the value
+     *
+     * @return simple name as string
+     */
+    String simpleName();
 }

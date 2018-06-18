@@ -58,7 +58,7 @@ public class Parser {
                     skipPunctuation(Punctuation.INSTRUCTION_END);
                 }
             }
-        } catch (IllegalArgumentException | IllegalStateException e) {
+        } catch (ParserException e) {
             program.add(new AtomToken<>(TokenType.ERROR, e.getMessage()));
         }
         return new ProgramToken(program.toArray(new Token[0]));
