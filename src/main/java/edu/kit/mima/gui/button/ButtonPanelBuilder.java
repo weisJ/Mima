@@ -4,8 +4,6 @@ import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
-import java.awt.Color;
-import java.awt.Font;
 import java.awt.GridLayout;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -18,9 +16,6 @@ import java.util.Queue;
  */
 public final class ButtonPanelBuilder {
 
-    private static final Font BUTTON_FONT = new Font(Font.MONOSPACED, Font.BOLD, 14);
-    private static final Color BUTTON_COLOR = new Color(0x009682);
-    private static final Color BUTTON_COLOR_TEXT = Color.WHITE;
     private final Queue<JButton> buttons;
 
     /**
@@ -84,34 +79,22 @@ public final class ButtonPanelBuilder {
             this.parent = parent;
             setAction(action);
             setAccelerator(accelerator);
-            styleButton();
         }
 
         private ButtonBuilder(final String label, final Runnable action, final ButtonPanelBuilder parent) {
             button = new JButton(label);
             this.parent = parent;
             setAction(action);
-            styleButton();
         }
 
         private ButtonBuilder(final String label, final ButtonPanelBuilder parent) {
             button = new JButton(label);
             this.parent = parent;
-            styleButton();
         }
 
         private ButtonBuilder(final JButton button, final ButtonPanelBuilder parent) {
             this.button = button;
-            this.button.setUI(new StyledButtonUI());
             this.parent = parent;
-            styleButton();
-        }
-
-        private void styleButton() {
-            button.setFont(BUTTON_FONT);
-            button.setBackground(BUTTON_COLOR);
-            button.setForeground(BUTTON_COLOR_TEXT);
-            button.setUI(new StyledButtonUI());
         }
 
         /**

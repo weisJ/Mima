@@ -1,5 +1,6 @@
 package edu.kit.mima.gui.editor;
 
+import edu.kit.mima.gui.color.SyntaxColor;
 import edu.kit.mima.gui.editor.style.StyleGroup;
 import edu.kit.mima.gui.editor.style.Stylizer;
 
@@ -23,7 +24,8 @@ import java.util.List;
 public class Editor extends JScrollPane {
 
     private static final Color BACKGROUND_COLOR = new Color(43, 43, 43);
-    private static final Color TEXT_COLOR = new Color(216, 216, 216);
+    private static final Color TEXT_COLOR = SyntaxColor.TEXT;
+    private static final Color LINE_NUMBER_COLOR = new Color(169, 183, 198);
     private static final int FONT_SIZE = 12;
     private static final int MINIMUM_FONT_SIZE = 3;
     private static final int MAXIMUM_FONT_SIZE = 30;
@@ -42,9 +44,10 @@ public class Editor extends JScrollPane {
      */
     public Editor() {
         final JPanel textPanel = new JPanel();
-        final NumberedTextPane numberedTextPane = new NumberedTextPane();
+        final Font font = new Font(Font.MONOSPACED, Font.PLAIN, FONT_SIZE);
+        final NumberedTextPane numberedTextPane = new NumberedTextPane(font, LINE_NUMBER_COLOR);
         editorPane = numberedTextPane.getPane();
-        editorPane.setFont(new Font(Font.MONOSPACED, Font.PLAIN, FONT_SIZE));
+        editorPane.setFont(font);
         textPanel.setLayout(new BorderLayout());
         textPanel.add(numberedTextPane, BorderLayout.LINE_START);
         textPanel.add(editorPane, BorderLayout.CENTER);
@@ -106,9 +109,7 @@ public class Editor extends JScrollPane {
         clean();
     }
 
-    //////////////////////////////////////////////////||
-    ///            Getter and Setters                /||
-    //////////////////////////////////////////////////||
+    /*----------Getter-and-Setter----------*/
 
 
     /**
