@@ -53,6 +53,16 @@ public class ArrayToken<T> implements Token<T[]> {
     }
 
     @Override
+    public String simpleName() {
+        if (values.length > 0 && values[0] instanceof Token) {
+            Token[] tokens = (Token[]) values;
+            return '(' + Arrays.stream(tokens).map(Token::simpleName).collect(Collectors.joining(",")) + ')';
+        } else {
+            return '(' + Arrays.stream(values).map(Object::toString).collect(Collectors.joining(",")) + ')';
+        }
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;

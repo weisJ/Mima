@@ -5,7 +5,9 @@ import edu.kit.mima.core.data.MachineWord;
 import edu.kit.mima.core.instruction.MimaInstruction;
 import edu.kit.mima.core.instruction.MimaXInstruction;
 import edu.kit.mima.core.interpretation.Environment;
+import edu.kit.mima.core.interpretation.ExceptionListener;
 import edu.kit.mima.core.interpretation.Interpreter;
+import edu.kit.mima.core.interpretation.InterpreterException;
 import edu.kit.mima.core.interpretation.Value;
 import edu.kit.mima.core.interpretation.ValueType;
 import edu.kit.mima.core.parsing.Parser;
@@ -18,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -27,7 +30,9 @@ import java.util.stream.Collectors;
  * @author Jannis Weis
  * @since 2018
  */
-public class MimaController {
+public class MimaController implements ExceptionListener {
+
+    private final AtomicReference<Exception> sharedException;
 
     private Interpreter interpreter;
     private Mima mima;
@@ -42,6 +47,7 @@ public class MimaController {
     public MimaController() {
         interpreter = new Interpreter(InstructionSet.MIMA.getConstCordLength());
         mima = new Mima(InstructionSet.MIMA.getWordLength(), InstructionSet.MIMA.getConstCordLength());
+        sharedException = new AtomicReference<>();
     }
 
     /**
@@ -94,9 +100,7 @@ public class MimaController {
         if (!interpreter.isRunning()) {
             start(false);
         }
-        while (interpreter.isRunning()) {
-            Thread.onSpinWait();
-        }
+        checkForException();
     }
 
     /**
@@ -107,8 +111,16 @@ public class MimaController {
             start(true);
         }
         interpreter.resume();
+        checkForException();
+    }
+
+    private void checkForException() {
+        System.out.println(interpreter.isWorking());
         while (interpreter.isWorking()) {
             Thread.onSpinWait();
+        }
+        if (sharedException.get() != null) {
+            throw new InterpreterException(sharedException.get().getMessage());
         }
     }
 
@@ -121,7 +133,8 @@ public class MimaController {
         if (programToken == null || globalEnvironment == null) {
             throw new IllegalStateException("must parse program before starting");
         }
-        interpreter.evaluateTopLevel(programToken, globalEnvironment, debug);
+        sharedException.set(null);
+        interpreter.evaluateTopLevel(programToken, globalEnvironment, debug, this);
     }
 
     /**
@@ -130,14 +143,6 @@ public class MimaController {
     public void stop() {
         interpreter.setRunning(false);
         interpreter.resume();
-    }
-
-    /**
-     * Reset the program to the beginning
-     */
-    public void reset() {
-        stop();
-        mima.reset();
     }
 
     /**
@@ -260,7 +265,7 @@ public class MimaController {
 
     /**
      * Search the parsed program for references and return as List of Sets
-     * as follows {{constant references}, {jump references}, {memory references}}
+     * as follows: {{constant references}, {jump references}, {memory references}}
      *
      * @return list with references sets
      */
@@ -296,5 +301,11 @@ public class MimaController {
             default:
                 break;
         }
+    }
+
+    @Override
+    public void notifyException(Exception e) {
+        interpreter.setRunning(false);
+        sharedException.set(e);
     }
 }

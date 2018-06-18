@@ -45,6 +45,11 @@ public class AtomToken<T> implements Token<T> {
     }
 
     @Override
+    public String simpleName() {
+        return value.toString();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;

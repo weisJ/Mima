@@ -49,6 +49,11 @@ public class ProgramToken implements Token<Token[]> {
     }
 
     @Override
+    public String simpleName() {
+        return Arrays.stream(program).map(Token::simpleName).collect(Collectors.joining("\n"));
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;

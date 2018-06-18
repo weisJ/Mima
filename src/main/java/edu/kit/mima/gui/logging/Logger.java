@@ -51,7 +51,7 @@ public final class Logger {
      */
     public static void log(final String message) {
         if (level == INFO) {
-            console.println(message);
+            console.println("[INFO]" + message);
         }
     }
 
@@ -62,7 +62,7 @@ public final class Logger {
      */
     public static void warning(final String message) {
         if (level != ERROR) {
-            console.println(message, Color.ORANGE);
+            console.println("[WARNING] " + message, Color.ORANGE);
         }
     }
 
@@ -72,7 +72,7 @@ public final class Logger {
      * @param message message to log
      */
     public static void error(final String message) {
-        console.println(message, Color.RED);
+        console.println("[ERROR] " + message, Color.RED);
     }
 
     /**
