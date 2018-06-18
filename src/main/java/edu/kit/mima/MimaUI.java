@@ -109,6 +109,7 @@ public final class MimaUI extends JFrame {
      */
     public static void main(final String[] args) {
         final MimaUI frame = new MimaUI();
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
         frame.repaint();
     }

@@ -25,6 +25,8 @@ public class Editor extends JScrollPane {
     private static final Color BACKGROUND_COLOR = new Color(43, 43, 43);
     private static final Color TEXT_COLOR = new Color(216, 216, 216);
     private static final int FONT_SIZE = 12;
+    private static final int MINIMUM_FONT_SIZE = 3;
+    private static final int MAXIMUM_FONT_SIZE = 30;
     private static final int DEFAULT_HISTORY_LENGTH = 20;
 
     private final JTextPane editorPane;
@@ -124,6 +126,9 @@ public class Editor extends JScrollPane {
      * @param fontSize font size to use
      */
     public void setFontSize(int fontSize) {
+        if (fontSize < MINIMUM_FONT_SIZE || fontSize > MAXIMUM_FONT_SIZE) {
+            return;
+        }
         Font font = editorPane.getFont();
         editorPane.setFont(new Font(font.getName(), font.getStyle(), fontSize));
     }

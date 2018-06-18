@@ -1,5 +1,7 @@
 package edu.kit.mima.gui.editor.style;
 
+import edu.kit.mima.gui.logging.Logger;
+
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
@@ -73,7 +75,8 @@ public class Stylizer {
                 while (matcher.find()) {
                     document.setCharacterAttributes(matcher.start(), matcher.group().length(), style, true);
                 }
-            } catch (final BadLocationException ignored) {
+            } catch (final BadLocationException e) {
+                Logger.error(e.getMessage());
             }
         }
     }
