@@ -296,7 +296,7 @@ public final class MimaUI extends JFrame {
      * Compile mima program
      */
     private void compile() {
-        Logger.log("Compiling: " + fileManager.getLastFile() + "...");
+        Logger.log("Compiling: " + fileManager.getLastFile().replaceAll("\\s", "") + "...");
         try {
             parse(editor.getText());
             updateMemoryTable();
