@@ -12,7 +12,9 @@ import edu.kit.mima.core.parsing.Parser;
 import edu.kit.mima.core.parsing.token.ProgramToken;
 import edu.kit.mima.core.parsing.token.Token;
 import edu.kit.mima.core.parsing.token.TokenType;
+import edu.kit.mima.gui.logging.Logger;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,11 +60,29 @@ public class MimaController implements ExceptionListener {
         currentInstructionSet = instructionSet;
         mima = new Mima(instructionSet.getWordLength(), instructionSet.getConstCordLength());
         programToken = new Parser(program).parse();
-        Token lastToken = programToken.getValue()[programToken.getValue().length - 1];
-        if (lastToken.getType() == TokenType.ERROR) {
-            throw new IllegalArgumentException(lastToken.getValue().toString());
+        if (programToken.getValue().length > 0) {
+            Token lastToken = programToken.getValue()[programToken.getValue().length - 1];
+            if (lastToken.getType() == TokenType.ERROR) {
+                throw new IllegalArgumentException(lastToken.getValue().toString());
+            }
         }
         createGlobalEnvironment();
+    }
+
+    /**
+     * Find duplicate jump references in code and warn about them
+     */
+    public void findJumpDuplicates() {
+        if (programToken == null) {
+            return;
+        }
+        Map<Token, Integer> jumps = new HashMap<>();
+        for (var pair : new ReferenceCrawler(programToken).getJumpPoints()) {
+            Integer prior = jumps.put(pair.getKey(), pair.getValue());
+            if (prior != null) {
+                Logger.warning("jump is defined multiple times in lines " + prior + " and " + pair.getValue());
+            }
+        }
     }
 
     /**
@@ -161,14 +181,15 @@ public class MimaController implements ExceptionListener {
     /**
      * Get the current mima memory table
      *
+     * @param binary whether to use the binary representation
      * @return memory table
      */
-    public Object[][] getMemoryTable() {
+    public Object[][] getMemoryTable(boolean binary) {
         Environment scope = interpreter.getCurrentScope();
         scope = scope == null || !interpreter.isRunning() ? globalEnvironment : scope;
         Map<String, Integer> map = scope.getDefinitions().get(0).entrySet().stream()
                 .collect(Collectors.toMap(e -> e.getKey().getValue().toString(), e -> e.getValue().intValue()));
-        return mima.memoryTable(map);
+        return mima.memoryTable(map, binary);
     }
 
     /**

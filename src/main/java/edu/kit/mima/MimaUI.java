@@ -10,6 +10,7 @@ import edu.kit.mima.gui.button.ButtonPanelBuilder;
 import edu.kit.mima.gui.color.SyntaxColor;
 import edu.kit.mima.gui.console.Console;
 import edu.kit.mima.gui.editor.Editor;
+import edu.kit.mima.gui.editor.style.SquigglePainter;
 import edu.kit.mima.gui.editor.style.StyleGroup;
 import edu.kit.mima.gui.loading.FileManager;
 import edu.kit.mima.gui.logging.Logger;
@@ -21,10 +22,13 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.ColorUIResource;
+import javax.swing.text.Highlighter;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
@@ -32,6 +36,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -50,6 +55,7 @@ public final class MimaUI extends JFrame {
     private static final String MIMA_DIR = System.getProperty("user.home") + "/.mima";
 
     private static final int HISTORY_CAPACITY = 100;
+    private static final Highlighter.HighlightPainter SQUIGGLE_LINE = new SquigglePainter(new Color(210, 82, 82));
 
     private final MimaController controller;
 
@@ -64,6 +70,7 @@ public final class MimaUI extends JFrame {
     private final JPanel controlPanel = new JPanel(new BorderLayout());
     private final JButton run = new JButton("RUN");
     private final JButton step = new JButton("STEP");
+    private final JRadioButtonMenuItem binaryView = new JRadioButtonMenuItem("Binary View");
 
     /**
      * Create a new Mima UI window
@@ -107,6 +114,7 @@ public final class MimaUI extends JFrame {
 
         updateSyntaxHighlighting();
         updateReferenceHighlighting();
+        updateMemoryTable();
     }
 
     /**
@@ -140,7 +148,6 @@ public final class MimaUI extends JFrame {
         setResizable(true);
         setSize((int) FULLSCREEN.getWidth() / 2, (int) FULLSCREEN.getHeight() / 2);
         setTitle(TITLE);
-        setLayout(new BorderLayout());
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("mima.png")));
     }
 
@@ -168,6 +175,8 @@ public final class MimaUI extends JFrame {
                 .addMenu("View").setMnemonic('V')
                 .addItem("Zoom In", () -> editor.setFontSize(editor.getFontSize() + 1), "control PLUS")
                 .addItem("Zoom Out", () -> editor.setFontSize(editor.getFontSize() - 1), "control MINUS")
+                .separator()
+                .addItem(binaryView, this::updateMemoryTable)
                 .addMenu("Help").setMnemonic('H')
                 .addItem("Show Help", () -> Help.getInstance().setVisible(true))
                 .get();
@@ -215,6 +224,7 @@ public final class MimaUI extends JFrame {
             controller.stop();
         } catch (final IllegalArgumentException | IOException e) {
             Logger.error(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -232,12 +242,14 @@ public final class MimaUI extends JFrame {
         }
         console.clear();
         loadAction.run();
+        setTitle(TITLE + ' ' + fileManager.getLastFile().replaceAll(" ", ""));
         String text = fileManager.getText();
         editor.setText(text);
         try {
             controller.parse(text, getInstructionSet());
         } catch (IllegalArgumentException | IllegalStateException e) {
             Logger.error(e.getMessage());
+            e.printStackTrace();
         }
         updateSyntaxHighlighting();
         updateReferenceHighlighting();
@@ -266,8 +278,10 @@ public final class MimaUI extends JFrame {
             run.setEnabled(false);
             updateMemoryTable();
             run.setEnabled(!controller.isRunning());
+            step.setEnabled(controller.isRunning());
         } catch (final InterpreterException e) {
             Logger.error(e.getMessage());
+            e.printStackTrace();
             step.setEnabled(false);
             run.setEnabled(false);
         }
@@ -288,6 +302,7 @@ public final class MimaUI extends JFrame {
             Logger.log("done");
         } catch (final InterpreterException e) {
             Logger.error(e.getMessage());
+            e.printStackTrace();
             step.setEnabled(false);
             run.setEnabled(false);
         }
@@ -314,12 +329,14 @@ public final class MimaUI extends JFrame {
         Logger.log("Compiling: " + fileManager.getLastFile().replaceAll("\\s", "") + "...");
         try {
             controller.parse(editor.getText(), getInstructionSet());
+            controller.findJumpDuplicates();
             updateMemoryTable();
             run.setEnabled(true);
             step.setEnabled(true);
             Logger.log("done");
         } catch (final IllegalArgumentException | IllegalStateException e) {
             Logger.error(e.getMessage());
+            e.printStackTrace();
             run.setEnabled(false);
             step.setEnabled(false);
         }
@@ -329,7 +346,7 @@ public final class MimaUI extends JFrame {
      * Update the MemoryMap table with new values
      */
     private void updateMemoryTable() {
-        memoryView.setContent(controller.getMemoryTable());
+        memoryView.setContent(controller.getMemoryTable(binaryView.isSelected()));
         repaint();
     }
 
@@ -337,7 +354,9 @@ public final class MimaUI extends JFrame {
      * Update the syntax highlighting according to the current instruction set
      */
     private void updateSyntaxHighlighting() {
-        syntaxStyle.setHighlight(Keyword.getKeywords(), SyntaxColor.KEYWORD);
+        syntaxStyle.setHighlight("[^\\s]*", SQUIGGLE_LINE);
+
+        syntaxStyle.addHighlight(Keyword.getKeywords(), SyntaxColor.KEYWORD);
 
         syntaxStyle.addHighlight('\\' + String.valueOf(Punctuation.OPEN_BRACKET), SyntaxColor.TEXT);
         syntaxStyle.addHighlight('\\' + String.valueOf(Punctuation.CLOSED_BRACKET), SyntaxColor.TEXT);
@@ -350,8 +369,10 @@ public final class MimaUI extends JFrame {
 
         syntaxStyle.addHighlight("-?[0-9]+", SyntaxColor.NUMBER);
         syntaxStyle.addHighlight(Punctuation.BINARY_PREFIX + "[10]*", SyntaxColor.BINARY);
-        syntaxStyle.addHighlight(getInstructionSet().getInstructions(), SyntaxColor.INSTRUCTION);
-        syntaxStyle.addHighlight("HALT", SyntaxColor.WARNING);
+        syntaxStyle.addHighlight(Arrays.stream(getInstructionSet().getInstructions()).map(
+                s -> "(?<=[\\s\\(,])" + s + "(?=[\\(,:;\\s])"
+        ).toArray(String[]::new), SyntaxColor.INSTRUCTION);
+        syntaxStyle.addHighlight("(?<=[\\s\\(,])HALT(?=[\\(,:;\\s])", SyntaxColor.WARNING);
         syntaxStyle.addHighlight(Punctuation.COMMENT + "[^\n" + Punctuation.COMMENT + "]*" + Punctuation.COMMENT + '?',
                 SyntaxColor.COMMENT);
     }
@@ -366,7 +387,7 @@ public final class MimaUI extends JFrame {
 
             final String[] constants = references.get(0)
                     .stream().map(s -> "(?<=[\\s\\(,])(\\s)*" + s + "(\\s)*(?=[\\),:;])").toArray(String[]::new);
-            referenceStyle.addHighlight(constants, SyntaxColor.CONSTANT);
+            referenceStyle.setHighlight(constants, SyntaxColor.CONSTANT);
             final String[] jumpReferences = references.get(1)
                     .stream().map(s -> "(?<=[\\s\\(,])(\\s)*" + s + "(\\s)*(?=[\\),:;])").toArray(String[]::new);
             referenceStyle.addHighlight(jumpReferences, SyntaxColor.JUMP);

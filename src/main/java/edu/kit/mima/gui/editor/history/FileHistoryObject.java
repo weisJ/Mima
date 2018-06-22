@@ -105,6 +105,7 @@ public class FileHistoryObject {
             editor.setCaretPosition(caret);
         } catch (final BadLocationException e) {
             Logger.error(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -135,6 +136,7 @@ public class FileHistoryObject {
             editor.setCaretPosition(caret);
         } catch (final BadLocationException e) {
             Logger.error(e.getMessage());
+            e.printStackTrace();
         }
     }
 

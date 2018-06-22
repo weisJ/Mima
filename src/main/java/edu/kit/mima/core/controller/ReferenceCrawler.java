@@ -3,7 +3,10 @@ package edu.kit.mima.core.controller;
 import edu.kit.mima.core.parsing.token.ProgramToken;
 import edu.kit.mima.core.parsing.token.Token;
 import edu.kit.mima.core.parsing.token.TokenType;
+import edu.kit.mima.core.parsing.token.Tuple;
+import javafx.util.Pair;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,7 +49,7 @@ public final class ReferenceCrawler {
         TokenType tokenType = token.getType();
         switch (tokenType) {
             case PROGRAM:
-                Token[] tokens = ((ProgramToken)token).getValue();
+                Token[] tokens = ((ProgramToken) token).getValue();
                 for (Token t : tokens) {
                     searchReferences(t, memory, constants, jump);
                 }
@@ -63,5 +66,23 @@ public final class ReferenceCrawler {
             default:
                 break;
         }
+    }
+
+    /**
+     * Create jump associations for the given environment based on the tokens
+     * This needs to be done as forward referencing is allowed for jumps
+     *
+     * @return List of all jump points in order they appeared
+     */
+    public List<Pair<Token, Integer>> getJumpPoints() {
+        List<Pair<Token, Integer>> references = new ArrayList<>();
+        Token[] tokens = programToken.getValue();
+        for (int i = 0; i < tokens.length; i++) {
+            Token token = tokens[i];
+            if (token.getType() == TokenType.JUMP_POINT) {
+                references.add(new Pair<>(((Tuple<Token, Token>) token).getFirst(), i));
+            }
+        }
+        return references;
     }
 }

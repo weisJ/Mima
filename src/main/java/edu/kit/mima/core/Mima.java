@@ -51,18 +51,22 @@ public class Mima {
      * Get the memory table labeled with the corresponding memory associations
      *
      * @param associations memory associations to use
+     * @param binaryView whether to use the binary representation of the memory values
      * @return MemoryTable formatted for an n(rows) x 2(columns) {@link JTable}
      */
-    public Object[][] memoryTable(Map<String, Integer> associations) {
+    public Object[][] memoryTable(Map<String, Integer> associations, boolean binaryView) {
         final Map<Integer, MachineWord> values = memoryMap.getMemoryMap();
         final List<Object[]> data = new ArrayList<>();
-        data.add(new Object[]{"accumulator", accumulator});
+        data.add(new Object[]{"accumulator", binaryView ? accumulator.binaryRepresentation() : accumulator.intValue()});
 
         final List<Object[]> memory = new ArrayList<>();
         for (Map.Entry<Integer, MachineWord> entry : values.entrySet()) {
+            String valueString = binaryView
+                    ? entry.getValue().binaryRepresentation()
+                    : String.valueOf(entry.getValue().intValue());
             Object[] element = associations.containsValue(entry.getKey())
-                    ? new Object[]{getAssociation(associations, entry.getKey()), entry.getValue().intValue()}
-                    : new Object[]{entry.getKey(), entry.getValue().intValue()};
+                    ? new Object[]{getAssociation(associations, entry.getKey()), valueString}
+                    : new Object[]{entry.getKey(), valueString};
             boolean skip;
             try {
                 int value = Integer.parseInt(element[0].toString());

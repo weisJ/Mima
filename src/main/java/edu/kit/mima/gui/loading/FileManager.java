@@ -1,7 +1,5 @@
 package edu.kit.mima.gui.loading;
 
-import edu.kit.mima.gui.logging.Logger;
-
 import javax.swing.JOptionPane;
 import java.awt.Component;
 import java.io.File;
@@ -57,8 +55,6 @@ public class FileManager implements AutoCloseable {
             }
         });
     }
-
-
     /*
      * load last used directory from options
      */
@@ -88,6 +84,7 @@ public class FileManager implements AutoCloseable {
             text = saveHandler.loadFile(lastFile);
             setLastExtension(lastFile);
             fileHash = text.hashCode();
+            isNewFile = false;
         } catch (final IOException e) {
             firstFile();
         }
@@ -100,6 +97,7 @@ public class FileManager implements AutoCloseable {
         text = textLoader.requestLoad(directory, extensions, () -> { });
         assert text != null;
         fileHash = text.hashCode();
+        isNewFile = false;
     }
 
     /*
@@ -121,9 +119,7 @@ public class FileManager implements AutoCloseable {
                 default:  //Abort
                     System.exit(0);
             }
-        } catch (final IllegalArgumentException e) {
-            error(e.getMessage());
-        }
+        } catch (final IllegalArgumentException ignored) { }
     }
 
     /**
@@ -158,12 +154,8 @@ public class FileManager implements AutoCloseable {
     public void saveAs() {
         try {
             textLoader.requestSave(text, directory, lastExtension,
-                    () -> {
-                        throw new IllegalArgumentException("aborted save");
-                    });
-        } catch (final IllegalArgumentException e) {
-            Logger.error(e.getMessage());
-        }
+                    () -> { throw new IllegalArgumentException("aborted save"); });
+        } catch (final IllegalArgumentException ignored) { }
         isNewFile = false;
         fileHash = text.hashCode();
     }
