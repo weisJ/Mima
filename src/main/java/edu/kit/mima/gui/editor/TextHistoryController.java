@@ -40,22 +40,18 @@ public class TextHistoryController {
      * @param length length of change
      * @param text   text inserted instead of old text
      */
-    public void addReplaceHistory(final int offset, final int length, final String text) {
+    public void addReplaceHistory(final int offset, final int length, final String text) throws BadLocationException {
         if (!active) {
             return;
         }
         if (offset >= editorPane.getDocument().getLength()) {
             addInsertHistory(offset, text);
         } else {
-            try {
-                final String old = editorPane.getDocument().getText(offset, length);
-                if (old.isEmpty()) {
-                    addInsertHistory(offset, text);
-                } else {
-                    history.add(new FileHistoryObject(editorPane, offset, text, old, ChangeType.REPLACE));
-                }
-            } catch (final BadLocationException e) {
-                Logger.error(e.getMessage());
+            final String old = editorPane.getDocument().getText(offset, length);
+            if (old.isEmpty()) {
+                addInsertHistory(offset, text);
+            } else {
+                history.add(new FileHistoryObject(editorPane, offset, text, old, ChangeType.REPLACE));
             }
         }
     }
@@ -101,6 +97,7 @@ public class TextHistoryController {
             text = editorPane.getDocument().getText(offset, length);
         } catch (final BadLocationException e) {
             Logger.error(e.getMessage());
+            e.printStackTrace();
         }
         assert text != null;
         if ((fhs != null)
@@ -121,22 +118,26 @@ public class TextHistoryController {
      * Undo last file change
      */
     public void undo() {
-        final FileHistoryObject fhs = history.back();
-        final boolean isActive = active;
-        setActive(false);
-        fhs.undo();
-        setActive(isActive);
+        try {
+            final FileHistoryObject fhs = history.back();
+            final boolean isActive = active;
+            setActive(false);
+            fhs.undo();
+            setActive(isActive);
+        } catch (IndexOutOfBoundsException ignored) { }
     }
 
     /**
      * Redo the last undo
      */
     public void redo() {
-        final FileHistoryObject fhs = history.forward();
-        final boolean isActive = active;
-        setActive(false);
-        fhs.redo();
-        setActive(isActive);
+        try {
+            final FileHistoryObject fhs = history.forward();
+            final boolean isActive = active;
+            setActive(false);
+            fhs.redo();
+            setActive(isActive);
+        } catch (IndexOutOfBoundsException ignored) { }
     }
 
     /**

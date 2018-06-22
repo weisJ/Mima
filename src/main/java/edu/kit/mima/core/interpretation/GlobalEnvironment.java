@@ -101,9 +101,6 @@ public class GlobalEnvironment extends Environment {
             interpreter.performJump(pair.getKey());
             return null;
         });
-        for (MimaXInstruction instruction : MimaXInstruction.values()) {
-            defineFunction(new AtomToken<>(TokenType.IDENTIFICATION, instruction.toString()), instruction);
-        }
     }
 
     /**

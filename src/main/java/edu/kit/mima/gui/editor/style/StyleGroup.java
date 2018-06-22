@@ -1,6 +1,7 @@
 package edu.kit.mima.gui.editor.style;
 
 
+import javax.swing.text.Highlighter;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +16,8 @@ import java.util.Map;
  */
 public class StyleGroup {
 
-    private final Map<String, Color> styleMap;
+    private final Map<String, Highlighter.HighlightPainter> styleMap;
+    private final Map<String, Color> colorMap;
     private final List<String> regexList;
 
     /**
@@ -27,6 +29,7 @@ public class StyleGroup {
      */
     public StyleGroup() {
         styleMap = new HashMap<>();
+        colorMap = new HashMap<>();
         regexList = new ArrayList<>();
     }
 
@@ -40,13 +43,23 @@ public class StyleGroup {
     }
 
     /**
+     * Get the highlight painter associated with a regular expression
+     *
+     * @param key regular expression
+     * @return painter of key
+     */
+    public Highlighter.HighlightPainter getHighlight(final String key) {
+        return styleMap.get(key);
+    }
+
+    /**
      * Get the color associated with a regular expression
      *
      * @param key regular expression
      * @return color of key
      */
     public Color getColor(final String key) {
-        return styleMap.get(key);
+        return colorMap.get(key);
     }
 
     /**
@@ -54,9 +67,9 @@ public class StyleGroup {
      * All expressions in regexArray will have the same color
      *
      * @param regexArray array of regular expressions
-     * @param color      color to highlight expressions in
+     * @param painter    highlight painter to use
      */
-    public void addHighlight(final String[] regexArray, final Color color) {
+    public void addHighlight(final String[] regexArray, final Highlighter.HighlightPainter painter) {
         if (regexArray.length == 0) {
             return;
         }
@@ -66,17 +79,17 @@ public class StyleGroup {
         }
         sb.deleteCharAt(sb.length() - 1);
         sb.append(')');
-        addHighlight(sb.toString(), color);
+        addHighlight(sb.toString(), painter);
     }
 
     /**
      * Add highlighting regular expression
      *
-     * @param regex expression to highlight
-     * @param color color to highlight in
+     * @param regex   expression to highlight
+     * @param painter highlight painter to use
      */
-    public void addHighlight(final String regex, final Color color) {
-        styleMap.put(regex, color);
+    public void addHighlight(final String regex, final Highlighter.HighlightPainter painter) {
+        styleMap.put(regex, painter);
         regexList.add(regex);
     }
 
@@ -85,7 +98,47 @@ public class StyleGroup {
      * Both arrays must have the same size.
      *
      * @param regexArray array of regular expressions
-     * @param colors     colors to highlight expressions in
+     * @param painters   highlighters to use
+     */
+    public void addHighlight(final String[] regexArray, final Highlighter.HighlightPainter[] painters) {
+        if (regexArray.length == 0) {
+            return;
+        }
+        assert regexArray.length == painters.length : "unequal array lengths";
+        for (int i = 0; i < regexArray.length; i++) {
+            addHighlight(regexArray[i], painters[i]);
+        }
+    }
+
+    /**
+     * Add highlighting regular expressions
+     *
+     * @param regex regular expression to match
+     * @param color color to highlight text in
+     */
+    public void addHighlight(final String regex, final Color color) {
+        regexList.add(regex);
+        colorMap.put(regex, color);
+    }
+
+    /**
+     * Add highlighting regular expressions
+     *
+     * @param regexArray array of regular expressions
+     * @param color      color to highlight text in
+     */
+    public void addHighlight(final String[] regexArray, final Color color) {
+        for (String regex : regexArray) {
+            addHighlight(regex, color);
+        }
+    }
+
+    /**
+     * Add highlighting regular expressions
+     * Both arrays must have the same size.
+     *
+     * @param regexArray array of regular expressions
+     * @param colors     color sto highlight text in
      */
     public void addHighlight(final String[] regexArray, final Color[] colors) {
         if (regexArray.length == 0) {
@@ -97,6 +150,7 @@ public class StyleGroup {
         }
     }
 
+
     /**
      * Set highlighting regular expressions
      * All expressions in regexArray will have the same color
@@ -104,10 +158,66 @@ public class StyleGroup {
      * Note: previously added expressions will be ignored
      *
      * @param regexArray array of regular expressions
-     * @param color      color to highlight expressions in
+     * @param painter    highlight painter to use
+     */
+    public void setHighlight(final String[] regexArray, final Highlighter.HighlightPainter painter) {
+        clearLists();
+        addHighlight(regexArray, painter);
+    }
+
+    /**
+     * Add highlighting regular expressions
+     * Both arrays must have the same size.
+     * <p>
+     * Note previously added expressions will be ignored
+     *
+     * @param regexArray array of regular expressions
+     * @param painters   highlight painters to use
+     */
+    public void setHighlight(final String[] regexArray, final Highlighter.HighlightPainter[] painters) {
+        if (regexArray.length == 0) {
+            return;
+        }
+        clearLists();
+        addHighlight(regexArray, painters);
+    }
+
+    /**
+     * Add highlighting regular expression
+     * <p>
+     * Note previously added expressions will be ignored
+     *
+     * @param regex   expression to highlight
+     * @param painter highlight painter to use
+     */
+    public void setHighlight(final String regex, final Highlighter.HighlightPainter painter) {
+        clearLists();
+        addHighlight(regex, painter);
+    }
+
+    /**
+     * Add highlighting regular expression
+     * <p>
+     * Note previously added expressions will be ignored
+     *
+     * @param regex regular expression to match
+     * @param color color to highlight text in
+     */
+    public void setHighlight(final String regex, final Color color) {
+        clearLists();
+        addHighlight(regex, color);
+    }
+
+    /**
+     * Add highlighting regular expression
+     * <p>
+     * Note previously added expressions will be ignored
+     *
+     * @param regexArray array of regular expressions
+     * @param color      color to highlight text in
      */
     public void setHighlight(final String[] regexArray, final Color color) {
-        styleMap.clear();
+        clearLists();
         addHighlight(regexArray, color);
     }
 
@@ -118,26 +228,16 @@ public class StyleGroup {
      * Note previously added expressions will be ignored
      *
      * @param regexArray array of regular expressions
-     * @param colors     colors to highlight expressions in
+     * @param colors     color sto highlight text in
      */
     public void setHighlight(final String[] regexArray, final Color[] colors) {
-        if (regexArray.length == 0) {
-            return;
-        }
-        styleMap.clear();
+        clearLists();
         addHighlight(regexArray, colors);
     }
 
-    /**
-     * Add highlighting regular expression
-     * <p>
-     * Note previously added expressions will be ignored
-     *
-     * @param regex expression to highlight
-     * @param color color to highlight in
-     */
-    public void setHighlight(final String regex, final Color color) {
+    private void clearLists() {
         styleMap.clear();
-        addHighlight(regex, color);
+        colorMap.clear();
+        regexList.clear();
     }
 }

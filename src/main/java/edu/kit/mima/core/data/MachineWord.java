@@ -14,6 +14,9 @@ import java.util.stream.IntStream;
 public class MachineWord {
 
     private final int wordLength;
+    /*
+     * Bits with msb at index length - 1
+     */
     private boolean[] bits;
 
     /**
@@ -70,6 +73,19 @@ public class MachineWord {
      */
     public static MachineWord cast(final MachineWord word, final int wordLength) {
         return new MachineWord(word.intValue(), wordLength);
+    }
+
+    /**
+     * Get the binary representation of this machine value
+     *
+     * @return binary representation beginning with the msb on the left
+     */
+    public String binaryRepresentation() {
+        StringBuilder sb = new StringBuilder();
+        for (boolean bit : bits) {
+            sb.append(bit ? 1 : 0);
+        }
+        return sb.reverse().toString();
     }
 
     @Override

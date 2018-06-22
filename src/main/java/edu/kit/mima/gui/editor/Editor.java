@@ -53,12 +53,12 @@ public class Editor extends JScrollPane {
         textPanel.add(editorPane, BorderLayout.CENTER);
         setViewportView(textPanel);
 
-        final StyledDocument document = editorPane.getStyledDocument();
-        stylizer = new Stylizer(document, TEXT_COLOR);
+        stylizer = new Stylizer(editorPane, TEXT_COLOR);
         historyController = new TextHistoryController(editorPane, DEFAULT_HISTORY_LENGTH);
         historyController.setActive(false);
         afterEditActions = new ArrayList<>();
 
+        final StyledDocument document = editorPane.getStyledDocument();
         ((AbstractDocument) document).setDocumentFilter(new EditorDocumentFilter(this));
         editorPane.setBackground(BACKGROUND_COLOR);
         editorPane.setCaretColor(TEXT_COLOR);

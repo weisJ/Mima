@@ -80,8 +80,12 @@ public final class Help extends JFrame {
     private static void showHtml(final String htmlSource) {
         Platform.runLater(() -> {
             final WebView webView = new WebView();
-            webView.getEngine().loadContent("<html> Html loaded");
-            webView.getEngine().loadContent(htmlSource);
+            webView.getEngine().loadContent("<html><body text=\"#D8D8D8\" "
+                    + "bgcolor=\"#3c3f41\""
+//                    + "background-color:transparent"
+                    + "style='font-family: Menlo,Monaco,Consolas,\"Liberation Mono\",\"Courier New\",monospace'>"
+                    + htmlSource
+                    + "</body></html>");
             jfxPanel.setScene(new Scene(webView));
         });
     }
@@ -122,7 +126,7 @@ public final class Help extends JFrame {
             urlConnection.setReadTimeout(READ_TIMEOUT);
 
             try (final BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(urlConnection.getInputStream(), "ISO-8859-1")
+                    new InputStreamReader(urlConnection.getInputStream(), "UTF-8")
             )) {
                 final String markdown = reader.lines().collect(Collectors.joining("\n"));
                 loadedFromWeb = true;
@@ -139,7 +143,7 @@ public final class Help extends JFrame {
     @SuppressWarnings("OverlyBroadCatchBlock")
     private String loadFallback() {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(
-                getClass().getClassLoader().getResourceAsStream(HELP_LOCAL), "ISO-8859-1"))) {
+                getClass().getClassLoader().getResourceAsStream(HELP_LOCAL), "UTF-8"))) {
             return reader.lines().collect(Collectors.joining("\n"));
         } catch (IOException e) {
             return null;

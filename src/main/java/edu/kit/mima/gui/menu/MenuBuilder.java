@@ -87,6 +87,30 @@ public final class MenuBuilder {
         }
 
         /**
+         * Add external JMenuItem to menu.
+         *
+         * @param item item to add
+         * @param action action to perform when clicked
+         * @return this
+         */
+        public SubMenuBuilder addItem(final JMenuItem item, final Runnable action) {
+            menu.add(item);
+            item.addActionListener(e -> action.run());
+            return this;
+        }
+
+        /**
+         * Add an external JMenuItem to menu
+         *
+         * @param item item to add
+         * @return this
+         */
+        public SubMenuBuilder addItem(final JMenuItem item) {
+            menu.add(item);
+            return this;
+        }
+
+        /**
          * Add a separator
          *
          * @return this

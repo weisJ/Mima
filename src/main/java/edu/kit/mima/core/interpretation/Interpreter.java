@@ -1,6 +1,7 @@
 package edu.kit.mima.core.interpretation;
 
 import edu.kit.mima.core.controller.DebugController;
+import edu.kit.mima.core.controller.ReferenceCrawler;
 import edu.kit.mima.core.data.MachineWord;
 import edu.kit.mima.core.parsing.Parser;
 import edu.kit.mima.core.parsing.token.ArrayToken;
@@ -65,13 +66,10 @@ public class Interpreter {
      * This needs to be done as forward referencing is allowed for jumps
      */
     @SuppressWarnings("unchecked")
-    private void resolveJumpPoints(final Token[] tokens, final Environment environment) {
+    private void resolveJumpPoints(final ProgramToken programToken, final Environment environment) {
         try {
-            for (int i = 0; i < tokens.length; i++) {
-                Token token = tokens[i];
-                if (token.getType() == TokenType.JUMP_POINT) {
-                    environment.defineJump(((Tuple<Token, Token>) token).getFirst(), i);
-                }
+            for (var pair : new ReferenceCrawler(programToken).getJumpPoints()) {
+                environment.defineJump(pair.getKey(), pair.getValue());
             }
         } catch (IllegalArgumentException e) {
             fail(e.getMessage());
@@ -96,7 +94,7 @@ public class Interpreter {
 
         Environment runtimeEnvironment = globalEnvironment.extend(program);
         ProgramToken runtimeToken = program;
-        resolveJumpPoints(program.getValue(), runtimeEnvironment);
+        resolveJumpPoints(program, runtimeEnvironment);
         boolean firstScope = true;
         while (running) {
             /*
@@ -134,7 +132,7 @@ public class Interpreter {
                  */
                 ProgramToken programToken = (ProgramToken) expression;
                 Environment scope = environment.extend(programToken);
-                resolveJumpPoints(programToken.getValue(), scope);
+                resolveJumpPoints(programToken, scope);
                 return evaluateProgram(programToken, environment, true, 0);
             case NUMBER:
                 return evaluateNumber((String) expression.getValue());
