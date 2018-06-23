@@ -3,12 +3,15 @@ package edu.kit.mima.gui.editor;
 import edu.kit.mima.gui.color.SyntaxColor;
 import edu.kit.mima.gui.editor.style.StyleGroup;
 import edu.kit.mima.gui.editor.style.Stylizer;
+import edu.kit.mima.gui.editor.view.HighlightViewFactory;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.StyledDocument;
+import javax.swing.text.StyledEditorKit;
+import javax.swing.text.ViewFactory;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
@@ -48,6 +51,12 @@ public class Editor extends JScrollPane {
         final NumberedTextPane numberedTextPane = new NumberedTextPane(font, LINE_NUMBER_COLOR);
         editorPane = numberedTextPane.getPane();
         editorPane.setFont(font);
+        editorPane.setEditorKit(new StyledEditorKit() {
+            public ViewFactory getViewFactory() {
+                return new HighlightViewFactory();
+            }
+        });
+
         textPanel.setLayout(new BorderLayout());
         textPanel.add(numberedTextPane, BorderLayout.LINE_START);
         textPanel.add(editorPane, BorderLayout.CENTER);

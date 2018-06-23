@@ -85,4 +85,47 @@ public final class ReferenceCrawler {
         }
         return references;
     }
+
+    /**
+     * Returns all top level non function calls in the program
+     *
+     * @return List of all tokens that are not a jump reference or function call
+     */
+    public List<Token> getNonFunctions() {
+        List<Token> found = new ArrayList<>();
+        Token[] tokens = programToken.getValue();
+        for (Token token : tokens) {
+            searchNonFunctions(token, found);
+        }
+        return found;
+    }
+
+    private void searchNonFunctions(Token token, List<Token> found) {
+        TokenType tokenType = token.getType();
+        switch (tokenType) {
+            case PROGRAM:
+                Token[] tokens = ((ProgramToken) token).getValue();
+                for (Token t : tokens) {
+                    searchNonFunctions(t, found);
+                }
+                break;
+            case KEYWORD:
+            case PUNCTUATION:
+            case BINARY:
+            case NUMBER:
+            case IDENTIFICATION:
+            case ARRAY:
+            case EMPTY:
+            case ERROR:
+                /* fall through */
+                found.add(token);
+                break;
+            case CALL:
+            case JUMP_POINT:
+            case DEFINITION:
+            case CONSTANT:
+                /* fall through */
+                break;
+        }
+    }
 }
