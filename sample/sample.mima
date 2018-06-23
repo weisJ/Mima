@@ -23,4 +23,3 @@ ADD(minus_eins);
 STV(val);
 JMP(Loop);
 Stop : HALT();
-test
