@@ -1,8 +1,8 @@
 #Memory associations;
-Â§define minus_eins; #inline comment#
-Â§define eins;
-Â§define zero;
-Â§define val;
+§define minus_eins; #inline comment#
+§define eins;
+§define zero;
+§define val;
 
 #Instructions
 #This is a comment
@@ -23,3 +23,4 @@ ADD(minus_eins);
 STV(val);
 JMP(Loop);
 Stop : HALT();
+test

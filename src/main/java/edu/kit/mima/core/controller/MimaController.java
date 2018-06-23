@@ -72,16 +72,34 @@ public class MimaController implements ExceptionListener {
     /**
      * Find duplicate jump references in code and warn about them
      */
-    public void findJumpDuplicates() {
+    public void checkCode() {
         if (programToken == null) {
             return;
         }
+        checkJumpDuplicates();
+        checkNonCalls();
+    }
+
+    /**
+     * Search for duplicate jump declarations. this may be a bug in the program and result in not expected behaviour
+     */
+    private void checkJumpDuplicates() {
         Map<Token, Integer> jumps = new HashMap<>();
         for (var pair : new ReferenceCrawler(programToken).getJumpPoints()) {
             Integer prior = jumps.put(pair.getKey(), pair.getValue());
             if (prior != null) {
                 Logger.warning("jump is defined multiple times in lines " + prior + " and " + pair.getValue());
             }
+        }
+    }
+
+    /**
+     * Search for program statements that are not function calls
+     */
+    private void checkNonCalls() {
+        List<Token> nonCalls = new ReferenceCrawler(programToken).getNonFunctions();
+        for (Token t : nonCalls) {
+            Logger.warning("not a function call: \"" + t.simpleName() + '\"');
         }
     }
 
@@ -187,8 +205,11 @@ public class MimaController implements ExceptionListener {
     public Object[][] getMemoryTable(boolean binary) {
         Environment scope = interpreter.getCurrentScope();
         scope = scope == null || !interpreter.isRunning() ? globalEnvironment : scope;
-        Map<String, Integer> map = scope.getDefinitions().get(0).entrySet().stream()
-                .collect(Collectors.toMap(e -> e.getKey().getValue().toString(), e -> e.getValue().intValue()));
+        Map<String, Integer> map = new HashMap<>();
+        if (scope != null) {
+            map = scope.getDefinitions().get(0).entrySet().stream()
+                    .collect(Collectors.toMap(e -> e.getKey().getValue().toString(), e -> e.getValue().intValue()));
+        }
         return mima.memoryTable(map, binary);
     }
 

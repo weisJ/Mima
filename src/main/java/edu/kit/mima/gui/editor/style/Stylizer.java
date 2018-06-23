@@ -1,18 +1,13 @@
 package edu.kit.mima.gui.editor.style;
 
-import edu.kit.mima.gui.logging.Logger;
-
 import javax.swing.JTextPane;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Highlighter;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 import java.awt.Color;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,20 +19,20 @@ import java.util.regex.Pattern;
  */
 public class Stylizer {
 
+    private final List<StyleGroup> styles;
+    private Color textColor;
     private JTextPane textPane;
-    private final Set<StyleGroup> styles;
-    private final Color textColor;
 
     /**
      * Document stylizer using regular expressions
      *
      * @param textPane  textPane to stylize
-     * @param textColor default text Color
+     * @param textColor default text color
      */
-    public Stylizer(final JTextPane textPane, Color textColor) {
+    public Stylizer(final JTextPane textPane, final Color textColor) {
         this.textPane = textPane;
-        styles = new HashSet<>();
-        this.textColor =  textColor;
+        styles = new ArrayList<>();
+        this.textColor = textColor;
     }
 
     /**
@@ -65,41 +60,14 @@ public class Stylizer {
      * Stylize one specific StyleGroup
      */
     private void stylize(final StyleGroup group) {
-        final StyleContext context = new StyleContext();
-        final List<String> regexList = group.regexList();
-        final int index = 0;
+        var regexList = group.regexList();
         for (final String regex : regexList) {
-            Style style =
-            style.addAttribute(StyleConstants.Foreground, group.getColor(regex));
-            try {
-                final Pattern pattern = Pattern.compile(regex);
-                final Matcher matcher = pattern.matcher(textPane.getText());
-                while (matcher.find()) {
-                    textPane.getHighlighter().addHighlight(matcher.start(), matcher.group().length(), style);
-                }
-            } catch (final BadLocationException e) {
-                Logger.error(e.getMessage());
-            }
-        }
-    }
-
-    /*
-     * Stylize one specific StyleGroup
-     */
-    private void stylizePainters(final StyleGroup group) {
-        final List<String> regexList = group.regexList();
-        for (final String regex : regexList) {
-            try {
-                final Pattern pattern = Pattern.compile(regex);
-                final Matcher matcher = pattern.matcher(textPane.getText());
-                final Highlighter.HighlightPainter style = group.getHighlight(regex);
-                while (matcher.find()) {
-                    textPane.getHighlighter()
-                            .addHighlight(matcher.start(), matcher.start() + matcher.group().length(), style);
-                }
-            } catch (final BadLocationException e) {
-                Logger.error(e.getMessage());
-                e.printStackTrace();
+            Style style = group.getStyle(regex);
+            final Pattern pattern = Pattern.compile(regex);
+            final Matcher matcher = pattern.matcher(textPane.getText());
+            while (matcher.find()) {
+                textPane.getStyledDocument()
+                        .setCharacterAttributes(matcher.start(), matcher.group().length(), style, true);
             }
         }
     }
