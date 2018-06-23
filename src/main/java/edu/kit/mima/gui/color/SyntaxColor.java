@@ -37,7 +37,7 @@ public final class SyntaxColor {
     /**
      * Color for Jump associations
      */
-    public static final Color JUMP = new Color(187, 181, 41);
+    public static final Color JUMP = new Color(255, 198, 109);
     /**
      * Color for memory address references
      */
