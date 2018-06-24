@@ -80,7 +80,8 @@ public class Parser {
                 return new ProgramToken(delimited(Punctuation.SCOPE_OPEN,
                         Punctuation.SCOPE_CLOSED,
                         Punctuation.INSTRUCTION_END,
-                        () -> maybeJumpAssociation(this::parseExpression)).getValue());
+                        () -> maybeJumpAssociation(this::parseExpression),
+                        true).getValue());
             }
             if (isPunctuation(Punctuation.OPEN_BRACKET)) {
                 input.next();
@@ -135,10 +136,12 @@ public class Parser {
      * Parse a function call
      */
     private Token parseCall(Token reference) {
-        return new BinaryToken<>(TokenType.CALL, reference, delimited(Punctuation.OPEN_BRACKET,
+        return new BinaryToken<>(TokenType.CALL, reference, delimited(
+                Punctuation.OPEN_BRACKET,
                 Punctuation.CLOSED_BRACKET,
                 Punctuation.COMMA,
-                this::parseExpression));
+                this::parseExpression,
+                true));
     }
 
     /*
@@ -148,9 +151,19 @@ public class Parser {
         skipKeyword(Keyword.DEFINITION);
         if (isKeyword(Keyword.CONSTANT)) {
             input.next();
-            return parseConstant();
+            return new AtomToken<>(TokenType.CONSTANT, delimited(
+                    CharInputStream.EMPTY_CHAR,
+                    Punctuation.INSTRUCTION_END,
+                    Punctuation.COMMA,
+                    this::parseConstant,
+                    false));
         }
-        return parseDefinition();
+        return new AtomToken<>(TokenType.DEFINITION, delimited(
+                CharInputStream.EMPTY_CHAR,
+                Punctuation.INSTRUCTION_END,
+                Punctuation.COMMA,
+                this::parseDefinition,
+                false));
     }
 
     /*
@@ -183,7 +196,7 @@ public class Parser {
     /*
      * Return expressions contained in the delimiters as ArrayToken
      */
-    private ArrayToken<Token> delimited(char start, char stop, char separator, Supplier<Token> parser) {
+    private ArrayToken<Token> delimited(char start, char stop, char separator, Supplier<Token> parser, boolean skipLast) {
         if (start != CharInputStream.EMPTY_CHAR) {
             skipPunctuation(start);
         }
@@ -207,7 +220,9 @@ public class Parser {
             }
             tokens.add(token);
         }
-        skipPunctuation(stop);
+        if (skipLast) {
+            skipPunctuation(stop);
+        }
         return new ArrayToken<>(tokens.toArray(new Token[0]));
     }
 

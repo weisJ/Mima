@@ -182,9 +182,10 @@ public class FileManager implements AutoCloseable {
             case 1:
                 saveAs();
                 break;
-            default:
-                assert response != JOptionPane.CLOSED_OPTION : "Window not closed";
+            case 2: /*do nothing*/
                 break;
+            default:
+                throw new IllegalArgumentException("aborted");
         }
     }
 

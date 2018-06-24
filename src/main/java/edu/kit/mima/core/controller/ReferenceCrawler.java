@@ -1,5 +1,7 @@
 package edu.kit.mima.core.controller;
 
+import edu.kit.mima.core.parsing.token.ArrayToken;
+import edu.kit.mima.core.parsing.token.BinaryToken;
 import edu.kit.mima.core.parsing.token.ProgramToken;
 import edu.kit.mima.core.parsing.token.Token;
 import edu.kit.mima.core.parsing.token.TokenType;
@@ -17,10 +19,10 @@ import java.util.Set;
  */
 public final class ReferenceCrawler {
 
-    private ProgramToken programToken;
+    private final ProgramToken programToken;
 
     /**
-     * Create new Referecne Crawler object
+     * Create new Reference Crawler object
      *
      * @param programToken the program token to search for references in
      */
@@ -45,6 +47,7 @@ public final class ReferenceCrawler {
         return List.of(constants, jumps, memory);
     }
 
+    @SuppressWarnings("unchecked")
     private void searchReferences(Token token, Set<String> memory, Set<String> constants, Set<String> jump) {
         TokenType tokenType = token.getType();
         switch (tokenType) {
@@ -58,10 +61,16 @@ public final class ReferenceCrawler {
                 jump.add(((Token) token.getValue()).getValue().toString());
                 break;
             case DEFINITION:
-                memory.add(((Token) token.getValue()).getValue().toString());
+                Token[] memoryValues = ((ArrayToken<Token>)token.getValue()).getValue();
+                for (var value : memoryValues) {
+                    memory.add((((BinaryToken<Token, Token>)value).getFirst()).getValue().toString());
+                }
                 break;
             case CONSTANT:
-                constants.add(((Token) token.getValue()).getValue().toString());
+                Token[] constantValues = ((ArrayToken<Token>)token.getValue()).getValue();
+                for (var value : constantValues) {
+                    constants.add((((BinaryToken<Token, Token>)value).getFirst()).getValue().toString());
+                }
                 break;
             default:
                 break;
@@ -74,6 +83,7 @@ public final class ReferenceCrawler {
      *
      * @return List of all jump points in order they appeared
      */
+    @SuppressWarnings("unchecked")
     public List<Pair<Token, Integer>> getJumpPoints() {
         List<Pair<Token, Integer>> references = new ArrayList<>();
         Token[] tokens = programToken.getValue();

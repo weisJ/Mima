@@ -60,7 +60,7 @@ public final class MimaUI extends JFrame {
     private static final int MAX_FILE_DISPLAY_LENGTH = 25;
     private static final Style DEFAULT_STYLE = new StyleContext().addStyle("default", null);
     static {
-        DEFAULT_STYLE.addAttribute(HighlightView.JAGGEND_UNDERLINE, new Color(0xd25252));
+        DEFAULT_STYLE.addAttribute(HighlightView.JAGGED_UNDERLINE, new Color(0xd25252));
     }
 
     private final MimaController controller;
@@ -234,7 +234,6 @@ public final class MimaUI extends JFrame {
             controller.stop();
         } catch (final IllegalArgumentException | IOException e) {
             Logger.error(e.getMessage());
-            e.printStackTrace();
         }
     }
 
@@ -289,7 +288,6 @@ public final class MimaUI extends JFrame {
             step.setEnabled(controller.isRunning());
         } catch (final InterpreterException e) {
             Logger.error(e.getMessage());
-            e.printStackTrace();
             step.setEnabled(false);
             run.setEnabled(false);
         }
@@ -310,7 +308,6 @@ public final class MimaUI extends JFrame {
             Logger.log("done");
         } catch (final InterpreterException e) {
             Logger.error(e.getMessage());
-            e.printStackTrace();
             step.setEnabled(false);
             run.setEnabled(false);
         }
@@ -344,7 +341,6 @@ public final class MimaUI extends JFrame {
             Logger.log("done");
         } catch (final IllegalArgumentException | IllegalStateException e) {
             Logger.error(e.getMessage());
-            e.printStackTrace();
             run.setEnabled(false);
             step.setEnabled(false);
         }

@@ -97,7 +97,6 @@ public class TextHistoryController {
             text = editorPane.getDocument().getText(offset, length);
         } catch (final BadLocationException e) {
             Logger.error(e.getMessage());
-            e.printStackTrace();
         }
         assert text != null;
         if ((fhs != null)

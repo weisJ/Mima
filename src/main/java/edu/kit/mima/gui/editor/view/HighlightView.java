@@ -5,6 +5,6 @@ package edu.kit.mima.gui.editor.view;
  * @since 2018
  */
 public interface HighlightView {
-    String JAGGEND_UNDERLINE = "jagged-underline-color";
+    String JAGGED_UNDERLINE = "jagged-underline-color";
     String STRIKE_THROUGH = "strike-color";
 }

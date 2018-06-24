@@ -31,7 +31,7 @@ public class Interpreter {
     private boolean running;
 
     //------------Debug---------------//
-    private DebugController debugController;
+    private final DebugController debugController;
     private ExceptionListener exceptionListener;
     private boolean debug;
     private Token currentToken;
@@ -143,10 +143,16 @@ public class Interpreter {
             case IDENTIFICATION:
                 return evaluateIdentification(expression, environment);
             case DEFINITION:
-                evaluateDefinition((BinaryToken<Token, Token>) expression, environment);
+                Token[] definitionTokens = (Token[])((ArrayToken)expression.getValue()).getValue();
+                for (Token token : definitionTokens) {
+                    evaluateDefinition((BinaryToken<Token, Token>)token, environment);
+                }
                 return VOID;
             case CONSTANT:
-                evaluateConstant((BinaryToken<Token, Token>) expression, environment);
+                Token[] constantTokens = (Token[])((ArrayToken)expression.getValue()).getValue();
+                for (Token token : constantTokens) {
+                    evaluateConstant((BinaryToken<Token, Token>)token, environment);
+                }
                 return VOID;
             case CALL:
                 return evaluateFunction((BinaryToken<Token, ArrayToken<Token>>) expression, environment);

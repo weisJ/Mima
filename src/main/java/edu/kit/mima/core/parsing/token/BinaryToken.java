@@ -1,6 +1,5 @@
 package edu.kit.mima.core.parsing.token;
 
-import edu.kit.mima.core.parsing.lang.Keyword;
 import edu.kit.mima.core.parsing.lang.Punctuation;
 
 import java.util.Objects;
@@ -89,8 +88,7 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
         if (type == TokenType.JUMP_POINT) {
             return firstName + ' ' + Punctuation.DEFINITION_DELIMITER + ' ' + secondName;
         } else if (type == TokenType.DEFINITION || type == TokenType.CONSTANT) {
-            StringBuilder sb = new StringBuilder(String.valueOf(Punctuation.DEFINITION_BEGIN))
-                    .append(Keyword.DEFINITION).append(' ').append(firstName);
+            StringBuilder sb = new StringBuilder(firstName);
             if (!secondName.isEmpty()) {
                 sb.append(' ').append(Punctuation.DEFINITION_DELIMITER).append(' ').append(secondName);
             }
