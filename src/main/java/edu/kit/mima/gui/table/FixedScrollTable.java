@@ -20,7 +20,7 @@ public class FixedScrollTable extends JScrollPane {
      * The fields of this table can not be edited by the user
      *
      * @param tableHeader header of table
-     * @param i
+     * @param initialEntries number of initial entries
      */
     public FixedScrollTable(final String[] tableHeader, int initialEntries) {
         super();

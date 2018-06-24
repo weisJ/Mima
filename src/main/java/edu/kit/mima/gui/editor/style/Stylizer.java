@@ -20,8 +20,8 @@ import java.util.regex.Pattern;
 public class Stylizer {
 
     private final List<StyleGroup> styles;
-    private Color textColor;
-    private JTextPane textPane;
+    private final Color textColor;
+    private final JTextPane textPane;
 
     /**
      * Document stylizer using regular expressions

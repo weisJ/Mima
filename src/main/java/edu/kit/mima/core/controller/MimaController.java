@@ -15,6 +15,7 @@ import edu.kit.mima.core.parsing.token.TokenType;
 import edu.kit.mima.gui.logging.Logger;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
  */
 public class MimaController implements ExceptionListener {
 
+    private final static int EXCEPTION_WAIT_TIME = 20;
     private final AtomicReference<Exception> sharedException;
     private final ThreadDebugController threadDebugController;
 
@@ -76,19 +78,27 @@ public class MimaController implements ExceptionListener {
         if (programToken == null) {
             return;
         }
-        checkJumpDuplicates();
+        checkReferenceDuplicates();
         checkNonCalls();
     }
 
     /**
-     * Search for duplicate jump declarations. this may be a bug in the program and result in not expected behaviour
+     * Search for duplicate reference declarations. this may be a bug in the program and results in not expected behaviour
      */
-    private void checkJumpDuplicates() {
-        Map<Token, Integer> jumps = new HashMap<>();
-        for (var pair : new ReferenceCrawler(programToken).getJumpPoints()) {
-            Integer prior = jumps.put(pair.getKey(), pair.getValue());
-            if (prior != null) {
-                Logger.warning("jump is defined multiple times in lines " + prior + " and " + pair.getValue());
+    private void checkReferenceDuplicates() {
+        var sets = new ReferenceCrawler(programToken).getReferences();
+        Set<String> references = new HashSet<>();
+        for (var string : sets.get(1)) {
+            if (!references.add(string)) {
+                Logger.warning("jump reference is defined multiple times: \"" + string + '\"');
+            }
+        }
+        references.clear();
+        for (var set : Set.of(sets.get(0), sets.get(2))) {
+            for (var string : set) {
+                if (!references.add(string)) {
+                    Logger.warning("reference is defined multiple times: \"" + string + '\"');
+                }
             }
         }
     }
@@ -175,10 +185,8 @@ public class MimaController implements ExceptionListener {
 
     private void checkForException() {
         try {
-            Thread.sleep(20);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+            Thread.sleep(EXCEPTION_WAIT_TIME);
+        } catch (InterruptedException ignored) { }
         while (threadDebugController.isWorking()) {
             Thread.onSpinWait();
         }
