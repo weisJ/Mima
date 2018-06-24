@@ -3,10 +3,11 @@
 §define eins;
 §define zero;
 §define val;
+§define const x : 5;
 
-#Instructions
+#Instructions 'change
 #This is a comment
-LDC(5);
+LDC(x);
 STV(val);
 LDC(0);
 STV(zero);

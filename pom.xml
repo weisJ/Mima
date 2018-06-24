@@ -51,7 +51,10 @@
                             <classpathPrefix>lib</classpathPrefix>
                             <classpathLayoutType>repository</classpathLayoutType>
                             <useUniqueVersions>false</useUniqueVersions>
-                            <mainClass>edu.kit.mima.MimaUI</mainClass>
+                            <mainClass>edu.kit.mima.App</mainClass>
+                            <manifestEntries>
+                                <SplashScreen-Image>images/mima.png</SplashScreen-Image>
+                            </manifestEntries>
                         </manifest>
                     </archive>
                 </configuration>
@@ -79,8 +82,11 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>edu.kit.mima.MimaUI</mainClass>
+                            <mainClass>edu.kit.mima.App</mainClass>
                         </manifest>
+                        <manifestEntries>
+                            <SplashScreen-Image>images/mima.png</SplashScreen-Image>
+                        </manifestEntries>
                     </archive>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>

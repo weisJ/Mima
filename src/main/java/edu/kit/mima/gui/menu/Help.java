@@ -51,7 +51,7 @@ public final class Help extends JFrame {
      * Construct the Help Screen
      */
     private Help() {
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("mima.png")));
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("images/mima.png")));
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         setSize((int) SIZE.getHeight() / 3, (int) SIZE.getWidth() / 3);
         setTitle("Help");
@@ -82,7 +82,6 @@ public final class Help extends JFrame {
             final WebView webView = new WebView();
             webView.getEngine().loadContent("<html><body text=\"#D8D8D8\" "
                     + "bgcolor=\"#3c3f41\""
-//                    + "background-color:transparent"
                     + "style='font-family: Menlo,Monaco,Consolas,\"Liberation Mono\",\"Courier New\",monospace'>"
                     + htmlSource
                     + "</body></html>");
