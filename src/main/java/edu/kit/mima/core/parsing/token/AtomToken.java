@@ -58,7 +58,7 @@ public class AtomToken<T> implements Token<T> {
                     .append(Keyword.DEFINITION).append(' ')
                     .append(Keyword.CONSTANT).append(' ');
         }
-        if (value instanceof ArrayToken) {
+        if (value instanceof ArrayToken && !(prefix.length() == 0)) {
             String name = ((ArrayToken) value).simpleName();
             return prefix + name.substring(1, name.length() - 1);
         } else if (value instanceof Token) {

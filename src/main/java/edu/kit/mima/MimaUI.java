@@ -1,6 +1,5 @@
 package edu.kit.mima;
 
-import com.bulenkov.darcula.DarculaLaf;
 import edu.kit.mima.core.controller.InstructionSet;
 import edu.kit.mima.core.controller.MimaController;
 import edu.kit.mima.core.interpretation.InterpreterException;
@@ -24,9 +23,6 @@ import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.plaf.ColorUIResource;
 import javax.swing.text.Style;
 import javax.swing.text.StyleContext;
 import java.awt.BorderLayout;
@@ -81,7 +77,7 @@ public final class MimaUI extends JFrame {
     /**
      * Create a new Mima UI window
      */
-    private MimaUI() {
+    public MimaUI() {
         controller = new MimaController();
         fileManager = new FileManager(this, MIMA_DIR, new String[]{FILE_EXTENSION, FILE_EXTENSION_X});
         editor = new Editor();
@@ -127,26 +123,6 @@ public final class MimaUI extends JFrame {
         updateMemoryTable();
     }
 
-    /**
-     * Entry point for starting the Mima UI
-     *
-     * @param args command line arguments (ignored)
-     */
-    public static void main(final String[] args) {
-        try {
-            UIManager.setLookAndFeel(DarculaLaf.class.getCanonicalName());
-            UIManager.put("ToolTip.background", new ColorUIResource(169, 183, 198));
-        } catch (ClassNotFoundException | InstantiationException
-                | UnsupportedLookAndFeelException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        final MimaUI frame = new MimaUI();
-        Logger.setLevel(Logger.LogLevel.INFO);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-        frame.repaint();
-    }
-
     /*------------Window-Setup------------*/
 
     /**
@@ -158,7 +134,7 @@ public final class MimaUI extends JFrame {
         setResizable(true);
         setSize((int) FULLSCREEN.getWidth() / 2, (int) FULLSCREEN.getHeight() / 2);
         setTitle(TITLE);
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("mima.png")));
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("images/mima.png")));
     }
 
     /**
