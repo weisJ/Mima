@@ -9,36 +9,31 @@ import edu.kit.mima.core.parsing.inputStream.TokenStream;
  * @author Jannis Weis
  * @since 2018
  */
-public final class Symbol {
+public interface Symbol {
 
     /**
      * Allowed symbols for names
      */
-    public static final String ALLOWED_SYMBOLS = "?!-_<>=0123456789";
+    String ALLOWED_SYMBOLS = "?!-_<>=0123456789";
     /**
      * Allowed digits for numbers
      */
-    public static final String NUMBERS = "[0-9]";
+    String NUMBERS = "[0-9]";
     /**
      * Allowed digits for begin of number
      */
-    public static final String NUMBER_SIGNED = "[-0-9]";
+    String NUMBER_SIGNED = "[-0-9]";
     /**
      * allowed letters for begin of names
      */
-    public static final String LETTERS = "[a-zA-Z]";
-
-
-    private Symbol() {
-        assert false : "utility constructor";
-    }
+    String LETTERS = "[a-zA-Z]";
 
     /**
      * Get the symbols
      *
      * @return array of symbols in definition order
      */
-    public static String[] getSymbols() {
+    static String[] getSymbols() {
         return new String[]{
                 ALLOWED_SYMBOLS,
                 NUMBERS,

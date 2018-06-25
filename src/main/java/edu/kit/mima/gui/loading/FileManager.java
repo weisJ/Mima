@@ -168,7 +168,7 @@ public class FileManager implements AutoCloseable {
                 JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
                 null, new String[]{"Save", "Save as", "Don't save"}, "Save");
         switch (response) {
-            case 0:
+            case 0: //Save
                 if (isNewFile) {
                     saveAs();
                 } else {
@@ -179,10 +179,10 @@ public class FileManager implements AutoCloseable {
                     }
                 }
                 break;
-            case 1:
+            case 1: //Save as
                 saveAs();
                 break;
-            case 2: /*do nothing*/
+            case 2: /*Don't save (do nothing)*/
                 break;
             default:
                 throw new IllegalArgumentException("aborted");
