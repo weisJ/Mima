@@ -26,6 +26,7 @@ import java.util.function.Supplier;
 public class Parser {
 
     private final TokenStream input;
+    private boolean skipEndOfInstruction;
 
     /**
      * Create parser from string input
@@ -34,6 +35,7 @@ public class Parser {
      */
     public Parser(String input) {
         this.input = new TokenStream(input);
+        skipEndOfInstruction = true;
     }
 
 
@@ -53,8 +55,9 @@ public class Parser {
         List<Token> program = new ArrayList<>();
         try {
             while (!input.isEmpty()) {
+                skipEndOfInstruction = true;
                 program.add(maybeJumpAssociation(this::parseExpression));
-                if (!input.isEmpty()) {
+                if (skipEndOfInstruction) {
                     skipPunctuation(Punctuation.INSTRUCTION_END);
                 }
             }
@@ -77,11 +80,17 @@ public class Parser {
     private Token parseAtomic() {
         return maybeCall(() -> {
             if (isPunctuation(Punctuation.SCOPE_OPEN)) {
-                return new ProgramToken(delimited(Punctuation.SCOPE_OPEN,
+                Token program =  new ProgramToken(delimited(
+                        Punctuation.SCOPE_OPEN,
                         Punctuation.SCOPE_CLOSED,
                         Punctuation.INSTRUCTION_END,
                         () -> maybeJumpAssociation(this::parseExpression),
                         true).getValue());
+                if (isPunctuation(Punctuation.INSTRUCTION_END)) {
+                    input.next();
+                }
+                skipEndOfInstruction = false;
+                return program;
             }
             if (isPunctuation(Punctuation.OPEN_BRACKET)) {
                 input.next();
@@ -215,9 +224,6 @@ public class Parser {
                 break;
             }
             Token token = parser.get();
-            if (token.getType() == TokenType.PROGRAM) {
-                first = true;
-            }
             tokens.add(token);
         }
         if (skipLast) {

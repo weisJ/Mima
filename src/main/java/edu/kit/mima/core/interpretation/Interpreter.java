@@ -32,7 +32,7 @@ public class Interpreter {
 
     //------------Debug---------------//
     private final DebugController debugController;
-    private ExceptionListener exceptionListener;
+    private final ExceptionListener exceptionListener;
     private boolean debug;
     private Token currentToken;
     private Environment currentScope;
@@ -113,7 +113,6 @@ public class Interpreter {
                 jumped = false;
             }
         }
-        running = false;
     }
 
     /*
@@ -133,7 +132,7 @@ public class Interpreter {
                 ProgramToken programToken = (ProgramToken) expression;
                 Environment scope = environment.extend(programToken);
                 resolveJumpPoints(programToken, scope);
-                return evaluateProgram(programToken, environment, true, 0);
+                return evaluateProgram(programToken, scope, true, 0);
             case NUMBER:
                 return evaluateNumber((String) expression.getValue());
             case EMPTY:
@@ -184,7 +183,7 @@ public class Interpreter {
             currentScope = scope;
             value = evaluate(currentToken, scope);
             scope.setExpressionIndex(scope.getExpressionIndex() + 1);
-            if (debug) {
+            if (debug && running && scope.getExpressionIndex() < tokens.length) {
                 debugController.pause();
             }
         }

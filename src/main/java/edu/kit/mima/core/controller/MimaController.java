@@ -187,7 +187,7 @@ public class MimaController implements ExceptionListener {
         try {
             Thread.sleep(EXCEPTION_WAIT_TIME);
         } catch (InterruptedException ignored) { }
-        while (threadDebugController.isWorking()) {
+        while (interpreter.isRunning() && threadDebugController.isWorking()) {
             Thread.onSpinWait();
         }
         if (sharedException.get() != null) {
