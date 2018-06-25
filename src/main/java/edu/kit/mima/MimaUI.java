@@ -53,10 +53,6 @@ public final class MimaUI extends JFrame {
 
     private static final int HISTORY_CAPACITY = 100;
     private static final int MAX_FILE_DISPLAY_LENGTH = 45;
-    private static final Style DEFAULT_STYLE = new StyleContext().addStyle("default", null);
-    static {
-        DEFAULT_STYLE.addAttribute(HighlightView.JAGGED_UNDERLINE, new Color(0xd25252));
-    }
 
     private final MimaController controller;
 
@@ -82,41 +78,27 @@ public final class MimaUI extends JFrame {
         editor = new Editor();
         console = new Console();
         memoryView = new FixedScrollTable(new String[]{"Address", "Value"}, 100);
-
         syntaxStyle = new StyleGroup();
         referenceStyle = new StyleGroup();
-        StyleGroup defaultStyle = new StyleGroup();
-        defaultStyle.addHighlight("[^\\s]*", DEFAULT_STYLE);
 
         Logger.setConsole(console);
 
         setupWindow();
-        final JPanel memoryConsole = new JPanel(new GridLayout(2, 1));
+
+        JPanel memoryConsole = new JPanel(new GridLayout(2, 1));
         memoryConsole.add(memoryView);
         memoryConsole.add(console);
         controlPanel.add(memoryConsole, BorderLayout.LINE_START);
+
+        updateFile(fileManager::loadLastFile);
+
         setupButtons();
         setupMenu();
+        setupEditor();
 
         add(controlPanel, BorderLayout.LINE_START);
         add(editor, BorderLayout.CENTER);
 
-        updateFile(fileManager::loadLastFile);
-
-        editor.addStyleGroup(defaultStyle);
-        editor.addStyleGroup(syntaxStyle);
-        editor.addStyleGroup(referenceStyle);
-        editor.addAfterEditAction(() -> fileManager.setText(editor.getText()));
-        editor.addAfterEditAction(() -> {
-            /* no need to error while writing*/
-            try {
-                controller.parse(editor.getText(), getInstructionSet());
-            } catch (IllegalArgumentException | IllegalStateException ignored) { }
-        });
-        editor.addAfterEditAction(this::updateReferenceHighlighting);
-        editor.useStyle(true);
-        editor.clean();
-        editor.useHistory(true, HISTORY_CAPACITY);
 
         updateHighlighting();
         updateMemoryTable();
@@ -184,6 +166,47 @@ public final class MimaUI extends JFrame {
                 .get();
         controlPanel.add(buttonPanel, BorderLayout.PAGE_START);
         controlPanel.add(buttonPanel, BorderLayout.PAGE_START);
+    }
+
+    /**
+     * Setup the editor
+     */
+    private void setupEditor() {
+        StyleGroup defaultStyle = new StyleGroup();
+        Style style = new StyleContext().addStyle("default", null);
+        style.addAttribute(HighlightView.JAGGED_UNDERLINE, new Color(0xd25252));
+        defaultStyle.addHighlight("[^\\s]*", style);
+
+        defaultStyle.addHighlight(Keyword.getKeywords(), SyntaxColor.KEYWORD);
+        defaultStyle.addHighlight('\\' + String.valueOf(Punctuation.OPEN_BRACKET), SyntaxColor.TEXT);
+        defaultStyle.addHighlight('\\' + String.valueOf(Punctuation.CLOSED_BRACKET), SyntaxColor.TEXT);
+        defaultStyle.addHighlight('\\' + String.valueOf(Punctuation.SCOPE_OPEN), SyntaxColor.SCOPE);
+        defaultStyle.addHighlight('\\' + String.valueOf(Punctuation.SCOPE_CLOSED), SyntaxColor.SCOPE);
+        defaultStyle.addHighlight(String.valueOf(Punctuation.DEFINITION_BEGIN), SyntaxColor.KEYWORD);
+        defaultStyle.addHighlight(String.valueOf(Punctuation.DEFINITION_DELIMITER), SyntaxColor.KEYWORD);
+        defaultStyle.addHighlight(String.valueOf(Punctuation.INSTRUCTION_END), SyntaxColor.KEYWORD);
+        defaultStyle.addHighlight(String.valueOf(Punctuation.COMMA), SyntaxColor.KEYWORD);
+        defaultStyle.addHighlight("-?[0-9]+", SyntaxColor.NUMBER);
+        defaultStyle.addHighlight(Punctuation.BINARY_PREFIX + "[10]*", SyntaxColor.BINARY);
+        StyleGroup commentStyle = new StyleGroup();
+        commentStyle.addHighlight(Punctuation.COMMENT + "[^\n" + Punctuation.COMMENT + "]*" + Punctuation.COMMENT + '?',
+                SyntaxColor.COMMENT);
+
+        editor.addStyleGroup(defaultStyle);
+        editor.addStyleGroup(syntaxStyle);
+        editor.addStyleGroup(referenceStyle);
+        editor.addStyleGroup(commentStyle);
+        editor.addAfterEditAction(() -> fileManager.setText(editor.getText()));
+        editor.addAfterEditAction(() -> {
+            /* no need to error while writing*/
+            try {
+                controller.parse(editor.getText(), getInstructionSet());
+            } catch (IllegalArgumentException | IllegalStateException ignored) { }
+        });
+        editor.addAfterEditAction(this::updateReferenceHighlighting);
+        editor.useStyle(true);
+        editor.clean();
+        editor.useHistory(true, HISTORY_CAPACITY);
     }
 
     /**
@@ -331,25 +354,10 @@ public final class MimaUI extends JFrame {
      * Update the syntax highlighting according to the current instruction set
      */
     private void updateSyntaxHighlighting() {
-        syntaxStyle.setHighlight(Keyword.getKeywords(), SyntaxColor.KEYWORD);
-
-        syntaxStyle.addHighlight('\\' + String.valueOf(Punctuation.OPEN_BRACKET), SyntaxColor.TEXT);
-        syntaxStyle.addHighlight('\\' + String.valueOf(Punctuation.CLOSED_BRACKET), SyntaxColor.TEXT);
-        syntaxStyle.addHighlight('\\' + String.valueOf(Punctuation.SCOPE_OPEN), SyntaxColor.SCOPE);
-        syntaxStyle.addHighlight('\\' + String.valueOf(Punctuation.SCOPE_CLOSED), SyntaxColor.SCOPE);
-        syntaxStyle.addHighlight(String.valueOf(Punctuation.DEFINITION_BEGIN), SyntaxColor.KEYWORD);
-        syntaxStyle.addHighlight(String.valueOf(Punctuation.DEFINITION_DELIMITER), SyntaxColor.KEYWORD);
-        syntaxStyle.addHighlight(String.valueOf(Punctuation.INSTRUCTION_END), SyntaxColor.KEYWORD);
-        syntaxStyle.addHighlight(String.valueOf(Punctuation.COMMA), SyntaxColor.KEYWORD);
-
-        syntaxStyle.addHighlight("-?[0-9]+", SyntaxColor.NUMBER);
-        syntaxStyle.addHighlight(Punctuation.BINARY_PREFIX + "[10]*", SyntaxColor.BINARY);
-        syntaxStyle.addHighlight(Arrays.stream(getInstructionSet().getInstructions()).map(
+        syntaxStyle.setHighlight(Arrays.stream(getInstructionSet().getInstructions()).map(
                 s -> "(?<=[\\s\\(,])" + s + "(?=[\\(,:;\\s])"
         ).toArray(String[]::new), SyntaxColor.INSTRUCTION);
         syntaxStyle.addHighlight("(?<=[\\s\\(,])HALT(?=[\\(,:;\\s])", SyntaxColor.WARNING);
-        syntaxStyle.addHighlight(Punctuation.COMMENT + "[^\n" + Punctuation.COMMENT + "]*" + Punctuation.COMMENT + '?',
-                SyntaxColor.COMMENT);
     }
 
     /**
