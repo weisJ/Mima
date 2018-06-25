@@ -57,6 +57,8 @@ public class AtomToken<T> implements Token<T> {
             prefix.append(Punctuation.DEFINITION_BEGIN)
                     .append(Keyword.DEFINITION).append(' ')
                     .append(Keyword.CONSTANT).append(' ');
+        } else if(type == TokenType.BINARY) {
+            prefix.append('~');
         }
         if (value instanceof ArrayToken && !(prefix.length() == 0)) {
             String name = ((ArrayToken) value).simpleName();
