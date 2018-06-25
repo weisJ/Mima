@@ -9,27 +9,23 @@ import edu.kit.mima.core.parsing.inputStream.TokenStream;
  * @author Jannis Weis
  * @since 2018
  */
-public final class Keyword {
+public interface Keyword {
 
     /**
      * Definition keyword
      */
-    public static final String DEFINITION = "define";
+    String DEFINITION = "define";
     /**
      * const keyword
      */
-    public static final String CONSTANT = "const";
-
-    private Keyword() {
-        assert false : "utility constructor";
-    }
+    String CONSTANT = "const";
 
     /**
      * Get all keywords
      *
      * @return array of keywords in definition order
      */
-    public static String[] getKeywords() {
+    static String[] getKeywords() {
         return new String[]{
                 DEFINITION,
                 CONSTANT

@@ -12,10 +12,8 @@ import edu.kit.mima.core.parsing.Parser;
 import edu.kit.mima.core.parsing.token.ProgramToken;
 import edu.kit.mima.core.parsing.token.Token;
 import edu.kit.mima.core.parsing.token.TokenType;
-import edu.kit.mima.gui.logging.Logger;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -72,48 +70,6 @@ public class MimaController implements ExceptionListener {
     }
 
     /**
-     * Find duplicate jump references in code and warn about them
-     */
-    public void checkCode() {
-        if (programToken == null) {
-            return;
-        }
-        checkReferenceDuplicates();
-        checkNonCalls();
-    }
-
-    /**
-     * Search for duplicate reference declarations. this may be a bug in the program and results in not expected behaviour
-     */
-    private void checkReferenceDuplicates() {
-        var sets = new ReferenceCrawler(programToken).getReferences();
-        Set<String> references = new HashSet<>();
-        for (var string : sets.get(1)) {
-            if (!references.add(string)) {
-                Logger.warning("jump reference is defined multiple times: \"" + string + '\"');
-            }
-        }
-        references.clear();
-        for (var set : Set.of(sets.get(0), sets.get(2))) {
-            for (var string : set) {
-                if (!references.add(string)) {
-                    Logger.warning("reference is defined multiple times: \"" + string + '\"');
-                }
-            }
-        }
-    }
-
-    /**
-     * Search for program statements that are not function calls
-     */
-    private void checkNonCalls() {
-        List<Token> nonCalls = new ReferenceCrawler(programToken).getNonFunctions();
-        for (Token t : nonCalls) {
-            Logger.warning("not a function call: \"" + t.simpleName() + '\"');
-        }
-    }
-
-    /**
      * Create the global environment
      */
     private void createGlobalEnvironment() {
@@ -123,6 +79,13 @@ public class MimaController implements ExceptionListener {
             globalEnvironment.setupExtendedInstructionSet();
             globalEnvironment.setupGlobalFunctions(MimaXInstruction.values());
         }
+    }
+
+    /**
+     * Check Code for probable bugs
+     */
+    public void checkCode() {
+        CodeChecker.checkCode(programToken);
     }
 
     /**
