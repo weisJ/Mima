@@ -1,26 +1,38 @@
-#Memory associations;
-§define minus_eins; #inline comment#
-§define eins;
-§define zero;
-§define val;
-§define const x : 5;
+#Definitions;
+Â§define negative_one;         #declaration of memory address#
+Â§define one : 0;              #adresses can also be explicit#
+Â§define zero,#inline# val;    #declarations can have multiple variables in one line
+Â§define const x : 5;          #constants are referred to as is and
+                              #need to have an initializer statement
 
-#Instructions 'change
-#This is a comment
-LDC(x);
-STV(val);
-LDC(0);
-STV(zero);
-LDC(1);
-STV(eins);
-NOT();
-ADD(eins);
-STV(minus_eins);
+#Instructions
+       LDC(x);   #LDC only takes constant values
+
+       STV(val); #function arguments are put into parenthesis
+                 #and are separated by ','
+       LDC(0);
+       STV(zero);
+
+       LDC(~0001); #binary values begin with '~' and may omit leading 0s
+       STV(one);
+
+       NOT(); #Calls with no arguments still need the parenthesis
+
+       ADD(one);
+       STV(negative_one);
+
+Â§define pow; #definitions can appear anywhere,
+             #but must stated before using the variable
+
+#jump declaration (*)
 Loop : LDV(val);
-EQL(zero);
-JMN(Stop);
-LDV(val);
-ADD(minus_eins);
-STV(val);
-JMP(Loop);
-Stop : HALT();
+       EQL(zero);
+
+       JMN(Stop); #references are used as arguments
+       LDV(val);
+       ADD(negative_one);
+       STV(val);
+
+       JMP(Loop); #jumps to (*)
+
+Stop : HALT(); #stop the program
