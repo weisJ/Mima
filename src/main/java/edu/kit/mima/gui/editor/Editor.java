@@ -61,6 +61,7 @@ public class Editor extends JScrollPane {
         textPanel.add(numberedTextPane, BorderLayout.LINE_START);
         textPanel.add(editorPane, BorderLayout.CENTER);
         setViewportView(textPanel);
+        getVerticalScrollBar().setUnitIncrement(FONT_SIZE / 2);
 
         stylizer = new Stylizer(editorPane, TEXT_COLOR);
         historyController = new TextHistoryController(editorPane, DEFAULT_HISTORY_LENGTH);
@@ -141,6 +142,7 @@ public class Editor extends JScrollPane {
         }
         Font font = editorPane.getFont();
         editorPane.setFont(new Font(font.getName(), font.getStyle(), fontSize));
+        getVerticalScrollBar().setUnitIncrement(fontSize / 2);
     }
 
     /**
