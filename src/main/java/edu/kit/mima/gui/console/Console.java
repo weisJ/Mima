@@ -32,7 +32,7 @@ public class Console extends JScrollPane {
      * Create new Console
      */
     public Console() {
-        textPane = new JTextPane();
+        textPane = new NonWrappingTextPane();
         textPane.setBackground(BACKGROUND);
         textPane.setFont(new Font(Font.MONOSPACED, Font.PLAIN, FONT_SIZE));
         textPane.setEditable(false);
@@ -60,7 +60,7 @@ public class Console extends JScrollPane {
      * @param color   color to print in
      */
     public void println(final String message, final Color color) {
-        print(message, color);
+        print(message + '\n', color);
     }
 
     /**
@@ -81,7 +81,7 @@ public class Console extends JScrollPane {
     public void print(final String message, final Color color) {
         try {
             StyleConstants.setForeground(style, color);
-            document.insertString(document.getLength(), message + '\n', style);
+            document.insertString(document.getLength(), message, style);
         } catch (final BadLocationException ignored) { }
         scrollToBottom();
     }

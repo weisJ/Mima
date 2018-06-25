@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
  */
 public final class Help extends JFrame {
 
+    private static final String ENCODING = "UTF-8";
     private static final String HELP_LOCAL = "Help.md";
     private static final String HELP_WEB = "https://raw.githubusercontent.com/weisJ/Mima/master/README.md";
     private static final int MAXIMUM_ATTEMPTS = 20;
@@ -125,7 +126,7 @@ public final class Help extends JFrame {
             urlConnection.setReadTimeout(READ_TIMEOUT);
 
             try (final BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(urlConnection.getInputStream(), "UTF-8")
+                    new InputStreamReader(urlConnection.getInputStream(), ENCODING)
             )) {
                 final String markdown = reader.lines().collect(Collectors.joining("\n"));
                 loadedFromWeb = true;
@@ -142,7 +143,7 @@ public final class Help extends JFrame {
     @SuppressWarnings("OverlyBroadCatchBlock")
     private String loadFallback() {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(
-                getClass().getClassLoader().getResourceAsStream(HELP_LOCAL), "UTF-8"))) {
+                getClass().getClassLoader().getResourceAsStream(HELP_LOCAL), ENCODING))) {
             return reader.lines().collect(Collectors.joining("\n"));
         } catch (IOException e) {
             return null;

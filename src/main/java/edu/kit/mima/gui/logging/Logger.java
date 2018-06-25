@@ -75,6 +75,7 @@ public final class Logger {
         console.println("[ERROR] " + message, Color.RED);
     }
 
+
     /**
      * LogLevel attributes
      */

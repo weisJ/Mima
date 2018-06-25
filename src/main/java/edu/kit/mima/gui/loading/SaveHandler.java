@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
  */
 public class SaveHandler {
 
+    private static final String ENCODING = System.getProperty("file.encoding");
     private final String tmpFile;
 
     /**
@@ -41,7 +42,7 @@ public class SaveHandler {
     @SuppressWarnings("OverlyBroadThrowsClause")
     public String loadFile(final String path) throws IOException {
         try (final BufferedReader reader = new BufferedReader(
-                new InputStreamReader(new FileInputStream(path), "ISO-8859-1"))) {
+                new InputStreamReader(new FileInputStream(path), ENCODING))) {
             return reader.lines().collect(Collectors.joining("\n"));
         }
     }
@@ -55,7 +56,7 @@ public class SaveHandler {
      */
     @SuppressWarnings("OverlyBroadThrowsClause")
     public void saveFile(final String text, final String path) throws IOException {
-        try (final PrintWriter writer = new PrintWriter(path, "ISO-8859-1")) {
+        try (final PrintWriter writer = new PrintWriter(path, ENCODING)) {
             writer.write(text);
         }
     }
@@ -69,7 +70,7 @@ public class SaveHandler {
     @SuppressWarnings("OverlyBroadThrowsClause")
     public String loadTmp() throws IOException {
         try (final BufferedReader reader = new BufferedReader(
-                new InputStreamReader(new FileInputStream(tmpFile), "ISO-8859-1"))) {
+                new InputStreamReader(new FileInputStream(tmpFile), ENCODING))) {
             return reader.lines().collect(Collectors.joining("\n"));
         }
     }
@@ -82,7 +83,7 @@ public class SaveHandler {
      */
     @SuppressWarnings("OverlyBroadThrowsClause")
     public void saveTmp(final String text) throws IOException {
-        try (final PrintWriter writer = new PrintWriter(tmpFile, "ISO-8859-1")) {
+        try (final PrintWriter writer = new PrintWriter(tmpFile, ENCODING)) {
             writer.write(text);
         }
     }

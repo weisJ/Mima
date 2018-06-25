@@ -53,7 +53,7 @@ public final class MimaUI extends JFrame {
     private static final String MIMA_DIR = System.getProperty("user.home") + "/.mima";
 
     private static final int HISTORY_CAPACITY = 100;
-    private static final int MAX_FILE_DISPLAY_LENGTH = 25;
+    private static final int MAX_FILE_DISPLAY_LENGTH = 45;
     private static final Style DEFAULT_STYLE = new StyleContext().addStyle("default", null);
     static {
         DEFAULT_STYLE.addAttribute(HighlightView.JAGGED_UNDERLINE, new Color(0xd25252));
@@ -275,15 +275,15 @@ public final class MimaUI extends JFrame {
     private void run() {
         step.setEnabled(false);
         run.setEnabled(false);
-        Logger.log("Running program: " + fileManager.getLastFile() + "...");
+        Logger.log("Running program: " + FileName.shorten(fileManager.getLastFile(), MAX_FILE_DISPLAY_LENGTH) + "...");
         try {
             controller.run();
             updateMemoryTable();
             step.setEnabled(true);
             run.setEnabled(true);
-            Logger.log("done");
+            Logger.log("(done)");
         } catch (final InterpreterException e) {
-            Logger.error(e.getMessage());
+            Logger.error('\n' + e.getMessage());
             step.setEnabled(false);
             run.setEnabled(false);
         }
@@ -294,9 +294,9 @@ public final class MimaUI extends JFrame {
      */
     private void save() {
         try {
-            Logger.log("saving...");
+            Logger.log("saving " + FileName.shorten(fileManager.getLastFile(), MAX_FILE_DISPLAY_LENGTH) + "...");
             fileManager.save();
-            Logger.log("done");
+            Logger.log("(done)");
         } catch (final IOException e) {
             Logger.error("failed to save: " + e.getMessage());
         }
@@ -314,7 +314,7 @@ public final class MimaUI extends JFrame {
             updateMemoryTable();
             run.setEnabled(true);
             step.setEnabled(true);
-            Logger.log("done");
+            Logger.log("(done)");
         } catch (final IllegalArgumentException | IllegalStateException e) {
             Logger.error(e.getMessage());
             run.setEnabled(false);
