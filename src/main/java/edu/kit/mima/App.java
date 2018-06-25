@@ -26,7 +26,7 @@ public final class App {
             UIManager.put("ToolTip.background", new ColorUIResource(169, 183, 198));
         } catch (ClassNotFoundException | InstantiationException
                 | UnsupportedLookAndFeelException | IllegalAccessException e) {
-            e.printStackTrace();
+            e.printStackTrace(); /*will throw error because of illegal field access*/
         }
         final MimaUI frame = new MimaUI();
         Logger.setLevel(Logger.LogLevel.INFO);

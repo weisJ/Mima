@@ -32,7 +32,6 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -130,7 +129,12 @@ public final class MimaUI extends JFrame {
      */
     private void setupWindow() {
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        addWindowListener(setupWindowListener());
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                quit();
+            }
+        });
         setResizable(true);
         setSize((int) FULLSCREEN.getWidth() / 2, (int) FULLSCREEN.getHeight() / 2);
         setTitle(TITLE);
@@ -180,20 +184,6 @@ public final class MimaUI extends JFrame {
                 .get();
         controlPanel.add(buttonPanel, BorderLayout.PAGE_START);
         controlPanel.add(buttonPanel, BorderLayout.PAGE_START);
-    }
-
-    /**
-     * Create the Window Listener for the frame
-     *
-     * @return the WindowListener
-     */
-    private WindowListener setupWindowListener() {
-        return new WindowAdapter() {
-            @Override
-            public void windowClosing(final WindowEvent e) {
-                quit();
-            }
-        };
     }
 
     /**
