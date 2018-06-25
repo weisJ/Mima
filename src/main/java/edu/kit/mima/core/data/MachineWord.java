@@ -43,7 +43,7 @@ public class MachineWord {
      * @param wordLength number of bits
      */
     public MachineWord(final Boolean[] bits, final int wordLength) {
-        if (wordLength > bits.length) {
+        if (wordLength < bits.length) {
             throw new IllegalArgumentException("too many bits");
         }
         this.wordLength = wordLength;

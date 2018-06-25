@@ -96,22 +96,26 @@ public class Interpreter {
         ProgramToken runtimeToken = program;
         resolveJumpPoints(program, runtimeEnvironment);
         boolean firstScope = true;
-        while (running) {
-            /*
-             * First call has to create own scope that releases memory.
-             * As calls/jumps can only go up in scopes the scope doesn't need to be renewed, and
-             * memory doesn't need to be released. Clearing memory will be done by the first
-             * environment call.
-             */
-            evaluateProgram(runtimeToken, runtimeEnvironment, firstScope, expressionScopeIndex);
-            if (firstScope) {
-                firstScope = false;
+        try {
+            while (running) {
+                /*
+                 * First call has to create own scope that releases memory.
+                 * As calls/jumps can only go up in scopes the scope doesn't need to be renewed, and
+                 * memory doesn't need to be released. Clearing memory will be done by the first
+                 * environment call.
+                 */
+                evaluateProgram(runtimeToken, runtimeEnvironment, firstScope, expressionScopeIndex);
+                if (firstScope) {
+                    firstScope = false;
+                }
+                if (jumped) {
+                    runtimeEnvironment = jumpEnvironment;
+                    runtimeToken = jumpEnvironment.getProgramToken();
+                    jumped = false;
+                }
             }
-            if (jumped) {
-                runtimeEnvironment = jumpEnvironment;
-                runtimeToken = jumpEnvironment.getProgramToken();
-                jumped = false;
-            }
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            exceptionListener.notifyException(e);
         }
     }
 
