@@ -225,9 +225,10 @@ public final class MimaUI extends JFrame {
         }
         console.clear();
         loadAction.run();
-        setTitle(TITLE + ' ' + fileManager.getLastFile().replaceAll(" ", ""));
         String text = fileManager.getText();
         editor.setText(text);
+        setTitle(TITLE + ' ' + fileManager.getLastFile().replaceAll(" ", ""));
+        Logger.log("loaded: "+ FileName.shorten(fileManager.getLastFile(), MAX_FILE_DISPLAY_LENGTH));
         try {
             controller.parse(text, getInstructionSet());
         } catch (IllegalArgumentException | IllegalStateException e) {
