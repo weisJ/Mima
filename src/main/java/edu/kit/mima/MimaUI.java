@@ -113,7 +113,7 @@ public final class MimaUI extends JFrame {
                 controller.parse(editor.getText(), getInstructionSet());
             } catch (IllegalArgumentException | IllegalStateException ignored) { }
         });
-        editor.addAfterEditAction(this::updateHighlighting);
+        editor.addAfterEditAction(this::updateReferenceHighlighting);
         editor.useStyle(true);
         editor.clean();
         editor.useHistory(true, HISTORY_CAPACITY);
