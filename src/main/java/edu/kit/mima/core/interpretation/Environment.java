@@ -233,9 +233,6 @@ public class Environment {
      * @return the parent environment
      */
     public Environment returnToParent() {
-        if (parent == null) {
-            throw new IllegalStateException("No parent environment defined");
-        }
         return parent;
     }
 

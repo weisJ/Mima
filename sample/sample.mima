@@ -28,7 +28,7 @@
                              #initalised by implied memory addresses
 
 §define pow; #definitions can appear anywhere,
-             #but must stated before using the variable
+             #but must be stated before using the variable
              #Duplicate definitions that are only executed once (e.g
              #        §define x;
              #        --code--
