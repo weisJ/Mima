@@ -177,9 +177,11 @@ public class MimaController implements ExceptionListener {
         Environment scope = interpreter.getCurrentScope();
         scope = scope == null || !interpreter.isRunning() ? globalEnvironment : scope;
         Map<String, Integer> map = new HashMap<>();
-        if (scope != null) {
-            map = scope.getDefinitions().get(0).entrySet().stream()
-                    .collect(Collectors.toMap(e -> e.getKey().getValue().toString(), e -> e.getValue().intValue()));
+        while (scope != null) {
+            map.putAll(scope.getDefinitions().get(0).entrySet().stream()
+                    .filter(e -> !map.containsKey(e.getKey().getValue().toString()))
+                    .collect(Collectors.toMap(e -> e.getKey().getValue().toString(), e -> e.getValue().intValue())));
+            scope = scope.returnToParent();
         }
         return mima.memoryTable(map, binary);
     }

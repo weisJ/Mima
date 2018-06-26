@@ -56,7 +56,9 @@ public class Parser {
         try {
             while (!input.isEmpty()) {
                 skipEndOfInstruction = true;
-                program.add(maybeJumpAssociation(this::parseExpression));
+                if (!isPunctuation(Punctuation.INSTRUCTION_END)) {
+                    program.add(maybeJumpAssociation(this::parseExpression));
+                }
                 if (skipEndOfInstruction) {
                     skipPunctuation(Punctuation.INSTRUCTION_END);
                 }
