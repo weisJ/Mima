@@ -55,6 +55,7 @@ public class FileManager implements AutoCloseable {
             }
         });
     }
+
     /*
      * load last used directory from options
      */
@@ -63,7 +64,7 @@ public class FileManager implements AutoCloseable {
             final String[] options = optionsHandler.loadOptions();
             lastFile = options[0];
             directory = new File(lastFile).getParentFile().getAbsolutePath();
-        } catch (final IOException e) {
+        } catch (final IOException | NullPointerException e) {
             directory = System.getProperty("user.home");
         }
     }
@@ -81,10 +82,15 @@ public class FileManager implements AutoCloseable {
     public void loadLastFile() {
         try {
             loadOptions();
-            text = saveHandler.loadFile(lastFile);
-            setLastExtension(lastFile);
-            fileHash = text.hashCode();
-            isNewFile = false;
+            if (lastFile.startsWith("unsaved.")) {
+                createNewFile();
+                setLastExtension(lastFile.split(".", 2)[1]);
+            } else {
+                text = saveHandler.loadFile(lastFile);
+                setLastExtension(lastFile);
+                fileHash = text.hashCode();
+                isNewFile = false;
+            }
         } catch (final IOException e) {
             firstFile();
         }
@@ -130,9 +136,14 @@ public class FileManager implements AutoCloseable {
                 JOptionPane.QUESTION_MESSAGE,
                 null, extensions, extensions[0]);
         if (response == null) {
-            return;
+            throw new IllegalArgumentException("aborted");
         }
+        lastFile = "unsaved." + response;
         setLastExtension(response);
+        createNewFile();
+    }
+
+    private void createNewFile() {
         text = "#New File\n";
         isNewFile = true;
         fileHash = text.hashCode();
@@ -152,10 +163,8 @@ public class FileManager implements AutoCloseable {
      * Save file to location of users choice
      */
     public void saveAs() {
-        try {
-            textLoader.requestSave(text, directory, lastExtension,
-                    () -> { throw new IllegalArgumentException("aborted save"); });
-        } catch (final IllegalArgumentException ignored) { }
+        textLoader.requestSave(text, directory, lastExtension,
+                () -> { throw new IllegalArgumentException("aborted save"); });
         isNewFile = false;
         fileHash = text.hashCode();
     }
@@ -247,6 +256,13 @@ public class FileManager implements AutoCloseable {
     }
 
     /*
+     * Set the extension used by file
+     */
+    private void setLastExtension(final File file) {
+        setLastExtension(file.getAbsolutePath());
+    }
+
+    /*
      * Set the extension used by loaded file
      */
     private void setLastExtension(final String file) {
@@ -255,13 +271,6 @@ public class FileManager implements AutoCloseable {
                 lastExtension = s;
             }
         }
-    }
-
-    /*
-     * Set the extension used by file
-     */
-    private void setLastExtension(final File file) {
-        setLastExtension(file.getAbsolutePath());
     }
 
     @Override
