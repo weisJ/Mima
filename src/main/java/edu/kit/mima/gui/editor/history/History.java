@@ -100,8 +100,7 @@ public class History<T> {
      */
     public T forward() throws IndexOutOfBoundsException {
         assert head != 0 : "already on newest version";
-        head--;
-        return history.get(head);
+        return history.get(head--);
     }
 
     /**

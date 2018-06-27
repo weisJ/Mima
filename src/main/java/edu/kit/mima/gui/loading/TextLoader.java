@@ -74,7 +74,7 @@ public class TextLoader {
         final String path = requestPath(searchPath, extensions, abortHandler);
         if (path == null) {
             abortHandler.run();
-            throw new IllegalArgumentException("path is null");
+            throw new IllegalArgumentException("aborted");
         }
 
         manager.onLoad(path);

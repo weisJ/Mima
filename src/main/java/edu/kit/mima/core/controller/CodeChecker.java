@@ -45,7 +45,7 @@ public final class CodeChecker {
             }
         }
         references.clear();
-        for (var set : Set.of(sets.get(0), sets.get(2))) {
+        for (var set : List.of(sets.get(0), sets.get(2))) {
             for (var string : set) {
                 if (!references.add(string)) {
                     Logger.warning("reference is defined multiple times: \"" + string + '\"');

@@ -227,6 +227,7 @@ public final class MimaUI extends JFrame {
     }
 
     /*------------Functionality------------*/
+
     /**
      * Wrapper function for changing a file
      *
@@ -236,20 +237,20 @@ public final class MimaUI extends JFrame {
         if (!fileManager.isSaved()) {
             fileManager.savePopUp();
         }
-        console.clear();
-        loadAction.run();
-        String text = fileManager.getText();
-        editor.setText(text);
-        setTitle(TITLE + ' ' + fileManager.getLastFile().replaceAll(" ", ""));
-        Logger.log("loaded: "+ FileName.shorten(fileManager.getLastFile(), MAX_FILE_DISPLAY_LENGTH));
         try {
+            loadAction.run();
+            console.clear();
+            String text = fileManager.getText();
+            editor.setText(text);
+            setTitle(TITLE + ' ' + fileManager.getLastFile().replaceAll(" ", ""));
+            Logger.log("loaded: " + FileName.shorten(fileManager.getLastFile(), MAX_FILE_DISPLAY_LENGTH));
             controller.parse(text, getInstructionSet());
+            updateHighlighting();
+            editor.resetHistory();
+            editor.clean();
         } catch (IllegalArgumentException | IllegalStateException e) {
             Logger.error(e.getMessage());
         }
-        updateHighlighting();
-        editor.resetHistory();
-        editor.clean();
     }
 
     /*
