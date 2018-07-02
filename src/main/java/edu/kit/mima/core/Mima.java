@@ -17,6 +17,8 @@ import java.util.Stack;
  * @since 2018
  */
 public class Mima {
+    private static final String STACK_POINTER_POSTFIX = " [SP]";
+    private static final String ACCUMULATOR = "accumulator";
 
     private final int wordLength;
     private final int constWordLength;
@@ -51,13 +53,13 @@ public class Mima {
      * Get the memory table labeled with the corresponding memory associations
      *
      * @param associations memory associations to use
-     * @param binaryView whether to use the binary representation of the memory values
+     * @param binaryView   whether to use the binary representation of the memory values
      * @return MemoryTable formatted for an n(rows) x 2(columns) {@link JTable}
      */
     public Object[][] memoryTable(Map<String, Integer> associations, boolean binaryView) {
         final Map<Integer, MachineWord> values = memoryMap.getMemoryMap();
         final List<Object[]> data = new ArrayList<>();
-        data.add(new Object[]{"accumulator", binaryView ? accumulator.binaryRepresentation() : accumulator.intValue()});
+        data.add(new Object[]{ACCUMULATOR, binaryView ? accumulator.binaryRepresentation() : accumulator.intValue()});
 
         final List<Object[]> memory = new ArrayList<>();
         for (Map.Entry<Integer, MachineWord> entry : values.entrySet()) {
@@ -65,7 +67,9 @@ public class Mima {
                     ? entry.getValue().binaryRepresentation()
                     : String.valueOf(entry.getValue().intValue());
             Object[] element = associations.containsValue(entry.getKey())
-                    ? new Object[]{getAssociation(associations, entry.getKey()), valueString}
+                    ? new Object[]{entry.getKey()
+                    + " (" + getAssociation(associations, entry.getKey())
+                    + ')', valueString}
                     : new Object[]{entry.getKey(), valueString};
             boolean skip;
             try {
@@ -76,7 +80,7 @@ public class Mima {
                 skip = true;
             }
             if (entry.getKey() == stackPointer.intValue()) {
-                element[0] += " (SP)";
+                element[0] += STACK_POINTER_POSTFIX;
             }
             if (!skip) {
                 memory.add(element);
@@ -187,5 +191,12 @@ public class Mima {
      */
     public void setStackPointer(int address) {
         stackPointer.setValue(address);
+    }
+
+    /**
+     * Reset the memory
+     */
+    public void reset() {
+        memoryMap.reset();
     }
 }

@@ -310,8 +310,8 @@ public final class MimaUI extends JFrame {
             Logger.log("saving " + FileName.shorten(fileManager.getLastFile(), MAX_FILE_DISPLAY_LENGTH) + "...");
             fileManager.save();
             Logger.log("(done)");
-        } catch (final IOException e) {
-            Logger.error("failed to save: " + e.getMessage());
+        } catch (final IllegalArgumentException | IOException e) {
+            Logger.error(e.getMessage());
         }
     }
 

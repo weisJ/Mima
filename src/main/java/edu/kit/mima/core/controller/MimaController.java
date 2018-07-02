@@ -128,6 +128,7 @@ public class MimaController implements ExceptionListener {
      * Run the program
      */
     public void run() {
+        mima.reset();
         if (!interpreter.isRunning()) {
             start(false);
         }

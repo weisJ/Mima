@@ -130,7 +130,7 @@ public class Parser {
         Token expression = supplier.get();
         if (isPunctuation(Punctuation.DEFINITION_DELIMITER)) {
             input.next();
-            return new BinaryToken<>(TokenType.JUMP_POINT, expression, parseExpression());
+            return new BinaryToken<>(TokenType.JUMP_POINT, expression, maybeJumpAssociation(supplier));
         }
         return expression;
     }

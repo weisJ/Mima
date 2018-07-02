@@ -22,7 +22,7 @@ public enum MimaXInstruction implements Instruction {
     ADC("ADC") {
         @Override
         public MachineWord apply(List<Value<MachineWord>> arguments, Environment environment) {
-            checkArgNumber(arguments, 0);
+            checkArgNumber(arguments, 1);
             var argument = arguments.get(0);
             if (argument.getType() != ValueType.CONSTANT && argument.getType() != ValueType.NUMBER) {
                 fail("can't pass a reference");
