@@ -133,11 +133,13 @@ public final class MimaUI extends JFrame {
                 .addItem("Load", () -> updateFile(fileManager::load), "control L")
                 .separator()
                 .addItem("Save", () -> {
-                    if (!fileManager.isOnDisk()) {
-                        fileManager.saveAs();
-                    } else {
-                        save();
-                    }
+                    try {
+                        if (!fileManager.isOnDisk()) {
+                            fileManager.saveAs();
+                        } else {
+                            save();
+                        }
+                    } catch (IllegalArgumentException ignored) { }
                 }, "control S")
                 .addItem("Save as", fileManager::saveAs, "control shift S")
                 .addItem("Quit", this::quit)
