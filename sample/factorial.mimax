@@ -1,0 +1,100 @@
+#Compute the Factorial of a number.
+#Works up to val = 10.
+§define const val : 5;
+LDC(val);
+CALL(FACTORIAL);
+Stop : HALT();
+
+
+#Call point for computing the factorial.
+#Parameter is stored in the accu.
+FACTORIAL : {
+      #Init
+      §define argument : 0;   #argument variable
+      §define comp : 1;       # 0
+      §define neg_one : 2;    # -1
+      §define tmp : 3;        #temporary variable
+   
+      STV(argument);
+      LDC(0);
+      STV(comp);
+      LDC(-1);
+      STV(neg_one);
+      LDC(4);
+      STSP();
+      #end init
+
+      LDV(argument);
+      JMN(Stop); #Only positive numbers are valid
+      CALL(COMPUTE_FAC);
+      RET();
+
+   COMPUTE_FAC :
+      #Check for base case
+      EQL(comp);
+      JMN(BASE_FAC);
+   
+      CALL(INCREASE_STACK);
+
+      #Compute factorial
+      LDV(argument);
+      STVR(0, SP());     #store x
+      LDC(-1);
+      ADD(argument);
+      STV(argument); 
+      CALL(COMPUTE_FAC); #compute (x-1)!
+      STVR(1, SP());     #store y
+      CALL(MULT);        #x * y
+ 
+      CALL(DECREASE_STACK);
+   
+      RET();
+
+   #Base case 0! = 1
+   BASE_FAC :
+      LDC(1);
+      RET();
+
+   #Multiply two numbers x and y
+   MULT :
+      LDVR(0, SP());
+      EQL(comp);
+      JMN(MULT_RET);
+      LDVR(2, SP());
+      STV(tmp);
+      LDVR(1, SP());
+      ADD(tmp);
+      STVR(2, SP());
+      LDVR(0, SP());
+      ADD(neg_one);
+      STVR(0, SP());
+      JMP(MULT);
+
+   MULT_RET : 
+      LDVR(2, SP());
+      RET();
+
+   #Increase the factorial recursion stack.
+   #Initialises all values in stack frame to 0
+   INCREASE_STACK : 
+      LDSP();
+      ADC(3);
+      STSP();
+      LDC(0);
+      STVR(0, SP());
+      STVR(1, SP());
+      STVR(2, SP());
+      RET();
+
+   #Decrease factorial recursion stack. Does not affect
+   #accumulator value
+   DECREASE_STACK :
+      STV(tmp);
+      LDSP();
+      ADC(-3);
+      STSP();
+      LDV(tmp);
+      RET();
+}
+
+            
