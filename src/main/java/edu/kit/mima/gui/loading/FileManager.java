@@ -91,7 +91,7 @@ public class FileManager implements AutoCloseable {
                 fileHash = text.hashCode();
                 isNewFile = false;
             }
-        } catch (final IOException e) {
+        } catch (final IOException | NullPointerException e) {
             firstFile();
         }
     }

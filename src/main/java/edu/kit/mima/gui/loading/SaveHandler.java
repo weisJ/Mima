@@ -1,7 +1,9 @@
 package edu.kit.mima.gui.loading;
 
+import org.apache.tika.parser.txt.CharsetDetector;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,6 +21,11 @@ import java.util.stream.Collectors;
 public class SaveHandler {
 
     private static final String ENCODING = System.getProperty("file.encoding");
+    private final CharsetDetector charsetDetector;
+    private String charSet;
+    static {
+        System.out.print(ENCODING);
+    }
     private final String tmpFile;
 
     /**
@@ -30,6 +37,8 @@ public class SaveHandler {
         tmpFile = saveDirectory == null
                 ? System.getProperty("user.home") + "/save.tmp"
                 : saveDirectory + "/save.tmp";
+        charsetDetector = new CharsetDetector();
+        charSet = ENCODING;
     }
 
     /**
@@ -41,8 +50,9 @@ public class SaveHandler {
      */
     @SuppressWarnings("OverlyBroadThrowsClause")
     public String loadFile(final String path) throws IOException {
-        try (final BufferedReader reader = new BufferedReader(
-                new InputStreamReader(new FileInputStream(path), ENCODING))) {
+        charSet = charsetDetector.setText(new BufferedInputStream(new FileInputStream(path))).detect().getName();
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(new FileInputStream(path), charSet))) {
             return reader.lines().collect(Collectors.joining("\n"));
         }
     }
@@ -56,7 +66,7 @@ public class SaveHandler {
      */
     @SuppressWarnings("OverlyBroadThrowsClause")
     public void saveFile(final String text, final String path) throws IOException {
-        try (final PrintWriter writer = new PrintWriter(path, ENCODING)) {
+        try (final PrintWriter writer = new PrintWriter(path, charSet)) {
             writer.write(text);
         }
     }
@@ -69,8 +79,9 @@ public class SaveHandler {
      */
     @SuppressWarnings("OverlyBroadThrowsClause")
     public String loadTmp() throws IOException {
+        charSet = charsetDetector.setText(new FileInputStream(tmpFile)).detect().getName();
         try (final BufferedReader reader = new BufferedReader(
-                new InputStreamReader(new FileInputStream(tmpFile), ENCODING))) {
+                new InputStreamReader(new FileInputStream(tmpFile), charSet))) {
             return reader.lines().collect(Collectors.joining("\n"));
         }
     }
@@ -83,7 +94,7 @@ public class SaveHandler {
      */
     @SuppressWarnings("OverlyBroadThrowsClause")
     public void saveTmp(final String text) throws IOException {
-        try (final PrintWriter writer = new PrintWriter(tmpFile, ENCODING)) {
+        try (final PrintWriter writer = new PrintWriter(tmpFile, charSet)) {
             writer.write(text);
         }
     }
