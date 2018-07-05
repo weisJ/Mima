@@ -34,7 +34,22 @@ public class ArithmeticLogicUnit {
      */
     public MachineWord add(final MachineWord x, final MachineWord y) {
         checkWord(x, y);
-        return new MachineWord(x.intValue() + y.intValue(), machineWordLength);
+        boolean[] bits = new boolean[machineWordLength];
+        boolean[] xBits = x.getBits();
+        boolean[] yBits = y.getBits();
+        boolean carry = false;
+        for (int i = 0; i < machineWordLength; i++) {
+            if (xBits[i] && yBits[i]) {
+                bits[i] = carry;
+                carry = true;
+            } else if (xBits[i] || yBits[i]){
+                bits[i] = !carry;
+            } else {
+                bits[i] = carry;
+                carry = false;
+            }
+        }
+        return new MachineWord(bits, machineWordLength);
     }
 
     /**
@@ -96,8 +111,8 @@ public class ArithmeticLogicUnit {
         checkWord(a);
         final boolean[] bits = a.getBits();
         final boolean tmp = bits[0];
-        System.arraycopy(bits, 1, bits, 2, machineWordLength - 1);
-        bits[machineWordLength - 1] = tmp;
+        System.arraycopy(bits, 1, bits, 0, bits.length - 1);
+        bits[bits.length - 1] = tmp;
         return new MachineWord(bits, machineWordLength);
     }
 
