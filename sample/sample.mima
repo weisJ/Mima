@@ -3,10 +3,10 @@
 #-------------------------------------------------#
 
 #Definitions:
-Â§define negative_one;         #Declaration of memory address.
-Â§define one : 0;              #Adresses can also be explicit.
-Â§define zero,#inline# val;    #Declarations can have multiple variables in one line.
-Â§define const x : 5;          #Constants are referred to as is and
+§define negative_one;         #Declaration of memory address.
+§define one : 0;              #Adresses can also be explicit.
+§define zero,#inline# val;    #Declarations can have multiple variables in one line.
+§define const x : 5;          #Constants are referred to as is and
                               #need to have an initializer statement.
 
 #Instructions:
@@ -48,7 +48,7 @@
 #        --code--
 #        Â§define x; that is not executed)
 #are fine but should be avoided
-Â§define pow; 
+§define pow; 
 
 #jump declaration (*). May only be stated once per scope.
 Loop : LDV(val);

@@ -3,8 +3,6 @@ package edu.kit.mima.core.data;
 
 import edu.kit.mima.core.Mima;
 
-import java.util.stream.IntStream;
-
 /**
  * MachineWord used in {@link Mima}
  *
@@ -158,8 +156,11 @@ public class MachineWord {
         if (isNegative) {
             value++;
         }
-        value += IntStream.range(0, (wordLength - 2)).filter(i -> isNegative ^ bits[i]).map(i -> (int) Math.pow(2, i))
-                .sum();
+        for (int i = 0; i < bits.length - 1; i++) {
+            if (bits[i] ^ isNegative) {
+                value += Math.pow(2, i);
+            }
+        }
         if (isNegative) {
             value *= -1;
         }

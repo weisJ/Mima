@@ -197,6 +197,6 @@ public class Mima {
      * Reset the memory
      */
     public void reset() {
-        memoryMap.reset();
+        memoryMap.empty();
     }
 }
