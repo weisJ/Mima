@@ -133,6 +133,7 @@ public final class ReferenceCrawler {
         return found;
     }
 
+    @SuppressWarnings("unchecked")
     private void searchNonFunctions(Token token, List<Token> found) {
         TokenType tokenType = token.getType();
         switch (tokenType) {
