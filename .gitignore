@@ -45,6 +45,9 @@ bin/
 .idea/
 *.iml
 
+# VS Code
+.vscode/
+
 # maven
 target/
 
