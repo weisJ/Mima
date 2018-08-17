@@ -72,7 +72,7 @@ public final class MimaUI extends JFrame {
     /**
      * Create a new Mima UI window
      */
-    public MimaUI() {
+    public MimaUI(String filePath) {
         controller = new MimaController();
         fileManager = new FileManager(this, MIMA_DIR, new String[]{FILE_EXTENSION, FILE_EXTENSION_X});
         editor = new Editor();
@@ -90,7 +90,18 @@ public final class MimaUI extends JFrame {
         memoryConsole.add(console);
         controlPanel.add(memoryConsole, BorderLayout.LINE_START);
 
-        updateFile(fileManager::loadLastFile);
+        if (filePath == null || filePath.isEmpty()) {
+            updateFile(fileManager::loadLastFile);
+        } else {
+            updateFile(() -> {
+                try {
+                    fileManager.load(filePath);
+                } catch (IOException e) {
+                    fileManager.loadLastFile();
+                    Logger.error("Could not load file: " + e.getMessage());
+                }
+            });
+        }
 
         setupButtons();
         setupMenu();
@@ -240,8 +251,8 @@ public final class MimaUI extends JFrame {
             fileManager.savePopUp();
         }
         try {
-            loadAction.run();
             console.clear();
+            loadAction.run();
             String text = fileManager.getText();
             editor.setText(text);
             setTitle(TITLE + ' ' + fileManager.getLastFile().replaceAll(" ", ""));

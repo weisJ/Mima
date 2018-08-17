@@ -28,7 +28,8 @@ public final class App {
                 | UnsupportedLookAndFeelException | IllegalAccessException e) {
             e.printStackTrace(); /*will throw error because of illegal field access*/
         }
-        final MimaUI frame = new MimaUI();
+        String filePath = args != null && args.length >= 1 ? args[0] : null;
+        final MimaUI frame = new MimaUI(filePath);
         Logger.setLevel(Logger.LogLevel.INFO);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
