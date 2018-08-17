@@ -1,5 +1,7 @@
 package edu.kit.mima.gui.loading;
 
+import edu.kit.mima.gui.logging.Logger;
+
 import javax.swing.JOptionPane;
 import java.awt.Component;
 import java.io.File;
@@ -97,13 +99,27 @@ public class FileManager implements AutoCloseable {
     }
 
     /**
-     * Load the text form last used file path
+     * Load the text from last used file path
      */
     public void load() {
         text = textLoader.requestLoad(directory, extensions, () -> { });
         assert text != null;
         fileHash = text.hashCode();
         isNewFile = false;
+    }
+
+    /**
+     * Load the text from given filePath
+     *
+     * @exception IOException if file does not exist
+     */
+    public void load(String filePath) throws IOException {
+            text = saveHandler.loadFile(filePath);
+            assert text != null;
+            fileHash = text.hashCode();
+            isNewFile = false;
+            lastFile = filePath;
+            setLastExtension(filePath);
     }
 
     /*
@@ -156,6 +172,7 @@ public class FileManager implements AutoCloseable {
      */
     public void save() throws IOException {
         saveHandler.saveFile(text, lastFile);
+        Logger.log("saving to: " + lastFile);
         fileHash = text.hashCode();
     }
 

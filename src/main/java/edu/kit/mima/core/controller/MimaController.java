@@ -169,14 +169,14 @@ public class MimaController implements ExceptionListener {
     }
 
     /**
-     * Get the current mima memory table
+     * Get the current mima memory table.
      *
      * @param binary whether to use the binary representation
      * @return memory table
      */
     public Object[][] getMemoryTable(boolean binary) {
         Environment scope = interpreter.getCurrentScope();
-        scope = scope == null || !interpreter.isRunning() ? globalEnvironment : scope;
+        scope = scope == null ? globalEnvironment : scope;
         Map<String, Integer> map = new HashMap<>();
         while (scope != null) {
             map.putAll(scope.getDefinitions().get(0).entrySet().stream()

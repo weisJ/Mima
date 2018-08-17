@@ -1,5 +1,7 @@
 package edu.kit.mima.gui.editor.style;
 
+import edu.kit.mima.gui.logging.Logger;
+
 import javax.swing.JTextPane;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
@@ -10,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Operates on a textPane and highlights it according to the {@link StyleGroup}
@@ -62,12 +65,17 @@ public class Stylizer {
     private void stylize(final StyleGroup group) {
         var regexList = group.regexList();
         for (final String regex : regexList) {
-            Style style = group.getStyle(regex);
-            final Pattern pattern = Pattern.compile(regex);
-            final Matcher matcher = pattern.matcher(textPane.getText());
-            while (matcher.find()) {
-                textPane.getStyledDocument()
-                        .setCharacterAttributes(matcher.start(), matcher.group().length(), style, true);
+            try {
+
+                Style style = group.getStyle(regex);
+                final Pattern pattern = Pattern.compile(regex);
+                final Matcher matcher = pattern.matcher(textPane.getText());
+                while (matcher.find()) {
+                    textPane.getStyledDocument()
+                            .setCharacterAttributes(matcher.start(), matcher.group().length(), style, true);
+                }
+            } catch (PatternSyntaxException e) {
+                Logger.error(e.getMessage());
             }
         }
     }
