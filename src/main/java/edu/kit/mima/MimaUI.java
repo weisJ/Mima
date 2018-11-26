@@ -1,6 +1,5 @@
 package edu.kit.mima;
 
-import edu.kit.mima.core.controller.InstructionSet;
 import edu.kit.mima.core.controller.MimaController;
 import edu.kit.mima.core.interpretation.InterpreterException;
 import edu.kit.mima.core.parsing.lang.Keyword;

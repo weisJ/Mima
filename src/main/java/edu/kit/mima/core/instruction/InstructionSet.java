@@ -1,7 +1,4 @@
-package edu.kit.mima.core.controller;
-
-import edu.kit.mima.core.instruction.MimaInstruction;
-import edu.kit.mima.core.instruction.MimaXInstruction;
+package edu.kit.mima.core.instruction;
 
 import java.util.Arrays;
 import java.util.List;

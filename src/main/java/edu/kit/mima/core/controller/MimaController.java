@@ -1,6 +1,7 @@
 package edu.kit.mima.core.controller;
 
 import edu.kit.mima.core.Mima;
+import edu.kit.mima.core.instruction.InstructionSet;
 import edu.kit.mima.core.instruction.MimaInstruction;
 import edu.kit.mima.core.instruction.MimaXInstruction;
 import edu.kit.mima.core.interpretation.Environment;
@@ -60,6 +61,7 @@ public class MimaController implements ExceptionListener {
         currentInstructionSet = instructionSet;
         mima = new Mima(instructionSet.getWordLength(), instructionSet.getConstCordLength());
         programToken = new Parser(program).parse();
+
         if (programToken.getValue().length > 0) {
             Token lastToken = programToken.getValue()[programToken.getValue().length - 1];
             if (lastToken.getType() == TokenType.ERROR) {
