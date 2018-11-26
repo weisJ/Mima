@@ -23,9 +23,6 @@ public class SaveHandler {
     private static final String ENCODING = System.getProperty("file.encoding");
     private final CharsetDetector charsetDetector;
     private String charSet;
-    static {
-        System.out.print(ENCODING);
-    }
     private final String tmpFile;
 
     /**

@@ -1,4 +1,7 @@
-§define const val : 15; #works up to val = 34
+#This program computes the fibonacci numbers up to the specified value.
+#It uses a value 'cache' to minimize unnecessary computations
+
+§define const val : 16; #works up to val = 34
 §define argument : 0;
 §define comp     : 1;
 §define tmp      : 2;
@@ -9,6 +12,7 @@ LDC(val);
 CALL(FIB);
 Stop : HALT();
 
+#Last result is stored at stackpointer position
 FIB : {
    STV(argument);
    LDC(5);

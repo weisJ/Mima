@@ -1,6 +1,13 @@
 package edu.kit.mima.core.parsing.token;
 
+import edu.kit.mima.core.parsing.lang.Punctuation;
+import edu.kit.mima.gui.color.SyntaxColor;
+import javafx.util.Pair;
+
+import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -51,6 +58,17 @@ public class ProgramToken implements Token<Token[]> {
     @Override
     public String simpleName() {
         return Arrays.stream(program).map(Token::simpleName).collect(Collectors.joining("\n"));
+    }
+
+    @Override
+    public List<Pair<String, Color>> syntaxPairs() {
+        List<Pair<String, Color>> list = new ArrayList<>();
+        list.add(new Pair<>(String.valueOf(Punctuation.SCOPE_OPEN), SyntaxColor.KEYWORD));
+        for (Token token : program) {
+            list.addAll(token.syntaxPairs());
+        }
+        list.add(new Pair<>(String.valueOf(Punctuation.SCOPE_CLOSED), SyntaxColor.KEYWORD));
+        return list;
     }
 
     @Override

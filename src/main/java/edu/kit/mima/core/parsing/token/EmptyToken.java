@@ -1,6 +1,11 @@
 package edu.kit.mima.core.parsing.token;
 
+import javafx.util.Pair;
 import org.jetbrains.annotations.Nullable;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Empty token to explicitly show no value is intended
@@ -33,5 +38,10 @@ public class EmptyToken implements Token {
     @Override
     public String simpleName() {
         return "";
+    }
+
+    @Override
+    public List<Pair<String, Color>> syntaxPairs() {
+        return new ArrayList<>();
     }
 }
