@@ -49,7 +49,7 @@ public final class MimaUI extends JFrame {
     private static final String TITLE = "Mima-Simulator";
     private static final String FILE_EXTENSION = "mima";
     private static final String FILE_EXTENSION_X = "mimax";
-    private static final String MIMA_DIR = System.getProperty("user.home") + "/.mima";
+    private static final String MIMA_DIR = System.getProperty("user.home") + "\\.mima";
 
     private static final int HISTORY_CAPACITY = 100;
     private static final int MAX_FILE_DISPLAY_LENGTH = 45;

@@ -21,7 +21,7 @@ public class OptionsHandler {
      */
     public OptionsHandler(final String optionsDirectory) {
         handler = new SaveHandler(optionsDirectory);
-        optionsPath = optionsDirectory + "/.options";
+        optionsPath = optionsDirectory + "\\.options";
         createDirectory();
     }
 
@@ -29,7 +29,7 @@ public class OptionsHandler {
     private void createDirectory() {
         final File homeDir = new File(optionsPath);
         if (!homeDir.exists()) {
-            homeDir.mkdir();
+            homeDir.getParentFile().mkdirs();
         }
     }
 
