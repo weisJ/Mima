@@ -1,6 +1,6 @@
 #Compute the Factorial of a number.
 #Works up to val = 10.
-§define const val : 11;
+§define const val : 5;
 LDC(val);
 CALL(FACTORIAL);
 Stop : HALT();
