@@ -12,7 +12,7 @@ LDC(val);
 CALL(FIB);
 Stop : HALT();
 
-#Last result is stored at stackpointer position
+#Last result is stored at stack-pointer position
 FIB : {
    STV(argument);
    LDC(5);
