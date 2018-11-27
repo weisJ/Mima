@@ -369,7 +369,7 @@ public final class MimaUI extends JFrame {
      */
     private void updateSyntaxHighlighting() {
         syntaxStyle.setHighlight(Arrays.stream(getInstructionSet().getInstructions()).map(
-                s -> "(?<=[\\s\\(,])" + s + "(?=[\\(,:;\\s])"
+                s -> "(?<=[\\s\\(,])?" + s + "(?=[\\(,:;\\s])"
         ).toArray(String[]::new), SyntaxColor.INSTRUCTION);
         syntaxStyle.addHighlight("(?<=[\\s\\(,])HALT(?=[\\(,:;\\s])", SyntaxColor.WARNING);
     }
