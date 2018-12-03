@@ -9,6 +9,10 @@ import java.io.File;
 public interface LoadManager {
 
     /**
+     * Actions to perform before loading a file
+     */
+    void beforeLoad();
+    /**
      * Action to perform at the load process
      *
      * @param filepath path to file being loaded

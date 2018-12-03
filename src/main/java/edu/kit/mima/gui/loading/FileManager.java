@@ -49,10 +49,26 @@ public class FileManager implements AutoCloseable {
         this.parent = parent;
 
         textLoader = new TextLoader(this.parent, new LogLoadManager() {
+            private String backupLastFile;
+            private String backupLastExtension;
+            @Override
+            public void beforeLoad() {
+                backupLastFile = lastFile;
+                backupLastExtension = lastExtension;
+            }
+            @Override
+            public void onFail(final String errorMessage) {
+                super.onFail(errorMessage);
+                lastFile = backupLastFile;
+                lastExtension = backupLastExtension;
+            }
             @Override
             public void afterRequest(final File chosenFile) {
                 setLastExtension(chosenFile);
                 lastFile = chosenFile.getAbsolutePath();
+                if (lastExtension != null) {
+                    lastFile = lastFile.endsWith(lastExtension) ? lastFile : lastFile + '.' + lastExtension;
+                }
                 directory = chosenFile.getParentFile().getAbsolutePath();
             }
         });
@@ -126,22 +142,29 @@ public class FileManager implements AutoCloseable {
      * Launches a request to load/create a file
      */
     private void firstFile() {
-        try {
-            final int response = JOptionPane
-                    .showOptionDialog(parent, "Create/Load File", "Create/Load File", JOptionPane.DEFAULT_OPTION,
-                            JOptionPane.PLAIN_MESSAGE,
-                            null, new String[]{"Load", "New"}, "Load");
-            switch (response) {
-                case 0:  //Load
-                    load();
-                    break;
-                case 1:  //New
-                    newFile();
-                    break;
-                default:  //Abort
-                    System.exit(0);
+        boolean succeeded = false;
+        while(!succeeded) {
+            try {
+                final int response = JOptionPane
+                        .showOptionDialog(parent, "Create/Load File", "Create/Load File", JOptionPane.DEFAULT_OPTION,
+                                JOptionPane.PLAIN_MESSAGE,
+                                null, new String[]{"Load", "New"}, "Load");
+                switch (response) {
+                    case 0:  //Load
+                        load();
+                        break;
+                    case 1:  //New
+                        newFile();
+                        break;
+                    default:  //Abort
+                        System.exit(0);
+                }
+                succeeded = true;
+            } catch (final IllegalArgumentException ignored) {
+            } catch(NullPointerException e) {
+                JOptionPane.showMessageDialog(parent, "Could not load file. Try again!", "Error", JOptionPane.ERROR_MESSAGE, null);
             }
-        } catch (final IllegalArgumentException ignored) { }
+        }
     }
 
     /**

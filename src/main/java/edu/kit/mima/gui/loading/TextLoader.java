@@ -54,10 +54,10 @@ public class TextLoader {
         manager.onSave(path);
         try {
             handler.saveFile(text, path);
+            manager.afterSave();
         } catch (IOException e) {
             manager.onFail(e.getMessage());
         }
-        manager.afterSave();
     }
 
     /**
@@ -71,6 +71,7 @@ public class TextLoader {
     @SuppressWarnings("OverlyBroadCatchBlock")
     public @Nullable String requestLoad(final String searchPath, final String[] extensions,
                                         final Runnable abortHandler) {
+        manager.beforeLoad();
         final String path = requestPath(searchPath, extensions, abortHandler);
         if (path == null) {
             abortHandler.run();
@@ -81,10 +82,10 @@ public class TextLoader {
         String text = null;
         try {
             text = handler.loadFile(path);
+            manager.afterLoad();
         } catch (final IOException e) {
             manager.onFail(e.getMessage());
         }
-        manager.afterLoad();
         return text;
     }
 
