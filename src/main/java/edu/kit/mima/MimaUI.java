@@ -67,6 +67,7 @@ public final class MimaUI extends JFrame {
     private final JPanel controlPanel = new JPanel(new BorderLayout());
     private final JButton run = new JButton("RUN");
     private final JButton step = new JButton("STEP");
+    private final JButton compile = new JButton("COMPILE");
     private final JRadioButtonMenuItem binaryView = new JRadioButtonMenuItem("Binary View");
 
     /**
@@ -173,9 +174,9 @@ public final class MimaUI extends JFrame {
      */
     private void setupButtons() {
         final JPanel buttonPanel = new ButtonPanelBuilder()
-                .addButton("COMPILE", this::compile, "alt C")
+                .addButton(compile).addAccelerator("alt C").addAction(this::compile).setEnabled(true)
                 .addButton(step).addAccelerator("alt S").addAction(this::step).setEnabled(false)
-                .addButton(run).addAccelerator("alt R").addAction(this::run).setEnabled(false)
+                .addButton(run).addAccelerator("alt R").addAction(() -> new Thread(this::run).start()).setEnabled(false)
                 .get();
         controlPanel.add(buttonPanel, BorderLayout.PAGE_START);
         controlPanel.add(buttonPanel, BorderLayout.PAGE_START);
@@ -301,6 +302,7 @@ public final class MimaUI extends JFrame {
     private void run() {
         step.setEnabled(false);
         run.setEnabled(false);
+        compile.setEnabled(false);
         Logger.log("Running program: " + FileName.shorten(fileManager.getLastFile(), MAX_FILE_DISPLAY_LENGTH) + "...");
         try {
             controller.run();
@@ -369,7 +371,7 @@ public final class MimaUI extends JFrame {
      */
     private void updateSyntaxHighlighting() {
         syntaxStyle.setHighlight(Arrays.stream(getInstructionSet().getInstructions()).map(
-                s -> "(?<=[\\s\\(,])?" + s + "(?=[\\(,:;\\s])"
+                s -> "(?:\\A|(?<=[\\s\\(,]))" + s + "(?=[\\(,:;\\s])"
         ).toArray(String[]::new), SyntaxColor.INSTRUCTION);
         syntaxStyle.addHighlight("(?<=[\\s\\(,])HALT(?=[\\(,:;\\s])", SyntaxColor.WARNING);
     }
@@ -383,13 +385,13 @@ public final class MimaUI extends JFrame {
             final List<Set<String>> references = controller.getReferences();
 
             final String[] constants = references.get(0)
-                    .stream().map(s -> "(?<=[\\s\\(,])(\\s)*" + s + "(\\s)*(?=[\\),:;])").toArray(String[]::new);
+                    .stream().map(s -> "(?:\\A|(?<=[\\s\\(,]))(\\s)*" + s + "(\\s)*(?=[\\),:;])").toArray(String[]::new);
             referenceStyle.setHighlight(constants, SyntaxColor.CONSTANT);
             final String[] jumpReferences = references.get(1)
-                    .stream().map(s -> "(?<=[\\s\\(,])(\\s)*" + s + "(\\s)*(?=[\\),:;])").toArray(String[]::new);
+                    .stream().map(s -> "(?:\\A|(?<=[\\s\\(,]))(\\s)*" + s + "(\\s)*(?=[\\),:;])").toArray(String[]::new);
             referenceStyle.addHighlight(jumpReferences, SyntaxColor.JUMP);
             final String[] memoryReferences = references.get(2)
-                    .stream().map(s -> "(?<=[\\s\\(,])(\\s)*" + s + "(\\s)*(?=[\\),:;])").toArray(String[]::new);
+                    .stream().map(s -> "(?:\\A|(?<=[\\s\\(,]))(\\s)*" + s + "(\\s)*(?=[\\),:;])").toArray(String[]::new);
             referenceStyle.addHighlight(memoryReferences, SyntaxColor.REFERENCE);
         } catch (final IllegalArgumentException e) {
             Logger.error(e.getMessage());

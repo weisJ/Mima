@@ -33,7 +33,6 @@ public class Interpreter {
     //------------Debug---------------//
     private final DebugController debugController;
     private final ExceptionListener exceptionListener;
-    private boolean debug;
     private Token currentToken;
     private Environment currentScope;
     //--------------------------------//
@@ -81,12 +80,9 @@ public class Interpreter {
      *
      * @param program           program input created by {@link Parser}
      * @param globalEnvironment the global runtime environment
-     * @param debug             whether the interpreter should pause after each statement
      */
-    public void evaluateTopLevel(final ProgramToken program, final Environment globalEnvironment,
-                                 boolean debug) {
+    public void evaluateTopLevel(final ProgramToken program, final Environment globalEnvironment) {
         /*Initializer*/
-        this.debug = debug;
         running = true;
         jumped = false;
         reservedIndex = -1;
@@ -187,7 +183,7 @@ public class Interpreter {
             currentScope = scope;
             value = evaluate(currentToken, scope);
             scope.setExpressionIndex(scope.getExpressionIndex() + 1);
-            if (debug && running && scope.getExpressionIndex() < tokens.length) {
+            if (running && scope.getExpressionIndex() < tokens.length) {
                 debugController.pause();
             }
         }

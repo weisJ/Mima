@@ -101,10 +101,8 @@ public class MimaController implements ExceptionListener {
 
     /**
      * Start the interpreter
-     *
-     * @param debug whether the interpreter should pause after each statement
      */
-    private void start(boolean debug) {
+    private void start() {
         if (programToken == null || globalEnvironment == null) {
             throw new IllegalStateException("must parse program before starting");
         }
@@ -112,7 +110,7 @@ public class MimaController implements ExceptionListener {
         createGlobalEnvironment();
         sharedException.set(null);
         Thread workingThread = new Thread(() ->
-                interpreter.evaluateTopLevel(programToken, globalEnvironment, debug)
+                interpreter.evaluateTopLevel(programToken, globalEnvironment)
         );
         threadDebugController.setWorkingThread(workingThread);
         threadDebugController.start();
@@ -131,10 +129,9 @@ public class MimaController implements ExceptionListener {
      */
     public void run() {
         mima.reset();
-        if (!interpreter.isRunning()) {
-            start(false);
-        }
-        checkForException();
+        do {
+            step();
+        } while (interpreter.isRunning());
     }
 
     /**
@@ -142,7 +139,7 @@ public class MimaController implements ExceptionListener {
      */
     public void step() {
         if (!interpreter.isRunning()) {
-            start(true);
+            start();
         } else {
             threadDebugController.resume();
         }
