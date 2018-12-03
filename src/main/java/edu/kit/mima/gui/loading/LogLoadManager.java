@@ -13,6 +13,10 @@ import static edu.kit.mima.gui.logging.Logger.log;
  */
 public class LogLoadManager implements LoadManager {
     @Override
+    public void beforeLoad() {
+    }
+
+    @Override
     public void onLoad(final String filepath) {
         log("Loading: " + filepath + "...");
     }
