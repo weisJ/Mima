@@ -70,6 +70,8 @@ public final class MimaUI extends JFrame {
     private final JButton compile = new JButton("COMPILE");
     private final JRadioButtonMenuItem binaryView = new JRadioButtonMenuItem("Binary View");
 
+    private Thread runThread;
+
     /**
      * Create a new Mima UI window
      */
@@ -176,7 +178,11 @@ public final class MimaUI extends JFrame {
         final JPanel buttonPanel = new ButtonPanelBuilder()
                 .addButton(compile).addAccelerator("alt C").addAction(this::compile).setEnabled(true)
                 .addButton(step).addAccelerator("alt S").addAction(this::step).setEnabled(false)
-                .addButton(run).addAccelerator("alt R").addAction(() -> new Thread(this::run).start()).setEnabled(false)
+                .addButton(run).addAccelerator("alt R").addAction(() -> {
+                    runThread = new Thread(this::run);
+                    runThread.start();
+                }).setEnabled(false)
+                .addButton("STOP", this::stop, "alt P")
                 .get();
         controlPanel.add(buttonPanel, BorderLayout.PAGE_START);
         controlPanel.add(buttonPanel, BorderLayout.PAGE_START);
@@ -274,6 +280,17 @@ public final class MimaUI extends JFrame {
         return fileManager.getLastExtension().equals(FILE_EXTENSION_X)
                 ? InstructionSet.MIMA_X
                 : InstructionSet.MIMA;
+    }
+
+    /**
+     * Stop the current execution of mima.
+     */
+    private void stop() {
+        if(runThread.isAlive()) {
+            Logger.log("Stopping...");
+            runThread.interrupt();
+            compile.setEnabled(true);
+        }
     }
 
     /**
