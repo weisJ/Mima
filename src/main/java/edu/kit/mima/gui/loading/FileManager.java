@@ -118,7 +118,7 @@ public class FileManager implements AutoCloseable {
      * Load the text from last used file path
      */
     public void load() {
-        text = textLoader.requestLoad(directory, extensions, () -> { });
+        text = textLoader.requestLoad(directory, extensions, () -> {/*Do nothing*/});
         assert text != null;
         fileHash = text.hashCode();
         isNewFile = false;
@@ -261,11 +261,11 @@ public class FileManager implements AutoCloseable {
      *
      * @return true if file has not changed
      */
-    public boolean isSaved() {
+    public boolean unsaved() {
         if (text == null) {
-            return true;
+            return false;
         }
-        return !isNewFile && (fileHash == text.hashCode());
+        return !(!isNewFile && (fileHash == text.hashCode()));
     }
 
     /**

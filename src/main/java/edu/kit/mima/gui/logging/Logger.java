@@ -50,19 +50,47 @@ public final class Logger {
      * @param message message to log
      */
     public static void log(final String message) {
+        log(message, false);
+    }
+
+    /**
+     * Log an information message
+     *
+     * @param message message to log
+     * @param overwriteLast true if last message should be overwritten.
+     */
+    public static void log(final String message, boolean overwriteLast) {
         if (level == INFO) {
-            console.println("[INFO] " + message);
+            if (overwriteLast) {
+                console.replaceLastLine("[INFO] " + message);
+            } else {
+                console.println("[INFO] " + message);
+            }
         }
     }
 
     /**
-     * Log an warning message
+     * Log a warning message
      *
      * @param message message to log
      */
     public static void warning(final String message) {
+        warning(message, false);
+    }
+
+    /**
+     * Log a warning message
+     *
+     * @param message message to log
+     * @param overwriteLast true if last message should be overwritten.
+     */
+    public static void warning(final String message, boolean overwriteLast) {
         if (level != ERROR) {
-            console.println("[WARNING] " + message, Color.ORANGE);
+            if (overwriteLast) {
+                console.replaceLastLine("[WARNING] " + message,  Color.ORANGE);
+            } else {
+                console.println("[WARNING] " + message,  Color.ORANGE);
+            }
         }
     }
 
@@ -73,6 +101,20 @@ public final class Logger {
      */
     public static void error(final String message) {
         console.println("[ERROR] " + message, Color.RED);
+    }
+
+    /**
+     * Log a error message
+     *
+     * @param message message to log
+     * @param overwriteLast true if last message should be overwritten.
+     */
+    public static void error(final String message, boolean overwriteLast) {
+            if (overwriteLast) {
+                console.replaceLastLine("[ERROR] " + message,  Color.RED);
+            } else {
+                console.println("[ERROR] " + message, Color.RED);
+            }
     }
 
     /**

@@ -28,6 +28,8 @@ public class Console extends JScrollPane {
     private final StyledDocument document;
     private final Style style;
 
+    private int lastMessageLength = 0;
+
     /**
      * Create new Console
      */
@@ -42,6 +44,50 @@ public class Console extends JScrollPane {
         StyleConstants.setForeground(style, DEFAULT_COLOR);
 
         setViewportView(textPane);
+    }
+
+    /**
+     * Replace the last message printed
+     *
+     * @param message message to replace the last with.
+     */
+    public void replaceLastLine(final String message) {
+        replaceLastLine(message, DEFAULT_COLOR);
+    }
+
+    /**
+     * Replace the last message printed
+     *
+     * @param message message to replace the last with.
+     * @param color color to print in.
+     */
+    public void replaceLastLine(final String message, final Color color) {
+        replaceLast(message  + "\n", color);
+    }
+
+    /**
+     * Replace the last message printed
+     *
+     * @param message message to replace the last with.
+     */
+    public void replaceLast(final String message) {
+        replaceLast(message, DEFAULT_COLOR);
+    }
+
+    /**
+     * Replace the last message printed
+     *
+     * @param message message to replace the last with.
+     * @param color color to print in.
+     */
+    public void replaceLast(final String message, final Color color) {
+        try {
+            StyleConstants.setForeground(style, color);
+            document.remove(document.getLength() - lastMessageLength, lastMessageLength);
+            document.insertString(document.getLength(), message, style);
+        } catch (final BadLocationException ignored) { }
+        scrollToBottom();
+        lastMessageLength = message.length();
     }
 
     /**
@@ -84,6 +130,7 @@ public class Console extends JScrollPane {
             document.insertString(document.getLength(), message, style);
         } catch (final BadLocationException ignored) { }
         scrollToBottom();
+        lastMessageLength = message.length();
     }
 
     /**
