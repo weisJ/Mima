@@ -40,7 +40,6 @@ public class TextLoader {
      * @param extension    allowed file extension
      * @param abortHandler action to perform if request was aborted
      */
-    @SuppressWarnings("OverlyBroadCatchBlock")
     public void requestSave(final String text, final String searchPath, final String extension,
                             final Runnable abortHandler) {
         String path = requestPath(searchPath, new String[]{extension}, abortHandler);
@@ -68,7 +67,6 @@ public class TextLoader {
      * @param abortHandler action to perform if request was aborted
      * @return loaded text
      */
-    @SuppressWarnings("OverlyBroadCatchBlock")
     public @Nullable String requestLoad(final String searchPath, final String[] extensions,
                                         final Runnable abortHandler) {
         manager.beforeLoad();

@@ -62,15 +62,15 @@ public final class ReferenceCrawler {
                 searchReferences(((BinaryToken<Token, Token>) token).getSecond(), memory, constants, jump);
                 break;
             case DEFINITION:
-                Token[] memoryValues = ((ArrayToken<Token>)token.getValue()).getValue();
+                Token[] memoryValues = ((ArrayToken<Token>) token.getValue()).getValue();
                 for (var value : memoryValues) {
-                    memory.add((((BinaryToken<Token, Token>)value).getFirst()).getValue().toString());
+                    memory.add((((BinaryToken<Token, Token>) value).getFirst()).getValue().toString());
                 }
                 break;
             case CONSTANT:
-                Token[] constantValues = ((ArrayToken<Token>)token.getValue()).getValue();
+                Token[] constantValues = ((ArrayToken<Token>) token.getValue()).getValue();
                 for (var value : constantValues) {
-                    constants.add((((BinaryToken<Token, Token>)value).getFirst()).getValue().toString());
+                    constants.add((((BinaryToken<Token, Token>) value).getFirst()).getValue().toString());
                 }
                 break;
             default:
@@ -84,7 +84,6 @@ public final class ReferenceCrawler {
      *
      * @return List of all jump points in order they appeared
      */
-    @SuppressWarnings("unchecked")
     public List<Pair<Token, Integer>> getJumpPoints() {
         List<Pair<Token, Integer>> references = new ArrayList<>();
         searchJumpPoints(programToken, references, 0);
@@ -102,7 +101,7 @@ public final class ReferenceCrawler {
                 break;
             case JUMP_POINT:
                 references.add(new Pair<>(((Tuple<Token, Token>) token).getFirst(), lineNumber));
-                searchJumpPoints(((BinaryToken<Token, Token>)token).getSecond(), references, lineNumber);
+                searchJumpPoints(((BinaryToken<Token, Token>) token).getSecond(), references, lineNumber);
             case KEYWORD:
             case PUNCTUATION:
             case BINARY:
@@ -144,7 +143,7 @@ public final class ReferenceCrawler {
                 }
                 break;
             case JUMP_POINT:
-                searchNonFunctions(((BinaryToken<Token, Token>)token).getSecond(), found);
+                searchNonFunctions(((BinaryToken<Token, Token>) token).getSecond(), found);
                 break;
             case KEYWORD:
             case PUNCTUATION:

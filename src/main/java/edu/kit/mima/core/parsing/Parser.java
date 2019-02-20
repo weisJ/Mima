@@ -82,7 +82,7 @@ public class Parser {
     private Token parseAtomic() {
         return maybeCall(() -> {
             if (isPunctuation(Punctuation.SCOPE_OPEN)) {
-                Token program =  new ProgramToken(delimited(
+                Token program = new ProgramToken(delimited(
                         Punctuation.SCOPE_OPEN,
                         Punctuation.SCOPE_CLOSED,
                         Punctuation.INSTRUCTION_END,
@@ -207,11 +207,11 @@ public class Parser {
     /**
      * Return expressions contained in the delimiters as ArrayToken
      *
-     * @param start start character (empty char if no begin is defined)
-     * @param stop stop character
+     * @param start     start character (empty char if no begin is defined)
+     * @param stop      stop character
      * @param separator separation character
-     * @param parser function to parse tokens in between of separator
-     * @param skipLast whether the stop delimiter should be skipped
+     * @param parser    function to parse tokens in between of separator
+     * @param skipLast  whether the stop delimiter should be skipped
      * @return Expressions in ArrayToken
      */
     private ArrayToken<Token> delimited(char start, char stop, char separator, Supplier<Token> parser, boolean skipLast) {

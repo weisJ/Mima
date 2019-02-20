@@ -1,44 +1,69 @@
 package edu.kit.mima.core.controller;
 
+import edu.kit.mima.gui.logging.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Jannis Weis
  * @since 2018
  */
 public class ThreadDebugController implements DebugController {
 
-    private static final int SLEEP_TIME = 200;
+    private final Object lock = new Object();
     private Thread workingThread;
-    private boolean isWorking;
-
-    public ThreadDebugController(Thread workingThread) {
-        this.workingThread = workingThread;
-        isWorking = false;
-    }
+    private List<Runnable> beforeStop;
+    private boolean isActive;
 
     public ThreadDebugController() {
-        isWorking = false;
+        beforeStop = new ArrayList<>();
+        isActive = false;
     }
 
 
     public void setWorkingThread(Thread workingThread) {
         this.workingThread = workingThread;
-        isWorking = false;
+        isActive = false;
     }
 
-    public boolean isWorking() {
-        return isWorking;
+    /**
+     * Add action to be executed before thread is stopped.
+     *
+     * @param handler handler to add
+     */
+    public void addStopHandler(Runnable handler) {
+        beforeStop.add(handler);
+    }
+
+    /**
+     * Remove action thas is currently executed before thread is stopped.
+     *
+     * @param handler handler to remove
+     * @return true if handler was removed successfully
+     */
+    public boolean removeStopHandler(Runnable handler) {
+        return beforeStop.remove(handler);
+    }
+
+    /**
+     * Returns whether the thread is currently active
+     *
+     * @return true if active
+     */
+    public boolean isActive() {
+        return isActive;
     }
 
     @Override
     public void pause() {
-        isWorking = false;
-        boolean interrupted = false;
-        while (!interrupted) {
+        synchronized (lock) {
+            isActive = false;
             try {
-                Thread.sleep(SLEEP_TIME);
+                lock.wait();
             } catch (InterruptedException e) {
-                interrupted = true;
-                isWorking = true;
+                Logger.error(e.getMessage());
+                isActive = true;
             }
         }
     }
@@ -48,7 +73,10 @@ public class ThreadDebugController implements DebugController {
         if (workingThread == null) {
             return;
         }
-        workingThread.interrupt();
+        synchronized (lock) {
+            isActive = true;
+            lock.notify();
+        }
     }
 
     @Override
@@ -56,6 +84,7 @@ public class ThreadDebugController implements DebugController {
         if (workingThread == null) {
             return;
         }
+        isActive = true;
         workingThread.start();
     }
 
@@ -64,9 +93,14 @@ public class ThreadDebugController implements DebugController {
         if (workingThread == null) {
             return;
         }
-        isWorking = false;
+        synchronized (lock) {
+            isActive = false;
+            for (Runnable runnable : beforeStop) {
+                runnable.run();
+            }
+            lock.notify();
+        }
         try {
-            workingThread.interrupt();
             workingThread.join();
         } catch (InterruptedException ignored) { /*doesn't matter thread should die*/}
     }

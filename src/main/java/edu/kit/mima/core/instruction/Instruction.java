@@ -15,7 +15,7 @@ public interface Instruction {
     /**
      * Apply the function
      *
-     * @param arguments function argument
+     * @param arguments   function argument
      * @param environment runtime environment
      * @return return value of function
      */

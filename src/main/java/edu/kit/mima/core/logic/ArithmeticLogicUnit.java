@@ -42,7 +42,7 @@ public class ArithmeticLogicUnit {
             if (xBits[i] && yBits[i]) {
                 bits[i] = carry;
                 carry = true;
-            } else if (xBits[i] || yBits[i]){
+            } else if (xBits[i] || yBits[i]) {
                 bits[i] = !carry;
             } else {
                 bits[i] = carry;

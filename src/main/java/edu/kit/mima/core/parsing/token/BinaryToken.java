@@ -112,9 +112,9 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
 
         List<Pair<String, Color>> list = new ArrayList<>();
         if (type == TokenType.JUMP_POINT) {
-           list.add(new Pair<>(firstName, SyntaxColor.JUMP));
-           list.add(new Pair<>(String.valueOf(Punctuation.DEFINITION_DELIMITER), SyntaxColor.KEYWORD));
-           list.addAll(((Token) second).syntaxPairs());
+            list.add(new Pair<>(firstName, SyntaxColor.JUMP));
+            list.add(new Pair<>(String.valueOf(Punctuation.DEFINITION_DELIMITER), SyntaxColor.KEYWORD));
+            list.addAll(((Token) second).syntaxPairs());
         } else if (type == TokenType.DEFINITION) {
             list.add(new Pair<>(firstName, SyntaxColor.REFERENCE));
             if (!secondName.isEmpty()) {

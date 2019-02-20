@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
  */
 public class MimaController implements ExceptionListener {
 
-    private final static int EXCEPTION_WAIT_TIME = 20;
     private final AtomicReference<Exception> sharedException;
     private final ThreadDebugController threadDebugController;
 
@@ -48,6 +47,7 @@ public class MimaController implements ExceptionListener {
         interpreter = new Interpreter(0, null, null);
         sharedException = new AtomicReference<>();
         threadDebugController = new ThreadDebugController();
+        threadDebugController.addStopHandler(() -> interpreter.setRunning(false));
     }
 
     /**
@@ -109,18 +109,16 @@ public class MimaController implements ExceptionListener {
         interpreter = new Interpreter(currentInstructionSet.getConstCordLength(), threadDebugController, this);
         createGlobalEnvironment();
         sharedException.set(null);
-        Thread workingThread = new Thread(() ->
-                interpreter.evaluateTopLevel(programToken, globalEnvironment)
-        );
+        Thread workingThread = new Thread(() -> interpreter.evaluateTopLevel(programToken, globalEnvironment));
         threadDebugController.setWorkingThread(workingThread);
         threadDebugController.start();
+        interpreter.setRunning(true);
     }
 
     /**
      * Stop the interpreter
      */
     public void stop() {
-        interpreter.setRunning(false);
         threadDebugController.stop();
     }
 
@@ -140,17 +138,14 @@ public class MimaController implements ExceptionListener {
     public void step() {
         if (!interpreter.isRunning()) {
             start();
-        } else {
+        } else if (!threadDebugController.isActive()) {
             threadDebugController.resume();
         }
         checkForException();
     }
 
     private void checkForException() {
-        try {
-            Thread.sleep(EXCEPTION_WAIT_TIME);
-        } catch (InterruptedException ignored) { }
-        while (interpreter.isRunning() && threadDebugController.isWorking()) {
+        while (interpreter.isRunning() && threadDebugController.isActive()) {
             Thread.onSpinWait();
         }
         if (sharedException.get() != null) {
@@ -198,7 +193,7 @@ public class MimaController implements ExceptionListener {
 
     @Override
     public void notifyException(Exception e) {
-        interpreter.setRunning(false);
         sharedException.set(e);
+        threadDebugController.stop();
     }
 }

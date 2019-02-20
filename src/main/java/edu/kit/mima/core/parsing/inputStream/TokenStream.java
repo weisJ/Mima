@@ -43,6 +43,34 @@ public class TokenStream {
         current = null;
     }
 
+    private static boolean isWhitespace(char c) {
+        return WHITESPACE.matcher(String.valueOf(c)).matches();
+    }
+
+    private static boolean isDigitStart(char c) {
+        return NUMBER_START.matcher(String.valueOf(c)).matches();
+    }
+
+    private static boolean isDigit(char c) {
+        return NUMBER.matcher(String.valueOf(c)).matches();
+    }
+
+    private static boolean isIdentificationStart(char c) {
+        return LETTER.matcher(String.valueOf(c)).matches();
+    }
+
+    private static boolean isPunctuationChar(char c) {
+        return PUNCTUATION.matcher(String.valueOf(c)).matches();
+    }
+
+    private static boolean isIdentification(char c) {
+        return isIdentificationStart(c) || (Symbol.ALLOWED_SYMBOLS.indexOf(c) >= 0);
+    }
+
+    private static boolean isKeyword(String identifier) {
+        return KEYWORDS.stream().anyMatch(keyword -> keyword.equals(identifier));
+    }
+
     /**
      * Get the next token and move forward
      *
@@ -89,10 +117,6 @@ public class TokenStream {
         return null;
     }
 
-    private static boolean isWhitespace(char c) {
-        return WHITESPACE.matcher(String.valueOf(c)).matches();
-    }
-
     /*
      * Read while a predicate is true
      */
@@ -107,30 +131,6 @@ public class TokenStream {
     private void skipComment() {
         readWhile(c -> c != NEW_LINE && c != Punctuation.COMMENT);
         input.next();
-    }
-
-    private static boolean isDigitStart(char c) {
-        return NUMBER_START.matcher(String.valueOf(c)).matches();
-    }
-
-    private static boolean isDigit(char c) {
-        return NUMBER.matcher(String.valueOf(c)).matches();
-    }
-
-    private static boolean isIdentificationStart(char c) {
-        return LETTER.matcher(String.valueOf(c)).matches();
-    }
-
-    private static boolean isPunctuationChar(char c) {
-        return PUNCTUATION.matcher(String.valueOf(c)).matches();
-    }
-
-    private static boolean isIdentification(char c) {
-        return isIdentificationStart(c) || (Symbol.ALLOWED_SYMBOLS.indexOf(c) >= 0);
-    }
-
-    private static boolean isKeyword(String identifier) {
-        return KEYWORDS.stream().anyMatch(keyword -> keyword.equals(identifier));
     }
 
     /*

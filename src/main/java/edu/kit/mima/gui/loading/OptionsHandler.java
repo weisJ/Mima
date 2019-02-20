@@ -39,7 +39,6 @@ public class OptionsHandler {
      * @return split of options file as array
      * @throws IOException may throw IOException during loading
      */
-    @SuppressWarnings("OverlyBroadThrowsClause")
     public String[] loadOptions() throws IOException {
         return handler.loadFile(optionsPath).split("\n");
     }
@@ -50,7 +49,6 @@ public class OptionsHandler {
      * @param text content to write to options file
      * @throws IOException may throw IOException during loading
      */
-    @SuppressWarnings("OverlyBroadThrowsClause")
     public void saveOptions(final String text) throws IOException {
         handler.saveFile(text, optionsPath);
     }

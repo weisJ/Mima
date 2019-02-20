@@ -12,19 +12,23 @@ import java.util.TimerTask;
 public class LoadingIndicator {
 
     private static final int PERIOD = 500;
-    private Timer timer;
-    private boolean running = false;
+    private static Timer timer;
+    private static boolean running = false;
 
-    public void start(String startMessage, int dotsNumber) {
+    private LoadingIndicator() {
+        assert false : "utility class constructor";
+    }
+
+    public static void start(String startMessage, int dotsNumber) {
         if (running) {
             return;
         }
         timer = new Timer();
-        timer.scheduleAtFixedRate(new LoadingTask(startMessage, dotsNumber),0, PERIOD);
+        timer.scheduleAtFixedRate(new LoadingTask(startMessage, dotsNumber), 0, PERIOD);
         running = true;
     }
 
-    public void stop(String lastMessage) {
+    public static void stop(String lastMessage) {
         if (!running) {
             return;
         }
@@ -34,17 +38,17 @@ public class LoadingIndicator {
         running = false;
     }
 
-    public void error(String message) {
+    public static void error(String message) {
         timer.cancel();
         timer.purge();
         Logger.error(message, true);
     }
 
-    private class LoadingTask extends TimerTask {
-        int counter = 0;
-        private boolean first = true;
+    private static class LoadingTask extends TimerTask {
         private final StringBuilder message;
         private final int dotsPeriod;
+        int counter = 0;
+        private boolean first = true;
 
         private LoadingTask(String message, int dotsNumber) {
             this.message = new StringBuilder(message);

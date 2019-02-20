@@ -22,8 +22,8 @@ public class SaveHandler {
 
     private static final String ENCODING = System.getProperty("file.encoding");
     private final CharsetDetector charsetDetector;
-    private String charSet;
     private final String tmpFile;
+    private String charSet;
 
     /**
      * Handler to manage file saving and loading from known paths

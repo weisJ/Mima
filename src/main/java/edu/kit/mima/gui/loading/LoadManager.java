@@ -12,6 +12,7 @@ public interface LoadManager {
      * Actions to perform before loading a file
      */
     void beforeLoad();
+
     /**
      * Action to perform at the load process
      *

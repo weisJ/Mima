@@ -44,7 +44,7 @@ import java.util.Set;
  * @author Jannis Weis
  * @since 2018
  */
-public final class MimaUI extends JFrame {
+public final class MimaUserInterface extends JFrame {
 
     private static final Dimension FULLSCREEN = Toolkit.getDefaultToolkit().getScreenSize();
     private static final String TITLE = "Mima-Simulator";
@@ -70,14 +70,13 @@ public final class MimaUI extends JFrame {
     private final JButton step = new JButton("STEP");
     private final JButton compile = new JButton("COMPILE");
     private final JRadioButtonMenuItem binaryView = new JRadioButtonMenuItem("Binary View");
-    private final LoadingIndicator indicator = new LoadingIndicator();
 
     private Thread runThread;
 
     /**
      * Create a new Mima UI window
      */
-    public MimaUI(String filePath) {
+    public MimaUserInterface(String filePath) {
         controller = new MimaController();
         fileManager = new FileManager(this, MIMA_DIR, new String[]{FILE_EXTENSION, FILE_EXTENSION_X});
         editor = new Editor();
@@ -94,7 +93,6 @@ public final class MimaUI extends JFrame {
         memoryConsole.setOrientation(JSplitPane.VERTICAL_SPLIT);
         memoryConsole.setTopComponent(memoryView);
         memoryConsole.setBottomComponent(console);
-//        controlPanel.add(memoryConsole, BorderLayout.LINE_START);
 
         if (filePath == null || filePath.isEmpty()) {
             updateFile(fileManager::loadLastFile);
@@ -117,9 +115,6 @@ public final class MimaUI extends JFrame {
         splitPane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setLeftComponent(memoryConsole);
         splitPane.setRightComponent(editor);
-
-//        add(controlPanel, BorderLayout.LINE_START);
-//        add(editor, BorderLayout.CENTER);
 
         add(controlPanel, BorderLayout.NORTH);
         add(splitPane, BorderLayout.CENTER);
@@ -159,13 +154,13 @@ public final class MimaUI extends JFrame {
                 .addItem("Save", () -> {
                     try {
                         if (!fileManager.isOnDisk()) {
-                            fileManager.saveAs();
+                            saveAs();
                         } else {
                             save();
                         }
                     } catch (IllegalArgumentException ignored) { }
                 }, "control S")
-                .addItem("Save as", fileManager::saveAs, "control shift S")
+                .addItem("Save as", this::saveAs, "control shift S")
                 .addItem("Quit", this::quit)
                 .addMenu("Edit").setMnemonic('E')
                 .addItem("Undo", editor::undo, "control Z")
@@ -272,7 +267,7 @@ public final class MimaUI extends JFrame {
             loadAction.run();
             String text = fileManager.getText();
             editor.setText(text);
-            setTitle(TITLE + ' ' + fileManager.getLastFile().replaceAll(" ", ""));
+            updateTitle();
             Logger.log("loaded: " + FileName.shorten(fileManager.getLastFile(), MAX_FILE_DISPLAY_LENGTH));
             controller.parse(text, getInstructionSet());
             updateHighlighting();
@@ -281,6 +276,13 @@ public final class MimaUI extends JFrame {
         } catch (IllegalArgumentException | IllegalStateException e) {
             Logger.error(e.getMessage());
         }
+    }
+
+    /**
+     * Update window title to current file name.
+     */
+    private void updateTitle() {
+        setTitle(TITLE + ' ' + fileManager.getLastFile().replaceAll(" ", ""));
     }
 
     /*
@@ -296,8 +298,8 @@ public final class MimaUI extends JFrame {
      * Stop the current execution of mima.
      */
     private void stop() {
-        if(runThread != null && runThread.isAlive()) {
-            indicator.stop("Running (stopped)");
+        if (runThread != null && runThread.isAlive()) {
+            LoadingIndicator.stop("Running (stopped)");
             runThread.interrupt();
             compile.setEnabled(true);
         }
@@ -332,15 +334,14 @@ public final class MimaUI extends JFrame {
         compile.setEnabled(false);
         Logger.log("Running program: " + FileName.shorten(fileManager.getLastFile(), MAX_FILE_DISPLAY_LENGTH));
         try {
-            indicator.start("Running", 3);
+            LoadingIndicator.start("Running", 3);
             controller.run();
-
             updateMemoryTable();
             step.setEnabled(true);
             run.setEnabled(true);
-            indicator.stop("Running (done)");
+            LoadingIndicator.stop("Running (done)");
         } catch (final InterpreterException e) {
-            indicator.stop("Running failed: " + e.getMessage());
+            LoadingIndicator.error("Running failed: " + e.getMessage());
             step.setEnabled(false);
             run.setEnabled(false);
         } finally {
@@ -354,30 +355,40 @@ public final class MimaUI extends JFrame {
     private void save() {
         try {
             String fileM = "Saving \"" + FileName.shorten(fileManager.getLastFile(), MAX_FILE_DISPLAY_LENGTH) + "\"";
-            indicator.start(fileM, 3);
+            LoadingIndicator.start(fileM, 3);
             fileManager.save();
-            indicator.stop(fileM + " (done)");
+            LoadingIndicator.stop(fileM + " (done)");
         } catch (final IllegalArgumentException | IOException e) {
-            indicator.error("Saving failed: " + e.getMessage());
+            LoadingIndicator.error("Saving failed: " + e.getMessage());
         }
+    }
+
+    /**
+     * Save current file and choose file name.
+     */
+    private void saveAs() {
+        fileManager.saveAs();
+        updateTitle();
     }
 
     /**
      * Compile mima program
      */
     private void compile() {
-        controller.stop();
+        if (controller.isRunning()) {
+            controller.stop();
+        }
         try {
             String fileM = "Compiling: \"" + FileName.shorten(fileManager.getLastFile(), MAX_FILE_DISPLAY_LENGTH) + "\"";
-            indicator.start(fileM, 3);
+            LoadingIndicator.start(fileM, 3);
             controller.parse(editor.getText(), getInstructionSet());
             controller.checkCode();
             updateMemoryTable();
             run.setEnabled(true);
             step.setEnabled(true);
-            indicator.stop(fileM + " (done)");
+            LoadingIndicator.stop(fileM + " (done)");
         } catch (final IllegalArgumentException | IllegalStateException e) {
-            indicator.error("Compilation failed: " + e.getMessage());
+            LoadingIndicator.error("Compilation failed: " + e.getMessage());
             run.setEnabled(false);
             step.setEnabled(false);
         }
@@ -387,7 +398,8 @@ public final class MimaUI extends JFrame {
      * Update the MemoryMap table with new values
      */
     private void updateMemoryTable() {
-        memoryView.setContent(controller.getMemoryTable(binaryView.isSelected()));
+        var values = controller.getMemoryTable(binaryView.isSelected());
+        memoryView.setContent(values);
         repaint();
     }
 

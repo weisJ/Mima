@@ -89,7 +89,7 @@ public final class MenuBuilder {
         /**
          * Add external JMenuItem to menu.
          *
-         * @param item item to add
+         * @param item   item to add
          * @param action action to perform when clicked
          * @return this
          */

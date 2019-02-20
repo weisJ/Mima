@@ -62,7 +62,7 @@ public class AtomToken<T> implements Token<T> {
             prefix.append(Punctuation.DEFINITION_BEGIN)
                     .append(Keyword.DEFINITION).append(' ')
                     .append(Keyword.CONSTANT).append(' ');
-        } else if(type == TokenType.BINARY) {
+        } else if (type == TokenType.BINARY) {
             prefix.append('~');
         }
         if (value instanceof ArrayToken && !(prefix.length() == 0)) {
@@ -78,32 +78,27 @@ public class AtomToken<T> implements Token<T> {
     @Override
     public List<Pair<String, Color>> syntaxPairs() {
         List<Pair<String, Color>> list = new ArrayList<>();
-        if (type == TokenType.DEFINITION) {
+        if (type == TokenType.DEFINITION || type == TokenType.CONSTANT) {
             list.add(new Pair<>(String.valueOf(Punctuation.DEFINITION_BEGIN), SyntaxColor.KEYWORD));
             list.add(new Pair<>(Keyword.DEFINITION, SyntaxColor.KEYWORD));
+            if (type == TokenType.CONSTANT) {
+                list.add(new Pair<>(Keyword.CONSTANT, SyntaxColor.KEYWORD));
+            }
             var values = ((ArrayToken<Token>) value).getValue();
-            for (int i = 1; i < values.length - 1; i++ ) {
+            for (int i = 1; i < values.length - 1; i++) {
                 list.addAll(values[i].syntaxPairs());
             }
-        } else if (type == TokenType.CONSTANT) {
-            list.add(new Pair<>(String.valueOf(Punctuation.DEFINITION_BEGIN), SyntaxColor.KEYWORD));
-            list.add(new Pair<>(Keyword.DEFINITION, SyntaxColor.KEYWORD));
-            list.add(new Pair<>(Keyword.CONSTANT, SyntaxColor.KEYWORD));
-            var values = ((ArrayToken<Token>) value).getValue();
-            for (int i = 1; i < values.length - 1; i++ ) {
-                list.addAll(values[i].syntaxPairs());
-            }
-        } else if(type == TokenType.BINARY) {
+        } else if (type == TokenType.BINARY) {
             list.add(new Pair<>(String.valueOf(Punctuation.BINARY_PREFIX), SyntaxColor.BINARY));
             list.add(new Pair<>(value.toString(), SyntaxColor.BINARY));
         }
         if (value instanceof ArrayToken && !list.isEmpty()) {
             var pairs = ((ArrayToken) value).syntaxPairs().toArray();
             for (int i = 1; i < pairs.length - 1; i++) {
-                list.add((Pair<String, Color>)pairs[i]);
+                list.add((Pair<String, Color>) pairs[i]);
             }
         } else if (value instanceof Token) {
-            list.addAll(((Token)value).syntaxPairs());
+            list.addAll(((Token) value).syntaxPairs());
         } else {
             list.add(new Pair<>(value.toString(), SyntaxColor.TEXT));
         }
