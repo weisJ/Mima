@@ -3,6 +3,7 @@ package edu.kit.mima;
 import edu.kit.mima.core.controller.MimaController;
 import edu.kit.mima.core.instruction.InstructionSet;
 import edu.kit.mima.core.interpretation.InterpreterException;
+import edu.kit.mima.core.parsing.ParseReferences;
 import edu.kit.mima.core.parsing.lang.Keyword;
 import edu.kit.mima.core.parsing.lang.Punctuation;
 import edu.kit.mima.gui.button.ButtonPanelBuilder;
@@ -33,6 +34,7 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -48,9 +50,6 @@ public final class MimaUserInterface extends JFrame {
 
     private static final Dimension FULLSCREEN = Toolkit.getDefaultToolkit().getScreenSize();
     private static final String TITLE = "Mima-Simulator";
-    private static final String FILE_EXTENSION = "mima";
-    private static final String FILE_EXTENSION_X = "mimax";
-    private static final String MIMA_DIR = System.getProperty("user.home") + "\\.mima";
 
     private static final int HISTORY_CAPACITY = 100;
     private static final int MAX_FILE_DISPLAY_LENGTH = 45;
@@ -66,9 +65,9 @@ public final class MimaUserInterface extends JFrame {
     private final StyleGroup referenceStyle;
 
     private final JPanel controlPanel = new JPanel(new BorderLayout());
-    private final JButton run = new JButton("RUN");
-    private final JButton step = new JButton("STEP");
-    private final JButton compile = new JButton("COMPILE");
+    private final JButton runButton = new JButton("RUN");
+    private final JButton stepButton = new JButton("STEP");
+    private final JButton compileButton = new JButton("COMPILE");
     private final JRadioButtonMenuItem binaryView = new JRadioButtonMenuItem("Binary View");
 
     private Thread runThread;
@@ -78,7 +77,7 @@ public final class MimaUserInterface extends JFrame {
      */
     public MimaUserInterface(String filePath) {
         controller = new MimaController();
-        fileManager = new FileManager(this, MIMA_DIR, new String[]{FILE_EXTENSION, FILE_EXTENSION_X});
+        fileManager = new FileManager(this, ParseReferences.MIMA_DIR, ParseReferences.FILE_EXTENSIONS);
         editor = new Editor();
         console = new Console();
         memoryView = new FixedScrollTable(new String[]{"Address", "Value"}, 100);
@@ -165,6 +164,17 @@ public final class MimaUserInterface extends JFrame {
                 .addMenu("Edit").setMnemonic('E')
                 .addItem("Undo", editor::undo, "control Z")
                 .addItem("Redo", editor::redo, "control shift Z")
+                .addItem("Comment out",
+                        () -> editor.transformLine(
+                                s -> {
+                                    String comment = String.valueOf(Punctuation.COMMENT);
+                                    if (s.trim().startsWith(comment)) {
+                                       return s.replaceFirst(comment, "");
+                                    } else {
+                                       return comment + s;
+                                  }
+                                }, editor.getCaretPosition()),
+                        "control 7")
                 .addMenu("View").setMnemonic('V')
                 .addItem("Zoom In", () -> editor.setFontSize(editor.getFontSize() + 1), "control PLUS")
                 .addItem("Zoom Out", () -> editor.setFontSize(editor.getFontSize() - 1), "control MINUS")
@@ -181,9 +191,9 @@ public final class MimaUserInterface extends JFrame {
      */
     private void setupButtons() {
         final JPanel buttonPanel = new ButtonPanelBuilder()
-                .addButton(compile).addAccelerator("alt C").addAction(this::compile).setEnabled(true)
-                .addButton(step).addAccelerator("alt S").addAction(this::step).setEnabled(false)
-                .addButton(run).addAccelerator("alt R").addAction(() -> {
+                .addButton(compileButton).addAccelerator("alt C").addAction(this::compile).setEnabled(true)
+                .addButton(stepButton).addAccelerator("alt S").addAction(this::step).setEnabled(false)
+                .addButton(runButton).addAccelerator("alt R").addAction(() -> {
                     runThread = new Thread(this::run);
                     runThread.start();
                 }).setEnabled(false)
@@ -208,11 +218,14 @@ public final class MimaUserInterface extends JFrame {
         defaultStyle.addHighlight('\\' + String.valueOf(Punctuation.SCOPE_OPEN), SyntaxColor.SCOPE);
         defaultStyle.addHighlight('\\' + String.valueOf(Punctuation.SCOPE_CLOSED), SyntaxColor.SCOPE);
         defaultStyle.addHighlight(String.valueOf(Punctuation.DEFINITION_BEGIN), SyntaxColor.KEYWORD);
+        defaultStyle.addHighlight(String.valueOf(Punctuation.PRE_PROC), SyntaxColor.KEYWORD);
         defaultStyle.addHighlight(String.valueOf(Punctuation.DEFINITION_DELIMITER), SyntaxColor.KEYWORD);
         defaultStyle.addHighlight(String.valueOf(Punctuation.INSTRUCTION_END), SyntaxColor.KEYWORD);
         defaultStyle.addHighlight(String.valueOf(Punctuation.COMMA), SyntaxColor.KEYWORD);
         defaultStyle.addHighlight("-?[0-9]+", SyntaxColor.NUMBER);
         defaultStyle.addHighlight(Punctuation.BINARY_PREFIX + "[10]*", SyntaxColor.BINARY);
+        defaultStyle.addHighlight(Punctuation.STRING + "[^" + Punctuation.STRING + "]*" + Punctuation.STRING,
+                SyntaxColor.STRING);
         StyleGroup commentStyle = new StyleGroup();
         commentStyle.addHighlight(Punctuation.COMMENT + "[^\n" + Punctuation.COMMENT + "]*" + Punctuation.COMMENT + '?',
                 SyntaxColor.COMMENT);
@@ -267,7 +280,7 @@ public final class MimaUserInterface extends JFrame {
             loadAction.run();
             String text = fileManager.getText();
             editor.setText(text);
-            updateTitle();
+            afterFileChange();
             Logger.log("loaded: " + FileName.shorten(fileManager.getLastFile(), MAX_FILE_DISPLAY_LENGTH));
             controller.parse(text, getInstructionSet());
             updateHighlighting();
@@ -281,15 +294,16 @@ public final class MimaUserInterface extends JFrame {
     /**
      * Update window title to current file name.
      */
-    private void updateTitle() {
+    private void afterFileChange() {
         setTitle(TITLE + ' ' + fileManager.getLastFile().replaceAll(" ", ""));
+        ParseReferences.WORKING_DIRECTORY = new File(fileManager.getLastFile()).getParentFile().getAbsolutePath();
     }
 
     /*
      * Get the current instruction set
      */
     private InstructionSet getInstructionSet() {
-        return fileManager.getLastExtension().equals(FILE_EXTENSION_X)
+        return fileManager.getLastExtension().equals(ParseReferences.FILE_EXTENSION_X)
                 ? InstructionSet.MIMA_X
                 : InstructionSet.MIMA;
     }
@@ -301,7 +315,7 @@ public final class MimaUserInterface extends JFrame {
         if (runThread != null && runThread.isAlive()) {
             LoadingIndicator.stop("Running (stopped)");
             runThread.interrupt();
-            compile.setEnabled(true);
+            compileButton.setEnabled(true);
         }
     }
 
@@ -314,14 +328,14 @@ public final class MimaUserInterface extends JFrame {
             if (controller.getCurrentStatement() != null) {
                 Logger.log("Instruction: " + controller.getCurrentStatement().simpleName());
             }
-            run.setEnabled(false);
+            runButton.setEnabled(false);
             updateMemoryTable();
-            run.setEnabled(!controller.isRunning());
-            step.setEnabled(controller.isRunning());
+            runButton.setEnabled(!controller.isRunning());
+            stepButton.setEnabled(controller.isRunning());
         } catch (final InterpreterException e) {
             Logger.error(e.getMessage());
-            step.setEnabled(false);
-            run.setEnabled(false);
+            stepButton.setEnabled(false);
+            runButton.setEnabled(false);
         }
     }
 
@@ -329,23 +343,23 @@ public final class MimaUserInterface extends JFrame {
      * Run all instructions of the mima
      */
     private void run() {
-        step.setEnabled(false);
-        run.setEnabled(false);
-        compile.setEnabled(false);
+        stepButton.setEnabled(false);
+        runButton.setEnabled(false);
+        compileButton.setEnabled(false);
         Logger.log("Running program: " + FileName.shorten(fileManager.getLastFile(), MAX_FILE_DISPLAY_LENGTH));
         try {
             LoadingIndicator.start("Running", 3);
             controller.run();
             updateMemoryTable();
-            step.setEnabled(true);
-            run.setEnabled(true);
+            stepButton.setEnabled(true);
+            runButton.setEnabled(true);
             LoadingIndicator.stop("Running (done)");
         } catch (final InterpreterException e) {
             LoadingIndicator.error("Running failed: " + e.getMessage());
-            step.setEnabled(false);
-            run.setEnabled(false);
+            stepButton.setEnabled(false);
+            runButton.setEnabled(false);
         } finally {
-            compile.setEnabled(true);
+            compileButton.setEnabled(true);
         }
     }
 
@@ -368,7 +382,7 @@ public final class MimaUserInterface extends JFrame {
      */
     private void saveAs() {
         fileManager.saveAs();
-        updateTitle();
+        afterFileChange();
     }
 
     /**
@@ -384,13 +398,13 @@ public final class MimaUserInterface extends JFrame {
             controller.parse(editor.getText(), getInstructionSet());
             controller.checkCode();
             updateMemoryTable();
-            run.setEnabled(true);
-            step.setEnabled(true);
+            runButton.setEnabled(true);
+            stepButton.setEnabled(true);
             LoadingIndicator.stop(fileM + " (done)");
         } catch (final IllegalArgumentException | IllegalStateException e) {
             LoadingIndicator.error("Compilation failed: " + e.getMessage());
-            run.setEnabled(false);
-            step.setEnabled(false);
+            runButton.setEnabled(false);
+            stepButton.setEnabled(false);
         }
     }
 
@@ -423,12 +437,14 @@ public final class MimaUserInterface extends JFrame {
 
     /**
      * Perform code analysis to fetch current associations for syntax highlighting
-     * Performs a silent compile on the instructions
+     * Performs a silent compileButton on the instructions
      */
     private void updateReferenceHighlighting() {
         try {
             final List<Set<String>> references = controller.getReferences();
-
+            if (references.isEmpty()) {
+                return;
+            }
             final String[] constants = references.get(0)
                     .stream().map(s -> "(?:\\A|(?<=[\\s\\(,]))(\\s)*" + s + "(\\s)*(?=[\\),:;])").toArray(String[]::new);
             referenceStyle.setHighlight(constants, SyntaxColor.CONSTANT);

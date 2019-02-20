@@ -12,7 +12,11 @@ import edu.kit.mima.core.parsing.inputStream.TokenStream;
 public interface Punctuation {
 
     /**
-     * Begin of definition
+     * begin of preprocessor statement.
+     */
+    char PRE_PROC = '!';
+    /**
+     * Begin of definition statement
      */
     char DEFINITION_BEGIN = '§';
     /**
@@ -51,6 +55,10 @@ public interface Punctuation {
      * open scope bracket
      */
     char SCOPE_CLOSED = '}';
+    /**
+     * String begin and end
+     */
+    char STRING = '\'';
 
     /**
      * Get the punctuation
@@ -59,6 +67,7 @@ public interface Punctuation {
      */
     static char[] getPunctuation() {
         return new char[]{
+                PRE_PROC,
                 DEFINITION_BEGIN,
                 DEFINITION_DELIMITER,
                 OPEN_BRACKET,
@@ -68,7 +77,8 @@ public interface Punctuation {
                 COMMENT,
                 COMMA,
                 SCOPE_OPEN,
-                SCOPE_CLOSED
+                SCOPE_CLOSED,
+                STRING
         };
     }
 }

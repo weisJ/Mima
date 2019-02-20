@@ -37,6 +37,10 @@ public enum TokenType {
      * Binary number type
      */
     BINARY,
+    /**
+     * String type
+     */
+    STRING,
 
     /**
      * Identification type

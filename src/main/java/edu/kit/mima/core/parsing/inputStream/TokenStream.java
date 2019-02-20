@@ -117,6 +117,15 @@ public class TokenStream {
         return null;
     }
 
+    /**
+     * Return current position in file
+     *
+     * @return current position
+     */
+    public int getPosition() {
+        return input.getPosition();
+    }
+
     /*
      * Read while a predicate is true
      */
@@ -157,6 +166,10 @@ public class TokenStream {
             input.next();
             return readBinary();
         }
+        if (c == Punctuation.STRING) {
+            input.next();
+            return readString();
+        }
         if (isPunctuationChar(c)) {
             input.next();
             return new AtomToken<>(TokenType.PUNCTUATION, String.valueOf(c));
@@ -190,5 +203,15 @@ public class TokenStream {
             return new AtomToken<>(TokenType.KEYWORD, identifier);
         }
         return new AtomToken<>(TokenType.IDENTIFICATION, identifier);
+    }
+
+    /*
+     * Read an string. Everything until the next apostrophe is taken
+     * as a String.
+     */
+    private Token readString() {
+        String string = readWhile(c -> c != Punctuation.STRING);
+        input.next();
+        return new AtomToken<>(TokenType.STRING, string);
     }
 }

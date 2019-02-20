@@ -82,4 +82,14 @@ public class CharInputStream {
     public void error(String message) {
         throw new ParserException(message, line, col);
     }
+
+
+    /**
+     * Get current position in text file
+     *
+     * @return current position
+     */
+    public int getPosition() {
+        return position;
+    }
 }

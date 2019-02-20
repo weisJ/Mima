@@ -37,6 +37,9 @@ public final class ReferenceCrawler {
      * @return list with references sets
      */
     public List<Set<String>> getReferences() {
+        if (programToken == null) {
+            return new ArrayList<>();
+        }
         Set<String> memory = new HashSet<>();
         Set<String> constants = new HashSet<>();
         Set<String> jumps = new HashSet<>();
@@ -85,6 +88,9 @@ public final class ReferenceCrawler {
      * @return List of all jump points in order they appeared
      */
     public List<Pair<Token, Integer>> getJumpPoints() {
+        if (programToken == null) {
+            return new ArrayList<>();
+        }
         List<Pair<Token, Integer>> references = new ArrayList<>();
         searchJumpPoints(programToken, references, 0);
         return references;
@@ -124,6 +130,9 @@ public final class ReferenceCrawler {
      * @return List of all tokens that are not a jump reference or function call
      */
     public List<Token> getNonFunctions() {
+        if (programToken == null) {
+            return new ArrayList<>();
+        }
         List<Token> found = new ArrayList<>();
         Token[] tokens = programToken.getValue();
         for (Token token : tokens) {

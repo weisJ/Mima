@@ -25,7 +25,7 @@ public interface SyntaxColor {
     /**
      * Color for binary Numbers
      */
-    Color BINARY = new Color(165, 194, 92);
+    Color BINARY = new Color(66, 130, 132);
     /**
      * Color for Comments
      */
@@ -50,9 +50,12 @@ public interface SyntaxColor {
      * Color for scopes
      */
     Color SCOPE = new Color(169, 183, 198);
-
     /**
      * Color for warning
      */
     Color WARNING = new Color(194, 65, 60);
+    /**
+     * Color for String
+     */
+    Color STRING = new Color(165, 194, 92);
 }
