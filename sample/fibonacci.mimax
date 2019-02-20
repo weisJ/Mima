@@ -1,12 +1,11 @@
 #This program computes the fibonacci numbers up to the specified value.
 #It uses a value 'cache' to minimize unnecessary computations
 
-§define const val : 16; #works up to val = 34
+§define const val : 8; #works up to val = 34
 §define argument : 0;
-§define comp     : 1;
+§define offset   : 1;
 §define tmp      : 2;
 §define tmp2     : 3;
-§define offset   : 4;
 
 LDC(val);
 CALL(FIB);
@@ -15,12 +14,8 @@ Stop : HALT();
 #Last result is stored at stack-pointer position
 FIB : {
    STV(argument);
-   LDC(5);
+   LDC(4);
    STV(offset);
-   LDC(1);
-   LDC(0);
-   STV(comp);
-   LDC(1);
    
    LDV(offset);
    ADD(argument);
@@ -29,9 +24,9 @@ FIB : {
    CALL(PREPARE_CACHE);
 
    LDC(0);
-   STV(5); #fib(0)
+   STV(4); #fib(0)
    LDC(1);
-   STV(6); #fib(1)
+   STV(5); #fib(1)
 
    LDV(argument);
    JMN(Stop); #assert argument > 0
@@ -56,7 +51,7 @@ FIB : {
    COMPUTE_FIB :
       STV(argument);
       CALL(CHECK_CACHE);
-      JMN(CACHE_FIB);
+      JMN(LOAD_CACHE_FIB);
 
       CALL(INCREASE_STACK);
 
@@ -120,7 +115,7 @@ FIB : {
       STIV(tmp2);
       RET();
 
-   CACHE_FIB :
+   LOAD_CACHE_FIB :
       LDV(offset);
       ADD(argument); 
       STV(tmp2);

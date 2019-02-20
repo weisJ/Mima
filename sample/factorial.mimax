@@ -1,6 +1,6 @@
 #Compute the Factorial of a number.
 #Works up to val = 10.
-§define const val : 5;
+Â§define const val : 5;
 LDC(val);
 CALL(FACTORIAL);
 Stop : HALT();
@@ -10,10 +10,10 @@ Stop : HALT();
 #Parameter is stored in the accu.
 FACTORIAL : {
       #Init
-      §define argument    : 0; #argument variable
-      §define comp        : 1; # 0
-      §define neg_one     : 2; # -1
-      §define tmp         : 3; #temporary variable
+      Â§define argument    : 0; #argument variable
+      Â§define comp        : 1; # 0
+      Â§define neg_one     : 2; # -1
+      Â§define tmp         : 3; #temporary variable
    
       STV(argument);
       LDC(0);
@@ -42,7 +42,7 @@ FACTORIAL : {
       LDC(-1);
       ADD(argument);
       STV(argument); 
-      CALL(COMPUTE_FAC); #compute (x-1)!
+      CALL(COMPUTE_FAC); #compute (x-1)! =: y
       STVR(1, SP());     #store y
       CALL(MULT);        #x * y
  
