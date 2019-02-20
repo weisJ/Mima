@@ -10,6 +10,7 @@ import edu.kit.mima.core.interpretation.GlobalEnvironment;
 import edu.kit.mima.core.interpretation.Interpreter;
 import edu.kit.mima.core.interpretation.InterpreterException;
 import edu.kit.mima.core.parsing.Parser;
+import edu.kit.mima.core.parsing.preprocessor.PreProcessor;
 import edu.kit.mima.core.parsing.token.ProgramToken;
 import edu.kit.mima.core.parsing.token.Token;
 import edu.kit.mima.core.parsing.token.TokenType;
@@ -60,7 +61,7 @@ public class MimaController implements ExceptionListener {
     public void parse(String program, InstructionSet instructionSet) {
         currentInstructionSet = instructionSet;
         mima = new Mima(instructionSet.getWordLength(), instructionSet.getConstCordLength());
-        programToken = new Parser(program).parse();
+        programToken = new Parser(new PreProcessor(program).process()).parse();
 
         if (programToken.getValue().length > 0) {
             Token lastToken = programToken.getValue()[programToken.getValue().length - 1];

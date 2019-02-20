@@ -16,12 +16,19 @@ public class ThreadDebugController implements DebugController {
     private List<Runnable> beforeStop;
     private boolean isActive;
 
+    /**
+     * Create new ThreadDebugController.
+     */
     public ThreadDebugController() {
         beforeStop = new ArrayList<>();
         isActive = false;
     }
 
-
+    /**
+     * Set the working thread.
+     *
+     * @param workingThread working thread to control.
+     */
     public void setWorkingThread(Thread workingThread) {
         this.workingThread = workingThread;
         isActive = false;
@@ -37,7 +44,7 @@ public class ThreadDebugController implements DebugController {
     }
 
     /**
-     * Remove action thas is currently executed before thread is stopped.
+     * Remove action that is currently executed before thread is stopped.
      *
      * @param handler handler to remove
      * @return true if handler was removed successfully

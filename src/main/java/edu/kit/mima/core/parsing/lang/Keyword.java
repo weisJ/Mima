@@ -19,6 +19,10 @@ public interface Keyword {
      * const keyword
      */
     String CONSTANT = "const";
+    /**
+     * Include keyword
+     */
+    String INPUT = "input";
 
     /**
      * Get all keywords
@@ -28,7 +32,8 @@ public interface Keyword {
     static String[] getKeywords() {
         return new String[]{
                 DEFINITION,
-                CONSTANT
+                CONSTANT,
+                INPUT
         };
     }
 }

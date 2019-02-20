@@ -4,11 +4,14 @@ import edu.kit.mima.gui.color.SyntaxColor;
 import edu.kit.mima.gui.editor.style.StyleGroup;
 import edu.kit.mima.gui.editor.style.Stylizer;
 import edu.kit.mima.gui.editor.view.HighlightViewFactory;
+import edu.kit.mima.gui.logging.Logger;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.text.AbstractDocument;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyledDocument;
 import javax.swing.text.StyledEditorKit;
 import javax.swing.text.ViewFactory;
@@ -17,6 +20,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Editor that supports highlighting and text history
@@ -119,6 +123,19 @@ public class Editor extends JScrollPane {
         clean();
     }
 
+    public void transformLine(Function<String, String> function, int index) {
+        String text = editorPane.getText();
+        int lower = text.substring(0, index).lastIndexOf('\n') + 1;
+        int upper = text.substring(index).indexOf('\n') + index;
+        String newLine = function.apply(text.substring(lower, upper));
+        try {
+            editorPane.getDocument().remove(lower, upper - lower);
+            editorPane.getDocument().insertString(lower, newLine, new SimpleAttributeSet());
+        } catch (BadLocationException e) {
+            Logger.error(e.getMessage());
+        }
+    }
+
     /*----------Getter-and-Setter----------*/
 
 
@@ -188,6 +205,13 @@ public class Editor extends JScrollPane {
      */
     public void setText(final String text) {
         editorPane.setText(text);
+    }
+
+    /**
+     * Get the current caret position
+     */
+    public int getCaretPosition() {
+        return editorPane.getCaretPosition();
     }
 
     /**
