@@ -51,17 +51,20 @@ public class FileManager implements AutoCloseable {
         textLoader = new TextLoader(this.parent, new LogLoadManager() {
             private String backupLastFile;
             private String backupLastExtension;
+
             @Override
             public void beforeLoad() {
                 backupLastFile = lastFile;
                 backupLastExtension = lastExtension;
             }
+
             @Override
             public void onFail(final String errorMessage) {
                 super.onFail(errorMessage);
                 lastFile = backupLastFile;
                 lastExtension = backupLastExtension;
             }
+
             @Override
             public void afterRequest(final File chosenFile) {
                 setLastExtension(chosenFile);
@@ -127,15 +130,15 @@ public class FileManager implements AutoCloseable {
     /**
      * Load the text from given filePath
      *
-     * @exception IOException if file does not exist
+     * @throws IOException if file does not exist
      */
     public void load(String filePath) throws IOException {
-            text = saveHandler.loadFile(filePath);
-            assert text != null;
-            fileHash = text.hashCode();
-            isNewFile = false;
-            lastFile = filePath;
-            setLastExtension(filePath);
+        text = saveHandler.loadFile(filePath);
+        assert text != null;
+        fileHash = text.hashCode();
+        isNewFile = false;
+        lastFile = filePath;
+        setLastExtension(filePath);
     }
 
     /*
@@ -143,7 +146,7 @@ public class FileManager implements AutoCloseable {
      */
     private void firstFile() {
         boolean succeeded = false;
-        while(!succeeded) {
+        while (!succeeded) {
             try {
                 final int response = JOptionPane
                         .showOptionDialog(parent, "Create/Load File", "Create/Load File", JOptionPane.DEFAULT_OPTION,
@@ -161,7 +164,7 @@ public class FileManager implements AutoCloseable {
                 }
                 succeeded = true;
             } catch (final IllegalArgumentException ignored) {
-            } catch(NullPointerException e) {
+            } catch (NullPointerException e) {
                 JOptionPane.showMessageDialog(parent, "Could not load file. Try again!", "Error", JOptionPane.ERROR_MESSAGE, null);
             }
         }

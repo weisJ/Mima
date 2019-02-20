@@ -109,10 +109,7 @@ public class StyleGroup {
      * @param color color to highlight text in
      */
     public void addHighlight(final String regex, final Color color) {
-        regexList.add(regex);
-        Style style = context.addStyle(regex, null);
-        StyleConstants.setForeground(style, color);
-        styleMap.put(regex, style);
+        addHighlight(regex, colorToStyle(regex, color));
     }
 
     /**
@@ -135,13 +132,18 @@ public class StyleGroup {
      * @param colors     color sto highlight text in
      */
     public void addHighlight(final String[] regexArray, final Color[] colors) {
-        if (regexArray.length == 0) {
-            return;
-        }
         assert regexArray.length == colors.length : "unequal array lengths";
-        for (int i = 0; i < regexArray.length; i++) {
-            addHighlight(regexArray[i], colors[i]);
+        Style[] styles = new Style[colors.length];
+        for (int i = 0; i < styles.length; i++) {
+            styles[i] = colorToStyle(regexArray[i], colors[i]);
         }
+        addHighlight(regexArray, styles);
+    }
+
+    private Style colorToStyle(final String regex, final Color color) {
+        Style style = context.addStyle(regex, null);
+        StyleConstants.setForeground(style, color);
+        return style;
     }
 
 

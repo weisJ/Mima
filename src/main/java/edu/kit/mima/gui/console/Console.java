@@ -59,10 +59,10 @@ public class Console extends JScrollPane {
      * Replace the last message printed
      *
      * @param message message to replace the last with.
-     * @param color color to print in.
+     * @param color   color to print in.
      */
     public void replaceLastLine(final String message, final Color color) {
-        replaceLast(message  + "\n", color);
+        replaceLast(message + "\n", color);
     }
 
     /**
@@ -78,7 +78,7 @@ public class Console extends JScrollPane {
      * Replace the last message printed
      *
      * @param message message to replace the last with.
-     * @param color color to print in.
+     * @param color   color to print in.
      */
     public void replaceLast(final String message, final Color color) {
         try {

@@ -29,7 +29,7 @@ public final class App {
             e.printStackTrace(); /*will throw error because of illegal field access*/
         }
         String filePath = args != null && args.length >= 1 ? args[0] : null;
-        final MimaUI frame = new MimaUI(filePath);
+        final MimaUserInterface frame = new MimaUserInterface(filePath);
         Logger.setLevel(Logger.LogLevel.INFO);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);

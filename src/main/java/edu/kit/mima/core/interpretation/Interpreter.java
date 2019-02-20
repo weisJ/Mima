@@ -27,12 +27,11 @@ public class Interpreter {
     private static final Value<MachineWord> VOID = new Value<>(ValueType.VOID, null);
 
     private final int wordLength;
-    private int reservedIndex;
-    private boolean running;
-
     //------------Debug---------------//
     private final DebugController debugController;
     private final ExceptionListener exceptionListener;
+    private int reservedIndex;
+    private boolean running;
     private Token currentToken;
     private Environment currentScope;
     //--------------------------------//
@@ -58,13 +57,13 @@ public class Interpreter {
         reservedIndex = -1;
         expressionScopeIndex = 0;
         jumped = false;
+        running = false;
     }
 
     /*
      * Create jump associations for the given environment based on the tokens
      * This needs to be done as forward referencing is allowed for jumps
      */
-    @SuppressWarnings("unchecked")
     private void resolveJumpPoints(final ProgramToken programToken, final Environment environment) {
         try {
             for (var pair : new ReferenceCrawler(programToken).getJumpPoints()) {
@@ -142,15 +141,15 @@ public class Interpreter {
             case IDENTIFICATION:
                 return evaluateIdentification(expression, environment);
             case DEFINITION:
-                Token[] definitionTokens = (Token[])((ArrayToken)expression.getValue()).getValue();
+                Token[] definitionTokens = (Token[]) ((ArrayToken) expression.getValue()).getValue();
                 for (Token token : definitionTokens) {
-                    evaluateDefinition((BinaryToken<Token, Token>)token, environment);
+                    evaluateDefinition((BinaryToken<Token, Token>) token, environment);
                 }
                 return VOID;
             case CONSTANT:
-                Token[] constantTokens = (Token[])((ArrayToken)expression.getValue()).getValue();
+                Token[] constantTokens = (Token[]) ((ArrayToken) expression.getValue()).getValue();
                 for (Token token : constantTokens) {
-                    evaluateConstant((BinaryToken<Token, Token>)token, environment);
+                    evaluateConstant((BinaryToken<Token, Token>) token, environment);
                 }
                 return VOID;
             case CALL:
@@ -273,7 +272,6 @@ public class Interpreter {
     /*
      * Evaluate a function call
      */
-    @SuppressWarnings("unchecked")
     private Value<MachineWord> evaluateFunction(BinaryToken<Token, ArrayToken<Token>> value, Environment environment) {
         var function = environment.getFunction(value.getFirst());
         Token[] arguments = value.getSecond().getValue();

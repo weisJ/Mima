@@ -1,6 +1,6 @@
 package edu.kit.mima.gui.menu;
 
-import edu.kit.mima.MimaUI;
+import edu.kit.mima.MimaUserInterface;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
@@ -18,10 +18,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * Help menu frame for {@link MimaUI}
+ * Help menu frame for {@link MimaUserInterface}
  *
  * @author Jannis Weis
  * @since 2018
@@ -143,7 +144,7 @@ public final class Help extends JFrame {
     @SuppressWarnings("OverlyBroadCatchBlock")
     private String loadFallback() {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(
-                getClass().getClassLoader().getResourceAsStream(HELP_LOCAL), ENCODING))) {
+                Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(HELP_LOCAL)), ENCODING))) {
             return reader.lines().collect(Collectors.joining("\n"));
         } catch (IOException e) {
             return null;

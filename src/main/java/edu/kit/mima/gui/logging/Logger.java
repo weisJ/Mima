@@ -56,7 +56,7 @@ public final class Logger {
     /**
      * Log an information message
      *
-     * @param message message to log
+     * @param message       message to log
      * @param overwriteLast true if last message should be overwritten.
      */
     public static void log(final String message, boolean overwriteLast) {
@@ -81,15 +81,15 @@ public final class Logger {
     /**
      * Log a warning message
      *
-     * @param message message to log
+     * @param message       message to log
      * @param overwriteLast true if last message should be overwritten.
      */
     public static void warning(final String message, boolean overwriteLast) {
         if (level != ERROR) {
             if (overwriteLast) {
-                console.replaceLastLine("[WARNING] " + message,  Color.ORANGE);
+                console.replaceLastLine("[WARNING] " + message, Color.ORANGE);
             } else {
-                console.println("[WARNING] " + message,  Color.ORANGE);
+                console.println("[WARNING] " + message, Color.ORANGE);
             }
         }
     }
@@ -106,15 +106,15 @@ public final class Logger {
     /**
      * Log a error message
      *
-     * @param message message to log
+     * @param message       message to log
      * @param overwriteLast true if last message should be overwritten.
      */
     public static void error(final String message, boolean overwriteLast) {
-            if (overwriteLast) {
-                console.replaceLastLine("[ERROR] " + message,  Color.RED);
-            } else {
-                console.println("[ERROR] " + message, Color.RED);
-            }
+        if (overwriteLast) {
+            console.replaceLastLine("[ERROR] " + message, Color.RED);
+        } else {
+            console.println("[ERROR] " + message, Color.RED);
+        }
     }
 
     /**
