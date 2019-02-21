@@ -1,7 +1,5 @@
 package edu.kit.mima.gui.loading;
 
-import edu.kit.mima.gui.logging.Logger;
-
 import javax.swing.JOptionPane;
 import java.awt.Component;
 import java.io.File;
@@ -198,7 +196,6 @@ public class FileManager implements AutoCloseable {
      */
     public void save() throws IOException {
         saveHandler.saveFile(text, lastFile);
-        Logger.log("saving to: " + lastFile);
         fileHash = text.hashCode();
     }
 

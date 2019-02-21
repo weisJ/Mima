@@ -22,7 +22,7 @@ public interface Keyword {
     /**
      * Include keyword
      */
-    String INPUT = "input";
+    String INPUT = "include";
 
     /**
      * Get all keywords

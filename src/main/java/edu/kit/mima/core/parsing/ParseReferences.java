@@ -6,9 +6,6 @@ package edu.kit.mima.core.parsing;
  */
 public class ParseReferences {
 
-    private ParseReferences() {
-        assert false : "Variable class constructor";
-    }
     /**
      * path to current working directory
      */
@@ -29,4 +26,8 @@ public class ParseReferences {
      * File extensions that are supported.
      */
     public static String[] FILE_EXTENSIONS = {FILE_EXTENSION, FILE_EXTENSION_X};
+
+    private ParseReferences() {
+        assert false : "Variable class constructor";
+    }
 }

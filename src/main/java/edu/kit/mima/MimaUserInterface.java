@@ -169,10 +169,10 @@ public final class MimaUserInterface extends JFrame {
                                 s -> {
                                     String comment = String.valueOf(Punctuation.COMMENT);
                                     if (s.trim().startsWith(comment)) {
-                                       return s.replaceFirst(comment, "");
+                                        return s.replaceFirst(comment, "");
                                     } else {
-                                       return comment + s;
-                                  }
+                                        return comment + s;
+                                    }
                                 }, editor.getCaretPosition()),
                         "control 7")
                 .addMenu("View").setMnemonic('V')
@@ -211,7 +211,6 @@ public final class MimaUserInterface extends JFrame {
         Style style = new StyleContext().addStyle("default", null);
         style.addAttribute(HighlightView.JAGGED_UNDERLINE, new Color(0xd25252));
         defaultStyle.addHighlight("[^\\s]*", style);
-
         defaultStyle.addHighlight(Keyword.getKeywords(), SyntaxColor.KEYWORD);
         defaultStyle.addHighlight('\\' + String.valueOf(Punctuation.OPEN_BRACKET), SyntaxColor.TEXT);
         defaultStyle.addHighlight('\\' + String.valueOf(Punctuation.CLOSED_BRACKET), SyntaxColor.TEXT);
@@ -282,7 +281,9 @@ public final class MimaUserInterface extends JFrame {
             editor.setText(text);
             afterFileChange();
             Logger.log("loaded: " + FileName.shorten(fileManager.getLastFile(), MAX_FILE_DISPLAY_LENGTH));
-            controller.parse(text, getInstructionSet());
+            try {
+                controller.parse(editor.getText(), getInstructionSet());
+            } catch (IllegalArgumentException | IllegalStateException ignored) { }
             updateHighlighting();
             editor.resetHistory();
             editor.clean();

@@ -2,6 +2,8 @@ package edu.kit.mima.core.parsing.inputStream;
 
 import edu.kit.mima.core.parsing.ParserException;
 
+import java.awt.Point;
+
 /**
  * The CharInputStream reads single characters from a line and
  * is responsible for keeping track in which line and column the parser currently is
@@ -91,5 +93,14 @@ public class CharInputStream {
      */
     public int getPosition() {
         return position;
+    }
+
+    /**
+     * Get current position as Point
+     *
+     * @return (line, col)
+     */
+    public Point getPosPoint() {
+        return new Point(line, col);
     }
 }
