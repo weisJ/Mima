@@ -1,24 +1,23 @@
 package edu.kit.mima;
 
-import edu.kit.mima.core.controller.MimaController;
 import edu.kit.mima.core.instruction.InstructionSet;
 import edu.kit.mima.core.interpretation.InterpreterException;
 import edu.kit.mima.core.parsing.ParseReferences;
-import edu.kit.mima.core.parsing.lang.Keyword;
-import edu.kit.mima.core.parsing.lang.Punctuation;
+import edu.kit.mima.core.running.MimaCompiler;
+import edu.kit.mima.core.running.MimaRunner;
+import edu.kit.mima.core.running.Program;
 import edu.kit.mima.gui.button.ButtonPanelBuilder;
-import edu.kit.mima.gui.color.SyntaxColor;
 import edu.kit.mima.gui.console.Console;
 import edu.kit.mima.gui.console.LoadingIndicator;
 import edu.kit.mima.gui.editor.Editor;
-import edu.kit.mima.gui.editor.style.StyleGroup;
-import edu.kit.mima.gui.editor.view.HighlightView;
+import edu.kit.mima.gui.editor.highlighter.MimaHighlighter;
 import edu.kit.mima.gui.loading.FileManager;
 import edu.kit.mima.gui.logging.Logger;
 import edu.kit.mima.gui.menu.Help;
 import edu.kit.mima.gui.menu.MenuBuilder;
 import edu.kit.mima.gui.table.FixedScrollTable;
 import edu.kit.mima.gui.util.FileName;
+import edu.kit.mima.gui.view.MemoryTableView;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -26,19 +25,15 @@ import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSplitPane;
-import javax.swing.text.Style;
-import javax.swing.text.StyleContext;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Mima Editor Frame
@@ -49,26 +44,23 @@ import java.util.Set;
 public final class MimaUserInterface extends JFrame {
 
     private static final Dimension FULLSCREEN = Toolkit.getDefaultToolkit().getScreenSize();
-    private static final String TITLE = "Mima-Simulator";
+    private static final String TITLE = "Mima-IDE";
 
     private static final int HISTORY_CAPACITY = 100;
-    private static final int MAX_FILE_DISPLAY_LENGTH = 45;
 
-    private final MimaController controller;
+    private final MimaCompiler mimaCompiler;
+    private final MimaRunner mimaRunner;
+    private final MemoryTableView memoryView;
 
     private final FileManager fileManager;
     private final Console console;
-    private final FixedScrollTable memoryView;
-
+    private final FixedScrollTable memoryTable;
     private final Editor editor;
-    private final StyleGroup syntaxStyle;
-    private final StyleGroup referenceStyle;
 
     private final JPanel controlPanel = new JPanel(new BorderLayout());
     private final JButton runButton = new JButton("RUN");
     private final JButton stepButton = new JButton("STEP");
     private final JButton compileButton = new JButton("COMPILE");
-    private final JRadioButtonMenuItem binaryView = new JRadioButtonMenuItem("Binary View");
 
     private Thread runThread;
 
@@ -76,23 +68,28 @@ public final class MimaUserInterface extends JFrame {
      * Create a new Mima UI window
      */
     public MimaUserInterface(String filePath) {
-        controller = new MimaController();
+        mimaCompiler = new MimaCompiler();
+        mimaRunner = new MimaRunner();
+
         fileManager = new FileManager(this, ParseReferences.MIMA_DIR, ParseReferences.FILE_EXTENSIONS);
         editor = new Editor();
         console = new Console();
-        memoryView = new FixedScrollTable(new String[]{"Address", "Value"}, 100);
-        syntaxStyle = new StyleGroup();
-        referenceStyle = new StyleGroup();
+        memoryTable = new FixedScrollTable(new String[]{"Address", "Value"}, 100);
+        memoryView = new MemoryTableView(mimaRunner, memoryTable);
 
         Logger.setConsole(console);
-
         setupWindow();
+        setupButtons();
+        setupMenu();
+        setupEditor();
+        setupHotKeys();
+        setupComponents();
 
-        JSplitPane memoryConsole = new JSplitPane();
-        memoryConsole.setOrientation(JSplitPane.VERTICAL_SPLIT);
-        memoryConsole.setTopComponent(memoryView);
-        memoryConsole.setBottomComponent(console);
+        restoreSession(filePath);
+        memoryView.updateView();
+    }
 
+    private void restoreSession(String filePath) {
         if (filePath == null || filePath.isEmpty()) {
             updateFile(fileManager::loadLastFile);
         } else {
@@ -105,21 +102,6 @@ public final class MimaUserInterface extends JFrame {
                 }
             });
         }
-
-        setupButtons();
-        setupMenu();
-        setupEditor();
-
-        JSplitPane splitPane = new JSplitPane();
-        splitPane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
-        splitPane.setLeftComponent(memoryConsole);
-        splitPane.setRightComponent(editor);
-
-        add(controlPanel, BorderLayout.NORTH);
-        add(splitPane, BorderLayout.CENTER);
-
-        updateHighlighting();
-        updateMemoryTable();
     }
 
     /*------------Window-Setup------------*/
@@ -139,47 +121,28 @@ public final class MimaUserInterface extends JFrame {
         setSize((int) FULLSCREEN.getWidth() / 2, (int) FULLSCREEN.getHeight() / 2);
         setTitle(TITLE);
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("images/mima.png")));
+
     }
 
     /**
      * Setup the MenuBar with all of its components
      */
     private void setupMenu() {
+        JRadioButtonMenuItem binaryView = new JRadioButtonMenuItem("Binary View");
         final JMenuBar menuBar = new MenuBuilder()
                 .addMenu("File").setMnemonic('F')
                 .addItem("New", () -> updateFile(fileManager::newFile), "control N")
                 .addItem("Load", () -> updateFile(fileManager::load), "control L")
                 .separator()
-                .addItem("Save", () -> {
-                    try {
-                        if (!fileManager.isOnDisk()) {
-                            saveAs();
-                        } else {
-                            save();
-                        }
-                    } catch (IllegalArgumentException ignored) { }
-                }, "control S")
+                .addItem("Save", this::saveButtonAction, "control S")
                 .addItem("Save as", this::saveAs, "control shift S")
                 .addItem("Quit", this::quit)
                 .addMenu("Edit").setMnemonic('E')
-                .addItem("Undo", editor::undo, "control Z")
-                .addItem("Redo", editor::redo, "control shift Z")
-                .addItem("Comment out",
-                        () -> editor.transformLine(
-                                s -> {
-                                    String comment = String.valueOf(Punctuation.COMMENT);
-                                    if (s.trim().startsWith(comment)) {
-                                        return s.replaceFirst(comment, "");
-                                    } else {
-                                        return comment + s;
-                                    }
-                                }, editor.getCaretPosition()),
-                        "control 7")
+                .addItem("Undo", editor::undo)
+                .addItem("Redo", editor::redo)
                 .addMenu("View").setMnemonic('V')
-                .addItem("Zoom In", () -> editor.setFontSize(editor.getFontSize() + 1), "control PLUS")
-                .addItem("Zoom Out", () -> editor.setFontSize(editor.getFontSize() - 1), "control MINUS")
                 .separator()
-                .addItem(binaryView, this::updateMemoryTable)
+                .addItem(binaryView, () -> memoryView.setBinaryView(binaryView.isEnabled()))
                 .addMenu("Help").setMnemonic('H')
                 .addItem("Show Help", () -> Help.getInstance().setVisible(true))
                 .get();
@@ -191,59 +154,96 @@ public final class MimaUserInterface extends JFrame {
      */
     private void setupButtons() {
         final JPanel buttonPanel = new ButtonPanelBuilder()
-                .addButton(compileButton).addAccelerator("alt C").addAction(this::compile).setEnabled(true)
-                .addButton(stepButton).addAccelerator("alt S").addAction(this::step).setEnabled(false)
-                .addButton(runButton).addAccelerator("alt R").addAction(() -> {
-                    runThread = new Thread(this::run);
-                    runThread.start();
-                }).setEnabled(false)
-                .addButton("STOP", this::stop, "alt P")
+                .addButton(compileButton).addAccelerator("alt C")
+                .addAction(this::compileButtonAction).setEnabled(true)
+                .addButton(stepButton).addAccelerator("alt S")
+                .addAction(this::stepButtonAction).setEnabled(false)
+                .addButton(runButton).addAccelerator("alt R")
+                .addAction(this::runButtonAction).setEnabled(false)
+                .addButton("STOP", this::stopButtonAction, "alt P")
                 .get();
         controlPanel.add(buttonPanel, BorderLayout.PAGE_START);
-        controlPanel.add(buttonPanel, BorderLayout.PAGE_START);
+    }
+
+    private void setupComponents() {
+        JSplitPane memoryConsole = new JSplitPane();
+        memoryConsole.setOrientation(JSplitPane.VERTICAL_SPLIT);
+        memoryConsole.setTopComponent(memoryTable);
+        memoryConsole.setBottomComponent(console);
+        JSplitPane splitPane = new JSplitPane();
+        splitPane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
+        splitPane.setLeftComponent(memoryConsole);
+        splitPane.setRightComponent(editor);
+        add(controlPanel, BorderLayout.NORTH);
+        add(splitPane, BorderLayout.CENTER);
     }
 
     /**
      * Setup the editor
      */
     private void setupEditor() {
-        StyleGroup defaultStyle = new StyleGroup();
-        Style style = new StyleContext().addStyle("default", null);
-        style.addAttribute(HighlightView.JAGGED_UNDERLINE, new Color(0xd25252));
-        defaultStyle.addHighlight("[^\\s]*", style);
-        defaultStyle.addHighlight(Keyword.getKeywords(), SyntaxColor.KEYWORD);
-        defaultStyle.addHighlight('\\' + String.valueOf(Punctuation.OPEN_BRACKET), SyntaxColor.TEXT);
-        defaultStyle.addHighlight('\\' + String.valueOf(Punctuation.CLOSED_BRACKET), SyntaxColor.TEXT);
-        defaultStyle.addHighlight('\\' + String.valueOf(Punctuation.SCOPE_OPEN), SyntaxColor.SCOPE);
-        defaultStyle.addHighlight('\\' + String.valueOf(Punctuation.SCOPE_CLOSED), SyntaxColor.SCOPE);
-        defaultStyle.addHighlight(String.valueOf(Punctuation.DEFINITION_BEGIN), SyntaxColor.KEYWORD);
-        defaultStyle.addHighlight(String.valueOf(Punctuation.PRE_PROC), SyntaxColor.KEYWORD);
-        defaultStyle.addHighlight(String.valueOf(Punctuation.DEFINITION_DELIMITER), SyntaxColor.KEYWORD);
-        defaultStyle.addHighlight(String.valueOf(Punctuation.INSTRUCTION_END), SyntaxColor.KEYWORD);
-        defaultStyle.addHighlight(String.valueOf(Punctuation.COMMA), SyntaxColor.KEYWORD);
-        defaultStyle.addHighlight("-?[0-9]+", SyntaxColor.NUMBER);
-        defaultStyle.addHighlight(Punctuation.BINARY_PREFIX + "[10]*", SyntaxColor.BINARY);
-        defaultStyle.addHighlight(Punctuation.STRING + "[^" + Punctuation.STRING + "]*" + Punctuation.STRING,
-                SyntaxColor.STRING);
-        StyleGroup commentStyle = new StyleGroup();
-        commentStyle.addHighlight(Punctuation.COMMENT + "[^\n" + Punctuation.COMMENT + "]*" + Punctuation.COMMENT + '?',
-                SyntaxColor.COMMENT);
+        MimaHighlighter highlighter = new MimaHighlighter();
+        fileManager.addFileEventHandler(highlighter);
+        mimaCompiler.addCompilationEventHandler(highlighter);
+        editor.setHighlighter(highlighter);
 
-        editor.addStyleGroup(defaultStyle);
-        editor.addStyleGroup(syntaxStyle);
-        editor.addStyleGroup(referenceStyle);
-        editor.addStyleGroup(commentStyle);
-        editor.addAfterEditAction(() -> fileManager.setText(editor.getText()));
-        editor.addAfterEditAction(() -> {
-            /* no need to error while writing*/
-            try {
-                controller.parse(editor.getText(), getInstructionSet());
-            } catch (IllegalArgumentException | IllegalStateException ignored) { }
+        editor.addEditEventHandler(() -> {
+            fileManager.setText(editor.getText().replaceAll(String.format("%n"), "\n"));
+            parseFile();
         });
-        editor.addAfterEditAction(this::updateReferenceHighlighting);
+
         editor.useStyle(true);
         editor.clean();
         editor.useHistory(true, HISTORY_CAPACITY);
+    }
+
+    private void setupHotKeys() {
+        KeyListener listener = new KeyListener() {
+            @Override
+            public void keyPressed(KeyEvent event) {
+                printEventInfo("Key Pressed", event);
+            }
+
+            @Override
+            public void keyReleased(KeyEvent event) {
+                printEventInfo("Key Released", event);
+            }
+
+            @Override
+            public void keyTyped(KeyEvent event) {
+                printEventInfo("Key Typed", event);
+            }
+
+            private void printEventInfo(String str, KeyEvent e) {
+                System.out.println(str);
+                int code = e.getKeyCode();
+                System.out.println("   Code: " + KeyEvent.getKeyText(code));
+                System.out.println("   Char: " + e.getKeyChar());
+                int mods = e.getModifiersEx();
+                System.out.println("    Mods: "
+                        + KeyEvent.getModifiersExText(mods));
+                System.out.println("    Location: "
+                        + keyboardLocation(e.getKeyLocation()));
+                System.out.println("    Action? " + e.isActionKey());
+            }
+            private String keyboardLocation(int keybrd) {
+                switch (keybrd) {
+                    case KeyEvent.KEY_LOCATION_RIGHT:
+                        return "Right";
+                    case KeyEvent.KEY_LOCATION_LEFT:
+                        return "Left";
+                    case KeyEvent.KEY_LOCATION_NUMPAD:
+                        return "NumPad";
+                    case KeyEvent.KEY_LOCATION_STANDARD:
+                        return "Standard";
+                    case KeyEvent.KEY_LOCATION_UNKNOWN:
+                    default:
+                        return "Unknown";
+                }
+            }
+        };
+        editor.addKeyListener(listener);
+        editor.setFocusable(true);
     }
 
     /**
@@ -257,10 +257,88 @@ public final class MimaUserInterface extends JFrame {
             fileManager.close();
             dispose();
             Help.close();
-            controller.stop();
+            mimaRunner.stop();
         } catch (final IllegalArgumentException | IOException e) {
             Logger.error(e.getMessage());
         }
+    }
+
+    private void compileButtonAction() {
+        String fileM = "Compiling: \"" + FileName.shorten(fileManager.getLastFile()) + "\"";
+        LoadingIndicator.start(fileM, 3);
+        try {
+            if (mimaRunner.isRunning()) {
+                mimaRunner.stop();
+            }
+            mimaRunner.setProgram(new Program(mimaCompiler.compile(editor.getText()), getInstructionSet()));
+            //Update Memory View
+            LoadingIndicator.stop(fileM + " (done)");
+            runButton.setEnabled(true);
+            stepButton.setEnabled(true);
+        } catch (final IllegalArgumentException | IllegalStateException e) {
+            LoadingIndicator.error("Compilation failed: " + e.getMessage());
+            runButton.setEnabled(false);
+            stepButton.setEnabled(false);
+        }
+    }
+
+    private void runButtonAction() {
+        runThread = new Thread(() -> {
+            stepButton.setEnabled(false);
+            runButton.setEnabled(false);
+            compileButton.setEnabled(false);
+            Logger.log("Running program: " + FileName.shorten(fileManager.getLastFile()));
+            LoadingIndicator.start("Running", 3);
+            try {
+                mimaRunner.run();
+                memoryView.updateView();
+                stepButton.setEnabled(true);
+                runButton.setEnabled(true);
+                LoadingIndicator.stop("Running (done)");
+            } catch (InterpreterException e) {
+                LoadingIndicator.error("Running failed: " + e.getMessage());
+                stepButton.setEnabled(false);
+                runButton.setEnabled(false);
+            } finally {
+                compileButton.setEnabled(true);
+            }
+        });
+        runThread.start();
+    }
+
+    private void stepButtonAction() {
+        try {
+            mimaRunner.step();
+            if (mimaRunner.getCurrentStatement() != null) {
+                Logger.log("Instruction: " + mimaRunner.getCurrentStatement().simpleName());
+            }
+            runButton.setEnabled(false);
+            memoryView.updateView();
+            runButton.setEnabled(!mimaRunner.isRunning());
+            stepButton.setEnabled(mimaRunner.isRunning());
+        } catch (InterpreterException e) {
+            Logger.error(e.getMessage());
+            stepButton.setEnabled(false);
+            runButton.setEnabled(false);
+        }
+    }
+
+    private void stopButtonAction() {
+        if (runThread != null && runThread.isAlive()) {
+            LoadingIndicator.stop("Running (stopped)");
+            runThread.interrupt();
+            compileButton.setEnabled(true);
+        }
+    }
+
+    private void saveButtonAction() {
+        try {
+            if (!fileManager.isOnDisk()) {
+                saveAs();
+            } else {
+                save();
+            }
+        } catch (IllegalArgumentException ignored) { }
     }
 
     /*------------Functionality------------*/
@@ -275,16 +353,12 @@ public final class MimaUserInterface extends JFrame {
             fileManager.savePopUp();
         }
         try {
-            console.clear();
             loadAction.run();
-            String text = fileManager.getText();
-            editor.setText(text);
+            editor.setText(fileManager.getText());
             afterFileChange();
-            Logger.log("loaded: " + FileName.shorten(fileManager.getLastFile(), MAX_FILE_DISPLAY_LENGTH));
-            try {
-                controller.parse(editor.getText(), getInstructionSet());
-            } catch (IllegalArgumentException | IllegalStateException ignored) { }
-            updateHighlighting();
+            console.clear();
+            Logger.log("loaded: " + FileName.shorten(fileManager.getLastFile()));
+            parseFile();
             editor.resetHistory();
             editor.clean();
         } catch (IllegalArgumentException | IllegalStateException e) {
@@ -300,6 +374,13 @@ public final class MimaUserInterface extends JFrame {
         ParseReferences.WORKING_DIRECTORY = new File(fileManager.getLastFile()).getParentFile().getAbsolutePath();
     }
 
+    private void parseFile() {
+        try {
+            mimaCompiler.compile(editor.getText(), false, true, false);
+        } catch (IllegalArgumentException | IllegalStateException ignored) {
+        }
+    }
+
     /*
      * Get the current instruction set
      */
@@ -310,66 +391,11 @@ public final class MimaUserInterface extends JFrame {
     }
 
     /**
-     * Stop the current execution of mima.
-     */
-    private void stop() {
-        if (runThread != null && runThread.isAlive()) {
-            LoadingIndicator.stop("Running (stopped)");
-            runThread.interrupt();
-            compileButton.setEnabled(true);
-        }
-    }
-
-    /**
-     * Perform one instruction of the mima.
-     */
-    private void step() {
-        try {
-            controller.step();
-            if (controller.getCurrentStatement() != null) {
-                Logger.log("Instruction: " + controller.getCurrentStatement().simpleName());
-            }
-            runButton.setEnabled(false);
-            updateMemoryTable();
-            runButton.setEnabled(!controller.isRunning());
-            stepButton.setEnabled(controller.isRunning());
-        } catch (final InterpreterException e) {
-            Logger.error(e.getMessage());
-            stepButton.setEnabled(false);
-            runButton.setEnabled(false);
-        }
-    }
-
-    /**
-     * Run all instructions of the mima
-     */
-    private void run() {
-        stepButton.setEnabled(false);
-        runButton.setEnabled(false);
-        compileButton.setEnabled(false);
-        Logger.log("Running program: " + FileName.shorten(fileManager.getLastFile(), MAX_FILE_DISPLAY_LENGTH));
-        try {
-            LoadingIndicator.start("Running", 3);
-            controller.run();
-            updateMemoryTable();
-            stepButton.setEnabled(true);
-            runButton.setEnabled(true);
-            LoadingIndicator.stop("Running (done)");
-        } catch (final InterpreterException e) {
-            LoadingIndicator.error("Running failed: " + e.getMessage());
-            stepButton.setEnabled(false);
-            runButton.setEnabled(false);
-        } finally {
-            compileButton.setEnabled(true);
-        }
-    }
-
-    /**
      * Save current file
      */
     private void save() {
         try {
-            String fileM = "Saving \"" + FileName.shorten(fileManager.getLastFile(), MAX_FILE_DISPLAY_LENGTH) + "\"";
+            String fileM = "Saving \"" + FileName.shorten(fileManager.getLastFile()) + "\"";
             LoadingIndicator.start(fileM, 3);
             fileManager.save();
             LoadingIndicator.stop(fileM + " (done)");
@@ -384,80 +410,6 @@ public final class MimaUserInterface extends JFrame {
     private void saveAs() {
         fileManager.saveAs();
         afterFileChange();
-    }
-
-    /**
-     * Compile mima program
-     */
-    private void compile() {
-        if (controller.isRunning()) {
-            controller.stop();
-        }
-        try {
-            String fileM = "Compiling: \"" + FileName.shorten(fileManager.getLastFile(), MAX_FILE_DISPLAY_LENGTH) + "\"";
-            LoadingIndicator.start(fileM, 3);
-            controller.parse(editor.getText(), getInstructionSet());
-            controller.checkCode();
-            updateMemoryTable();
-            runButton.setEnabled(true);
-            stepButton.setEnabled(true);
-            LoadingIndicator.stop(fileM + " (done)");
-        } catch (final IllegalArgumentException | IllegalStateException e) {
-            LoadingIndicator.error("Compilation failed: " + e.getMessage());
-            runButton.setEnabled(false);
-            stepButton.setEnabled(false);
-        }
-    }
-
-    /**
-     * Update the MemoryMap table with new values
-     */
-    private void updateMemoryTable() {
-        var values = controller.getMemoryTable(binaryView.isSelected());
-        memoryView.setContent(values);
-        repaint();
-    }
-
-    /**
-     * Update the style groups for syntax highlighting
-     */
-    private void updateHighlighting() {
-        updateSyntaxHighlighting();
-        updateReferenceHighlighting();
-    }
-
-    /**
-     * Update the syntax highlighting according to the current instruction set
-     */
-    private void updateSyntaxHighlighting() {
-        syntaxStyle.setHighlight(Arrays.stream(getInstructionSet().getInstructions()).map(
-                s -> "(?:\\A|(?<=[\\s\\(,]))" + s + "(?=[\\(,:;\\s])"
-        ).toArray(String[]::new), SyntaxColor.INSTRUCTION);
-        syntaxStyle.addHighlight("(?<=[\\s\\(,])HALT(?=[\\(,:;\\s])", SyntaxColor.WARNING);
-    }
-
-    /**
-     * Perform code analysis to fetch current associations for syntax highlighting
-     * Performs a silent compileButton on the instructions
-     */
-    private void updateReferenceHighlighting() {
-        try {
-            final List<Set<String>> references = controller.getReferences();
-            if (references.isEmpty()) {
-                return;
-            }
-            final String[] constants = references.get(0)
-                    .stream().map(s -> "(?:\\A|(?<=[\\s\\(,]))(\\s)*" + s + "(\\s)*(?=[\\),:;])").toArray(String[]::new);
-            referenceStyle.setHighlight(constants, SyntaxColor.CONSTANT);
-            final String[] jumpReferences = references.get(1)
-                    .stream().map(s -> "(?:\\A|(?<=[\\s\\(,]))(\\s)*" + s + "(\\s)*(?=[\\),:;])").toArray(String[]::new);
-            referenceStyle.addHighlight(jumpReferences, SyntaxColor.JUMP);
-            final String[] memoryReferences = references.get(2)
-                    .stream().map(s -> "(?:\\A|(?<=[\\s\\(,]))(\\s)*" + s + "(\\s)*(?=[\\),:;])").toArray(String[]::new);
-            referenceStyle.addHighlight(memoryReferences, SyntaxColor.REFERENCE);
-        } catch (final IllegalArgumentException e) {
-            Logger.error(e.getMessage());
-        }
     }
 
 }

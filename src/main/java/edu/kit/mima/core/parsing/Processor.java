@@ -40,7 +40,8 @@ public abstract class Processor {
      * @param skipLast  whether the stop delimiter should be skipped
      * @return Expressions in ArrayToken
      */
-    protected ArrayToken<Token> delimited(char start, char stop, char separator, Supplier<Token> parser, boolean skipLast) {
+    protected ArrayToken<Token> delimited(char start, char stop, char separator,
+                                          Supplier<Token> parser, boolean skipLast) {
         if (start != CharInputStream.EMPTY_CHAR) {
             skipPunctuation(start);
         }
@@ -59,7 +60,9 @@ public abstract class Processor {
                 break;
             }
             Token token = parser.get();
-            tokens.add(token);
+            if (token.getType() != TokenType.ERROR) {
+                tokens.add(token);
+            }
         }
         if (skipLast) {
             skipPunctuation(stop);

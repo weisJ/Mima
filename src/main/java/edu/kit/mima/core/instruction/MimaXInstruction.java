@@ -32,7 +32,7 @@ public enum MimaXInstruction implements Instruction {
     LDSP("LDSP", 0) {
         @Override
         protected MachineWord applyInternal(List<Value<MachineWord>> arguments, Environment environment) {
-            mima.setAccumulator(mima.getStackPointer());
+            mima.setAccumulator(mima.getStackPointer().clone());
             return null;
         }
     },
@@ -54,7 +54,7 @@ public enum MimaXInstruction implements Instruction {
     SP("SP", 0) {
         @Override
         protected MachineWord applyInternal(List<Value<MachineWord>> arguments, Environment environment) {
-            return mima.getStackPointer();
+            return mima.getStackPointer().clone();
         }
     },
     /**

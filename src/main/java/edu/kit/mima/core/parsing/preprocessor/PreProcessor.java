@@ -179,7 +179,7 @@ public class PreProcessor extends Processor {
      * @return converted path
      */
     private String parseInputPath(String path) {
-        String[] hierarchy = path.split("\\.");
+        String[] hierarchy = path.replaceAll("\\s+", "").split("\\.");
         StringBuilder newPath = new StringBuilder();
         for (String s : hierarchy) {
             newPath.append('\\').append(s);

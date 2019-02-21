@@ -49,6 +49,11 @@ public class MemoryMap implements Memory<MachineWord> {
     }
 
     @Override
+    public Map<Integer, MachineWord> getMapping() {
+        return memory;
+    }
+
+    @Override
     public void reset() {
         for (final MachineWord value : memory.values()) {
             value.setValue(0);
@@ -63,14 +68,5 @@ public class MemoryMap implements Memory<MachineWord> {
         for (int i = 0; i < initialCapacity; i++) {
             memory.put(i, new MachineWord(0, machineWordLength));
         }
-    }
-
-    /**
-     * Get the memory Map
-     *
-     * @return memory map
-     */
-    public Map<Integer, MachineWord> getMemoryMap() {
-        return memory;
     }
 }

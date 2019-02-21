@@ -1,7 +1,7 @@
 package edu.kit.mima.gui.editor;
 
 import edu.kit.mima.gui.color.SyntaxColor;
-import edu.kit.mima.gui.editor.style.StyleGroup;
+import edu.kit.mima.gui.editor.highlighter.Highlighter;
 import edu.kit.mima.gui.editor.style.Stylizer;
 import edu.kit.mima.gui.editor.view.HighlightViewFactory;
 import edu.kit.mima.gui.logging.Logger;
@@ -41,8 +41,9 @@ public class Editor extends JScrollPane {
     private final JTextPane editorPane;
     private final Stylizer stylizer;
     private final TextHistoryController historyController;
-    private final List<Runnable> afterEditActions;
+    private final List<EditEventHandler> editEventHandlers;
 
+    private Highlighter highlighter;
     private boolean stylize;
     private boolean changeLock;
 
@@ -70,7 +71,7 @@ public class Editor extends JScrollPane {
         stylizer = new Stylizer(editorPane, TEXT_COLOR);
         historyController = new TextHistoryController(editorPane, DEFAULT_HISTORY_LENGTH);
         historyController.setActive(false);
-        afterEditActions = new ArrayList<>();
+        editEventHandlers = new ArrayList<>();
 
         final StyledDocument document = editorPane.getStyledDocument();
         ((AbstractDocument) document).setDocumentFilter(new EditorDocumentFilter(this));
@@ -85,8 +86,8 @@ public class Editor extends JScrollPane {
         if (changeLock) {
             return;
         }
-        for (final Runnable event : afterEditActions) {
-            event.run();
+        for (final EditEventHandler event : editEventHandlers) {
+            event.notifyEdit();
         }
         clean();
     }
@@ -99,8 +100,9 @@ public class Editor extends JScrollPane {
         final boolean historyLock = historyController.isActive();
         historyController.setActive(false);
         final int caret = editorPane.getCaretPosition();
-        if (stylize) {
-            stylizer.stylize();
+        if (stylize && highlighter != null) {
+            highlighter.updateHighlighting();
+            stylizer.stylize(highlighter.getStyleGroups());
         }
         setCaretPosition(caret);
         changeLock = false;
@@ -172,21 +174,30 @@ public class Editor extends JScrollPane {
     }
 
     /**
-     * Add a new style group that should be used for highlighting
-     *
-     * @param group StyleGroup
+     * Set Highlighter to use for syntax highlighting
+     * @param highlighter highlighter
      */
-    public void addStyleGroup(final StyleGroup group) {
-        stylizer.addStyleGroup(group);
+    public void setHighlighter(final Highlighter highlighter) {
+        this.highlighter = highlighter;
     }
 
     /**
      * Add an action that should be performed after an edit to the text has been occurred
      *
-     * @param action action to perform after edit
+     * @param handler handler to add
      */
-    public void addAfterEditAction(final Runnable action) {
-        afterEditActions.add(action);
+    public void addEditEventHandler(final EditEventHandler handler) {
+        editEventHandlers.add(handler);
+    }
+
+    /**
+     * Remove EditEventHandler
+     *
+     * @param handler handler to remove
+     * @return true if removed successfully
+     */
+    public boolean removeEditEventHandler(final EditEventHandler handler) {
+        return editEventHandlers.remove(handler);
     }
 
     /**

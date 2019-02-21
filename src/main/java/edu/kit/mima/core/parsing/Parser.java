@@ -13,7 +13,9 @@ import edu.kit.mima.core.parsing.token.Tuple;
 import edu.kit.mima.core.parsing.token.ValueTuple;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 
 /**
@@ -25,6 +27,8 @@ import java.util.function.Supplier;
 public class Parser extends Processor {
 
     private boolean skipEndOfInstruction;
+    private int scopeIndex;
+    private Set<Exception> errors;
 
     /**
      * Create parser from string input
@@ -34,6 +38,8 @@ public class Parser extends Processor {
     public Parser(String input) {
         super(input);
         skipEndOfInstruction = true;
+        errors = new HashSet<>();
+        scopeIndex = -1;
     }
 
 
@@ -43,6 +49,7 @@ public class Parser extends Processor {
      * @return ProgramToken containing the program
      */
     public Tuple<ProgramToken, List<Exception>> parse() {
+        errors.clear();
         return parseTopLevel();
     }
 
@@ -51,12 +58,19 @@ public class Parser extends Processor {
      */
     private Tuple<ProgramToken, List<Exception>> parseTopLevel() {
         List<Token> program = new ArrayList<>();
-        List<Exception> errors = new ArrayList<>();
-        while (!input.isEmpty()) {
+        boolean finishedScope = false;
+        scopeIndex++;
+        while (!input.isEmpty() && !finishedScope) {
             try {
                 skipEndOfInstruction = true;
                 if (!isPunctuation(Punctuation.INSTRUCTION_END)) {
-                    program.add(maybeJumpAssociation(this::parseExpression));
+                    Token token = maybeJumpAssociation(this::parseExpression);
+                    if (token.getType() == TokenType.SCOPE_END) {
+                        finishedScope = true;
+                        skipEndOfInstruction = false;
+                    } else {
+                        program.add(token);
+                    }
                 }
                 if (skipEndOfInstruction) {
                     skipPunctuation(Punctuation.INSTRUCTION_END);
@@ -66,7 +80,7 @@ public class Parser extends Processor {
                 input.next();
             }
         }
-        return new ValueTuple<>(new ProgramToken(program.toArray(new Token[0])), errors);
+        return new ValueTuple<>(new ProgramToken(program.toArray(new Token[0])), new ArrayList<>(errors));
     }
 
     /*
@@ -82,17 +96,18 @@ public class Parser extends Processor {
     private Token parseAtomic() {
         return maybeCall(() -> {
             if (isPunctuation(Punctuation.SCOPE_OPEN)) {
-                Token program = new ProgramToken(delimited(
-                        Punctuation.SCOPE_OPEN,
-                        Punctuation.SCOPE_CLOSED,
-                        Punctuation.INSTRUCTION_END,
-                        () -> maybeJumpAssociation(this::parseExpression),
-                        true).getValue());
+                input.next();
+                var parsed = parseTopLevel();
+                errors.addAll(parsed.getSecond());
+                Token program = parsed.getFirst();
                 if (isPunctuation(Punctuation.INSTRUCTION_END)) {
                     input.next();
                 }
                 skipEndOfInstruction = false;
                 return program;
+            }
+            if (isPunctuation(Punctuation.SCOPE_CLOSED)) {
+                return new AtomToken<>(TokenType.SCOPE_END, scopeIndex);
             }
             if (isPunctuation(Punctuation.OPEN_BRACKET)) {
                 input.next();
