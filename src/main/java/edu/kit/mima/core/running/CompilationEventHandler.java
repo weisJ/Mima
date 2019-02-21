@@ -10,6 +10,7 @@ public interface CompilationEventHandler {
 
     /**
      * Method to hook into an compilation process.
+     *
      * @param programToken output programToken.
      */
     void notifyCompilation(ProgramToken programToken);

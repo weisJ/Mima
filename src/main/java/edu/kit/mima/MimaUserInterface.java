@@ -10,6 +10,7 @@ import edu.kit.mima.gui.button.ButtonPanelBuilder;
 import edu.kit.mima.gui.console.Console;
 import edu.kit.mima.gui.console.LoadingIndicator;
 import edu.kit.mima.gui.editor.Editor;
+import edu.kit.mima.gui.editor.EditorHotKeys;
 import edu.kit.mima.gui.editor.highlighter.MimaHighlighter;
 import edu.kit.mima.gui.loading.FileManager;
 import edu.kit.mima.gui.logging.Logger;
@@ -20,16 +21,16 @@ import edu.kit.mima.gui.util.FileName;
 import edu.kit.mima.gui.view.MemoryTableView;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSplitPane;
+import javax.swing.KeyStroke;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -198,52 +199,12 @@ public final class MimaUserInterface extends JFrame {
     }
 
     private void setupHotKeys() {
-        KeyListener listener = new KeyListener() {
-            @Override
-            public void keyPressed(KeyEvent event) {
-                printEventInfo("Key Pressed", event);
-            }
-
-            @Override
-            public void keyReleased(KeyEvent event) {
-                printEventInfo("Key Released", event);
-            }
-
-            @Override
-            public void keyTyped(KeyEvent event) {
-                printEventInfo("Key Typed", event);
-            }
-
-            private void printEventInfo(String str, KeyEvent e) {
-                System.out.println(str);
-                int code = e.getKeyCode();
-                System.out.println("   Code: " + KeyEvent.getKeyText(code));
-                System.out.println("   Char: " + e.getKeyChar());
-                int mods = e.getModifiersEx();
-                System.out.println("    Mods: "
-                        + KeyEvent.getModifiersExText(mods));
-                System.out.println("    Location: "
-                        + keyboardLocation(e.getKeyLocation()));
-                System.out.println("    Action? " + e.isActionKey());
-            }
-            private String keyboardLocation(int keybrd) {
-                switch (keybrd) {
-                    case KeyEvent.KEY_LOCATION_RIGHT:
-                        return "Right";
-                    case KeyEvent.KEY_LOCATION_LEFT:
-                        return "Left";
-                    case KeyEvent.KEY_LOCATION_NUMPAD:
-                        return "NumPad";
-                    case KeyEvent.KEY_LOCATION_STANDARD:
-                        return "Standard";
-                    case KeyEvent.KEY_LOCATION_UNKNOWN:
-                    default:
-                        return "Unknown";
-                }
-            }
-        };
-        editor.addKeyListener(listener);
-        editor.setFocusable(true);
+        EditorHotKeys.setEditor(editor);
+        for (EditorHotKeys key : EditorHotKeys.values()) {
+            editor.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+                    .put(KeyStroke.getKeyStroke(key.getAccelerator()), key.toString());
+            editor.getActionMap().put(key.toString(), key);
+        }
     }
 
     /**

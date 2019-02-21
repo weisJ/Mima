@@ -15,7 +15,8 @@ public class Program implements ImmutableTuple<ProgramToken, InstructionSet> {
 
     /**
      * Create new program. It consists of a programToken and an instructionSet
-     * @param programToken programToken
+     *
+     * @param programToken   programToken
      * @param instructionSet instructionSet
      */
     public Program(ProgramToken programToken, InstructionSet instructionSet) {
@@ -25,6 +26,7 @@ public class Program implements ImmutableTuple<ProgramToken, InstructionSet> {
 
     /**
      * Get program Token.
+     *
      * @return programToken
      */
     public ProgramToken getProgramToken() {
@@ -33,6 +35,7 @@ public class Program implements ImmutableTuple<ProgramToken, InstructionSet> {
 
     /**
      * Get InstructionSet
+     *
      * @return instructionSet
      */
     public InstructionSet getInstructionSet() {

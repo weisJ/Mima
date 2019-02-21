@@ -22,7 +22,7 @@ public class MimaCompiler {
     }
 
     public ProgramToken compile(String input) {
-        return compile(input,true,true, true);
+        return compile(input, true, true, true);
     }
 
     public ProgramToken compile(String input, boolean throwErrors, boolean preProcess, boolean performCheck) {

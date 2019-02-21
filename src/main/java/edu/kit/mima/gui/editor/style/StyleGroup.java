@@ -79,9 +79,9 @@ public class StyleGroup {
     /**
      * Add highlighting regular expression
      *
-     * @param regex   expression to highlight
+     * @param regex      expression to highlight
      * @param groupIndex index of matching group
-     * @param painter highlight painter to use
+     * @param painter    highlight painter to use
      */
     public void addHighlight(final String regex, int groupIndex, final Style painter) {
         StylePattern pattern = new StylePattern(Pattern.compile(regex), groupIndex);
@@ -120,9 +120,9 @@ public class StyleGroup {
     /**
      * Add highlighting regular expressions
      *
-     * @param regex regular expression to match
+     * @param regex      regular expression to match
      * @param groupIndex index of matching group
-     * @param color color to highlight text in
+     * @param color      color to highlight text in
      */
     public void addHighlight(final String regex, int groupIndex, final Color color) {
         addHighlight(regex, groupIndex, colorToStyle(regex, color));
@@ -225,9 +225,9 @@ public class StyleGroup {
      * <p>
      * Note previously added expressions will be ignored
      *
-     * @param regex expression to highlight
+     * @param regex      expression to highlight
      * @param groupIndex index of matching group
-     * @param style highlight painter to use
+     * @param style      highlight painter to use
      */
     public void setHighlight(final String regex, int groupIndex, final Style style) {
         clearLists();
@@ -239,9 +239,9 @@ public class StyleGroup {
      * <p>
      * Note previously added expressions will be ignored
      *
-     * @param regex regular expression to match
+     * @param regex      regular expression to match
      * @param groupIndex index of matching group
-     * @param color color to highlight text in
+     * @param color      color to highlight text in
      */
     public void setHighlight(final String regex, int groupIndex, final Color color) {
         clearLists();

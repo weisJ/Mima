@@ -1,9 +1,9 @@
 package edu.kit.mima.gui.view;
 
-import edu.kit.mima.core.running.MimaRunner;
 import edu.kit.mima.core.Mima;
 import edu.kit.mima.core.data.MachineWord;
 import edu.kit.mima.core.interpretation.Environment;
+import edu.kit.mima.core.running.MimaRunner;
 import edu.kit.mima.gui.table.FixedScrollTable;
 
 import javax.swing.JTable;
@@ -24,7 +24,7 @@ public class MemoryTableView implements MemoryView {
 
     private final MimaRunner mimaRunner;
 
-    private FixedScrollTable table;
+    private final FixedScrollTable table;
     private boolean binaryView = false;
 
     public MemoryTableView(MimaRunner mimaRunner, FixedScrollTable table) {
@@ -32,6 +32,10 @@ public class MemoryTableView implements MemoryView {
         this.table = table;
     }
 
+    private static String getAssociation(final Map<String, Integer> associations, final int value) {
+        return associations.entrySet().stream().filter(entry -> entry.getValue() == value).findFirst()
+                .map(Map.Entry::getKey).orElse(null);
+    }
 
     @Override
     public void updateView() {
@@ -41,6 +45,7 @@ public class MemoryTableView implements MemoryView {
 
     /**
      * Set whether to use the binary representation of the memory values.
+     *
      * @param binaryView true if binary should be used.
      */
     public void setBinaryView(boolean binaryView) {
@@ -49,7 +54,6 @@ public class MemoryTableView implements MemoryView {
             updateView();
         }
     }
-
 
     /**
      * Get the current mima memory table.
@@ -111,10 +115,5 @@ public class MemoryTableView implements MemoryView {
         }
         data.addAll(memory);
         return data.toArray(new Object[0][]);
-    }
-
-    private static String getAssociation(final Map<String, Integer> associations, final int value) {
-        return associations.entrySet().stream().filter(entry -> entry.getValue() == value).findFirst()
-                .map(Map.Entry::getKey).orElse(null);
     }
 }

@@ -13,19 +13,19 @@ public class ParseReferences {
     /**
      * Path to home directory
      */
-    public static String MIMA_DIR = System.getProperty("user.home") + "\\.mima";
+    public static final String MIMA_DIR = System.getProperty("user.home") + "\\.mima";
     /**
      * File extension for default mimax files
      */
-    public static String FILE_EXTENSION_X = "mimax";
+    public static final String FILE_EXTENSION_X = "mimax";
     /**
      * File extension for default mima files
      */
-    public static String FILE_EXTENSION = "mima";
+    public static final String FILE_EXTENSION = "mima";
     /**
      * File extensions that are supported.
      */
-    public static String[] FILE_EXTENSIONS = {FILE_EXTENSION, FILE_EXTENSION_X};
+    public static final String[] FILE_EXTENSIONS = {FILE_EXTENSION, FILE_EXTENSION_X};
 
     private ParseReferences() {
         assert false : "Variable class constructor";

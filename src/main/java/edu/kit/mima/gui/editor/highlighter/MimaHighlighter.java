@@ -68,9 +68,9 @@ public class MimaHighlighter implements Highlighter, CompilationEventHandler, Fi
         defaultStyle.addHighlight(Punctuation.STRING + "[^" + Punctuation.STRING + "\n]*" + Punctuation.STRING,
                 SyntaxColor.STRING);
         commentStyle.addHighlight("(?:(?:[^" + Punctuation.STRING + "]*?" + Punctuation.STRING + "[^"
-                        + Punctuation.STRING + "]*?" + Punctuation.STRING + ")*?[^" + Punctuation.STRING
-                        + Punctuation.COMMENT + "]*?)(" + Punctuation.COMMENT + "[^\\n" + Punctuation.COMMENT + "]*?["
-                        + Punctuation.COMMENT + "\\n])", 1, SyntaxColor.COMMENT);
+                + Punctuation.STRING + "]*?" + Punctuation.STRING + ")*?[^" + Punctuation.STRING
+                + Punctuation.COMMENT + "]*?)(" + Punctuation.COMMENT + "[^\\n" + Punctuation.COMMENT + "]*?["
+                + Punctuation.COMMENT + "\\n])", 1, SyntaxColor.COMMENT);
     }
 
     @Override
@@ -91,8 +91,8 @@ public class MimaHighlighter implements Highlighter, CompilationEventHandler, Fi
      */
     private void updateSyntaxHighlighting() {
         syntaxStyle.setHighlight(Arrays.stream(currentInstructionSet.getInstructions())
-                        .map(s -> String.format(instructionRegex, s))
-                        .toArray(String[]::new), 0, SyntaxColor.INSTRUCTION);
+                .map(s -> String.format(instructionRegex, s))
+                .toArray(String[]::new), 0, SyntaxColor.INSTRUCTION);
         syntaxStyle.addHighlight(String.format(instructionRegex, "HALT"), SyntaxColor.WARNING);
     }
 
@@ -107,7 +107,7 @@ public class MimaHighlighter implements Highlighter, CompilationEventHandler, Fi
             }
             final String[] constants = currentReferences.get(0)
                     .stream().map(s -> String.format(variableRegex, s)).toArray(String[]::new);
-            referenceStyle.setHighlight(constants,0, SyntaxColor.CONSTANT);
+            referenceStyle.setHighlight(constants, 0, SyntaxColor.CONSTANT);
             final String[] jumpReferences = currentReferences.get(1)
                     .stream().map(s -> String.format(variableRegex, s)).toArray(String[]::new);
             referenceStyle.addHighlight(jumpReferences, SyntaxColor.JUMP);
