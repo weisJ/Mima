@@ -24,6 +24,7 @@ public class LoadingIndicator {
             return;
         }
         timer = new Timer();
+        Logger.log(startMessage);
         timer.scheduleAtFixedRate(new LoadingTask(startMessage, dotsNumber), 0, PERIOD);
         running = true;
     }
@@ -42,13 +43,13 @@ public class LoadingIndicator {
         timer.cancel();
         timer.purge();
         Logger.error(message, true);
+        running = false;
     }
 
     private static class LoadingTask extends TimerTask {
         private final StringBuilder message;
         private final int dotsPeriod;
         int counter = 0;
-        private boolean first = true;
 
         private LoadingTask(String message, int dotsNumber) {
             this.message = new StringBuilder(message);
@@ -61,8 +62,7 @@ public class LoadingIndicator {
             for (int i = 0; i < counter % dotsPeriod; i++) {
                 dots.append('.');
             }
-            Logger.log(message.toString() + dots.toString(), !first);
-            if (first) first = false;
+            Logger.log(message.toString() + dots.toString(), true);
             counter++;
         }
     }

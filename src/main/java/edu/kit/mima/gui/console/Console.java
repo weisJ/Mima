@@ -145,11 +145,11 @@ public class Console extends JScrollPane {
      * Scroll to the top of the console
      */
     private void scrollToTop() {
-        final JScrollBar verticalBar = getVerticalScrollBar();
-        final AdjustmentListener downScroller = new AdjustmentListener() {
+        JScrollBar verticalBar = getVerticalScrollBar();
+        AdjustmentListener downScroller = new AdjustmentListener() {
             @Override
-            public void adjustmentValueChanged(final AdjustmentEvent e) {
-                final Adjustable adjustable = e.getAdjustable();
+            public void adjustmentValueChanged(AdjustmentEvent e) {
+                Adjustable adjustable = e.getAdjustable();
                 adjustable.setValue(adjustable.getMinimum());
                 verticalBar.removeAdjustmentListener(this);
             }
@@ -162,16 +162,17 @@ public class Console extends JScrollPane {
      * Scroll to the bottom of the console
      */
     private void scrollToBottom() {
-        final JScrollBar verticalBar = getVerticalScrollBar();
-        final AdjustmentListener downScroller = new AdjustmentListener() {
-            @Override
-            public void adjustmentValueChanged(final AdjustmentEvent e) {
-                final Adjustable adjustable = e.getAdjustable();
-                adjustable.setValue(adjustable.getMaximum());
-                verticalBar.removeAdjustmentListener(this);
-            }
-        };
-        verticalBar.addAdjustmentListener(downScroller);
+//        JScrollBar verticalBar = getVerticalScrollBar();
+//        AdjustmentListener downScroller = new AdjustmentListener() {
+//            @Override
+//            public void adjustmentValueChanged(AdjustmentEvent e) {
+//                Adjustable adjustable = e.getAdjustable();
+//                adjustable.setValue(adjustable.getMaximum());
+//                verticalBar.removeAdjustmentListener(this);
+//            }
+//        };
+//        verticalBar.addAdjustmentListener(downScroller);
+        textPane.selectAll();
         repaint();
     }
 }

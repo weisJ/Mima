@@ -8,6 +8,7 @@ import edu.kit.mima.core.parsing.token.Token;
 import edu.kit.mima.core.parsing.token.TokenType;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.Point;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -124,6 +125,15 @@ public class TokenStream {
      */
     public int getPosition() {
         return input.getPosition();
+    }
+
+    /**
+     * Get position in document as point
+     *
+     * @return (row column)
+     */
+    public Point getPosPoint() {
+        return input.getPosPoint();
     }
 
     /*

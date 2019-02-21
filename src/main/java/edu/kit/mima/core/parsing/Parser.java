@@ -9,6 +9,8 @@ import edu.kit.mima.core.parsing.token.EmptyToken;
 import edu.kit.mima.core.parsing.token.ProgramToken;
 import edu.kit.mima.core.parsing.token.Token;
 import edu.kit.mima.core.parsing.token.TokenType;
+import edu.kit.mima.core.parsing.token.Tuple;
+import edu.kit.mima.core.parsing.token.ValueTuple;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,17 +42,18 @@ public class Parser extends Processor {
      *
      * @return ProgramToken containing the program
      */
-    public ProgramToken parse() {
+    public Tuple<ProgramToken, List<Exception>> parse() {
         return parseTopLevel();
     }
 
     /*
      * Parses single instruction segments divided by ';'
      */
-    private ProgramToken parseTopLevel() {
+    private Tuple<ProgramToken, List<Exception>> parseTopLevel() {
         List<Token> program = new ArrayList<>();
-        try {
-            while (!input.isEmpty()) {
+        List<Exception> errors = new ArrayList<>();
+        while (!input.isEmpty()) {
+            try {
                 skipEndOfInstruction = true;
                 if (!isPunctuation(Punctuation.INSTRUCTION_END)) {
                     program.add(maybeJumpAssociation(this::parseExpression));
@@ -58,11 +61,12 @@ public class Parser extends Processor {
                 if (skipEndOfInstruction) {
                     skipPunctuation(Punctuation.INSTRUCTION_END);
                 }
+            } catch (ParserException e) {
+                errors.add(e);
+                input.next();
             }
-        } catch (ParserException e) {
-            program.add(new AtomToken<>(TokenType.ERROR, e.getMessage()));
         }
-        return new ProgramToken(program.toArray(new Token[0]));
+        return new ValueTuple<>(new ProgramToken(program.toArray(new Token[0])), errors);
     }
 
     /*

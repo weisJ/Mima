@@ -13,7 +13,6 @@ import edu.kit.mima.core.parsing.Parser;
 import edu.kit.mima.core.parsing.preprocessor.PreProcessor;
 import edu.kit.mima.core.parsing.token.ProgramToken;
 import edu.kit.mima.core.parsing.token.Token;
-import edu.kit.mima.core.parsing.token.TokenType;
 
 import java.util.HashMap;
 import java.util.List;
@@ -61,13 +60,16 @@ public class MimaController implements ExceptionListener {
     public void parse(String program, InstructionSet instructionSet) {
         currentInstructionSet = instructionSet;
         mima = new Mima(instructionSet.getWordLength(), instructionSet.getConstCordLength());
-        programToken = new Parser(new PreProcessor(program).process()).parse();
-
-        if (programToken.getValue().length > 0) {
-            Token lastToken = programToken.getValue()[programToken.getValue().length - 1];
-            if (lastToken.getType() == TokenType.ERROR) {
-                throw new IllegalArgumentException(lastToken.getValue().toString());
-            }
+        var processed = new PreProcessor(program).process();
+        var parsed = new Parser(processed.getFirst()).parse();
+        programToken = parsed.getFirst();
+        var errors = processed.getSecond();
+        errors.addAll(parsed.getSecond());
+        if (!errors.isEmpty()) {
+            String message = errors.stream()
+                    .map(Exception::getMessage)
+                    .collect(Collectors.joining("\n"));
+            throw new IllegalArgumentException("Invalid Tokens \n" + message);
         }
         createGlobalEnvironment();
     }
