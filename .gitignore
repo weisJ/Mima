@@ -43,8 +43,6 @@ bin/
 
 # intelliJ
 .idea/
-*.iml
-
 # VS Code
 .vscode/
 

@@ -4,10 +4,11 @@ package edu.kit.mima.core.parsing.token;
  * @author Jannis Weis
  * @since 2018
  */
-public interface ImmutableTuple<T, K> extends Tuple<T,K> {
+public interface ImmutableTuple<T, K> extends Tuple<T, K> {
 
     /**
      * Not supported. Will throw UnsupportedOperationException
+     *
      * @param firstValue firstValue
      */
     @Override
@@ -17,6 +18,7 @@ public interface ImmutableTuple<T, K> extends Tuple<T,K> {
 
     /**
      * Not supported. Will throw UnsupportedOperationException
+     *
      * @param secondValue secondValue
      */
     @Override

@@ -4,7 +4,7 @@
   <headerType>gui</headerType>
   <jar>C:\Users\weisj\OneDrive - bwedu\Documents\Studium\Code\Java\Mima\build\Mima-1.9.jar</jar>
   <outfile>C:\Users\weisj\OneDrive - bwedu\Documents\Studium\Code\Java\Mima\build\Mima-1.9.exe</outfile>
-  <errTitle></errTitle>
+    <errTitle/>
   <cmdLine></cmdLine>
   <chdir>.</chdir>
   <priority>normal</priority>

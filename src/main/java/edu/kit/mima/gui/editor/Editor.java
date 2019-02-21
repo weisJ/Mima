@@ -175,6 +175,7 @@ public class Editor extends JScrollPane {
 
     /**
      * Set Highlighter to use for syntax highlighting
+     *
      * @param highlighter highlighter
      */
     public void setHighlighter(final Highlighter highlighter) {

@@ -10,6 +10,7 @@ public class MimaRuntimeException extends RuntimeException {
 
     /**
      * Create new MimaRuntimeException
+     *
      * @param message exception message
      */
     public MimaRuntimeException(String message) {

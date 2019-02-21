@@ -28,7 +28,7 @@ public class Parser extends Processor {
 
     private boolean skipEndOfInstruction;
     private int scopeIndex;
-    private Set<Exception> errors;
+    private final Set<Exception> errors;
 
     /**
      * Create parser from string input

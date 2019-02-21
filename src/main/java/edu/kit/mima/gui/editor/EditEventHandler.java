@@ -7,7 +7,7 @@ package edu.kit.mima.gui.editor;
 public interface EditEventHandler {
 
     /**
-     * Action to perform after edit has occured.
+     * Action to perform after edit has occurred.
      */
     void notifyEdit();
 }

@@ -41,6 +41,7 @@ public class Mima {
 
     /**
      * Returns the memory of the mima.
+     *
      * @return memory
      */
     public Memory<MachineWord> getMemory() {

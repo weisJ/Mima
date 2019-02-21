@@ -13,7 +13,7 @@ public class ThreadDebugController implements DebugController {
 
     private final Object lock = new Object();
     private Thread workingThread;
-    private List<Runnable> beforeStop;
+    private final List<Runnable> beforeStop;
     private boolean isActive;
 
     /**
