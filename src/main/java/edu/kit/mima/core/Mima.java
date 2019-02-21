@@ -1,14 +1,11 @@
 package edu.kit.mima.core;
 
 import edu.kit.mima.core.data.MachineWord;
+import edu.kit.mima.core.data.Memory;
 import edu.kit.mima.core.data.MemoryMap;
 import edu.kit.mima.core.interpretation.Environment;
 import javafx.util.Pair;
 
-import javax.swing.JTable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Stack;
 
 
@@ -17,16 +14,14 @@ import java.util.Stack;
  * @since 2018
  */
 public class Mima {
-    private static final String STACK_POINTER_POSTFIX = " [SP]";
-    private static final String ACCUMULATOR = "accumulator";
-
     private final int wordLength;
     private final int constWordLength;
 
     private final MemoryMap memoryMap;
-    private final MachineWord stackPointer;
-    private final Stack<Pair<Integer, Environment>> returnStack;
     private final MachineWord accumulator;
+    private final MachineWord stackPointer;
+
+    private final Stack<Pair<Integer, Environment>> returnStack;
 
     /**
      * Construct new Mima object with the given number of bits for
@@ -44,50 +39,12 @@ public class Mima {
         returnStack = new Stack<>();
     }
 
-    private static String getAssociation(final Map<String, Integer> associations, final int value) {
-        return associations.entrySet().stream().filter(entry -> entry.getValue() == value).findFirst()
-                .map(Map.Entry::getKey).orElse(null);
-    }
-
     /**
-     * Get the memory table labeled with the corresponding memory associations
-     *
-     * @param associations memory associations to use
-     * @param binaryView   whether to use the binary representation of the memory values
-     * @return MemoryTable formatted for an n(rows) x 2(columns) {@link JTable}
+     * Returns the memory of the mima.
+     * @return memory
      */
-    public Object[][] memoryTable(Map<String, Integer> associations, boolean binaryView) {
-        final Map<Integer, MachineWord> values = memoryMap.getMemoryMap();
-        final List<Object[]> data = new ArrayList<>();
-        data.add(new Object[]{ACCUMULATOR, binaryView ? accumulator.binaryRepresentation() : accumulator.intValue()});
-
-        final List<Object[]> memory = new ArrayList<>();
-        for (Map.Entry<Integer, MachineWord> entry : values.entrySet()) {
-            String valueString = binaryView
-                    ? entry.getValue().binaryRepresentation()
-                    : String.valueOf(entry.getValue().intValue());
-            Object[] element = associations.containsValue(entry.getKey())
-                    ? new Object[]{entry.getKey()
-                    + " (" + getAssociation(associations, entry.getKey())
-                    + ')', valueString}
-                    : new Object[]{entry.getKey(), valueString};
-            boolean skip;
-            try {
-                int value = Integer.parseInt(element[0].toString());
-                skip = value < 0;
-            } catch (NumberFormatException e) {
-                data.add(element);
-                skip = true;
-            }
-            if (entry.getKey() == stackPointer.intValue()) {
-                element[0] += STACK_POINTER_POSTFIX;
-            }
-            if (!skip) {
-                memory.add(element);
-            }
-        }
-        data.addAll(memory);
-        return data.toArray(new Object[0][]);
+    public Memory<MachineWord> getMemory() {
+        return memoryMap;
     }
 
     /**
@@ -181,7 +138,7 @@ public class Mima {
      * @return stack pointer
      */
     public MachineWord getStackPointer() {
-        return stackPointer.clone();
+        return stackPointer;
     }
 
     /**

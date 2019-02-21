@@ -1,5 +1,7 @@
 package edu.kit.mima.core.data;
 
+import java.util.Map;
+
 /**
  * Memory interface
  *
@@ -23,6 +25,13 @@ public interface Memory<T> {
      * @param value value to store
      */
     void storeValue(int index, T value);
+
+    /**
+     * Get the mapping of memory from integer addresses to values
+     *
+     * @return map with addresses as keys and values at address as value.
+     */
+    Map<Integer, T> getMapping();
 
     /**
      * Reset the memory. Changes all saved values to original state

@@ -8,10 +8,8 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /**
@@ -22,7 +20,6 @@ import java.util.regex.PatternSyntaxException;
  */
 public class Stylizer {
 
-    private final List<StyleGroup> styles;
     private final Color textColor;
     private final JTextPane textPane;
 
@@ -34,45 +31,32 @@ public class Stylizer {
      */
     public Stylizer(final JTextPane textPane, final Color textColor) {
         this.textPane = textPane;
-        styles = new ArrayList<>();
         this.textColor = textColor;
     }
 
     /**
-     * Add a new style group that should be used for highlighting
-     *
-     * @param group StyleGroup
-     */
-    public void addStyleGroup(final StyleGroup group) {
-        styles.add(group);
-    }
-
-
-    /**
      * Stylize the textPane
      */
-    public void stylize() {
+    public void stylize(Collection<StyleGroup> styles) {
         removeHighlighting();
         for (final StyleGroup group : styles) {
             stylize(group);
         }
     }
 
-
     /*
      * Stylize one specific StyleGroup
      */
     private void stylize(final StyleGroup group) {
-        var regexList = group.regexList();
-        for (final String regex : regexList) {
+        var regexList = group.patternList();
+        for (final StylePattern regex : regexList) {
             try {
-
                 Style style = group.getStyle(regex);
-                final Pattern pattern = Pattern.compile(regex);
-                final Matcher matcher = pattern.matcher(textPane.getText());
+                final Matcher matcher = regex.getPattern().matcher(textPane.getText());
                 while (matcher.find()) {
                     textPane.getStyledDocument()
-                            .setCharacterAttributes(matcher.start(), matcher.group().length(), style, true);
+                            .setCharacterAttributes(matcher.start(regex.getIndex()),
+                                    matcher.group(regex.getIndex()).length(), style, true);
                 }
             } catch (PatternSyntaxException e) {
                 Logger.error(e.getMessage());

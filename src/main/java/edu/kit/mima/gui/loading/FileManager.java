@@ -4,6 +4,9 @@ import javax.swing.JOptionPane;
 import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 import static edu.kit.mima.gui.logging.Logger.error;
 
@@ -20,6 +23,7 @@ public class FileManager implements AutoCloseable {
     private final TextLoader textLoader;
     private final OptionsHandler optionsHandler;
     private final SaveHandler saveHandler;
+    private final List<FileEventHandler> eventHandlers;
 
     private final String[] extensions;
     private boolean isNewFile;
@@ -43,6 +47,7 @@ public class FileManager implements AutoCloseable {
     public FileManager(final Component parent, final String saveDirectory, final String[] extensions) {
         optionsHandler = new OptionsHandler(saveDirectory);
         saveHandler = new SaveHandler(saveDirectory);
+        eventHandlers = new ArrayList<>();
         this.extensions = extensions;
         this.parent = parent;
 
@@ -103,12 +108,9 @@ public class FileManager implements AutoCloseable {
             loadOptions();
             if (lastFile.startsWith("unsaved.")) {
                 createNewFile();
-                setLastExtension(lastFile.split(".", 2)[1]);
-            } else {
-                text = saveHandler.loadFile(lastFile);
                 setLastExtension(lastFile);
-                fileHash = text.hashCode();
-                isNewFile = false;
+            } else {
+                load(lastFile);
             }
         } catch (final IOException | NullPointerException e) {
             firstFile();
@@ -123,6 +125,7 @@ public class FileManager implements AutoCloseable {
         assert text != null;
         fileHash = text.hashCode();
         isNewFile = false;
+        notifyHandlers(e -> e.fileLoadedEvent(lastFile));
     }
 
     /**
@@ -137,6 +140,7 @@ public class FileManager implements AutoCloseable {
         isNewFile = false;
         lastFile = filePath;
         setLastExtension(filePath);
+        notifyHandlers(e -> e.fileLoadedEvent(lastFile));
     }
 
     /*
@@ -181,6 +185,7 @@ public class FileManager implements AutoCloseable {
         lastFile = "unsaved." + response;
         setLastExtension(response);
         createNewFile();
+        notifyHandlers(e -> e.fileCreated(lastFile));
     }
 
     private void createNewFile() {
@@ -197,6 +202,7 @@ public class FileManager implements AutoCloseable {
     public void save() throws IOException {
         saveHandler.saveFile(text, lastFile);
         fileHash = text.hashCode();
+        notifyHandlers(e -> e.saveEvent(lastFile));
     }
 
     /**
@@ -207,6 +213,7 @@ public class FileManager implements AutoCloseable {
                 () -> { throw new IllegalArgumentException("aborted save"); });
         isNewFile = false;
         fileHash = text.hashCode();
+        notifyHandlers(e -> e.saveEvent(lastFile));
     }
 
     /**
@@ -265,7 +272,7 @@ public class FileManager implements AutoCloseable {
         if (text == null) {
             return false;
         }
-        return !(!isNewFile && (fileHash == text.hashCode()));
+        return isNewFile || fileHash != text.hashCode();
     }
 
     /**
@@ -316,5 +323,19 @@ public class FileManager implements AutoCloseable {
     @Override
     public void close() throws IOException {
         saveOptions();
+    }
+
+    public void addFileEventHandler(FileEventHandler handler) {
+        eventHandlers.add(handler);
+    }
+
+    public boolean removeFileEventHandler(FileEventHandler handler) {
+        return eventHandlers.remove(handler);
+    }
+
+    private void notifyHandlers(Consumer<FileEventHandler> action) {
+        for (FileEventHandler handler : eventHandlers) {
+            action.accept(handler);
+        }
     }
 }

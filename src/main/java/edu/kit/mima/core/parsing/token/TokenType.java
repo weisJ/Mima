@@ -67,5 +67,9 @@ public enum TokenType {
     /**
      * Error type. Used internally for signalling the parsing failed
      */
-    ERROR
+    ERROR,
+    /**
+     * End of Scope
+     */
+    SCOPE_END
 }

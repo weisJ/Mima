@@ -220,7 +220,7 @@ public class TokenStream {
      * as a String.
      */
     private Token readString() {
-        String string = readWhile(c -> c != Punctuation.STRING);
+        String string = readWhile(c -> c != Punctuation.STRING && c != NEW_LINE);
         input.next();
         return new AtomToken<>(TokenType.STRING, string);
     }

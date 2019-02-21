@@ -6,8 +6,14 @@ package edu.kit.mima.gui.util;
  */
 public final class FileName {
 
+    private static final int MAX_FILE_DISPLAY_LENGTH = 45;
+
     private FileName() {
         assert false : "utility class constructor";
+    }
+
+    public static String shorten(String fileName) {
+        return shorten(fileName, MAX_FILE_DISPLAY_LENGTH);
     }
 
     public static String shorten(String fileName, int maxLength) {
