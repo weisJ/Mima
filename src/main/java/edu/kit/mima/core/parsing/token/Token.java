@@ -2,10 +2,6 @@ package edu.kit.mima.core.parsing.token;
 
 import edu.kit.mima.core.parsing.Parser;
 import edu.kit.mima.core.parsing.inputStream.TokenStream;
-import javafx.util.Pair;
-
-import java.awt.Color;
-import java.util.List;
 
 /**
  * Token to used in {@link TokenStream}
@@ -65,11 +61,4 @@ public interface Token<T> {
      * @return simple name as string
      */
     String simpleName();
-
-    /**
-     * Returns the list of syntax pairs (String, Color) the token consists of.
-     *
-     * @return List of Pairs (String, Color)
-     */
-    List<Pair<String, Color>> syntaxPairs();
 }

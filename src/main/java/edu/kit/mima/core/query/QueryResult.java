@@ -3,6 +3,7 @@ package edu.kit.mima.core.query;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * Result of a Query
@@ -40,6 +41,13 @@ public interface QueryResult<T> {
      * @return List result
      */
     List<T> get();
+
+    /**
+     * Create stream from result.
+     *
+     * @return Stream with results
+     */
+    Stream<T> stream();
 
     /**
      * Get the query Result as a list in the given ordering.
