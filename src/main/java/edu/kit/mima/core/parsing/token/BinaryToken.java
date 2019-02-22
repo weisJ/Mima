@@ -21,6 +21,7 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
     private static final Pattern INDENT = Pattern.compile("\n");
     private static final String INDENT_REPLACEMENT = "\n\t";
     private final TokenType type;
+    private int index;
     private T first;
     private K second;
 
@@ -30,11 +31,24 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
      * @param type   type of the token
      * @param first  first value
      * @param second second value
+     * @param index  index of token
      */
-    public BinaryToken(TokenType type, T first, K second) {
+    public BinaryToken(TokenType type, T first, K second, int index) {
         this.type = type;
         this.first = first;
         this.second = second;
+        this.index = index;
+    }
+
+    /**
+     * Token that holds two values independent of each others type
+     *
+     * @param type   type of the token
+     * @param first  first value
+     * @param second second value
+     */
+    public BinaryToken(TokenType type, T first, K second) {
+        this(type, first, second, -1);
     }
 
     /**
@@ -75,6 +89,16 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
     @Override
     public TokenType getType() {
         return type;
+    }
+
+    @Override
+    public int getIndex() {
+        return index;
+    }
+
+    @Override
+    public void setIndex(int index) {
+        this.index = index;
     }
 
     @Override

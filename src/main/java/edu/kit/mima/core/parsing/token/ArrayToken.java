@@ -23,7 +23,20 @@ public class ArrayToken<T> implements Token<T[]> {
     private static final Pattern INDENT = Pattern.compile("\n");
     private static final String INDENT_REPLACEMENT = "\n\t";
     private final String className;
+    private int index;
     private T[] values;
+
+    /**
+     * Token that holds an array of values
+     *
+     * @param values array
+     * @param index  index
+     */
+    public ArrayToken(T[] values, int index) {
+        this.values = values;
+        this.index = index;
+        className = values.getClass().getSimpleName().substring(0, values.getClass().getSimpleName().length() - 2);
+    }
 
     /**
      * Token that holds an array of values
@@ -31,8 +44,7 @@ public class ArrayToken<T> implements Token<T[]> {
      * @param values array
      */
     public ArrayToken(T[] values) {
-        this.values = values;
-        className = values.getClass().getSimpleName().substring(0, values.getClass().getSimpleName().length() - 2);
+        this(values, -1);
     }
 
     @Override
@@ -48,6 +60,16 @@ public class ArrayToken<T> implements Token<T[]> {
     @Override
     public TokenType getType() {
         return TokenType.ARRAY;
+    }
+
+    @Override
+    public int getIndex() {
+        return index;
+    }
+
+    @Override
+    public void setIndex(int index) {
+        this.index = index;
     }
 
     @Override

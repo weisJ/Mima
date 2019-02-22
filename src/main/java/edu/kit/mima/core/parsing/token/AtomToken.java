@@ -19,7 +19,21 @@ import java.util.Objects;
 public class AtomToken<T> implements Token<T> {
 
     private final TokenType type;
+    private int index;
     private T value;
+
+    /**
+     * Plain Token that holds any value type
+     *
+     * @param type  type of token
+     * @param value value of token
+     * @param index index of token
+     */
+    public AtomToken(TokenType type, T value, int index) {
+        this.type = type;
+        this.value = value;
+        this.index = index;
+    }
 
     /**
      * Plain Token that holds any value type
@@ -28,13 +42,22 @@ public class AtomToken<T> implements Token<T> {
      * @param value value of token
      */
     public AtomToken(TokenType type, T value) {
-        this.type = type;
-        this.value = value;
+        this(type, value, -1);
     }
 
     @Override
     public TokenType getType() {
         return type;
+    }
+
+    @Override
+    public int getIndex() {
+        return index;
+    }
+
+    @Override
+    public void setIndex(int index) {
+        this.index = index;
     }
 
     @Override

@@ -1,7 +1,6 @@
 package edu.kit.mima.core.interpretation;
 
 import edu.kit.mima.core.controller.DebugController;
-import edu.kit.mima.core.controller.ReferenceCrawler;
 import edu.kit.mima.core.data.MachineWord;
 import edu.kit.mima.core.parsing.Parser;
 import edu.kit.mima.core.parsing.token.ArrayToken;
@@ -10,6 +9,7 @@ import edu.kit.mima.core.parsing.token.ProgramToken;
 import edu.kit.mima.core.parsing.token.Token;
 import edu.kit.mima.core.parsing.token.TokenType;
 import edu.kit.mima.core.parsing.token.Tuple;
+import edu.kit.mima.core.query.programQuery.ProgramQuery;
 
 import java.util.Arrays;
 import java.util.List;
@@ -66,8 +66,10 @@ public class Interpreter {
      */
     private void resolveJumpPoints(final ProgramToken programToken, final Environment environment) {
         try {
-            for (var pair : new ReferenceCrawler(programToken).getJumpPoints()) {
-                environment.defineJump(pair.getKey(), pair.getValue());
+            List<Token> tokens = new ProgramQuery(programToken)
+                    .whereEqual(Token::getType, TokenType.JUMP_POINT).get();
+            for (var token : tokens) {
+                environment.defineJump((Token) token.getValue(), token.getIndex());
             }
         } catch (IllegalArgumentException e) {
             fail(e.getMessage());
@@ -117,7 +119,7 @@ public class Interpreter {
     /*
      * Evaluate different tokens
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked") /*Construction of tokens guarantees these types*/
     private Value<MachineWord> evaluate(final Token expression, final Environment environment) {
         if (!running) {
             return VOID;

@@ -25,6 +25,7 @@ public class LoadingIndicator {
         }
         timer = new Timer();
         Logger.log(startMessage);
+        Logger.setLock(true);
         timer.scheduleAtFixedRate(new LoadingTask(startMessage, dotsNumber), 0, PERIOD);
         running = true;
     }
@@ -36,6 +37,7 @@ public class LoadingIndicator {
         timer.cancel();
         timer.purge();
         Logger.log(lastMessage, true);
+        Logger.setLock(false);
         running = false;
     }
 
@@ -43,6 +45,7 @@ public class LoadingIndicator {
         timer.cancel();
         timer.purge();
         Logger.error(message, true);
+        Logger.setLock(false);
         running = false;
     }
 

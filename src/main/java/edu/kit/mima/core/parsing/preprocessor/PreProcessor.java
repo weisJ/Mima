@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  * @author Jannis Weis
  * @since 2018
  */
-public class PreProcessor extends Processor {
+public final class PreProcessor extends Processor {
 
     private final StringBuilder processedInput;
     private final CharsetDetector charsetDetector;

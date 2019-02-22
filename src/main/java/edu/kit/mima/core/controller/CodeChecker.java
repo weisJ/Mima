@@ -2,11 +2,15 @@ package edu.kit.mima.core.controller;
 
 import edu.kit.mima.core.parsing.token.ProgramToken;
 import edu.kit.mima.core.parsing.token.Token;
+import edu.kit.mima.core.parsing.token.TokenType;
+import edu.kit.mima.core.query.programQuery.ProgramQuery;
 import edu.kit.mima.gui.logging.Logger;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Jannis Weis
@@ -37,20 +41,26 @@ public final class CodeChecker {
      * @param token Program token to check
      */
     private static void checkReferenceDuplicates(ProgramToken token) {
-        var sets = new ReferenceCrawler(token).getReferences();
-        Set<String> references = new HashSet<>();
-        for (var string : sets.get(1)) {
-            if (!references.add(string)) {
-                Logger.warning("jump reference is defined multiple times: \"" + string + '\"');
-            }
+        ProgramQuery query = new ProgramQuery(token);
+        List<String> referencesJump = query
+                .whereEqual(Token::getType, TokenType.JUMP_POINT).get()
+                .stream()
+                .map(t -> ((Token<Token>) t).getValue().getValue().toString()).collect(Collectors.toList());
+        Set<String> duplicates = findDuplicates(referencesJump);
+        if (!duplicates.isEmpty()) {
+            String duplicatesS = String.join(", ", duplicates);
+            Logger.warning("Multiple Jump Definitions: \"" + duplicatesS + '\"');
         }
-        references.clear();
-        for (var set : List.of(sets.get(0), sets.get(2))) {
-            for (var string : set) {
-                if (!references.add(string)) {
-                    Logger.warning("reference is defined multiple times: \"" + string + '\"');
-                }
-            }
+        List<String> referencesVar = query
+                .whereEqual(Token::getType, TokenType.CONSTANT)
+                .or()
+                .whereEqual(Token::getType, TokenType.DEFINITION).get()
+                .stream()
+                .map(t -> ((Token<Token>) t).getValue().getValue().toString()).collect(Collectors.toList());
+        duplicates = findDuplicates(referencesVar);
+        if (!duplicates.isEmpty()) {
+            String duplicatesS = String.join(", ", duplicates);
+            Logger.warning("Multiple Reference Definitions: \"" + duplicatesS + '\"');
         }
     }
 
@@ -60,9 +70,27 @@ public final class CodeChecker {
      * @param token program token to check
      */
     private static void checkNonCalls(ProgramToken token) {
-        List<Token> nonCalls = new ReferenceCrawler(token).getNonFunctions();
+        List<Token> nonCalls = new ProgramQuery(token)
+                .whereNotEqual(Token::getType, TokenType.DEFINITION)
+                .and()
+                .whereNotEqual(Token::getType, TokenType.CONSTANT)
+                .and()
+                .whereNotEqual(Token::getType, TokenType.CALL)
+                .and()
+                .whereNotEqual(Token::getType, TokenType.JUMP_POINT).get();
         for (Token t : nonCalls) {
             Logger.warning("not a function call: \"" + t.simpleName() + '\"');
         }
+    }
+
+    private static <T> Set<T> findDuplicates(Collection<T> collection) {
+        Set<T> duplicates = new HashSet<>();
+        Set<T> uniques = new HashSet<>();
+        for (T t : collection) {
+            if (!uniques.add(t)) {
+                duplicates.add(t);
+            }
+        }
+        return duplicates;
     }
 }

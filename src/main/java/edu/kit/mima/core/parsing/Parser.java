@@ -24,11 +24,11 @@ import java.util.function.Supplier;
  * @author Jannis Weis
  * @since 2018
  */
-public class Parser extends Processor {
+public final class Parser extends Processor {
 
+    private final Set<Exception> errors;
     private boolean skipEndOfInstruction;
     private int scopeIndex;
-    private final Set<Exception> errors;
 
     /**
      * Create parser from string input
@@ -60,6 +60,7 @@ public class Parser extends Processor {
         List<Token> program = new ArrayList<>();
         boolean finishedScope = false;
         scopeIndex++;
+        int tokenIndex = 0;
         while (!input.isEmpty() && !finishedScope) {
             try {
                 skipEndOfInstruction = true;
@@ -69,7 +70,9 @@ public class Parser extends Processor {
                         finishedScope = true;
                         skipEndOfInstruction = false;
                     } else {
+                        token.setIndex(tokenIndex);
                         program.add(token);
+                        tokenIndex++;
                     }
                 }
                 if (skipEndOfInstruction) {
