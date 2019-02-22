@@ -49,6 +49,14 @@ public class ProgramToken implements Token<Token[]> {
     }
 
     @Override
+    public int getIndex() {
+        return 0;
+    }
+
+    @Override
+    public void setIndex(int index) { }
+
+    @Override
     public String toString() {
         return Arrays.stream(program)
                 .map(t -> '\t' + INDENT.matcher(t.toString()).replaceAll(INDENT_REPLACEMENT) + '\n')

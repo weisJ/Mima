@@ -31,6 +31,14 @@ public class EmptyToken implements Token {
     }
 
     @Override
+    public int getIndex() {
+        return -1;
+    }
+
+    @Override
+    public void setIndex(int index) { }
+
+    @Override
     public String toString() {
         return "[type=empty]{ }";
     }

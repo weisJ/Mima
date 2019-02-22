@@ -1,8 +1,11 @@
 package edu.kit.mima.gui.logging;
 
+import edu.kit.mima.core.parsing.token.ValueTuple;
 import edu.kit.mima.gui.console.Console;
 
 import java.awt.Color;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import static edu.kit.mima.gui.logging.Logger.LogLevel.ERROR;
 import static edu.kit.mima.gui.logging.Logger.LogLevel.INFO;
@@ -17,6 +20,8 @@ public final class Logger {
 
     private static Console console;
     private static LogLevel level = INFO;
+    private static boolean locked = false;
+    private static Queue<ValueTuple<String, Color>> messageQueue = new LinkedList<>();
 
     /*
      * Prevent instantiation
@@ -61,10 +66,15 @@ public final class Logger {
      */
     public static void log(final String message, boolean overwriteLast) {
         if (level == INFO) {
+            String m = "[INFO] " + message;
             if (overwriteLast) {
-                console.replaceLastLine("[INFO] " + message);
+                console.replaceLastLine(m);
             } else {
-                console.println("[INFO] " + message);
+                if (locked) {
+                    messageQueue.offer(new ValueTuple<>(m, null));
+                    return;
+                }
+                console.println(m);
             }
         }
     }
@@ -86,10 +96,15 @@ public final class Logger {
      */
     public static void warning(final String message, boolean overwriteLast) {
         if (level != ERROR) {
+            String m = "[WARNING] " + message;
             if (overwriteLast) {
-                console.replaceLastLine("[WARNING] " + message, Color.ORANGE);
+                console.replaceLastLine(m, Color.ORANGE);
             } else {
-                console.println("[WARNING] " + message, Color.ORANGE);
+                if (locked) {
+                    messageQueue.offer(new ValueTuple<>(m, Color.ORANGE));
+                    return;
+                }
+                console.println(m, Color.ORANGE);
             }
         }
     }
@@ -100,7 +115,7 @@ public final class Logger {
      * @param message message to log
      */
     public static void error(final String message) {
-        console.println("[ERROR] " + message, Color.RED);
+        error(message, false);
     }
 
     /**
@@ -110,11 +125,32 @@ public final class Logger {
      * @param overwriteLast true if last message should be overwritten.
      */
     public static void error(final String message, boolean overwriteLast) {
+        String m = "[ERROR] " + message;
         if (overwriteLast) {
-            console.replaceLastLine("[ERROR] " + message, Color.RED);
+            console.replaceLastLine(m, Color.RED);
         } else {
-            console.println("[ERROR] " + message, Color.RED);
+            if (locked) {
+                messageQueue.offer(new ValueTuple<>(m, Color.RED));
+                return;
+            }
+            console.println(m, Color.RED);
         }
+    }
+
+    public static void setLock(boolean locked) {
+        if (Logger.locked && !locked) {
+            while (!messageQueue.isEmpty()) {
+                var pair = messageQueue.poll();
+                String m = pair.getFirst();
+                Color c = pair.getSecond();
+                if (c == null) {
+                    console.println(m);
+                } else {
+                    console.println(m, c);
+                }
+            }
+        }
+        Logger.locked = locked;
     }
 
     /**

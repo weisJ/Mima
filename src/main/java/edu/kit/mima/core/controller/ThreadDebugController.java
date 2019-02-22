@@ -12,8 +12,8 @@ import java.util.List;
 public class ThreadDebugController implements DebugController {
 
     private final Object lock = new Object();
-    private Thread workingThread;
     private final List<Runnable> beforeStop;
+    private Thread workingThread;
     private boolean isActive;
 
     /**

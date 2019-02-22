@@ -1,11 +1,13 @@
 package edu.kit.mima.gui.editor.highlighter;
 
-import edu.kit.mima.core.controller.ReferenceCrawler;
 import edu.kit.mima.core.instruction.InstructionSet;
 import edu.kit.mima.core.parsing.ParseReferences;
 import edu.kit.mima.core.parsing.lang.Keyword;
 import edu.kit.mima.core.parsing.lang.Punctuation;
 import edu.kit.mima.core.parsing.token.ProgramToken;
+import edu.kit.mima.core.parsing.token.Token;
+import edu.kit.mima.core.parsing.token.TokenType;
+import edu.kit.mima.core.query.programQuery.ProgramQuery;
 import edu.kit.mima.core.running.CompilationEventHandler;
 import edu.kit.mima.gui.color.SyntaxColor;
 import edu.kit.mima.gui.editor.style.StyleGroup;
@@ -20,7 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Jannis Weis
@@ -37,7 +39,9 @@ public class MimaHighlighter implements Highlighter, CompilationEventHandler, Fi
     private final StyleGroup commentStyle;
 
     private InstructionSet currentInstructionSet;
-    private List<Set<String>> currentReferences;
+    private List<String> jumps;
+    private List<String> variables;
+    private List<String> constants;
 
     public MimaHighlighter() {
         syntaxStyle = new StyleGroup();
@@ -45,7 +49,9 @@ public class MimaHighlighter implements Highlighter, CompilationEventHandler, Fi
         defaultStyle = new StyleGroup();
         commentStyle = new StyleGroup();
         currentInstructionSet = InstructionSet.MIMA;
-        currentReferences = List.of(Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
+        jumps = Collections.emptyList();
+        variables = Collections.emptyList();
+        constants = Collections.emptyList();
         setup();
     }
 
@@ -102,26 +108,42 @@ public class MimaHighlighter implements Highlighter, CompilationEventHandler, Fi
      */
     private void updateReferenceHighlighting() {
         try {
-            if (currentReferences.isEmpty()) {
-                return;
+            if (!constants.isEmpty()) {
+                final String[] constantsA = constants
+                        .stream().map(s -> String.format(variableRegex, s)).toArray(String[]::new);
+                referenceStyle.setHighlight(constantsA, 0, SyntaxColor.CONSTANT);
             }
-            final String[] constants = currentReferences.get(0)
-                    .stream().map(s -> String.format(variableRegex, s)).toArray(String[]::new);
-            referenceStyle.setHighlight(constants, 0, SyntaxColor.CONSTANT);
-            final String[] jumpReferences = currentReferences.get(1)
-                    .stream().map(s -> String.format(variableRegex, s)).toArray(String[]::new);
-            referenceStyle.addHighlight(jumpReferences, SyntaxColor.JUMP);
-            final String[] memoryReferences = currentReferences.get(2)
-                    .stream().map(s -> String.format(variableRegex, s)).toArray(String[]::new);
-            referenceStyle.addHighlight(memoryReferences, SyntaxColor.REFERENCE);
+            if (!jumps.isEmpty()) {
+                final String[] jumpsA = jumps
+                        .stream().map(s -> String.format(variableRegex, s)).toArray(String[]::new);
+                referenceStyle.addHighlight(jumpsA, SyntaxColor.JUMP);
+            }
+            if (!variables.isEmpty()) {
+                final String[] variablesA = variables
+                        .stream().map(s -> String.format(variableRegex, s)).toArray(String[]::new);
+                referenceStyle.addHighlight(variablesA, SyntaxColor.REFERENCE);
+            }
         } catch (final IllegalArgumentException e) {
             Logger.error(e.getMessage());
         }
     }
 
     @Override
+    @SuppressWarnings("unchecked") /*Construction of tokens guarantees these types*/
     public void notifyCompilation(ProgramToken programToken) {
-        currentReferences = new ReferenceCrawler(programToken).getReferences();
+        ProgramQuery query = new ProgramQuery(programToken);
+        constants = query
+                .whereEqual(Token::getType, TokenType.CONSTANT).get()
+                .stream()
+                .map(t -> ((Token<Token>) t).getValue().getValue().toString()).collect(Collectors.toList());
+        variables = query
+                .whereEqual(Token::getType, TokenType.DEFINITION).get()
+                .stream()
+                .map(t -> ((Token<Token>) t).getValue().getValue().toString()).collect(Collectors.toList());
+        jumps = query
+                .whereEqual(Token::getType, TokenType.JUMP_POINT).get()
+                .stream()
+                .map(t -> ((Token<Token>) t).getValue().getValue().toString()).collect(Collectors.toList());
     }
 
     @Override

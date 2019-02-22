@@ -39,6 +39,19 @@ public interface Token<T> {
     TokenType getType();
 
     /**
+     * Index of token
+     *
+     * @return index
+     */
+    int getIndex();
+
+    /**
+     * Set index of token
+     */
+    void setIndex(int index);
+
+
+    /**
      * Get a string representation of the token.
      *
      * @return String representation
