@@ -79,6 +79,18 @@ public class ProgramQueryResult implements QueryResult<Token> {
      * Resets the query
      */
     @Override
+    public Stream<Token> stream() {
+        var stream = createTokenStream(query.getTokens())
+                .filter(query.getFilter());
+        query.reset();
+        return stream;
+    }
+
+    /**
+     * {@inheritDoc }
+     * Resets the query
+     */
+    @Override
     public List<Token> getSorted(Comparator<? super Token> comparator) {
         var result = createTokenStream(query.getTokens())
                 .filter(query.getFilter()).sorted(comparator).collect(Collectors.toList());

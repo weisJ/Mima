@@ -133,15 +133,15 @@ public class MimaHighlighter implements Highlighter, CompilationEventHandler, Fi
     public void notifyCompilation(ProgramToken programToken) {
         ProgramQuery query = new ProgramQuery(programToken);
         constants = query
-                .whereEqual(Token::getType, TokenType.CONSTANT).get()
+                .whereEqual(Token::getType, TokenType.CONSTANT)
                 .stream()
                 .map(t -> ((Token<Token>) t).getValue().getValue().toString()).collect(Collectors.toList());
         variables = query
-                .whereEqual(Token::getType, TokenType.DEFINITION).get()
+                .whereEqual(Token::getType, TokenType.DEFINITION)
                 .stream()
                 .map(t -> ((Token<Token>) t).getValue().getValue().toString()).collect(Collectors.toList());
         jumps = query
-                .whereEqual(Token::getType, TokenType.JUMP_POINT).get()
+                .whereEqual(Token::getType, TokenType.JUMP_POINT)
                 .stream()
                 .map(t -> ((Token<Token>) t).getValue().getValue().toString()).collect(Collectors.toList());
     }

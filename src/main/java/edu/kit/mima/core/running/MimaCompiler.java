@@ -1,6 +1,6 @@
 package edu.kit.mima.core.running;
 
-import edu.kit.mima.core.controller.CodeChecker;
+import edu.kit.mima.core.CodeChecker;
 import edu.kit.mima.core.parsing.Parser;
 import edu.kit.mima.core.parsing.preprocessor.PreProcessor;
 import edu.kit.mima.core.parsing.token.ProgramToken;

@@ -1,13 +1,6 @@
 package edu.kit.mima.core.parsing.token;
 
-import edu.kit.mima.core.parsing.lang.Punctuation;
-import edu.kit.mima.gui.color.SyntaxColor;
-import javafx.util.Pair;
-
-import java.awt.Color;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -89,30 +82,6 @@ public class ArrayToken<T> implements Token<T[]> {
         } else {
             return '(' + Arrays.stream(values).map(Object::toString).collect(Collectors.joining(", ")) + ')';
         }
-    }
-
-    @Override
-    public List<Pair<String, Color>> syntaxPairs() {
-        List<Pair<String, Color>> list = new ArrayList<>();
-        list.add(new Pair<>(String.valueOf(Punctuation.OPEN_BRACKET), SyntaxColor.TEXT));
-        if (values.length > 0 && values[0] instanceof Token) {
-            Token[] tokens = (Token[]) values;
-            for (int i = 0; i < tokens.length; i++) {
-                list.addAll(tokens[i].syntaxPairs());
-                if (i < tokens.length - 1) {
-                    list.add(new Pair<>(String.valueOf(Punctuation.COMMA), SyntaxColor.KEYWORD));
-                }
-            }
-        } else {
-            for (int i = 0; i < values.length; i++) {
-                list.add(new Pair<>(values[i].toString(), SyntaxColor.TEXT));
-                if (i < values.length - 1) {
-                    list.add(new Pair<>(String.valueOf(Punctuation.COMMA), SyntaxColor.KEYWORD));
-                }
-            }
-        }
-        list.add(new Pair<>(String.valueOf(Punctuation.CLOSED_BRACKET), SyntaxColor.TEXT));
-        return list;
     }
 
     @Override

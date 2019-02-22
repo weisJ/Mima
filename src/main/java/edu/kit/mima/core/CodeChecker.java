@@ -1,4 +1,4 @@
-package edu.kit.mima.core.controller;
+package edu.kit.mima.core;
 
 import edu.kit.mima.core.parsing.token.ProgramToken;
 import edu.kit.mima.core.parsing.token.Token;
@@ -40,10 +40,11 @@ public final class CodeChecker {
      *
      * @param token Program token to check
      */
+    @SuppressWarnings("unchecked") /*Construction of tokens guarantees these types*/
     private static void checkReferenceDuplicates(ProgramToken token) {
         ProgramQuery query = new ProgramQuery(token);
         List<String> referencesJump = query
-                .whereEqual(Token::getType, TokenType.JUMP_POINT).get()
+                .whereEqual(Token::getType, TokenType.JUMP_POINT)
                 .stream()
                 .map(t -> ((Token<Token>) t).getValue().getValue().toString()).collect(Collectors.toList());
         Set<String> duplicates = findDuplicates(referencesJump);
@@ -54,7 +55,7 @@ public final class CodeChecker {
         List<String> referencesVar = query
                 .whereEqual(Token::getType, TokenType.CONSTANT)
                 .or()
-                .whereEqual(Token::getType, TokenType.DEFINITION).get()
+                .whereEqual(Token::getType, TokenType.DEFINITION)
                 .stream()
                 .map(t -> ((Token<Token>) t).getValue().getValue().toString()).collect(Collectors.toList());
         duplicates = findDuplicates(referencesVar);
