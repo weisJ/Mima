@@ -20,7 +20,6 @@ import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 import java.util.List;
 import java.util.Timer;
-import java.util.regex.Pattern;
 
 /**
  * @author Jannis Weis
@@ -28,8 +27,6 @@ import java.util.regex.Pattern;
  */
 public class MimaHighlighter implements Highlighter, FileEventHandler {
 
-    private static final Pattern TEXT = Pattern.compile("[^\\s]*");
-    private static final int DELAY = 500;
     private InstructionSet currentInstructionSet;
     private Timer highlightTimer;
     private boolean scheduled;

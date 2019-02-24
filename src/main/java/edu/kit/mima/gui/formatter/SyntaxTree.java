@@ -2,6 +2,10 @@ package edu.kit.mima.gui.formatter;
 
 import edu.kit.mima.core.parsing.lang.Punctuation;
 import edu.kit.mima.core.parsing.token.SyntaxToken;
+import edu.kit.mima.gui.formatter.syntaxtree.LeafNode;
+import edu.kit.mima.gui.formatter.syntaxtree.NodeType;
+import edu.kit.mima.gui.formatter.syntaxtree.SimpleSyntaxNode;
+import edu.kit.mima.gui.formatter.syntaxtree.SyntaxNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,33 +24,55 @@ public class SyntaxTree {
     public static SyntaxToken[] tokens = null;
     private SyntaxNode root;
 
+    /**
+     * Create syntax tree
+     * @param tokens tokens to build tree from
+     */
     public SyntaxTree(SyntaxToken[] tokens) {
         SyntaxTree.tokens = tokens;
         this.root = new SimpleSyntaxNode(NodeType.ROOT, 0, tokens.length, null);
         build();
     }
 
+    /**
+     * Get the root node
+     * @return root node
+     */
     public SyntaxNode root() {
         return root;
     }
 
+    /**
+     * Build the tree
+     */
     private void build() {
         buildGroundLayer();
         buildScopes();
     }
 
+    /**
+     * Build ground layer consisting of leaf nodes
+     */
     private void buildGroundLayer() {
         for (int i = 0; i < tokens.length; i++) {
             root.addChild(tokenToNode(tokens[i], i));
         }
     }
 
+    /**
+     * Group lines
+     * @param node parent node to create lines on
+     */
     private void buildLines(SyntaxNode node) {
         insertLayer(n -> n.getType() == NodeType.NEW_LINE,
                 (x, y) -> new SimpleSyntaxNode(NodeType.LINE, x, y, null), node);
         buildJumps(node);
     }
 
+    /**
+     * Create Jump layer
+     * @param node parent node to create layer on
+     */
     private void buildJumps(SyntaxNode node) {
         for (var line : new ArrayList<>(node.children())) {
             groupLayer(n -> n.getType() == NodeType.JUMP_DEL,
@@ -55,6 +81,9 @@ public class SyntaxTree {
         buildInstructions(node);
     }
 
+    /**
+     * Build scopes.
+     */
     private void buildScopes() {
         Stack<SyntaxNode> scopes = new Stack<>();
         scopes.add(root);
@@ -74,6 +103,10 @@ public class SyntaxTree {
         buildLines(root);
     }
 
+    /**
+     * Group instructions into one node
+     * @param node parent node to group on
+     */
     private void buildInstructions(SyntaxNode node) {
         for (var line : new ArrayList<>(node.children())) {
             groupLayer(n -> n.getType() == NodeType.INSTRUCTION_END,
@@ -82,6 +115,10 @@ public class SyntaxTree {
         buildBlocks(node);
     }
 
+    /**
+     * Create code blocks
+     * @param node parent nodes to create blocks on
+     */
     private void buildBlocks(SyntaxNode node) {
         insertLayer(n -> n.children().size() <= 1,
                 (x, y) -> new SimpleSyntaxNode(NodeType.BLOCK, x, y, null), node);
@@ -92,6 +129,11 @@ public class SyntaxTree {
         }
     }
 
+    /**
+     * Calculate size of node recursively.
+     * @param node node to calculate size of
+     * @return all Leaf node descendants
+     */
     private int calculateSize(SyntaxNode node) {
         if (node.children().isEmpty()) {
             return 1;
@@ -103,10 +145,21 @@ public class SyntaxTree {
         return result;
     }
 
+    /**
+     * Edit Layer
+     * @param function function to apply on children
+     * @param parentLayer parentNode
+     */
     private void editLayer(Consumer<SyntaxNode> function, SyntaxNode parentLayer) {
         editLayer(n -> true, function, parentLayer);
     }
 
+    /**
+     * Edit Layer
+     * @param filter filter out nodes to edit
+     * @param function function to appply
+     * @param parentLayer parentNode
+     */
     private void editLayer(Predicate<SyntaxNode> filter, Consumer<SyntaxNode> function, SyntaxNode parentLayer) {
         for (var n : parentLayer.children()) {
             if (filter.test(n)) {
@@ -115,6 +168,13 @@ public class SyntaxTree {
         }
     }
 
+    /**
+     * Split children on Predicate and group into new Node
+     * @param filter filter to test where to split
+     * @param supplier supplier for new node
+     * @param parentNode parent node
+     * @param includeLast whether to include the last group
+     */
     private void groupLayer(Predicate<SyntaxNode> filter,
                             BiFunction<Integer, Integer, SyntaxNode> supplier, SyntaxNode parentNode,
                             boolean includeLast) {
@@ -127,6 +187,12 @@ public class SyntaxTree {
 
     }
 
+    /**
+     * Insert new layer by grouping
+     * @param filter filter to split on
+     * @param supplier supplier for new nodes
+     * @param insertAfter parent node of new nodes
+     */
     private void insertLayer(Predicate<SyntaxNode> filter,
                              BiFunction<Integer, Integer, SyntaxNode> supplier, SyntaxNode insertAfter) {
         SyntaxNode[] nodes = insertAfter.children().toArray(new SyntaxNode[0]);
@@ -138,6 +204,10 @@ public class SyntaxTree {
         }
     }
 
+    /**
+     * Duplicate a layer
+     * @param parent parent of layer to duplicate
+     */
     private void duplicateLayer(SyntaxNode parent) {
         for (var n : new ArrayList<>(parent.children())) {
             var duplicate = new SimpleSyntaxNode(n.getType(), n.getBegin(), n.getEnd(), null);
@@ -147,11 +217,17 @@ public class SyntaxTree {
         }
     }
 
-    public String toString() {
-        return "";
-    }
-
-    private <T, K extends SyntaxNode> List<K> group(T[] items, Predicate<T> filter,
+    /**
+     * Group items based on predicate
+     * @param items items to group
+     * @param filter filter to split on
+     * @param supplier supplier for new nodes
+     * @param includeLast whether to include last group
+     * @param <T> Type of input data
+     * @param <K> Type of output data
+     * @return List of grouped items
+     */
+    private <T, K> List<K> group(T[] items, Predicate<T> filter,
                                                     BiFunction<Integer, Integer, K> supplier,
                                                     boolean includeLast) {
         List<K> groups = new ArrayList<>();
@@ -167,6 +243,13 @@ public class SyntaxTree {
         return groups;
     }
 
+    /**
+     * Get indices of split
+     * @param array array to split
+     * @param predicate predicate to split on
+     * @param <T> Type of input array
+     * @return integer array containing split indices
+     */
     private <T> int[] splitOn(T[] array, Predicate<T> predicate) {
         List<Integer> values = new ArrayList<>();
         for (int i = 0; i < array.length; i++) {
@@ -177,6 +260,12 @@ public class SyntaxTree {
         return values.stream().sorted(Integer::compareTo).mapToInt(Integer::intValue).toArray();
     }
 
+    /**
+     * Parse {@link SyntaxNode} to {@link SyntaxNode}
+     * @param token token to parse
+     * @param index index of token
+     * @return Syntax Node
+     */
     private SyntaxNode tokenToNode(SyntaxToken token, int index) {
         SyntaxNode node = new LeafNode(NodeType.LEAF, index, null);
         switch (token.getType()) {
