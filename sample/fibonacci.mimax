@@ -1,145 +1,155 @@
 #This program computes the fibonacci numbers up to the specified value.
 #It uses a value 'cache' to minimize unnecessary computations
 
-Â§define const val : 8; #works up to val = 34
-Â§define argument : 0;
-Â§define offset   : 1;
-Â§define tmp      : 2;
-Â§define tmp2     : 3;
+§define const val = 8; #works up to val = 34
+§define argument = 0;
+§define offset = 1;
+§define tmp = 2;
+§define tmp2 = 3;
 
 LDC(val);
 CALL(FIB);
-Stop : HALT();
+Stop :
+    HALT();
 
 #Last result is stored at stack-pointer position
 FIB : {
-   STV(argument);
-   LDC(4);
-   STV(offset);
-   
-   LDV(offset);
-   ADD(argument);
-   ADC(-3);
-   STSP();
-   CALL(PREPARE_CACHE);
+    STV(argument);
+    LDC(4);
+    STV(offset);
 
-   LDC(0);
-   STV(4); #fib(0)
-   LDC(1);
-   STV(5); #fib(1)
+    LDV(offset);
+    ADD(argument);
+    ADC(-3);
+    STSP();
+    CALL(PREPARE_CACHE);
 
-   LDV(argument);
-   JMN(Stop); #assert argument > 0
-   
-   CALL(COMPUTE_FIB);
-   
-   #store last result
-   STV(tmp);
-   LDV(offset);
-   ADC(val);
-   STV(tmp2);
-   LDV(tmp);
-   STIV(tmp2);
-   
-   LDV(argument);
-   ADD(offset);
-   ADC(2);
-   STSP();
+    LDC(0);
+    STV(4); #fib(0)
+    LDC(1);
+    STV(5); #fib(1)
 
-   RET();
+    LDV(argument);
+    JMN(Stop); #assert argument > 0
 
-   COMPUTE_FIB :
-      STV(argument);
-      CALL(CHECK_CACHE);
-      JMN(LOAD_CACHE_FIB);
+    CALL(COMPUTE_FIB);
 
-      CALL(INCREASE_STACK);
+    #store last result
+    STV(tmp);
+    LDV(offset);
+    ADC(val);
+    STV(tmp2);
+    LDV(tmp);
+    STIV(tmp2);
 
-      LDV(argument);
-      STVR(0, SP());
-      ADC(-1);
-      STV(argument);
-      STVR(3, SP());
-      CALL(COMPUTE_FIB);
-      STVR(1, SP());
-      CALL(STORE_CACHE);
-      
-      LDVR(0, SP());
-      ADC(-1);
-      ADC(-1);
-      STV(argument);
-      STVR(3, SP());
-      CALL(COMPUTE_FIB);
-      STVR(2, SP());
-      CALL(STORE_CACHE);
-      
-      LDVR(1, SP());
-      STV(tmp);
-      LDVR(2, SP());
-      ADD(tmp);
-      CALL(DECREASE_STACK);
-      RET();
+    LDV(argument);
+    ADD(offset);
+    ADC(2);
+    STSP();
 
-   PREPARE_CACHE :
-      LDV(argument);
-      STV(tmp);
-      PREP :
-         LDV(offset);
-         ADD(tmp);  
-         STV(tmp2);
+    RET();
 
-         LDC(-1);
-         STIV(tmp2);
+    COMPUTE_FIB : {
+        STV(argument);
+        CALL(CHECK_CACHE);
+        JMN(LOAD_CACHE_FIB);
 
-         ADD(tmp);
-         STV(tmp);
-         
-         JMN(END_PREP);
-         JMP(PREP);
-      END_PREP : RET();
+        CALL(INCREASE_STACK);
 
-   CHECK_CACHE :
-      LDV(offset);
-      ADD(argument);
-      STV(tmp2);
-      LDIV(tmp2);
-      NOT();
-      RET();
+        LDV(argument);
+        STVR(0, SP());
+        ADC(-1);
+        STV(argument);
+        STVR(3, SP());
+        CALL(COMPUTE_FIB);
+        STVR(1, SP());
+        CALL(STORE_CACHE);
 
-   STORE_CACHE :
-      STV(tmp);
-      LDVR(3, SP());
-      ADD(offset);
-      STV(tmp2);
-      LDV(tmp);
-      STIV(tmp2);
-      RET();
+        LDVR(0, SP());
+        ADC(-1);
+        ADC(-1);
+        STV(argument);
+        STVR(3, SP());
+        CALL(COMPUTE_FIB);
+        STVR(2, SP());
+        CALL(STORE_CACHE);
 
-   LOAD_CACHE_FIB :
-      LDV(offset);
-      ADD(argument); 
-      STV(tmp2);
-      LDIV(tmp2);
-      RET();
+        LDVR(1, SP());
+        STV(tmp);
+        LDVR(2, SP());
+        ADD(tmp);
+        CALL(DECREASE_STACK);
+        RET();
+    }
 
-   INCREASE_STACK :
-      STV(tmp);
-      LDSP();
-      ADC(4);
-      STSP();
-      LDC(0);
-      STVR(0, SP());
-      STVR(1, SP());
-      STVR(2, SP());
-      STVR(3, SP());
-      LDV(tmp);
-      RET();
+    PREPARE_CACHE : {
+        LDV(argument);
+        STV(tmp);
+        PREP : {
+            LDV(offset);
+            ADD(tmp);
+            STV(tmp2);
 
-   DECREASE_STACK : 
-      STV(tmp);
-      LDSP();
-      ADC(-4);
-      STSP();
-      LDV(tmp);
-      RET();
+            LDC(-1);
+            STIV(tmp2);
+
+            ADD(tmp);
+            STV(tmp);
+
+            JMN(END_PREP);
+            JMP(PREP);
+        }
+        END_PREP :
+            RET();
+    }
+
+    CHECK_CACHE : {
+        LDV(offset);
+        ADD(argument);
+        STV(tmp2);
+        LDIV(tmp2);
+        NOT();
+        RET();
+    }
+
+    STORE_CACHE : {
+        STV(tmp);
+        LDVR(3, SP());
+        ADD(offset);
+        STV(tmp2);
+        LDV(tmp);
+        STIV(tmp2);
+        RET();
+    }
+
+    LOAD_CACHE_FIB : {
+        LDV(offset);
+        ADD(argument);
+        STV(tmp2);
+        LDIV(tmp2);
+        RET();
+    }
+
+    INCREASE_STACK : {
+        STV(tmp);
+        LDSP();
+        ADC(4);
+        STSP();
+        LDC(0);
+        STVR(0, SP());
+        STVR(1, SP());
+        STVR(2, SP());
+        STVR(3, SP());
+        LDV(tmp);
+        RET();
+    }
+
+    DECREASE_STACK : {
+        STV(tmp);
+        LDSP();
+        ADC(-4);
+        STSP();
+        LDV(tmp);
+        RET();
+    }
 }
