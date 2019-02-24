@@ -1,11 +1,10 @@
-package edu.kit.mima.gui.formatter;
+package edu.kit.mima.gui.formatter.syntaxtree;
 
 /**
  * @author Jannis Weis
  * @since 2018
  */
 public enum NodeType {
-
     ROOT,
     SCOPE,
     LINE,

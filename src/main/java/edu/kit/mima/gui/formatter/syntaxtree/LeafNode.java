@@ -1,4 +1,4 @@
-package edu.kit.mima.gui.formatter;
+package edu.kit.mima.gui.formatter.syntaxtree;
 
 import java.util.Collections;
 import java.util.List;
@@ -9,6 +9,12 @@ import java.util.List;
  */
 public class LeafNode extends SimpleSyntaxNode {
 
+    /**
+     * Create new LeafNode that has no children
+     * @param type type of node
+     * @param position position of node
+     * @param parent parent node
+     */
     public LeafNode(NodeType type, int position, SyntaxNode parent) {
         super(type, position, position, parent);
     }
@@ -26,15 +32,4 @@ public class LeafNode extends SimpleSyntaxNode {
     public boolean removeChild(SyntaxNode child) {
         return false;
     }
-
-    @Override
-    public String toString() {
-        String s = SyntaxTree.tokens[getBegin()].getValue().toString();
-        if (s.equals("\n")) {
-            return "\\n";
-        } else {
-            return s;
-        }
-    }
-
 }

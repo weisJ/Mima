@@ -4,6 +4,8 @@ import edu.kit.mima.core.instruction.InstructionSet;
 import edu.kit.mima.core.parsing.SyntaxParser;
 import edu.kit.mima.core.parsing.lang.Punctuation;
 import edu.kit.mima.core.parsing.token.SyntaxToken;
+import edu.kit.mima.gui.formatter.syntaxtree.NodeType;
+import edu.kit.mima.gui.formatter.syntaxtree.SyntaxNode;
 
 import java.util.Iterator;
 
@@ -16,6 +18,12 @@ public class Formatter {
     private final static String TAB = "    ";
     private SyntaxToken[] tokens;
 
+    /**
+     * Format String
+     *
+     * @param input input string
+     * @return formatted string
+     */
     public String format(String input) {
         tokens = new SyntaxParser(input, InstructionSet.MIMA_X).parse();
         SyntaxTree tree = new SyntaxTree(tokens);
@@ -23,6 +31,12 @@ public class Formatter {
         return printNode(root).replaceAll(" *\n", "\n").replaceAll("\t", TAB).trim();
     }
 
+    /**
+     * print Node
+     *
+     * @param node node to print
+     * @return string representation of node
+     */
     private String printNode(SyntaxNode node) {
         StringBuilder sb = new StringBuilder();
         switch (node.getType()) {
@@ -68,6 +82,12 @@ public class Formatter {
         return "";
     }
 
+    /**
+     * Print instruction Node
+     *
+     * @param node node to print
+     * @return String representation of node
+     */
     private String printInstruction(SyntaxNode node) {
         StringBuilder sb = new StringBuilder();
         var iterator = node.children().iterator();
@@ -95,6 +115,13 @@ public class Formatter {
         return sb.toString();
     }
 
+    /**
+     * parse a Node that may be followed by a jump delimiter.
+     * Starts at next node in iterator.
+     *
+     * @param iterator iterator of parent node
+     * @param sb string builder to which Strings a appended
+     */
     private void maybeJump(Iterator<SyntaxNode> iterator, StringBuilder sb) {
         if (!iterator.hasNext()) {
             return;
@@ -103,6 +130,13 @@ public class Formatter {
         maybeJump(iterator, sb, n);
     }
 
+    /**
+     * parse a Node that may be followed by a jump delimiter
+     *
+     * @param iterator iterator of parent node
+     * @param sb string builder to which Strings a appended
+     * @param current current node in iterator
+     */
     private void maybeJump(Iterator<SyntaxNode> iterator, StringBuilder sb, SyntaxNode current) {
         sb.append(printNode(current));
         if (current.getType() == NodeType.JUMP) {
@@ -120,6 +154,12 @@ public class Formatter {
         }
     }
 
+    /**
+     * Print Line Node
+     *
+     * @param node node to print
+     * @return String representation of node
+     */
     private String printLine(SyntaxNode node) {
         StringBuilder sb = new StringBuilder();
         var iterator = node.children().iterator();
@@ -132,6 +172,12 @@ public class Formatter {
         return sb.toString();
     }
 
+    /**
+     * Print Leaf Node
+     *
+     * @param node node to print
+     * @return String representation of node
+     */
     private String printLeaf(SyntaxNode node) {
         SyntaxToken token = tokens[node.getBegin()];
         switch (token.getType()) {
@@ -145,6 +191,12 @@ public class Formatter {
         }
     }
 
+    /**
+     * Print punctuation char
+     *
+     * @param c chat to print
+     * @return String representation of node
+     */
     private String printPunctuation(char c) {
         if (c == Punctuation.DEFINITION_DELIMITER) {
             return ' ' + String.valueOf(c) + ' ';

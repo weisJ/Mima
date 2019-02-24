@@ -191,15 +191,17 @@ public final class MimaUserInterface extends JFrame {
         editor.setHighlighter(highlighter);
 
 
-        editor.addEditEventHandler(() -> {
-            fileManager.setText(editor.getText().replaceAll(String.format("%n"), "\n"));
-        });
+        editor.addEditEventHandler(() ->
+                fileManager.setText(editor.getText().replaceAll(String.format("%n"), "\n")));
 
         editor.useStyle(true);
         editor.clean();
         editor.useHistory(true, HISTORY_CAPACITY);
     }
 
+    /**
+     * Setup HotKey functionality
+     */
     private void setupHotKeys() {
         EditorHotKeys.setEditor(editor);
         for (EditorHotKeys key : EditorHotKeys.values()) {

@@ -1,4 +1,4 @@
-package edu.kit.mima.gui.formatter;
+package edu.kit.mima.gui.formatter.syntaxtree;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,6 +18,14 @@ public class SimpleSyntaxNode implements SyntaxNode {
 
     private boolean sorted = true;
 
+    /**
+     * Create new syntax node
+     *
+     * @param type node type
+     * @param begin begin position of node
+     * @param end end positon of node
+     * @param parent parent node
+     */
     public SimpleSyntaxNode(NodeType type, int begin, int end, SyntaxNode parent) {
         this.type = type;
         this.begin = begin;
@@ -114,17 +122,5 @@ public class SimpleSyntaxNode implements SyntaxNode {
         for (var c : children) {
             c.sort();
         }
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("[node=" + type + "]{\n");
-        var child = new ArrayList<>(children);
-        child.sort(SyntaxNode::compareTo);
-        for (var c : child) {
-            sb.append('\t').append(c.toString().replaceAll("\n", "\n\t")).append('\n');
-        }
-        sb.append('}');
-        return sb.toString();
     }
 }
