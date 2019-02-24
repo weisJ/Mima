@@ -8,7 +8,6 @@ import edu.kit.mima.core.parsing.token.Token;
 import edu.kit.mima.core.parsing.token.TokenType;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.Point;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -29,8 +28,8 @@ public class TokenStream {
     private static final Pattern PUNCTUATION = Pattern.compile('['
             + String.valueOf(Punctuation.getPunctuation()) + ']');
 
-    private static final char NEW_LINE = '\n';
-    private final CharInputStream input;
+    protected static final char NEW_LINE = '\n';
+    protected final CharInputStream input;
 
     private @Nullable Token current;
 
@@ -44,31 +43,31 @@ public class TokenStream {
         current = null;
     }
 
-    private static boolean isWhitespace(char c) {
+    public static boolean isWhitespace(char c) {
         return WHITESPACE.matcher(String.valueOf(c)).matches();
     }
 
-    private static boolean isDigitStart(char c) {
+    public static boolean isDigitStart(char c) {
         return NUMBER_START.matcher(String.valueOf(c)).matches();
     }
 
-    private static boolean isDigit(char c) {
+    public static boolean isDigit(char c) {
         return NUMBER.matcher(String.valueOf(c)).matches();
     }
 
-    private static boolean isIdentificationStart(char c) {
+    public static boolean isIdentificationStart(char c) {
         return LETTER.matcher(String.valueOf(c)).matches();
     }
 
-    private static boolean isPunctuationChar(char c) {
+    public static boolean isPunctuationChar(char c) {
         return PUNCTUATION.matcher(String.valueOf(c)).matches();
     }
 
-    private static boolean isIdentification(char c) {
+    public static boolean isIdentification(char c) {
         return isIdentificationStart(c) || (Symbol.ALLOWED_SYMBOLS.indexOf(c) >= 0);
     }
 
-    private static boolean isKeyword(String identifier) {
+    public static boolean isKeyword(String identifier) {
         return KEYWORDS.stream().anyMatch(keyword -> keyword.equals(identifier));
     }
 
@@ -127,19 +126,10 @@ public class TokenStream {
         return input.getPosition();
     }
 
-    /**
-     * Get position in document as point
-     *
-     * @return (row column)
-     */
-    public Point getPosPoint() {
-        return input.getPosPoint();
-    }
-
     /*
      * Read while a predicate is true
      */
-    private String readWhile(Predicate<Character> predicate) {
+    protected String readWhile(Predicate<Character> predicate) {
         StringBuilder string = new StringBuilder();
         while (!input.isEmpty() && predicate.test(input.peek())) {
             string.append(input.next());
@@ -147,7 +137,7 @@ public class TokenStream {
         return string.toString();
     }
 
-    private void skipComment() {
+    protected void skipComment() {
         readWhile(c -> c != NEW_LINE && c != Punctuation.COMMENT);
         input.next();
     }
@@ -155,7 +145,7 @@ public class TokenStream {
     /*
      * Read the next token
      */
-    private @Nullable Token readNext() {
+    protected @Nullable Token readNext() {
         readWhile(TokenStream::isWhitespace);
         if (input.isEmpty()) {
             return null;

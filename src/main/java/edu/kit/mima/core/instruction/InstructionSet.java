@@ -36,7 +36,6 @@ public enum InstructionSet {
             instructions.addAll(Arrays.stream(MimaInstruction.values())
                     .map(MimaInstruction::toString)
                     .collect(Collectors.toList()));
-            instructions.add("ADC");
             instructions.add("JMP");
             instructions.add("JMN");
             instructions.add("HALT");

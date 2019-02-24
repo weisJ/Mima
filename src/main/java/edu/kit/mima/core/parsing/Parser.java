@@ -26,7 +26,7 @@ import java.util.function.Supplier;
  */
 public final class Parser extends Processor {
 
-    private final Set<Exception> errors;
+    private final Set<ParserException> errors;
     private boolean skipEndOfInstruction;
     private int scopeIndex;
 
@@ -48,7 +48,7 @@ public final class Parser extends Processor {
      *
      * @return ProgramToken containing the program
      */
-    public Tuple<ProgramToken, List<Exception>> parse() {
+    public Tuple<ProgramToken, List<ParserException>> parse() {
         errors.clear();
         return parseTopLevel();
     }
@@ -56,7 +56,7 @@ public final class Parser extends Processor {
     /*
      * Parses single instruction segments divided by ';'
      */
-    private Tuple<ProgramToken, List<Exception>> parseTopLevel() {
+    private Tuple<ProgramToken, List<ParserException>> parseTopLevel() {
         List<Token> program = new ArrayList<>();
         boolean finishedScope = false;
         scopeIndex++;
@@ -139,7 +139,7 @@ public final class Parser extends Processor {
      */
     private Token maybeJumpAssociation(Supplier<Token> supplier) {
         Token expression = supplier.get();
-        if (isPunctuation(Punctuation.DEFINITION_DELIMITER)) {
+        if (isPunctuation(Punctuation.JUMP_DELIMITER)) {
             input.next();
             return new BinaryToken<>(TokenType.JUMP_POINT, expression, maybeJumpAssociation(supplier));
         }

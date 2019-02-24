@@ -58,4 +58,8 @@ public interface SyntaxColor {
      * Color for String
      */
     Color STRING = new Color(165, 194, 92);
+    /**
+     * Unrecognized Color
+     */
+    Color UNRECOGNIZED = new Color(0xD25252);
 }

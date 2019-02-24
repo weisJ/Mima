@@ -41,6 +41,14 @@ public enum TokenType {
      * String type
      */
     STRING,
+    /**
+     * Comment type
+     */
+    COMMENT,
+    /**
+     * new line type
+     */
+    NEW_LINE,
 
     /**
      * Identification type
