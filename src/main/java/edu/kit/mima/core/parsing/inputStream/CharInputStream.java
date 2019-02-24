@@ -82,7 +82,7 @@ public class CharInputStream {
      * @param message error message
      */
     public void error(String message) {
-        throw new ParserException(message, line, col);
+        throw new ParserException(message, line, col, position);
     }
 
 

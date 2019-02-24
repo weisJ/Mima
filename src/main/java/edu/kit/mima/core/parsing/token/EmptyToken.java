@@ -12,7 +12,7 @@ public class EmptyToken implements Token {
 
     @Override
     public @Nullable Object getValue() {
-        return null;
+        return "";
     }
 
     @Override

@@ -13,6 +13,7 @@ public class ParserException extends IllegalArgumentException {
 
     private final int line;
     private final int column;
+    private final int position;
     private final String message;
 
     /**
@@ -22,14 +23,19 @@ public class ParserException extends IllegalArgumentException {
      * @param line    line in which the exception happened
      * @param column  column in which the exception happened
      */
-    public ParserException(String message, int line, int column) {
+    public ParserException(String message, int line, int column, int position) {
         this.line = line;
         this.column = column;
         this.message = message;
+        this.position = position;
     }
 
     @Override
     public String getMessage() {
         return message + "(line: " + line + "|column: " + column + ')';
+    }
+
+    public int getPosition() {
+        return position;
     }
 }

@@ -110,7 +110,7 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
         String firstName = first instanceof Token ? ((Token) first).simpleName() : first.toString();
         String secondName = second instanceof Token ? ((Token) second).simpleName() : second.toString();
         if (type == TokenType.JUMP_POINT) {
-            return firstName + ' ' + Punctuation.DEFINITION_DELIMITER + ' ' + secondName;
+            return firstName + ' ' + Punctuation.JUMP_DELIMITER + ' ' + secondName;
         } else if (type == TokenType.DEFINITION || type == TokenType.CONSTANT) {
             StringBuilder sb = new StringBuilder(firstName);
             if (!secondName.isEmpty()) {

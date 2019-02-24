@@ -1,8 +1,11 @@
 package edu.kit.mima.gui.editor;
 
 import edu.kit.mima.core.parsing.lang.Punctuation;
+import edu.kit.mima.gui.formatter.Formatter;
+import edu.kit.mima.gui.logging.Logger;
 
 import javax.swing.Action;
+import javax.swing.text.BadLocationException;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeListener;
 
@@ -23,6 +26,36 @@ public enum EditorHotKeys implements Action {
                     return comment + s;
                 }
             }, editor.getCaretPosition());
+        }
+    },
+    STRING_CREATE("shift NUMBER_SIGN") {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            try {
+                editor.insert(String.valueOf(Punctuation.STRING), editor.getCaretPosition());
+                editor.setCaretPosition(editor.getCaretPosition() - 1);
+            } catch (BadLocationException e1) {
+                Logger.error(e1.getMessage());
+            }
+        }
+    },
+    STRING_DELETE("BACK_SPACE" ) {//Todo
+        @Override
+        public void actionPerformed(ActionEvent e) {
+//            try {
+//                String test = editor.getText(editor.getCaretPosition() - 1, 1);
+//                System.out.println(test);
+//            } catch (BadLocationException e1) {
+//                Logger.error(e1.getMessage());
+//            }
+        }
+    },
+    FORMAT("control alt F") {
+        private final Formatter formatter = new Formatter();
+        @Override
+        public void actionPerformed(ActionEvent e) {
+//            String s = formatter.format(editor.getText());
+            editor.setText(formatter.format(editor.getText()));
         }
     },
     REDO("control shift Z") {

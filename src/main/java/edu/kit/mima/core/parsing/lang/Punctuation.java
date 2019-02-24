@@ -22,7 +22,11 @@ public interface Punctuation {
     /**
      * definition separator/delimiter
      */
-    char DEFINITION_DELIMITER = ':';
+    char DEFINITION_DELIMITER = '=';
+    /**
+     * Jump definition delimiter
+     */
+    char JUMP_DELIMITER = ':';
     /**
      * Open bracket
      */
@@ -70,6 +74,7 @@ public interface Punctuation {
                 PRE_PROC,
                 DEFINITION_BEGIN,
                 DEFINITION_DELIMITER,
+                JUMP_DELIMITER,
                 OPEN_BRACKET,
                 CLOSED_BRACKET,
                 INSTRUCTION_END,

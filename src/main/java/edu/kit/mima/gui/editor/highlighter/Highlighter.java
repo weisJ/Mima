@@ -1,8 +1,6 @@
 package edu.kit.mima.gui.editor.highlighter;
 
-import edu.kit.mima.gui.editor.style.StyleGroup;
-
-import java.util.Collection;
+import javax.swing.JTextPane;
 
 /**
  * @author Jannis Weis
@@ -11,14 +9,9 @@ import java.util.Collection;
 public interface Highlighter {
 
     /**
-     * Get styleGroups of highlighter
-     *
-     * @return Collection of styleGroups
-     */
-    Collection<StyleGroup> getStyleGroups();
-
-    /**
      * Update Highlighting.
+     *
+     * @param pane TextPane to style
      */
-    void updateHighlighting();
+    void updateHighlighting(JTextPane pane);
 }

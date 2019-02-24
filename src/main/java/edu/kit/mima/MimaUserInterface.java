@@ -185,7 +185,6 @@ public final class MimaUserInterface extends JFrame {
     private void setupEditor() {
         MimaHighlighter highlighter = new MimaHighlighter();
         fileManager.addFileEventHandler(highlighter);
-        mimaCompiler.addCompilationEventHandler(highlighter);
         editor.setHighlighter(highlighter);
 
         editor.addEditEventHandler(() -> {

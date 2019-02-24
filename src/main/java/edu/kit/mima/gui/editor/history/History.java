@@ -90,7 +90,9 @@ public class History<T> {
      */
     public T back() throws IndexOutOfBoundsException {
         assert head < length() : "reached end of history";
-        return history.get(head++);
+        T element = history.get(head);
+        head++;
+        return element;
     }
 
     /**
@@ -100,7 +102,9 @@ public class History<T> {
      */
     public T forward() throws IndexOutOfBoundsException {
         assert head != 0 : "already on newest version";
-        return history.get(head--);
+        T element = history.get(head - 1);
+        head--;
+        return element;
     }
 
     /**

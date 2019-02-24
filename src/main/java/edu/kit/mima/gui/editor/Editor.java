@@ -2,7 +2,6 @@ package edu.kit.mima.gui.editor;
 
 import edu.kit.mima.gui.color.SyntaxColor;
 import edu.kit.mima.gui.editor.highlighter.Highlighter;
-import edu.kit.mima.gui.editor.style.Stylizer;
 import edu.kit.mima.gui.editor.view.HighlightViewFactory;
 import edu.kit.mima.gui.logging.Logger;
 
@@ -39,7 +38,6 @@ public class Editor extends JScrollPane {
     private static final int DEFAULT_HISTORY_LENGTH = 20;
 
     private final JTextPane editorPane;
-    private final Stylizer stylizer;
     private final TextHistoryController historyController;
     private final List<EditEventHandler> editEventHandlers;
 
@@ -68,7 +66,6 @@ public class Editor extends JScrollPane {
         setViewportView(textPanel);
         getVerticalScrollBar().setUnitIncrement(FONT_SIZE / 2);
 
-        stylizer = new Stylizer(editorPane, TEXT_COLOR);
         historyController = new TextHistoryController(editorPane, DEFAULT_HISTORY_LENGTH);
         historyController.setActive(false);
         editEventHandlers = new ArrayList<>();
@@ -101,8 +98,7 @@ public class Editor extends JScrollPane {
         historyController.setActive(false);
         final int caret = editorPane.getCaretPosition();
         if (stylize && highlighter != null) {
-            highlighter.updateHighlighting();
-            stylizer.stylize(highlighter.getStyleGroups());
+            highlighter.updateHighlighting(editorPane);
         }
         setCaretPosition(caret);
         changeLock = false;
@@ -125,6 +121,12 @@ public class Editor extends JScrollPane {
         clean();
     }
 
+    /**
+     * Transform current line in editor
+     *
+     * @param function Function that takes in the current line and caret position in line
+     * @param index index in file
+     */
     public void transformLine(Function<String, String> function, int index) {
         String text = editorPane.getText();
         int lower = text.substring(0, index).lastIndexOf('\n') + 1;
@@ -137,6 +139,17 @@ public class Editor extends JScrollPane {
             Logger.error(e.getMessage());
         }
     }
+
+    /**
+     * Insert String into text
+     * @param text text to insert
+     * @param offset location in file
+     * @throws BadLocationException if location is outside bounds
+     */
+    public void insert(String text, int offset) throws BadLocationException {
+        editorPane.getStyledDocument().insertString(offset, text, new SimpleAttributeSet());
+    }
+
 
     /*----------Getter-and-Setter----------*/
 
@@ -211,12 +224,31 @@ public class Editor extends JScrollPane {
     }
 
     /**
+     * Get specific part of text
+     *
+     * @param startIndex start index
+     * @param length length of tex tto get
+     * @return Text from startIndex to startIndex + length
+     * @throws BadLocationException if location is out of bounds
+     */
+    public String getText(int startIndex, int length) throws BadLocationException {
+        return editorPane.getText(startIndex, length);
+    }
+
+    /**
      * Set the text in the editor
      *
      * @param text text to set
      */
     public void setText(final String text) {
+        int pos = getCaretPosition();
+        try {
+            historyController.addReplaceHistory(0, editorPane.getText().length(), text);
+        } catch (BadLocationException ignored) { }
+        historyController.setActive(false);
         editorPane.setText(text);
+        historyController.setActive(true);
+        setCaretPosition(Math.min(pos, text.length() - 1));
     }
 
     /**
@@ -236,11 +268,12 @@ public class Editor extends JScrollPane {
     }
 
     /**
-     * Get the history controller
+     * Get the history controller.
+     * Should only be called from EditorDocumentFilter
      *
      * @return the history controller
      */
-    public TextHistoryController getHistoryController() {
+    /*default*/ TextHistoryController getHistoryController() {
         return historyController;
     }
 
