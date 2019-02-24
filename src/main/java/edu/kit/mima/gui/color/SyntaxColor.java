@@ -61,5 +61,5 @@ public interface SyntaxColor {
     /**
      * Unrecognized Color
      */
-    Color UNRECOGNIZED = new Color(0xD25252);
+    Color ERROR = new Color(0xD25252);
 }

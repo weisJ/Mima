@@ -124,4 +124,23 @@ public abstract class Processor {
             input.error("Expecting keyword: \"" + keyword + '"');
         }
     }
+
+    /**
+     * Skip over occurring errors.
+     *
+     * @return List of occurred errors
+     */
+    protected List<ParserException> skipError() {
+        boolean error = true;
+        List<ParserException> errors = new ArrayList<>();
+        while (error) {
+            try {
+                input.peek();
+                error = false;
+            } catch (ParserException e) {
+                errors.add(e);
+            }
+        }
+        return errors;
+    }
 }
