@@ -30,36 +30,36 @@ __rs__ is the return stack
 
 __Mima:__
 
-- __LDC__ __c__ : c  → accu
-- __LDV__ __a__ : <a\> → accu
-- __STV__ __a__ : accu → <a\>
-- __LDIV__ __a__ : <<a\>\> → accu
-- __STIV__ __a__ : accu → <<a\>\>
+- __LDC__ __c__ : c  ⟶  accu
+- __LDV__ __a__ : <a\> ⟶ accu
+- __STV__ __a__ : accu ⟶ <a\>
+- __LDIV__ __a__ : <<a\>\> ⟶ accu
+- __STIV__ __a__ : accu ⟶ <<a\>\>
 
 - __NOT__ : invert all bits in accu
 - __RAR__ : rotate bits in accu one place to the right
 
-- __ADD__ __a__ : accu + <a\> → accu
-- __AND__ : accu AND <a\> → accu (bitwise)
-- __OR__ : accu OR <a\> → accu (bitwise)
-- __XOR__ : accu XOR <a\> → accu (bitwise)
-- __EQL__ __a__ : if <a\> = accu then -1 → accu else 0 → accu
+- __ADD__ __a__ : accu + <a\> ⟶ accu
+- __AND__ : accu AND <a\> ⟶ accu (bitwise)
+- __OR__ : accu OR <a\> ⟶ accu (bitwise)
+- __XOR__ : accu XOR <a\> ⟶ accu (bitwise)
+- __EQL__ __a__ : if <a\> = accu then -1 ⟶ accu else 0 ⟶ accu
 
-- __JMP__ __c__ : c → iar
-- __JMN__ __c__ : if msb of accu = 1 then c → iar
+- __JMP__ __c__ : c ⟶ iar
+- __JMN__ __c__ : if msb of accu = 1 then c ⟶ iar
 
 __MimaX:__
 
-- __CALL__ __c__ : rs.push(iar) and c → iar
-- __RET__ : rs.pop() → iar
+- __CALL__ __c__ : rs.push(iar) and c ⟶ iar
+- __RET__ : rs.pop() ⟶ iar
 
-- __ADC__ __c__ : accu + c → accu
+- __ADC__ __c__ : accu + c ⟶ accu
 
-- __LDSP__ : sp → accu
-- __STSP__ : accu → sp
+- __LDSP__ : sp ⟶ accu
+- __STSP__ : accu ⟶ sp
 
-- __STVR__ __disp,SP__ : accu → <<sp> + disp>
-- __LDVR__ __disp,SP__ : <<sp> + disp> → accu
+- __STVR__ __disp,SP__ : accu ⟶ <<sp> + disp>
+- __LDVR__ __disp,SP__ : <<sp\> + disp\> ⟶ accu
 
 - all instructions from Mima
 
@@ -67,8 +67,8 @@ __MimaX:__
 
 - Comments: __#...__ or __#...#__
 - Definitions:
-    - __§define__ __"def"__ __:__ __"value"__ (use with e.g. STV "def")
-    - __§define__ __const__ __"ref"__ : __"value"__ (use with e.g. LDC("ref"))
+    - __§define__ __"def"__ __=__ __"value"__ (use with e.g. STV "def")
+    - __§define__ __const__ __"ref"__ __=__ __"value"__ (use with e.g. LDC("ref"))
     - __"ref"__ __:__ __...__ (use with e.g. JMP "ref")
 - Statements must be terminated with __;__
 - Arguments are passed within parenthesis (e.g. STV(5), LDVR(1,SP())
