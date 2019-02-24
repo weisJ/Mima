@@ -4,11 +4,10 @@
 
 #Definitions:
 §define negative_one;         #Declaration of memory address.
-§define one : 0;              #Adresses can also be explicit.
+§define one = 0;              #Adresses can also be explicit.
 §define zero,#inline# val;    #Declarations can have multiple variables in one line.
-§define const x : 5;          #Constants are referred to as is and
+§define const x = 5;          #Constants are referred to as is and
                               #need to have an initializer statement.
-
 #Instructions:
        LDC(x);   #LDC only takes constant values.
 
@@ -44,9 +43,9 @@
 #definitions can appear anywhere,
 #but must be stated before using the variable
 #Duplicate definitions that are only executed once (e.g
-#        Â§define x;
+#        §define x;
 #        --code--
-#        Â§define x; that is not executed)
+#        §define x; that is not executed)
 #are fine but should be avoided
 §define pow; 
 
