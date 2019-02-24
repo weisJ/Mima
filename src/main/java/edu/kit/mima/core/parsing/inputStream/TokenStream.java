@@ -174,6 +174,7 @@ public class TokenStream {
             input.next();
             return new AtomToken<>(TokenType.PUNCTUATION, String.valueOf(c));
         }
+        input.next();
         return error("Can't handle character: " + c);
     }
 

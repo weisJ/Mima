@@ -87,6 +87,8 @@ public final class MimaUserInterface extends JFrame {
         setupComponents();
 
         restoreSession(filePath);
+        editor.setRepaint(true);
+        editor.clean();
         memoryView.updateView();
     }
 
@@ -185,11 +187,12 @@ public final class MimaUserInterface extends JFrame {
     private void setupEditor() {
         MimaHighlighter highlighter = new MimaHighlighter();
         fileManager.addFileEventHandler(highlighter);
+        editor.setRepaint(false);
         editor.setHighlighter(highlighter);
+
 
         editor.addEditEventHandler(() -> {
             fileManager.setText(editor.getText().replaceAll(String.format("%n"), "\n"));
-            parseFile();
         });
 
         editor.useStyle(true);
@@ -318,7 +321,6 @@ public final class MimaUserInterface extends JFrame {
             afterFileChange();
             console.clear();
             Logger.log("loaded: " + FileName.shorten(fileManager.getLastFile()));
-            parseFile();
             editor.resetHistory();
             editor.clean();
         } catch (IllegalArgumentException | IllegalStateException e) {
@@ -332,13 +334,6 @@ public final class MimaUserInterface extends JFrame {
     private void afterFileChange() {
         setTitle(TITLE + ' ' + fileManager.getLastFile().replaceAll(" ", ""));
         ParseReferences.WORKING_DIRECTORY = new File(fileManager.getLastFile()).getParentFile().getAbsolutePath();
-    }
-
-    private void parseFile() {
-        try {
-            mimaCompiler.compile(editor.getText(), false, true, false);
-        } catch (IllegalArgumentException | IllegalStateException ignored) {
-        }
     }
 
     /*

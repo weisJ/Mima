@@ -54,7 +54,7 @@ public class SyntaxParser {
         return tokens.stream()
                 .filter(t -> t.getType() != TokenType.EMPTY
                         && t.getType() != TokenType.ERROR
-                        && !t.getColor().equals(SyntaxColor.UNRECOGNIZED))
+                        && !t.getColor().equals(SyntaxColor.ERROR))
                 .sorted(Comparator.comparingInt(SyntaxToken::getOffset))
                 .toArray(SyntaxToken[]::new);
     }
@@ -202,7 +202,7 @@ public class SyntaxParser {
 
     private SyntaxToken parseIdentification() {
         SyntaxToken token = next();
-        token.setColor(SyntaxColor.UNRECOGNIZED);
+        token.setColor(SyntaxColor.ERROR);
         if (insideCall) {
             unresolvedIdentifications.add(token);
         }

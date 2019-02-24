@@ -44,6 +44,7 @@ public class Editor extends JScrollPane {
     private Highlighter highlighter;
     private boolean stylize;
     private boolean changeLock;
+    private boolean repaint;
 
     /**
      * Editor that supports highlighting and text history
@@ -69,6 +70,7 @@ public class Editor extends JScrollPane {
         historyController = new TextHistoryController(editorPane, DEFAULT_HISTORY_LENGTH);
         historyController.setActive(false);
         editEventHandlers = new ArrayList<>();
+        repaint = true;
 
         final StyledDocument document = editorPane.getStyledDocument();
         ((AbstractDocument) document).setDocumentFilter(new EditorDocumentFilter(this));
@@ -93,6 +95,9 @@ public class Editor extends JScrollPane {
      * Clean the document
      */
     public void clean() {
+        if (!repaint) {
+            return;
+        }
         changeLock = true;
         final boolean historyLock = historyController.isActive();
         historyController.setActive(false);
@@ -149,7 +154,6 @@ public class Editor extends JScrollPane {
     public void insert(String text, int offset) throws BadLocationException {
         editorPane.getStyledDocument().insertString(offset, text, new SimpleAttributeSet());
     }
-
 
     /*----------Getter-and-Setter----------*/
 
@@ -294,5 +298,10 @@ public class Editor extends JScrollPane {
      */
     public void resetHistory() {
         historyController.reset();
+    }
+
+    public void setRepaint(boolean repaint) {
+        this.repaint = repaint;
+        editorPane.setIgnoreRepaint(!repaint);
     }
 }

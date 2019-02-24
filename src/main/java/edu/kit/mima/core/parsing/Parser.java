@@ -61,6 +61,7 @@ public final class Parser extends Processor {
         boolean finishedScope = false;
         scopeIndex++;
         int tokenIndex = 0;
+        errors.addAll(skipError());
         while (!input.isEmpty() && !finishedScope) {
             try {
                 skipEndOfInstruction = true;

@@ -28,7 +28,7 @@ public class MimaCompiler {
     public ProgramToken compile(String input, boolean throwErrors, boolean preProcess, boolean performCheck) {
         List<Exception> errors = new ArrayList<>();
         if (preProcess) {
-            var processed = new PreProcessor(input).process();
+            var processed = new PreProcessor(input, true).process();
             errors.addAll(processed.getSecond());
             input = processed.getFirst();
         }

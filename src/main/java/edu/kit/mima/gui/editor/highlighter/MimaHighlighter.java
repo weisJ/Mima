@@ -5,6 +5,7 @@ import edu.kit.mima.core.parsing.ParseReferences;
 import edu.kit.mima.core.parsing.Parser;
 import edu.kit.mima.core.parsing.ParserException;
 import edu.kit.mima.core.parsing.SyntaxParser;
+import edu.kit.mima.core.parsing.preprocessor.PreProcessor;
 import edu.kit.mima.core.parsing.token.SyntaxToken;
 import edu.kit.mima.gui.color.SyntaxColor;
 import edu.kit.mima.gui.editor.view.HighlightView;
@@ -18,7 +19,7 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 import java.util.List;
-import java.util.regex.Matcher;
+import java.util.Timer;
 import java.util.regex.Pattern;
 
 /**
@@ -28,30 +29,43 @@ import java.util.regex.Pattern;
 public class MimaHighlighter implements Highlighter, FileEventHandler {
 
     private static final Pattern TEXT = Pattern.compile("[^\\s]*");
+    private static final int DELAY = 500;
     private InstructionSet currentInstructionSet;
+    private Timer highlightTimer;
+    private boolean scheduled;
 
     public MimaHighlighter() {
         currentInstructionSet = InstructionSet.MIMA;
+        highlightTimer = new Timer();
+    }
+
+    public void updateHighlighting(JTextPane textPane) {
+//        if (!scheduled) {
+//            highlightTimer.schedule(new TimerTask() {
+//                @Override
+//                public void run() {
+//                    update(textPane);
+//                    scheduled = false;
+//                }
+//            }, DELAY);
+//            scheduled = true;
+//        }
+        update(textPane);
     }
 
     /**
      * Update the style groups for syntax highlighting
      */
-    public void updateHighlighting(JTextPane textPane) {
+    private void update(JTextPane textPane) {
+        textPane.setIgnoreRepaint(true);
+        StyledDocument document = textPane.getStyledDocument();
+        StyleContext context = new StyleContext();
+        Style standard = context.addStyle("Default", null);
+        standard.addAttribute(StyleConstants.Foreground, SyntaxColor.TEXT);
+        document.setCharacterAttributes(0, document.getLength(), standard, true);
+
         try {
-            StyledDocument document = textPane.getStyledDocument();
-            StyleContext context = new StyleContext();
-            Style standard = context.addStyle("Default", null);
-            standard.addAttribute(StyleConstants.Foreground, SyntaxColor.TEXT);
-            document.setCharacterAttributes(0, document.getLength(), standard, true);
-            standard.addAttribute(HighlightView.JAGGED_UNDERLINE, SyntaxColor.UNRECOGNIZED);
-
             String text = document.getText(0, document.getLength());
-
-            Matcher matcher = TEXT.matcher(text);
-            while(matcher.find()) {
-                document.setCharacterAttributes(matcher.start(), matcher.group().length(), standard, true);
-            }
 
             textPane.getHighlighter().removeAllHighlights();
 
@@ -61,14 +75,22 @@ public class MimaHighlighter implements Highlighter, FileEventHandler {
                 StyleConstants.setForeground(style, token.getColor());
                 document.setCharacterAttributes(token.getOffset(), token.getLength(), style, true);
             }
-            var parsed = new Parser(text).parse();
-            List<ParserException> errors = parsed.getSecond();
-            for (var error : errors) {
-                document.setCharacterAttributes(error.getPosition() - 1, 1, standard, false);
-            }
 
+            var processed = new PreProcessor(text, false).process();
+            var parsed = new Parser(processed.getFirst()).parse();
+
+            List<ParserException> errors = processed.getSecond();
+            errors.addAll(parsed.getSecond());
+
+            Style errorStyle = context.addStyle("Error", null);
+            errorStyle.addAttribute(HighlightView.JAGGED_UNDERLINE, SyntaxColor.ERROR);
+            for (var error : errors) {
+                document.setCharacterAttributes(error.getPosition() - 1, 1, errorStyle, false);
+            }
         } catch (BadLocationException e) {
             Logger.error(e.getMessage());
+        } finally {
+            textPane.setIgnoreRepaint(false);
         }
     }
 

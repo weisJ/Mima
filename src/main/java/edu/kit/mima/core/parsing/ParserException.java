@@ -9,12 +9,12 @@ import edu.kit.mima.core.parsing.inputStream.TokenStream;
  * @author Jannis Weis
  * @since 2018
  */
-public class ParserException extends IllegalArgumentException {
+public class ParserException extends RuntimeException {
 
     private final int line;
     private final int column;
     private final int position;
-    private final String message;
+    protected final String message;
 
     /**
      * ParsingExpression

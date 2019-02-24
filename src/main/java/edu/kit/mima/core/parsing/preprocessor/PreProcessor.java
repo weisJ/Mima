@@ -3,6 +3,7 @@ package edu.kit.mima.core.parsing.preprocessor;
 import edu.kit.mima.core.parsing.ParseReferences;
 import edu.kit.mima.core.parsing.ParserException;
 import edu.kit.mima.core.parsing.Processor;
+import edu.kit.mima.core.parsing.ProcessorException;
 import edu.kit.mima.core.parsing.lang.Keyword;
 import edu.kit.mima.core.parsing.lang.Punctuation;
 import edu.kit.mima.core.parsing.token.Token;
@@ -33,20 +34,23 @@ public final class PreProcessor extends Processor {
     private final StringBuilder processedInput;
     private final CharsetDetector charsetDetector;
     private final Set<String> processedFiles;
-    private List<Exception> errors;
+    private List<ParserException> errors;
+    private boolean recursive;
     private boolean isHome = false;
 
     /**
      * Create new PreProcessor to process preProcessor Statements.
      *
      * @param inputString string to process
+     * @param recursive whether to recursivly parse and input included files
      */
-    public PreProcessor(final String inputString) {
+    public PreProcessor(final String inputString, boolean recursive) {
         super(inputString);
         this.processedInput = new StringBuilder(inputString);
         this.charsetDetector = new CharsetDetector();
         this.processedFiles = new HashSet<>();
         this.errors = new ArrayList<>();
+        this.recursive = recursive;
     }
 
     /**
@@ -70,12 +74,13 @@ public final class PreProcessor extends Processor {
      *
      * @return processed String.
      */
-    public Tuple<String, List<Exception>> process() {
+    public Tuple<String, List<ParserException>> process() {
         List<Point> deleteRanges = new ArrayList<>();
         errors = new ArrayList<>();
+        errors.addAll(skipError());
         while (!input.isEmpty()) {
+            int index = input.getPosition() - 1;
             try {
-                int index = input.getPosition();
                 if (isPunctuation(Punctuation.PRE_PROC)) {
                     input.next();
                     deleteRanges.add(processStatement(index - 1));
@@ -84,6 +89,7 @@ public final class PreProcessor extends Processor {
                 }
             } catch (ParserException e) {
                 errors.add(e);
+                deleteRanges.add(new Point(index, input.getPosition() - 1));
             }
         }
         deleteRanges.sort((p, q) -> Integer.compare(q.y, p.y));
@@ -116,6 +122,10 @@ public final class PreProcessor extends Processor {
     private void processInput() {
         Token token = input.peek();
         if (token != null && token.getType() == TokenType.STRING) {
+            if (!recursive) {
+                input.next();
+                return;
+            }
             input.next();
             String path = token.getValue().toString();
             String newPath = parseInputPath(path);
@@ -159,9 +169,9 @@ public final class PreProcessor extends Processor {
 
             processedInput.append("\n#<<File = ").append(path).append(">>#\n");
             var processed = new PreProcessor(file, processedFiles, isHome).process();
-            List<Exception> err = processed.getSecond();
+            List<ParserException> err = processed.getSecond();
             if (!err.isEmpty()) {
-                errors.add(new IllegalArgumentException("--File: " + path + "--"));
+                errors.add(new ProcessorException("File not found: \"" + path + "\""));
                 errors.addAll(err);
             }
             processedInput.append(processed.getFirst());
