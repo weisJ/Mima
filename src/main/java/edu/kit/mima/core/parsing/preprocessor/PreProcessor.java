@@ -79,7 +79,7 @@ public final class PreProcessor extends Processor {
         errors = new ArrayList<>();
         errors.addAll(skipError());
         while (!input.isEmpty()) {
-            int index = input.getPosition() - 1;
+            int index = input.getPosition();
             try {
                 if (isPunctuation(Punctuation.PRE_PROC)) {
                     input.next();
@@ -89,7 +89,7 @@ public final class PreProcessor extends Processor {
                 }
             } catch (ParserException e) {
                 errors.add(e);
-                deleteRanges.add(new Point(index, input.getPosition() - 1));
+                deleteRanges.add(new Point(index - 1, input.getPosition() - 1));
             }
         }
         deleteRanges.sort((p, q) -> Integer.compare(q.y, p.y));

@@ -1,11 +1,7 @@
-package edu.kit.mima.gui.formatter;
+package edu.kit.mima.gui.formatter.syntaxtree;
 
 import edu.kit.mima.core.parsing.lang.Punctuation;
 import edu.kit.mima.core.parsing.token.SyntaxToken;
-import edu.kit.mima.gui.formatter.syntaxtree.LeafNode;
-import edu.kit.mima.gui.formatter.syntaxtree.NodeType;
-import edu.kit.mima.gui.formatter.syntaxtree.SimpleSyntaxNode;
-import edu.kit.mima.gui.formatter.syntaxtree.SyntaxNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +17,7 @@ import java.util.stream.IntStream;
  */
 public class SyntaxTree {
 
-    public static SyntaxToken[] tokens = null;
+    public SyntaxToken[] tokens;
     private SyntaxNode root;
 
     /**
@@ -29,7 +25,7 @@ public class SyntaxTree {
      * @param tokens tokens to build tree from
      */
     public SyntaxTree(SyntaxToken[] tokens) {
-        SyntaxTree.tokens = tokens;
+        this.tokens = tokens;
         this.root = new SimpleSyntaxNode(NodeType.ROOT, 0, tokens.length, null);
         build();
     }
