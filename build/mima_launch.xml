@@ -2,9 +2,9 @@
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
-  <jar>C:\Users\weisj\OneDrive - bwedu\Documents\Studium\Code\Java\Mima\build\Mima-1.9.jar</jar>
-  <outfile>C:\Users\weisj\OneDrive - bwedu\Documents\Studium\Code\Java\Mima\build\Mima-1.9.exe</outfile>
-    <errTitle/>
+    <jar>C:\Users\weisj\OneDrive - bwedu\Dokumente\Code\Java\Mima\build\Mima-1.10.jar</jar>
+    <outfile>C:\Users\weisj\OneDrive - bwedu\Dokumente\Code\Java\Mima\build\Mima-1.10.exe</outfile>
+    <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir>.</chdir>
   <priority>normal</priority>
@@ -13,12 +13,12 @@
   <stayAlive>false</stayAlive>
   <restartOnCrash>false</restartOnCrash>
   <manifest></manifest>
-  <icon>C:\Users\weisj\OneDrive - bwedu\Documents\Studium\Code\Java\Mima\src\main\resources\images\mima.ico</icon>
+    <icon>C:\Users\weisj\OneDrive - bwedu\Dokumente\Code\Java\Mima\src\main\resources\images\mima.ico</icon>
   <jre>
     <path></path>
     <bundledJre64Bit>false</bundledJre64Bit>
     <bundledJreAsFallback>false</bundledJreAsFallback>
-    <minVersion>10.0</minVersion>
+      <minVersion>11.0</minVersion>
     <maxVersion></maxVersion>
     <jdkPreference>preferJre</jdkPreference>
     <runtimeBits>64/32</runtimeBits>

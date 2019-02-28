@@ -55,3 +55,6 @@ target/
 # Windows
 Thumbs.db
 /.recommenders/
+
+# Launch
+/build/mima_launch.xml
