@@ -1,5 +1,3 @@
-!include 'test.mimax';
-
 #Compute the Factorial of a number.
 #Works up to val = 10.
 §define const val = 5;
@@ -13,6 +11,9 @@ Stop :
 #Parameter is stored in the accu.
 FACTORIAL : {
     #Init
+    §define test1, test2;
+    STV(test1);
+    STV(test2);
     §define argument = 0; #argument variable
     §define comp = 1; # 0
     §define neg_one = 2; # -1
@@ -34,6 +35,9 @@ FACTORIAL : {
     RET();
 
     COMPUTE_FAC : {
+        §define test4, test3;
+        STV(test3);
+        STV(test4);
         #Check for base case
         EQL(comp);
         JMN(BASE_FAC);
