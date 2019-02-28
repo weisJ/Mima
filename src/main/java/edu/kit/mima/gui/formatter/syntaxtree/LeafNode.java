@@ -32,4 +32,13 @@ public class LeafNode extends SimpleSyntaxNode {
     public boolean removeChild(SyntaxNode child) {
         return false;
     }
+
+//Uncomment for Debugging purposes
+//    @Override
+//    public String toString() {
+//        if (getType() == NodeType.NEW_LINE) {
+//            return "\\n(" + getBegin() + ")";
+//        }
+//        return SyntaxTree.tokens[getBegin()].getValue().toString() + "(" + getBegin() + ")";
+//    }
 }

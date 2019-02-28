@@ -2,19 +2,25 @@ package edu.kit.mima.core.interpretation;
 
 import edu.kit.mima.core.controller.DebugController;
 import edu.kit.mima.core.data.MachineWord;
+import edu.kit.mima.core.interpretation.environment.Environment;
+import edu.kit.mima.core.interpretation.stack.Continuation;
+import edu.kit.mima.core.interpretation.stack.StackGuard;
 import edu.kit.mima.core.parsing.Parser;
 import edu.kit.mima.core.parsing.token.ArrayToken;
 import edu.kit.mima.core.parsing.token.BinaryToken;
+import edu.kit.mima.core.parsing.token.EmptyToken;
 import edu.kit.mima.core.parsing.token.ProgramToken;
 import edu.kit.mima.core.parsing.token.Token;
 import edu.kit.mima.core.parsing.token.TokenType;
 import edu.kit.mima.core.parsing.token.Tuple;
 import edu.kit.mima.core.query.programQuery.ProgramQuery;
+import edu.kit.mima.core.query.programQuery.ProgramQueryResult;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * Interprets the result of {@link Parser}
@@ -27,20 +33,14 @@ public class Interpreter {
     private static final Value<MachineWord> VOID = new Value<>(ValueType.VOID, null);
 
     private final int wordLength;
-    //------------Debug---------------//
+    private final StackGuard stackGuard;
+
     private final DebugController debugController;
     private final ExceptionListener exceptionListener;
-    private int reservedIndex;
+
     private boolean running;
     private Token currentToken;
     private Environment currentScope;
-    //--------------------------------//
-
-    //------------Jump----------------//
-    private Environment jumpEnvironment;
-    private int expressionScopeIndex;
-    private boolean jumped;
-    //--------------------------------//
 
 
     /**
@@ -54,9 +54,7 @@ public class Interpreter {
         this.debugController = debugController;
         this.exceptionListener = exceptionListener;
         this.wordLength = wordLength;
-        reservedIndex = -1;
-        expressionScopeIndex = 0;
-        jumped = false;
+        stackGuard = new StackGuard();
         running = false;
     }
 
@@ -66,10 +64,10 @@ public class Interpreter {
      */
     private void resolveJumpPoints(final ProgramToken programToken, final Environment environment) {
         try {
-            List<Token> tokens = new ProgramQuery(programToken)
-                    .whereEqual(Token::getType, TokenType.JUMP_POINT).get();
+            List<Token> tokens = ((ProgramQueryResult)new ProgramQuery(programToken)
+                    .whereEqual(Token::getType, TokenType.JUMP_POINT)).get(false);
             for (var token : tokens) {
-                environment.defineJump((Token) token.getValue(), token.getIndex());
+                environment.defineJump(((Token)token.getValue()).getValue().toString(), token.getIndex());
             }
         } catch (IllegalArgumentException e) {
             fail(e.getMessage());
@@ -83,36 +81,32 @@ public class Interpreter {
      * @param globalEnvironment the global runtime environment
      */
     public void evaluateTopLevel(final ProgramToken program, final Environment globalEnvironment) {
-        /*Initializer*/
         running = true;
-        jumped = false;
-        reservedIndex = -1;
-        expressionScopeIndex = 0;
-
         Environment runtimeEnvironment = globalEnvironment.extend(program);
-        ProgramToken runtimeToken = program;
-        resolveJumpPoints(program, runtimeEnvironment);
-        boolean firstScope = true;
         try {
-            while (running) {
-                /*
-                 * First call has to create own scope that releases memory.
-                 * As calls/jumps can only go up in scopes the scope doesn't need to be renewed, and
-                 * memory doesn't need to be released. Clearing memory will be done by the first
-                 * environment call.
-                 */
-                evaluateProgram(runtimeToken, runtimeEnvironment, firstScope, expressionScopeIndex);
-                if (firstScope) {
-                    firstScope = false;
-                }
-                if (jumped) {
-                    runtimeEnvironment = jumpEnvironment;
-                    runtimeToken = jumpEnvironment.getProgramToken();
-                    jumped = false;
-                }
-            }
+            execute(() -> {
+                resolveJumpPoints(program, runtimeEnvironment);
+                evaluateProgram(program, runtimeEnvironment, v -> {/*Stop program*/});
+            });
         } catch (IllegalArgumentException | IllegalStateException e) {
             exceptionListener.notifyException(e);
+        }
+    }
+
+    /**
+     * Start and monitor program execution
+     *
+     * @param continuation continuation to invoke execution with
+     */
+    private void execute(Runnable continuation) {
+        var func = continuation;
+        while(running) {
+            try {
+                stackGuard.reset();
+                func.run();
+            } catch (Continuation cont) {
+                func = cont.getContinuation();
+            }
         }
     }
 
@@ -120,95 +114,173 @@ public class Interpreter {
      * Evaluate different tokens
      */
     @SuppressWarnings("unchecked") /*Construction of tokens guarantees these types*/
-    private Value<MachineWord> evaluate(final Token expression, final Environment environment) {
-        if (!running) {
-            return VOID;
-        }
+    private void evaluate(final Token expression, final Environment environment,
+                                        final Consumer<Value> callback) throws Continuation  {
+        stackGuard.guard(() -> evaluate(expression, environment, callback));
         switch (expression.getType()) {
             case PROGRAM:
                 /*
                  * Subprograms need to have own scope for variable shadowing.
-                 * They should also release their memory and start at index 0
                  */
                 ProgramToken programToken = (ProgramToken) expression;
                 Environment scope = environment.extend(programToken);
+                scope.setReservedIndex(environment.getReservedIndex());
                 resolveJumpPoints(programToken, scope);
-                return evaluateProgram(programToken, scope, true, 0);
+                evaluateProgram(programToken, scope, callback);
+                break;
             case NUMBER:
-                return evaluateNumber((String) expression.getValue());
+                callback.accept(evaluateNumber((String) expression.getValue()));
+                break;
             case EMPTY:
-                return VOID;
+                callback.accept(VOID);
+                break;
             case BINARY:
-                return evaluateBinary((String) expression.getValue());
+                callback.accept(evaluateBinary((String) expression.getValue()));
+                break;
             case IDENTIFICATION:
-                return evaluateIdentification(expression, environment);
+                callback.accept(evaluateIdentification(expression, environment));
+                break;
             case DEFINITION:
-                Token[] definitionTokens = (Token[]) ((ArrayToken) expression.getValue()).getValue();
-                for (Token token : definitionTokens) {
-                    evaluateDefinition((BinaryToken<Token, Token>) token, environment);
-                }
-                return VOID;
+                var defToken = (ArrayToken<Token>) expression.getValue();
+                evaluateDefinition(defToken, environment, callback);
+                break;
             case CONSTANT:
-                Token[] constantTokens = (Token[]) ((ArrayToken) expression.getValue()).getValue();
-                for (Token token : constantTokens) {
-                    evaluateConstant((BinaryToken<Token, Token>) token, environment);
-                }
-                return VOID;
+                var constToken = (ArrayToken<Token>) expression.getValue();
+                evaluateConstant(constToken, environment, callback);
+                break;
             case CALL:
-                return evaluateFunction((BinaryToken<Token, ArrayToken<Token>>) expression, environment);
+                evaluateFunction((BinaryToken<Token, ArrayToken<Token>>) expression, environment, callback);
+                break;
             case JUMP_POINT:
-                return evaluate(((Tuple<Token, Token>) expression).getSecond(), environment);
+                evaluate(((Tuple<Token, Token>) expression).getSecond(), environment, callback);
+                break;
             default:
-                return fail("Can't evaluate: " + expression);
+                fail("Can't evaluate: " + expression);
         }
     }
 
-    /**
-     * Evaluate a program Token
-     *
-     * @param programToken  the program token to be evaluated
-     * @param scope         run environment
-     * @param releaseMemory whether the memory addresses should be released after execution
-     * @param scopeIndex    startIndex in scope
-     * @return last evaluated statement
-     */
-    private Value<MachineWord> evaluateProgram(final ProgramToken programToken, final Environment scope,
-                                               boolean releaseMemory, int scopeIndex) {
+    public void jump(Environment toEnvironment, int instructionIndex, Consumer<Value> callback) {
+        toEnvironment.setExpressionIndex(instructionIndex);
+        debugController.pause();
+        evaluateProgram(toEnvironment.getProgramToken(), toEnvironment, callback);
+    }
+
+    private void evaluateProgram(ProgramToken programToken, Environment environment,
+                                 Consumer<Value> callback) throws Continuation  {
+        stackGuard.guard(() -> evaluateProgram(programToken, environment, callback));
         Token[] tokens = programToken.getValue();
-        scope.setExpressionIndex(scopeIndex);
-        int reserved = reservedIndex; //Remember index for auto created memory cells
+        currentScope = environment;
+        int startIndex = environment.getExpressionIndex();
+        BiConsumer<Value, Integer> loop = LambdaUtil.createRecursive(func -> (last, i) -> {
+           if (running && i != startIndex) {
+               debugController.pause();
+           }
+           if (i < tokens.length && running) {
+               environment.setExpressionIndex(i);
+               currentToken = tokens[i];
+               evaluate(currentToken, environment, v -> func.accept(v, i + 1));
+           } else {
+               environment.setExpressionIndex(0);
+               callback.accept(last);
+           }
+        });
+        loop.accept(null, startIndex);
+    }
 
-        Value<MachineWord> value = VOID;
-        while (!jumped && running && scope.getExpressionIndex() < tokens.length) {
-            currentToken = tokens[scope.getExpressionIndex()];
-            currentScope = scope;
-            value = evaluate(currentToken, scope);
-            scope.setExpressionIndex(scope.getExpressionIndex() + 1);
-            if (running && scope.getExpressionIndex() < tokens.length) {
-                debugController.pause();
+    @SuppressWarnings("unchecked") /*Construction of tokens guarantees these types*/
+    private void evaluateDefinition(ArrayToken<Token> token, Environment environment,
+                                    Consumer<Value> callback) throws Continuation  {
+        stackGuard.guard(() -> evaluateDefinition(token, environment, callback));
+        Token[] tokens = token.getValue();
+        BiConsumer<Environment, Integer> loop = LambdaUtil.createRecursive(func -> (env, i) -> {
+            if (i < tokens.length) {
+                BinaryToken<Token, Token> definition = ((BinaryToken<Token, Token>) tokens[i]);
+                if (definition.getSecond().getType() == TokenType.EMPTY) {
+                    environment.defineVariable(
+                            definition.getFirst().getValue().toString(),
+                            evaluateNumber(String.valueOf(env.getReservedIndex())).getValue()
+                    );
+                    env.setReservedIndex(env.getReservedIndex() - 1);
+                    func.accept(environment, i + 1);
+                } else {
+                    evaluate(definition.getSecond(), environment, v -> {
+                        if (Objects.equals(v, VOID)) {
+                            fail("Not a definition body: " + definition.getSecond());
+                        }
+                        if (((MachineWord)v.getValue()).intValue() < 0) {
+                            fail("Can't have negative memory references");
+                        }
+                        environment.defineVariable(
+                                definition.getFirst().getValue().toString(),
+                                (MachineWord)v.getValue()
+                        );
+                        func.accept(environment, i + 1);
+                    });
+                }
+            } else {
+                evaluate(new EmptyToken(), environment, callback);
             }
-        }
+        });
+        loop.accept(environment, 0);
+    }
 
-        if (!jumped) {
-            expressionScopeIndex = 0;
-        }
-        if (releaseMemory) {
-            reservedIndex = reserved; //Release auto created memory cells
-        }
-        return jumped ? VOID : value; //Automatically return to parent scope
+    @SuppressWarnings("unchecked") /*Construction of tokens guarantees these types*/
+    private void evaluateConstant(ArrayToken<Token> token, Environment environment,
+                                  Consumer<Value> callback) throws Continuation  {
+        stackGuard.guard(() -> evaluateConstant(token, environment, callback));
+        Token[] tokens = token.getValue();
+        BiConsumer<Environment, Integer> loop = LambdaUtil.createRecursive(func -> (env, i) -> {
+            if (i < tokens.length) {
+                BinaryToken<Token, Token> definition = ((BinaryToken<Token, Token>) tokens[i]);
+                evaluate(definition.getSecond(), environment, v -> {
+                    if (Objects.equals(v, VOID)) {
+                        fail("Not a definition body: " + definition.getSecond());
+                    }
+                    environment.defineConstant(
+                            definition.getFirst().getValue().toString(),
+                            (MachineWord)v.getValue()
+                    );
+                    func.accept(environment, i + 1);
+                });
+            } else {
+                evaluate(new EmptyToken(), environment, callback);
+            }
+        });
+        loop.accept(environment, 0);
+    }
+
+    /*
+     * Evaluate a function call
+     */
+    private void evaluateFunction(BinaryToken<Token, ArrayToken<Token>> value, Environment environment,
+                                  Consumer<Value> callback) throws Continuation {
+        stackGuard.guard(() -> evaluateFunction(value, environment, callback));
+        Token[] arguments = value.getSecond().getValue();
+        BiConsumer<List<Value>, Integer> loop = LambdaUtil.createRecursive(func -> (args, i) -> {
+            if (i < arguments.length) {
+                evaluate(arguments[i], environment, v2 -> {
+                    args.add(v2);
+                    func.accept(args, i + 1);
+                });
+            } else {
+                var function = environment.getFunction(value.getFirst().getValue().toString());
+                function.apply(args, environment, callback);
+            }
+        });
+        loop.accept(new ArrayList<>(), 0);
     }
 
     /*
      * Evaluate a number string
      */
-    private Value<MachineWord> evaluateNumber(String value) {
+    private Value<MachineWord> evaluateNumber(final String value) {
         return new Value<>(ValueType.NUMBER, new MachineWord(Integer.parseInt(value), wordLength));
     }
 
     /*
      * Evaluate a binary string
      */
-    private Value<MachineWord> evaluateBinary(String binary) {
+    private Value<MachineWord> evaluateBinary(final String binary) {
         Boolean[] bits = new StringBuilder(binary).reverse().toString()
                 .chars().mapToObj(i -> i == '1').toArray(Boolean[]::new);
         return new Value<>(ValueType.NUMBER, new MachineWord(bits, wordLength));
@@ -217,69 +289,22 @@ public class Interpreter {
     /*
      * Evaluate a Identification reference
      */
-    private Value<MachineWord> evaluateIdentification(final Token token, final Environment environment) {
+    private Value evaluateIdentification(final Token token, final Environment environment) {
         MachineWord value;
         ValueType type;
-        if (environment.lookupVariable(token) != null) {
-            value = environment.getVariable(token);
+        String name = token.getValue().toString();
+        if (environment.lookupVariable(name) != null) {
+            value = environment.getVariable(name);
             type = ValueType.MEMORY_REFERENCE;
-        } else if (environment.lookupConstant(token) != null) {
-            value = environment.getConstant(token);
+        } else if (environment.lookupConstant(name) != null) {
+            value = environment.getConstant(name);
             type = ValueType.CONSTANT;
-        } else if (environment.lookupJump(token) != null) {
-            value = new MachineWord(environment.getJump(token), wordLength);
-            type = ValueType.JUMP_REFERENCE;
-            prepareJump(environment.lookupJump(token));
+        } else if (environment.lookupJump(name) != null) {
+            return new Value<>(ValueType.JUMP_REFERENCE, name);
         } else {
             return fail("Undefined Identification: " + token.getValue());
         }
         return new Value<>(type, value);
-    }
-
-    /*
-     * Evaluate memory reference definitions
-     */
-    private void evaluateDefinition(BinaryToken<Token, Token> definition, Environment environment) {
-        if (definition.getSecond().getType() == TokenType.EMPTY) {
-            environment.defineVariable(definition.getFirst(), evaluateNumber(String.valueOf(reservedIndex)).getValue());
-            reservedIndex--;
-        } else {
-            var expressionValue = checkDefinitionBody(definition.getSecond(), environment);
-            if (expressionValue.getValue().intValue() < 0) {
-                fail("Can't have negative memory references");
-            }
-            environment.defineVariable(definition.getFirst(), expressionValue.getValue());
-        }
-    }
-
-    /*
-     * Evaluate constant definitions
-     */
-    private void evaluateConstant(BinaryToken<Token, Token> definition, Environment environment) {
-        var expressionValue = checkDefinitionBody(definition.getSecond(), environment);
-        environment.defineConstant(definition.getFirst(), expressionValue.getValue());
-    }
-
-    /*
-     * check if given expressions is a definition body
-     */
-    private Value<MachineWord> checkDefinitionBody(Token body, Environment environment) {
-        var expressionValue = evaluate(body, environment);
-        if (Objects.equals(expressionValue, VOID)) {
-            fail("Not a definition body: " + body);
-        }
-        return expressionValue;
-    }
-
-    /*
-     * Evaluate a function call
-     */
-    private Value<MachineWord> evaluateFunction(BinaryToken<Token, ArrayToken<Token>> value, Environment environment) {
-        var function = environment.getFunction(value.getFirst());
-        Token[] arguments = value.getSecond().getValue();
-        List<Value<MachineWord>> args = Arrays.stream(arguments)
-                .map(argument -> evaluate(argument, environment)).collect(Collectors.toList());
-        return new Value<>(ValueType.NUMBER, function.apply(args, environment));
     }
 
     private Value<MachineWord> fail(String message) {
@@ -287,25 +312,6 @@ public class Interpreter {
         debugController.stop();
         running = false;
         return VOID;
-    }
-
-    /**
-     * Set the environment the next jump falls in
-     *
-     * @param jumpEnvironment destination Environment
-     */
-    public void prepareJump(Environment jumpEnvironment) {
-        this.jumpEnvironment = jumpEnvironment;
-    }
-
-    /**
-     * Performs the jump to the given index
-     *
-     * @param instructionIndex index in jump environment
-     */
-    public void performJump(int instructionIndex) {
-        jumped = true;
-        expressionScopeIndex = instructionIndex;
     }
 
     /**

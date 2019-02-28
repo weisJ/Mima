@@ -3,7 +3,7 @@ package edu.kit.mima.core;
 import edu.kit.mima.core.data.MachineWord;
 import edu.kit.mima.core.data.Memory;
 import edu.kit.mima.core.data.MemoryMap;
-import edu.kit.mima.core.interpretation.Environment;
+import edu.kit.mima.core.interpretation.environment.Environment;
 import javafx.util.Pair;
 
 import java.util.Stack;
@@ -156,5 +156,7 @@ public class Mima {
      */
     public void reset() {
         memoryMap.empty();
+        accumulator.setValue(0);
+        stackPointer.setValue(0);
     }
 }

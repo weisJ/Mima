@@ -2,12 +2,13 @@ package edu.kit.mima.gui.view;
 
 import edu.kit.mima.core.Mima;
 import edu.kit.mima.core.data.MachineWord;
-import edu.kit.mima.core.interpretation.Environment;
+import edu.kit.mima.core.interpretation.environment.Environment;
 import edu.kit.mima.core.running.MimaRunner;
 import edu.kit.mima.gui.table.FixedScrollTable;
 
 import javax.swing.JTable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,8 +66,8 @@ public class MemoryTableView implements MemoryView {
         Map<String, Integer> map = new HashMap<>();
         while (scope != null) {
             map.putAll(scope.getDefinitions().get(0).entrySet().stream()
-                    .filter(e -> !map.containsKey(e.getKey().getValue().toString()))
-                    .collect(Collectors.toMap(e -> e.getKey().getValue().toString(), e -> e.getValue().intValue())));
+                    .filter(e -> !map.containsKey(e.getKey()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().intValue())));
             scope = scope.returnToParent();
         }
         return createMemoryTable(map);
@@ -89,7 +90,9 @@ public class MemoryTableView implements MemoryView {
         data.add(new Object[]{ACCUMULATOR, binaryView ? accumulator.binaryRepresentation() : accumulator.intValue()});
 
         final List<Object[]> memory = new ArrayList<>();
-        for (Map.Entry<Integer, MachineWord> entry : values.entrySet()) {
+        var entryList = new ArrayList<>(values.entrySet());
+        entryList.sort(Comparator.comparingInt(Map.Entry::getKey));
+        for (Map.Entry<Integer, MachineWord> entry : entryList) {
             String valueString = binaryView
                     ? entry.getValue().binaryRepresentation()
                     : String.valueOf(entry.getValue().intValue());

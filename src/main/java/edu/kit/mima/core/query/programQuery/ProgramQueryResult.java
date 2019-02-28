@@ -68,7 +68,16 @@ public class ProgramQueryResult implements QueryResult<Token> {
      */
     @Override
     public List<Token> get() {
-        var result = createTokenStream(query.getTokens())
+        return get(true);
+    }
+
+    /**
+     * Return query result
+     * @param recursive whether to recursively include program tokens
+     * @return List of tokens matching query
+     */
+    public List<Token> get(boolean recursive) {
+        var result = createTokenStream(query.getTokens(), recursive)
                 .filter(query.getFilter()).collect(Collectors.toList());
         query.reset();
         return result;
@@ -80,7 +89,7 @@ public class ProgramQueryResult implements QueryResult<Token> {
      */
     @Override
     public Stream<Token> stream() {
-        var stream = createTokenStream(query.getTokens())
+        var stream = createTokenStream(query.getTokens(), true)
                 .filter(query.getFilter());
         query.reset();
         return stream;
@@ -92,7 +101,7 @@ public class ProgramQueryResult implements QueryResult<Token> {
      */
     @Override
     public List<Token> getSorted(Comparator<? super Token> comparator) {
-        var result = createTokenStream(query.getTokens())
+        var result = createTokenStream(query.getTokens(), true)
                 .filter(query.getFilter()).sorted(comparator).collect(Collectors.toList());
         query.reset();
         return result;
@@ -104,13 +113,13 @@ public class ProgramQueryResult implements QueryResult<Token> {
      */
     @Override
     public void forEach(Consumer<Token> consumer) {
-        createTokenStream(query.getTokens()).filter(query.getFilter()).forEach(consumer);
+        createTokenStream(query.getTokens(), true).filter(query.getFilter()).forEach(consumer);
         query.reset();
     }
 
     @Override
     public QueryItem<Token> findFirst() {
-        return createTokenStream(query.getTokens())
+        return createTokenStream(query.getTokens(), true)
                 .filter(query.getFilter())
                 .findFirst()
                 .map(ProgramQueryResult.ProgramQueryItem::new)
@@ -134,7 +143,7 @@ public class ProgramQueryResult implements QueryResult<Token> {
      */
     @Override
     public boolean anyMatch() {
-        boolean match = createTokenStream(query.getTokens()).anyMatch(query.getFilter());
+        boolean match = createTokenStream(query.getTokens(), true).anyMatch(query.getFilter());
         query.reset();
         return match;
     }
@@ -142,25 +151,29 @@ public class ProgramQueryResult implements QueryResult<Token> {
     /*
      * Create Token stream from program Token flattening all nested program occurrences.
      */
-    private Stream<Token> createTokenStream(ProgramToken programToken) {
-        return Arrays.stream(programToken.getValue()).flatMap(this::mapToken);
+    private Stream<Token> createTokenStream(ProgramToken programToken, boolean recursive) {
+        return Arrays.stream(programToken.getValue()).flatMap(t -> mapToken(t, recursive));
     }
 
     @SuppressWarnings("unchecked") /*Construction of tokens guarantees these types*/
-    private Stream<Token> mapToken(Token token) {
+    private Stream<Token> mapToken(Token token, boolean recursive) {
         switch (token.getType()) {
             case PROGRAM:
-                return createTokenStream((ProgramToken) token);
+                if (recursive) {
+                    return createTokenStream((ProgramToken) token, true);
+                } else {
+                    return Stream.empty();
+                }
             case JUMP_POINT:
                 BinaryToken<Token, Token> binaryToken = (BinaryToken<Token, Token>) token;
-                return Stream.concat(Stream.of(binaryToken), mapToken(binaryToken.getSecond()));
+                return Stream.concat(Stream.of(binaryToken), mapToken(binaryToken.getSecond(), recursive));
             case ARRAY:
                 return Arrays.stream(((ArrayToken<Token>) token).getValue());
             case DEFINITION: /*fall through*/
             case CONSTANT:
                 Token value = ((Token<Token>) token).getValue();
                 if (value.getType() == TokenType.ARRAY) {
-                    return mapToken(value);
+                    return mapToken(value, recursive);
                 } else {
                     return Stream.of(token);
                 }

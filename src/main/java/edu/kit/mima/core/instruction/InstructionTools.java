@@ -22,7 +22,7 @@ public class InstructionTools {
      * @param args                   arguments list
      * @param expectedArgumentNumber expected number of arguments
      */
-    public static void checkArgNumber(List<Value<MachineWord>> args, int expectedArgumentNumber) {
+    public static void checkArgNumber(List<Value> args, int expectedArgumentNumber) {
         if (args.size() != expectedArgumentNumber) {
             fail("invalid number of arguments");
         }
@@ -35,7 +35,7 @@ public class InstructionTools {
      * @param index     index of argument
      * @return reference argument value
      */
-    public static Value<MachineWord> getReferenceValue(List<Value<MachineWord>> arguments, int index) {
+    public static Value getReferenceValue(List<Value> arguments, int index) {
         var argument = arguments.get(index);
         if (argument.getType() != ValueType.CONSTANT && argument.getType() != ValueType.NUMBER) {
             fail("can't pass a reference");
@@ -49,7 +49,7 @@ public class InstructionTools {
      * @param arguments argument list
      * @param index     index of argument in list
      */
-    public static Value<MachineWord> getMemoryReference(List<Value<MachineWord>> arguments, int index) {
+    public static Value getMemoryReference(List<Value> arguments, int index) {
         var argument = arguments.get(index);
         if (argument == null
                 || !(argument.getType() == ValueType.NUMBER
@@ -57,7 +57,8 @@ public class InstructionTools {
                              || argument.getType() == ValueType.MEMORY_REFERENCE)) {
             fail("must pass a memory address");
         }
-        if (!(argument.getType() == ValueType.MEMORY_REFERENCE) && argument.getValue().intValue() < 0) {
+        if (!(argument.getType() == ValueType.MEMORY_REFERENCE)
+                && ((MachineWord)(argument.getValue())).intValue() < 0) {
             fail("illegal memory address");
         }
         return argument;
@@ -70,8 +71,8 @@ public class InstructionTools {
      * @param index     index of argument in argument list
      * @return jump reference
      */
-    public static Value<MachineWord> getJumpReference(List<Value<MachineWord>> arguments, int index) {
-        var argument = arguments.get(0);
+    public static Value getJumpReference(List<Value> arguments, int index) {
+        var argument = arguments.get(index);
         if (argument.getType() != ValueType.JUMP_REFERENCE) {
             throw new IllegalArgumentException("must pass jump reference");
         }
