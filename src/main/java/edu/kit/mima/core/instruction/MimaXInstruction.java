@@ -2,12 +2,14 @@ package edu.kit.mima.core.instruction;
 
 import edu.kit.mima.core.Mima;
 import edu.kit.mima.core.data.MachineWord;
-import edu.kit.mima.core.interpretation.Environment;
 import edu.kit.mima.core.interpretation.Value;
+import edu.kit.mima.core.interpretation.ValueType;
+import edu.kit.mima.core.interpretation.environment.Environment;
 import edu.kit.mima.core.logic.ArithmeticLogicUnit;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * @author Jannis Weis
@@ -20,9 +22,9 @@ public enum MimaXInstruction implements Instruction {
      */
     ADC("ADC", 1) {
         @Override
-        protected MachineWord applyInternal(List<Value<MachineWord>> arguments, Environment environment) {
+        protected MachineWord applyInternal(List<Value> arguments, Environment environment) {
             var argument = InstructionTools.getReferenceValue(arguments, 0);
-            mima.setAccumulator(arithmeticLogicUnit.add(mima.getAccumulator(), argument.getValue()));
+            mima.setAccumulator(arithmeticLogicUnit.add(mima.getAccumulator(), (MachineWord)argument.getValue()));
             return null;
         }
     },
@@ -31,7 +33,7 @@ public enum MimaXInstruction implements Instruction {
      */
     LDSP("LDSP", 0) {
         @Override
-        protected MachineWord applyInternal(List<Value<MachineWord>> arguments, Environment environment) {
+        protected MachineWord applyInternal(List<Value> arguments, Environment environment) {
             mima.setAccumulator(mima.getStackPointer().clone());
             return null;
         }
@@ -41,7 +43,7 @@ public enum MimaXInstruction implements Instruction {
      */
     STSP("STSP", 0) {
         @Override
-        protected MachineWord applyInternal(List<Value<MachineWord>> arguments, Environment environment) {
+        protected MachineWord applyInternal(List<Value> arguments, Environment environment) {
             int address = mima.getAccumulator().intValue();
             mima.storeValue(address, mima.loadValue(address)); //Make sure there is an memory entry for <SP>
             mima.setStackPointer(address);
@@ -53,7 +55,7 @@ public enum MimaXInstruction implements Instruction {
      */
     SP("SP", 0) {
         @Override
-        protected MachineWord applyInternal(List<Value<MachineWord>> arguments, Environment environment) {
+        protected MachineWord applyInternal(List<Value> arguments, Environment environment) {
             return mima.getStackPointer().clone();
         }
     },
@@ -62,7 +64,7 @@ public enum MimaXInstruction implements Instruction {
      */
     STVR("STVR", 2) {
         @Override
-        protected MachineWord applyInternal(List<Value<MachineWord>> arguments, Environment environment) {
+        protected MachineWord applyInternal(List<Value> arguments, Environment environment) {
             int address = getOffsetAddress(arguments);
             mima.storeValue(address, mima.getAccumulator());
             return null;
@@ -73,7 +75,7 @@ public enum MimaXInstruction implements Instruction {
      */
     LDVR("LDVR", 2) {
         @Override
-        protected MachineWord applyInternal(List<Value<MachineWord>> arguments, Environment environment) {
+        protected MachineWord applyInternal(List<Value> arguments, Environment environment) {
             int address = getOffsetAddress(arguments);
             mima.setAccumulator(mima.loadValue(address));
             return null;
@@ -113,10 +115,11 @@ public enum MimaXInstruction implements Instruction {
      * @param arguments argument list. first index, second offset
      * @return absolute index
      */
-    protected int getOffsetAddress(List<Value<MachineWord>> arguments) {
+    protected int getOffsetAddress(List<Value> arguments) {
         var first = InstructionTools.getReferenceValue(arguments, 0);
         var second = InstructionTools.getReferenceValue(arguments, 1);
-        int address = first.getValue().intValue() + second.getValue().intValue();
+        int address = ((MachineWord)first.getValue()).intValue()
+                + ((MachineWord)second.getValue()).intValue();
         if (address < 0) {
             InstructionTools.fail("illegal memory address");
         }
@@ -129,9 +132,10 @@ public enum MimaXInstruction implements Instruction {
     }
 
     @Override
-    public @Nullable MachineWord apply(List<Value<MachineWord>> arguments, Environment environment) {
+    public void apply(List<Value> arguments, Environment environment,
+                                Consumer<Value> callback) {
         InstructionTools.checkArgNumber(arguments, this.argNum);
-        return this.applyInternal(arguments, environment);
+        callback.accept(new Value<>(ValueType.NUMBER, this.applyInternal(arguments, environment)));
     }
 
     /**
@@ -141,7 +145,7 @@ public enum MimaXInstruction implements Instruction {
      * @param environment execution environment
      * @return return value of instruction
      */
-    protected abstract @Nullable MachineWord applyInternal(List<Value<MachineWord>> arguments, Environment environment);
+    protected abstract @Nullable MachineWord applyInternal(List<Value> arguments, Environment environment);
 
 
 }

@@ -1,13 +1,14 @@
-package edu.kit.mima.core.interpretation;
+package edu.kit.mima.core.interpretation.environment;
 
 import edu.kit.mima.core.Mima;
 import edu.kit.mima.core.instruction.Instruction;
 import edu.kit.mima.core.instruction.InstructionTools;
 import edu.kit.mima.core.instruction.MimaInstruction;
 import edu.kit.mima.core.instruction.MimaXInstruction;
-import edu.kit.mima.core.parsing.token.AtomToken;
+import edu.kit.mima.core.interpretation.Interpreter;
+import edu.kit.mima.core.interpretation.Value;
+import edu.kit.mima.core.interpretation.ValueType;
 import edu.kit.mima.core.parsing.token.ProgramToken;
-import edu.kit.mima.core.parsing.token.TokenType;
 
 /**
  * @author Jannis Weis
@@ -36,7 +37,7 @@ public class GlobalEnvironment extends Environment {
 
     public void setupGlobalFunctions(Instruction[] instructions) {
         for (Instruction instruction : instructions) {
-            defineFunction(new AtomToken<>(TokenType.IDENTIFICATION, instruction.toString()), instruction);
+            defineFunction(instruction.toString(), instruction);
         }
     }
 
@@ -45,23 +46,24 @@ public class GlobalEnvironment extends Environment {
      */
     private void setupDefaultInstructions() {
         //Halt Instruction
-        defineNewFunction("HALT", 0, (args, env) -> {
-            interpreter.setRunning(false);
-            return null;
-        });
+        defineNewFunction("HALT", 0, (args, env, callback) -> interpreter.setRunning(false));
         //Jump Instruction
-        defineNewFunction("JMP", 1, (args, env) -> {
+        defineNewFunction("JMP", 1, (args, env, callback) -> {
             var argument = InstructionTools.getJumpReference(args, 0);
-            interpreter.performJump(argument.getValue().intValue());
-            return null;
+            Environment jumpEnv = env.lookupJump(argument.getValue().toString());
+            int jumpIndex = env.getJump(argument.getValue().toString());
+            interpreter.jump(jumpEnv, jumpIndex, callback);
         });
         //Jump if negative Instruction
-        defineNewFunction("JMN", 1, (args, env) -> {
+        defineNewFunction("JMN", 1, (args, env, callback) -> {
             var argument = InstructionTools.getJumpReference(args, 0);
+            Environment jumpEnv = env.lookupJump(argument.getValue().toString());
+            int jumpIndex = env.getJump(argument.getValue().toString());
             if (mima.getAccumulator().msb() == 1) {
-                interpreter.performJump(argument.getValue().intValue());
+                interpreter.jump(jumpEnv, jumpIndex, callback);
+            } else {
+                callback.accept(new Value<>(ValueType.NUMBER, 0));
             }
-            return null;
         });
     }
 
@@ -70,21 +72,20 @@ public class GlobalEnvironment extends Environment {
      */
     public void setupExtendedInstructionSet() {
         //CALL subroutine
-        defineNewFunction("CALL", 1, (args, env) -> {
+        defineNewFunction("CALL", 1, (args, env, callback) -> {
             var argument = InstructionTools.getJumpReference(args, 0);
             mima.pushRoutine(env.getExpressionIndex() + 1, env);
-            interpreter.performJump(argument.getValue().intValue());
-            return null;
+            Environment jumpEnv = env.lookupJump(argument.getValue().toString());
+            int jumpIndex = env.getJump(argument.getValue().toString());
+            interpreter.jump(jumpEnv, jumpIndex, callback);
         });
         //Return from subroutine
-        defineNewFunction("RET", 0, (args, env) -> {
+        defineNewFunction("RET", 0, (args, env, callback) -> {
             if (mima.hasEmptyReturnStack()) {
                 throw new IllegalArgumentException("nowhere to return to");
             }
             var pair = mima.returnRoutine();
-            interpreter.prepareJump(pair.getValue());
-            interpreter.performJump(pair.getKey());
-            return null;
+            interpreter.jump(pair.getValue(), pair.getKey(), callback);
         });
     }
 
@@ -96,9 +97,9 @@ public class GlobalEnvironment extends Environment {
      * @param instruction execution instructions
      */
     private void defineNewFunction(String name, int argNum, Instruction instruction) {
-        defineFunction(new AtomToken<>(TokenType.IDENTIFICATION, name), (args, env) -> {
+        defineFunction(name, (args, env, callback) -> {
             InstructionTools.checkArgNumber(args, argNum);
-            return instruction.apply(args, env);
+            instruction.apply(args, env, callback);
         });
     }
 }

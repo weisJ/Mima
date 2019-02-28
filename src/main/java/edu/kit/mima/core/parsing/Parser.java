@@ -70,6 +70,7 @@ public final class Parser extends Processor {
                     if (token.getType() == TokenType.SCOPE_END) {
                         finishedScope = true;
                         skipEndOfInstruction = false;
+                        input.next();
                     } else {
                         token.setIndex(tokenIndex);
                         program.add(token);

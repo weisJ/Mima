@@ -153,7 +153,7 @@ public class SyntaxTree {
     /**
      * Edit Layer
      * @param filter filter out nodes to edit
-     * @param function function to appply
+     * @param function function to apply
      * @param parentLayer parentNode
      */
     private void editLayer(Predicate<SyntaxNode> filter, Consumer<SyntaxNode> function, SyntaxNode parentLayer) {
@@ -194,10 +194,10 @@ public class SyntaxTree {
         SyntaxNode[] nodes = insertAfter.children().toArray(new SyntaxNode[0]);
         List<SyntaxNode> newNodes = group(nodes, filter, supplier, true);
         insertAfter.removeAll();
-        insertAfter.addAll(newNodes);
         for (var n : newNodes) {
             IntStream.rangeClosed(n.getBegin(), n.getEnd()).forEach(i -> n.addChild(nodes[i]));
         }
+        insertAfter.addAll(newNodes);
     }
 
     /**

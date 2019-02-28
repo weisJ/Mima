@@ -1,9 +1,8 @@
-package edu.kit.mima.core.interpretation;
+package edu.kit.mima.core.interpretation.environment;
 
 import edu.kit.mima.core.data.MachineWord;
 import edu.kit.mima.core.instruction.Instruction;
 import edu.kit.mima.core.parsing.token.ProgramToken;
-import edu.kit.mima.core.parsing.token.Token;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -18,12 +17,20 @@ public class Environment {
 
     private final @Nullable Environment parent;
     private final ProgramToken programToken;
-    private final HashMap<Token, MachineWord> variables;
-    private final HashMap<Token, MachineWord> constants;
-    private final HashMap<Token, Instruction> functions;
-    private final HashMap<Token, Integer> jumps;
+    private final HashMap<String, MachineWord> variables;
+    private final HashMap<String, MachineWord> constants;
+    private final HashMap<String, Instruction> functions;
+    private final HashMap<String, Integer> jumps;
 
+    /**
+     * Index of current expression
+     */
     private int expressionIndex;
+    /**
+     * When creating memory variables with no value given, an address is automatically assigned
+     * This index is the current index of the last assigned value.
+     */
+    private int reservedIndex;
 
     /**
      * Create environment that inherits the fields from its parent environment.
@@ -39,6 +46,7 @@ public class Environment {
         functions = new HashMap<>();
         jumps = new HashMap<>();
         expressionIndex = 0;
+        reservedIndex = -1;
     }
 
     /**
@@ -47,7 +55,7 @@ public class Environment {
      *
      * @return list of variables and constant associations maps
      */
-    public List<Map<Token, MachineWord>> getDefinitions() {
+    public List<Map<String, MachineWord>> getDefinitions() {
         return List.of(variables, constants);
     }
 
@@ -76,7 +84,7 @@ public class Environment {
      * @param name name of variable
      * @return Environment with "name" defined. Null if name is not defined
      */
-    public @Nullable Environment lookupVariable(Token name) {
+    public @Nullable Environment lookupVariable(String name) {
         Environment scope = this;
         while (scope != null) {
             if (scope.variables.containsKey(name)) {
@@ -93,7 +101,7 @@ public class Environment {
      * @param name name of constant
      * @return Environment with "name" defined. Null if name is not defined
      */
-    public @Nullable Environment lookupConstant(Token name) {
+    public @Nullable Environment lookupConstant(String name) {
         Environment scope = this;
         while (scope != null) {
             if (scope.constants.containsKey(name)) {
@@ -110,7 +118,7 @@ public class Environment {
      * @param name name of function
      * @return Environment with "name" defined. Null if name is not defined
      */
-    public @Nullable Environment lookupFunction(Token name) {
+    public @Nullable Environment lookupFunction(String name) {
         Environment scope = this;
         while (scope != null) {
             if (scope.functions.containsKey(name)) {
@@ -127,7 +135,7 @@ public class Environment {
      * @param name name of jump
      * @return Environment with "name" defined. Null if name is not defined
      */
-    public @Nullable Environment lookupJump(Token name) {
+    public @Nullable Environment lookupJump(String name) {
         Environment scope = this;
         while (scope != null) {
             if (scope.jumps.containsKey(name)) {
@@ -163,7 +171,7 @@ public class Environment {
      * @param name name of variable
      * @return Integer associated with variable
      */
-    public MachineWord getVariable(Token name) {
+    public MachineWord getVariable(String name) {
         if (variables.containsKey(name)) {
             return variables.get(name);
         }
@@ -180,7 +188,7 @@ public class Environment {
      * @param name name of variable
      * @return value associated with variable
      */
-    public MachineWord getConstant(Token name) {
+    public MachineWord getConstant(String name) {
         if (constants.containsKey(name)) {
             return constants.get(name);
         }
@@ -197,7 +205,7 @@ public class Environment {
      * @param name name of variable
      * @return function associated with variable
      */
-    public Instruction getFunction(Token name) {
+    public Instruction getFunction(String name) {
         if (functions.containsKey(name)) {
             return functions.get(name);
         }
@@ -215,7 +223,7 @@ public class Environment {
      * @param name name of variable
      * @return index of expression in environment
      */
-    public Integer getJump(Token name) {
+    public Integer getJump(String name) {
         if (jumps.containsKey(name)) {
             return jumps.get(name);
         }
@@ -242,9 +250,9 @@ public class Environment {
      * @param name     name of function
      * @param function function body
      */
-    public void defineFunction(Token name, Instruction function) {
+    public void defineFunction(String name, Instruction function) {
         if (functions.containsKey(name)) {
-            throw new IllegalArgumentException("function: \"" + name.getValue() + "\" already defined in scope");
+            throw new IllegalArgumentException("function: \"" + name + "\" already defined in scope");
         }
         functions.put(name, function);
     }
@@ -255,9 +263,9 @@ public class Environment {
      * @param name  name of variable
      * @param value value
      */
-    public void defineVariable(Token name, MachineWord value) {
+    public void defineVariable(String name, MachineWord value) {
         if (variables.containsKey(name) || constants.containsKey(name)) {
-            throw new IllegalArgumentException("reference: \"" + name.getValue() + "\" already defined in scope");
+            throw new IllegalArgumentException("reference: \"" + name + "\" already defined in scope");
         }
         variables.put(name, value);
     }
@@ -268,9 +276,9 @@ public class Environment {
      * @param name  name of variable
      * @param value value
      */
-    public void defineConstant(Token name, MachineWord value) {
+    public void defineConstant(String name, MachineWord value) {
         if (variables.containsKey(name) || constants.containsKey(name)) {
-            throw new IllegalArgumentException("reference: \"" + name.getValue() + "\" already defined in scope");
+            throw new IllegalArgumentException("reference: \"" + name + "\" already defined in scope");
         }
         constants.put(name, value);
     }
@@ -281,11 +289,28 @@ public class Environment {
      * @param name  name of jump point
      * @param index index of expression in Environment
      */
-    public void defineJump(Token name, Integer index) {
+    public void defineJump(String name, Integer index) {
         if (jumps.containsKey(name)) {
-            throw new IllegalArgumentException("jump: \"" + name.getValue() + "\" already defined in scope");
+            throw new IllegalArgumentException("jump: \"" + name + "\" already defined in scope");
         }
         jumps.put(name, index);
     }
 
+    /**
+     * Get the reserved memory index
+     *
+     * @return reserved memory index
+     */
+    public int getReservedIndex() {
+        return reservedIndex;
+    }
+
+    /**
+     * Set the reserved memory index
+     *
+     * @param reservedIndex reserved memory index
+     */
+    public void setReservedIndex(int reservedIndex) {
+        this.reservedIndex = reservedIndex;
+    }
 }

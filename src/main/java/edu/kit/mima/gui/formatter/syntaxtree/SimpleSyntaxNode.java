@@ -16,8 +16,6 @@ public class SimpleSyntaxNode implements SyntaxNode {
     private int begin;
     private int end;
 
-    private boolean sorted = true;
-
     /**
      * Create new syntax node
      *
@@ -51,10 +49,6 @@ public class SimpleSyntaxNode implements SyntaxNode {
 
     @Override
     public List<SyntaxNode> children() {
-        if (!sorted) {
-            children.sort(SyntaxNode::compareTo);
-            sorted = true;
-        }
         return children;
     }
 
@@ -75,9 +69,7 @@ public class SimpleSyntaxNode implements SyntaxNode {
     public void addChild(SyntaxNode child) {
         child.setParent(this);
         children.add(child);
-        begin = Math.min(begin, child.getBegin());
-        end = Math.max(end, child.getEnd());
-        sorted = false;
+        updateIndex();
     }
 
     @Override
@@ -85,12 +77,11 @@ public class SimpleSyntaxNode implements SyntaxNode {
         if (nodes == null) {
             return;
         }
-        sorted = sorted && nodes.isEmpty();
         nodes.forEach(n -> {
             children.add(n);
             n.setParent(this);
         });
-
+        updateIndex();
     }
 
     @Override
@@ -99,8 +90,7 @@ public class SimpleSyntaxNode implements SyntaxNode {
             if (child.parent() == this) {
                 child.setParent(null);
             }
-//            begin = Math.max(begin, child.getEnd() + 1);
-//            end = Math.min(end, child.getBegin() - 1);
+            updateIndex();
             return true;
         }
         return false;
@@ -123,4 +113,25 @@ public class SimpleSyntaxNode implements SyntaxNode {
             c.sort();
         }
     }
+
+    private void updateIndex() {
+        if (!children.isEmpty()) {
+            children.sort(SyntaxNode::compareTo); //Sort children
+            begin = children.get(0).getBegin();
+            end = children.get(children.size() - 1).getEnd();
+        }
+    }
+
+//Uncomment for Debugging purposes
+//    @Override
+//    public String toString() {
+//        StringBuilder sb = new StringBuilder("[node=")
+//                .append(type.toString()).append(',')
+//                .append(begin).append(',').append(end).append("]{");
+//        sort();
+//        for (var n : children) {
+//            sb.append("\n").append(n.toString());
+//        }
+//        return sb.toString().replaceAll("\n", "\n\t") + "\n}";
+//    }
 }

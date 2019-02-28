@@ -5,11 +5,12 @@ import edu.kit.mima.core.controller.ThreadDebugController;
 import edu.kit.mima.core.instruction.InstructionSet;
 import edu.kit.mima.core.instruction.MimaInstruction;
 import edu.kit.mima.core.instruction.MimaXInstruction;
-import edu.kit.mima.core.interpretation.Environment;
 import edu.kit.mima.core.interpretation.ExceptionListener;
-import edu.kit.mima.core.interpretation.GlobalEnvironment;
 import edu.kit.mima.core.interpretation.Interpreter;
 import edu.kit.mima.core.interpretation.InterpreterException;
+import edu.kit.mima.core.interpretation.environment.Environment;
+import edu.kit.mima.core.interpretation.environment.GlobalEnvironment;
+import edu.kit.mima.core.parsing.token.ProgramToken;
 import edu.kit.mima.core.parsing.token.Token;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -20,6 +21,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class MimaRunner implements ExceptionListener {
 
+    private final static Environment EMPTY_ENV = new Environment(null, new ProgramToken(new Token[0]));
     private final AtomicReference<Exception> sharedException;
     private final ThreadDebugController threadDebugController;
 
@@ -118,6 +120,7 @@ public class MimaRunner implements ExceptionListener {
             throw new MimaRuntimeException("Can't change program during execution");
         }
         this.program = program;
+        this.mima.reset();
     }
 
     /**
@@ -130,6 +133,9 @@ public class MimaRunner implements ExceptionListener {
     }
 
     public Environment getCurrentEnvironment() {
+        if (!isRunning()) {
+            return EMPTY_ENV;
+        }
         var scope = interpreter.getCurrentScope();
         return scope == null ? globalEnvironment : scope;
     }

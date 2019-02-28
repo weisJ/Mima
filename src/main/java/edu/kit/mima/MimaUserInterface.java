@@ -113,7 +113,7 @@ public final class MimaUserInterface extends JFrame {
      * Setup general Frame properties
      */
     private void setupWindow() {
-        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -236,7 +236,7 @@ public final class MimaUserInterface extends JFrame {
                 mimaRunner.stop();
             }
             mimaRunner.setProgram(new Program(mimaCompiler.compile(editor.getText()), getInstructionSet()));
-            //Update Memory View
+            memoryView.updateView();
             LoadingIndicator.stop(fileM + " (done)");
             runButton.setEnabled(true);
             stepButton.setEnabled(true);
@@ -335,7 +335,10 @@ public final class MimaUserInterface extends JFrame {
      */
     private void afterFileChange() {
         setTitle(TITLE + ' ' + fileManager.getLastFile().replaceAll(" ", ""));
-        ParseReferences.WORKING_DIRECTORY = new File(fileManager.getLastFile()).getParentFile().getAbsolutePath();
+        File parent = new File(fileManager.getLastFile()).getParentFile();
+        ParseReferences.WORKING_DIRECTORY = parent != null
+                ? parent.getAbsolutePath()
+                : ParseReferences.MIMA_DIR;
     }
 
     /*

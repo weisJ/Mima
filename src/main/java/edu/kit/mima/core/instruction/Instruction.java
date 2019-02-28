@@ -1,10 +1,10 @@
 package edu.kit.mima.core.instruction;
 
-import edu.kit.mima.core.data.MachineWord;
-import edu.kit.mima.core.interpretation.Environment;
 import edu.kit.mima.core.interpretation.Value;
+import edu.kit.mima.core.interpretation.environment.Environment;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * @author Jannis Weis
@@ -15,9 +15,10 @@ public interface Instruction {
     /**
      * Apply the function
      *
-     * @param arguments   function argument
+     * @param arguments   function arguments array
      * @param environment runtime environment
-     * @return return value of function
+     * @param callback callback for method return value
      */
-    MachineWord apply(List<Value<MachineWord>> arguments, Environment environment);
+    void apply(List<Value> arguments, Environment environment,
+               Consumer<Value> callback);
 }

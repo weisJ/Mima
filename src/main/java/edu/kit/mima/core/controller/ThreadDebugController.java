@@ -109,6 +109,6 @@ public class ThreadDebugController implements DebugController {
         }
         try {
             workingThread.join();
-        } catch (InterruptedException ignored) { /*doesn't matter thread should die*/}
+        } catch (InterruptedException ignored) {/*doesn't matter thread should die*/}
     }
 }
