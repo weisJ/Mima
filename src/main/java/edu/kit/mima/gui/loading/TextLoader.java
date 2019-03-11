@@ -18,7 +18,6 @@ public class TextLoader {
 
     private final LoadManager manager;
     private final Component parent;
-    private final SaveHandler handler;
 
     /**
      * TextLoader to control loading and saving files as well as handling the request for file paths
@@ -29,7 +28,6 @@ public class TextLoader {
     public TextLoader(final Component parent, final LoadManager manager) {
         this.manager = manager;
         this.parent = parent;
-        handler = new SaveHandler(null);
     }
 
     /**
@@ -52,7 +50,7 @@ public class TextLoader {
 
         manager.onSave(path);
         try {
-            handler.saveFile(text, path);
+            IOTools.saveFile(text, path);
             manager.afterSave();
         } catch (IOException e) {
             manager.onFail(e.getMessage());
@@ -79,7 +77,7 @@ public class TextLoader {
         manager.onLoad(path);
         String text = null;
         try {
-            text = handler.loadFile(path);
+            text = IOTools.loadFile(path);
             manager.afterLoad();
         } catch (final IOException e) {
             manager.onFail(e.getMessage());

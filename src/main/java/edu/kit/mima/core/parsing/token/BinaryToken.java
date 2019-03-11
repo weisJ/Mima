@@ -87,7 +87,7 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
     }
 
     @Override
-    public int getIndex() {
+    public int getIndexAttribute() {
         return index;
     }
 

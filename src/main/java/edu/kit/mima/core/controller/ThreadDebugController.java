@@ -1,5 +1,6 @@
 package edu.kit.mima.core.controller;
 
+import edu.kit.mima.core.parsing.token.Token;
 import edu.kit.mima.gui.logging.Logger;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ public class ThreadDebugController implements DebugController {
     private final List<Runnable> beforeStop;
     private Thread workingThread;
     private boolean isActive;
+    private boolean autoPause;
 
     /**
      * Create new ThreadDebugController.
@@ -22,6 +24,7 @@ public class ThreadDebugController implements DebugController {
     public ThreadDebugController() {
         beforeStop = new ArrayList<>();
         isActive = false;
+        autoPause = false;
     }
 
     /**
@@ -110,5 +113,22 @@ public class ThreadDebugController implements DebugController {
         try {
             workingThread.join();
         } catch (InterruptedException ignored) {/*doesn't matter thread should die*/}
+    }
+
+    @Override
+    public void afterInstruction(Token currentInstruction) {
+        if (autoPause) {
+            pause();
+        }
+    }
+
+    /**
+     * Sets whether the thread should be automatically paused after
+     * each step;
+     *
+     * @param autoPause true if debugger should auto pause after each step
+     */
+    public void setAutoPause(boolean autoPause) {
+        this.autoPause = autoPause;
     }
 }

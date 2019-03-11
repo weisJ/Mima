@@ -4,7 +4,7 @@ import edu.kit.mima.core.Mima;
 import edu.kit.mima.core.data.MachineWord;
 import edu.kit.mima.core.interpretation.environment.Environment;
 import edu.kit.mima.core.running.MimaRunner;
-import edu.kit.mima.gui.table.FixedScrollTable;
+import edu.kit.mima.gui.components.FixedScrollTable;
 
 import javax.swing.JTable;
 import java.util.ArrayList;

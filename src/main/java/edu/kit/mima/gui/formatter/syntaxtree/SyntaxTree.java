@@ -17,8 +17,8 @@ import java.util.stream.IntStream;
  */
 public class SyntaxTree {
 
-    public SyntaxToken[] tokens;
-    private SyntaxNode root;
+    public final SyntaxToken[] tokens;
+    private final SyntaxNode root;
 
     /**
      * Create syntax tree

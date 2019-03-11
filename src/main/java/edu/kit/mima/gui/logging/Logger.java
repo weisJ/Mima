@@ -1,7 +1,11 @@
 package edu.kit.mima.gui.logging;
 
 import edu.kit.mima.core.parsing.token.ValueTuple;
-import edu.kit.mima.gui.console.Console;
+import edu.kit.mima.gui.components.console.Console;
+import edu.kit.mima.preferences.ColorKey;
+import edu.kit.mima.preferences.Preferences;
+import edu.kit.mima.preferences.PropertyKey;
+import edu.kit.mima.preferences.UserPreferenceChangedListener;
 
 import java.awt.Color;
 import java.util.LinkedList;
@@ -9,6 +13,7 @@ import java.util.Queue;
 
 import static edu.kit.mima.gui.logging.Logger.LogLevel.ERROR;
 import static edu.kit.mima.gui.logging.Logger.LogLevel.INFO;
+import static edu.kit.mima.gui.logging.Logger.LogLevel.WARNING;
 
 /**
  * Logger that outputs to a {@link Console}
@@ -21,7 +26,7 @@ public final class Logger {
     private static Console console;
     private static LogLevel level = INFO;
     private static boolean locked = false;
-    private static Queue<ValueTuple<String, Color>> messageQueue = new LinkedList<>();
+    private static final Queue<ValueTuple<String, Color>> messageQueue = new LinkedList<>();
 
     /*
      * Prevent instantiation
@@ -98,13 +103,13 @@ public final class Logger {
         if (level != ERROR) {
             String m = "[WARNING] " + message;
             if (overwriteLast) {
-                console.replaceLastLine(m, Color.ORANGE);
+                console.replaceLastLine(m, WARNING.color);
             } else {
                 if (locked) {
-                    messageQueue.offer(new ValueTuple<>(m, Color.ORANGE));
+                    messageQueue.offer(new ValueTuple<>(m, WARNING.color));
                     return;
                 }
-                console.println(m, Color.ORANGE);
+                console.println(m, WARNING.color);
             }
         }
     }
@@ -127,13 +132,13 @@ public final class Logger {
     public static void error(final String message, boolean overwriteLast) {
         String m = "[ERROR] " + message;
         if (overwriteLast) {
-            console.replaceLastLine(m, Color.RED);
+            console.replaceLastLine(m, ERROR.color);
         } else {
             if (locked) {
-                messageQueue.offer(new ValueTuple<>(m, Color.RED));
+                messageQueue.offer(new ValueTuple<>(m, ERROR.color));
                 return;
             }
-            console.println(m, Color.RED);
+            console.println(m, ERROR.color);
         }
     }
 
@@ -156,19 +161,40 @@ public final class Logger {
     /**
      * LogLevel attributes
      */
-    public enum LogLevel {
+    public enum LogLevel implements UserPreferenceChangedListener {
         /**
          * Log everything
          */
-        INFO,
+        INFO(Color.WHITE, ColorKey.CONSOLE_TEXT_INFO),
         /**
          * Log warnings and errors
          */
-        WARNING,
+        WARNING(Color.ORANGE, ColorKey.CONSOLE_TEXT_WARNING),
         /**
          * Log only errors
          */
-        ERROR
+        ERROR(Color.RED, ColorKey.CONSOLE_TEXT_ERROR);
+
+        static {
+            for (var logLevel : LogLevel.values()) {
+                Preferences.registerUserPreferenceChangedListener(logLevel);
+            }
+        }
+
+        private Color color;
+        private ColorKey key;
+
+        LogLevel(Color color, ColorKey key) {
+            this.color = color;
+            this.key = key;
+        }
+
+        @Override
+        public void notifyUserPreferenceChanged(PropertyKey key) {
+            if (key == PropertyKey.THEME) {
+                this.color = Preferences.getInstance().readColor(this.key);
+            }
+        }
     }
 
 }

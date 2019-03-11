@@ -112,7 +112,7 @@ public final class Parser extends Processor {
                 return program;
             }
             if (isPunctuation(Punctuation.SCOPE_CLOSED)) {
-                return new AtomToken<>(TokenType.SCOPE_END, scopeIndex);
+                return new AtomToken<>(TokenType.SCOPE_END, scopeIndex, input.getLine());
             }
             if (isPunctuation(Punctuation.OPEN_BRACKET)) {
                 input.next();
@@ -143,7 +143,9 @@ public final class Parser extends Processor {
         Token expression = supplier.get();
         if (isPunctuation(Punctuation.JUMP_DELIMITER)) {
             input.next();
-            return new BinaryToken<>(TokenType.JUMP_POINT, expression, maybeJumpAssociation(supplier));
+            return new BinaryToken<>(TokenType.JUMP_POINT,
+                    expression,
+                    maybeJumpAssociation(supplier), input.getLine());
         }
         return expression;
     }
@@ -165,7 +167,7 @@ public final class Parser extends Processor {
                 Punctuation.CLOSED_BRACKET,
                 Punctuation.COMMA,
                 this::parseExpression,
-                true));
+                true), input.getLine());
     }
 
     /*
@@ -180,14 +182,14 @@ public final class Parser extends Processor {
                     Punctuation.INSTRUCTION_END,
                     Punctuation.COMMA,
                     this::parseConstant,
-                    false));
+                    false), input.getLine());
         }
         return new AtomToken<>(TokenType.DEFINITION, delimited(
                 CharInputStream.EMPTY_CHAR,
                 Punctuation.INSTRUCTION_END,
                 Punctuation.COMMA,
                 this::parseDefinition,
-                false));
+                false), input.getLine());
     }
 
     /*
@@ -198,7 +200,7 @@ public final class Parser extends Processor {
         skipPunctuation(Punctuation.DEFINITION_DELIMITER);
         Token value = parseExpression();
         assert reference != null;
-        return new BinaryToken<>(TokenType.CONSTANT, reference, value);
+        return new BinaryToken<>(TokenType.CONSTANT, reference, value, input.getLine());
     }
 
     /*
@@ -210,9 +212,9 @@ public final class Parser extends Processor {
             if (isPunctuation(Punctuation.DEFINITION_DELIMITER)) {
                 input.next();
                 Token value = parseExpression();
-                return new BinaryToken<>(TokenType.DEFINITION, reference, value);
+                return new BinaryToken<>(TokenType.DEFINITION, reference, value, input.getLine());
             }
-            return new BinaryToken<>(TokenType.DEFINITION, reference, new EmptyToken());
+            return new BinaryToken<>(TokenType.DEFINITION, reference, new EmptyToken(), input.getLine());
         }
         return input.error("expected identifier");
     }

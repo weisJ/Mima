@@ -35,11 +35,14 @@ public interface Token<T> {
     TokenType getType();
 
     /**
-     * Index of token
+     * Index attribute of token
+     * May be used as an index or position attribute.
+     * The current use of this value is dependent of the implementation
+     * and usage of the token.
      *
-     * @return index
+     * @return index attribute
      */
-    int getIndex();
+    int getIndexAttribute();
 
     /**
      * Set index of token

@@ -126,6 +126,15 @@ public class TokenStream {
         return input.getPosition();
     }
 
+    /**
+     * Return current line in file
+     *
+     * @return current line index
+     */
+    public int getLine() {
+        return input.getLine();
+    }
+
     /*
      * Read while a predicate is true
      */
