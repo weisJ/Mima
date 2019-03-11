@@ -46,7 +46,7 @@ public class AtomToken<T> implements Token<T> {
     }
 
     @Override
-    public int getIndex() {
+    public int getIndexAttribute() {
         return index;
     }
 

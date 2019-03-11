@@ -103,4 +103,13 @@ public class CharInputStream {
     public Point getPosPoint() {
         return new Point(line, col);
     }
+
+    /**
+     * Get current line in file
+     *
+     * @return index of line in file
+     */
+    public int getLine() {
+        return line;
+    }
 }

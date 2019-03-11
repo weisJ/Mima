@@ -1,6 +1,5 @@
 package edu.kit.mima.core.parsing.preprocessor;
 
-import edu.kit.mima.core.parsing.ParseReferences;
 import edu.kit.mima.core.parsing.ParserException;
 import edu.kit.mima.core.parsing.Processor;
 import edu.kit.mima.core.parsing.ProcessorException;
@@ -10,6 +9,9 @@ import edu.kit.mima.core.parsing.token.Token;
 import edu.kit.mima.core.parsing.token.TokenType;
 import edu.kit.mima.core.parsing.token.Tuple;
 import edu.kit.mima.core.parsing.token.ValueTuple;
+import edu.kit.mima.preferences.MimaConstants;
+import edu.kit.mima.preferences.Preferences;
+import edu.kit.mima.preferences.PropertyKey;
 import org.apache.tika.parser.txt.CharsetDetector;
 
 import java.awt.Point;
@@ -130,10 +132,11 @@ public final class PreProcessor extends Processor {
             String path = token.getValue().toString();
             String newPath = parseInputPath(path);
 
-            File workingDir = new File(ParseReferences.WORKING_DIRECTORY);
-            File homeDir = new File(ParseReferences.MIMA_DIR);
+            var pref = Preferences.getInstance();
+            File workingDir = new File(pref.readString(PropertyKey.DIRECTORY_WORKING));
+            File homeDir = new File(pref.readString(PropertyKey.DIRECTORY_MIMA));
             boolean success = false;
-            for (String ext : ParseReferences.FILE_EXTENSIONS) {
+            for (String ext : MimaConstants.EXTENSIONS) {
                 if (success
                         || (!isHome
                                     && workingDir.exists()

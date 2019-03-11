@@ -1,5 +1,7 @@
 package edu.kit.mima.gui.util;
 
+import java.io.File;
+
 /**
  * @author Jannis Weis
  * @since 2018
@@ -12,10 +14,25 @@ public final class FileName {
         assert false : "utility class constructor";
     }
 
+    /**
+     * Shortens fileName. See {@link #shorten(String, int) shorten(fileName, maxLength}.
+     * Uses {@link #MAX_FILE_DISPLAY_LENGTH} as parameter.
+     *
+     * @param fileName Name to shorten
+     * @return shortened String
+     */
     public static String shorten(String fileName) {
         return shorten(fileName, MAX_FILE_DISPLAY_LENGTH);
     }
 
+    /**
+     * Shorten a fileName to the given length.
+     * Shortens by deleting directories in the middle and replacing them by \...\
+     *
+     * @param fileName  Name to shorten
+     * @param maxLength maximum length to shorten to.
+     * @return shortened String
+     */
     public static String shorten(String fileName, int maxLength) {
         String name = fileName;
         String[] split = name.split("\\\\");
@@ -38,5 +55,30 @@ public final class FileName {
             indexLow--;
         }
         return name;
+    }
+
+    public static String removeExtension(File file) {
+        if (!file.isDirectory() && file.getName().contains(".")) {
+            return file.getName().substring(0, Math.max(file.getName().lastIndexOf('.'), 0));
+        } else {
+            return file.getName();
+        }
+    }
+
+    /**
+     * Escape all special characters in String
+     *
+     * @param inputString input
+     * @return input string with all special characters escaped
+     */
+    public static String escapeMetaCharacters(String inputString) {
+        final String[] metaCharacters = {"\\", "^", "$", "{", "}", "[", "]", "(", ")", ".", "*", "+", "?", "|", "<", ">", "-", "&", "%"};
+
+        for (String metaCharacter : metaCharacters) {
+            if (inputString.contains(metaCharacter)) {
+                inputString = inputString.replace(metaCharacter, "\\" + metaCharacter);
+            }
+        }
+        return inputString;
     }
 }

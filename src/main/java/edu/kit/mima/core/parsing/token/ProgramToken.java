@@ -1,6 +1,12 @@
 package edu.kit.mima.core.parsing.token;
 
+import edu.kit.mima.core.query.programQuery.ProgramQuery;
+import edu.kit.mima.core.query.programQuery.ProgramQueryResult;
+
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -16,6 +22,7 @@ public class ProgramToken implements Token<Token[]> {
     private static final Pattern INDENT = Pattern.compile("\n");
     private static final String INDENT_REPLACEMENT = "\n\t";
     private Token[] program;
+    private Map<Token, Integer> jumpMap;
 
     /**
      * Program token that holds an array of Tokens
@@ -24,6 +31,28 @@ public class ProgramToken implements Token<Token[]> {
      */
     public ProgramToken(Token[] program) {
         this.program = program;
+        jumpMap = new HashMap<>();
+        resolveJumps();
+    }
+
+    /*
+     * Create jump map for program token
+     */
+    private void resolveJumps() {
+        List<Token> tokens = ((ProgramQueryResult) new ProgramQuery(this)
+                .whereEqual(Token::getType, TokenType.JUMP_POINT)).get(false);
+        for (var token : tokens) {
+            jumpMap.put((Token) token.getValue(), token.getIndexAttribute());
+        }
+    }
+
+    /**
+     * Returns the jump associations for this program token.
+     *
+     * @return Map that with tokens as key and their program index as value
+     */
+    public Map<Token, Integer> getJumps() {
+        return jumpMap;
     }
 
     @Override
@@ -42,7 +71,7 @@ public class ProgramToken implements Token<Token[]> {
     }
 
     @Override
-    public int getIndex() {
+    public int getIndexAttribute() {
         return 0;
     }
 

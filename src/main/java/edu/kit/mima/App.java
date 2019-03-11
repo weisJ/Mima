@@ -1,11 +1,9 @@
 package edu.kit.mima;
 
-import com.bulenkov.darcula.DarculaLaf;
+import edu.kit.mima.gui.laf.LafManager;
+import edu.kit.mima.gui.laf.icons.Icons;
 import edu.kit.mima.gui.logging.Logger;
 
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.plaf.ColorUIResource;
 import java.awt.SplashScreen;
 
 /**
@@ -14,6 +12,7 @@ import java.awt.SplashScreen;
  */
 public final class App {
 
+    private static MimaUserInterface frame;
     /**
      * Entry point for starting the Mima UI
      *
@@ -21,18 +20,20 @@ public final class App {
      */
     public static void main(final String[] args) {
         SplashScreen.getSplashScreen();
-        try {
-            UIManager.setLookAndFeel(DarculaLaf.class.getCanonicalName());
-            UIManager.put("ToolTip.background", new ColorUIResource(169, 183, 198));
-        } catch (ClassNotFoundException | InstantiationException
-                | UnsupportedLookAndFeelException | IllegalAccessException e) {
-            e.printStackTrace(); /*will throw error because of illegal field access*/
-        }
+        LafManager.update();
         String filePath = args != null && args.length >= 1 ? args[0] : null;
-        final MimaUserInterface frame = new MimaUserInterface(filePath);
+        frame = new MimaUserInterface(filePath);
         Logger.setLevel(Logger.LogLevel.INFO);
         frame.setLocationRelativeTo(null);
+        Icons.loadIcons();
+
         frame.setVisible(true);
+        frame.requestFocus();
+        frame.toFront();
         frame.repaint();
+    }
+
+    public static boolean isInitialized() {
+        return frame != null;
     }
 }

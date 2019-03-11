@@ -1,9 +1,9 @@
 package edu.kit.mima.gui.formatter;
 
 import edu.kit.mima.core.instruction.InstructionSet;
-import edu.kit.mima.core.parsing.SyntaxParser;
 import edu.kit.mima.core.parsing.lang.Punctuation;
 import edu.kit.mima.core.parsing.token.SyntaxToken;
+import edu.kit.mima.core.syntax.SyntaxParser;
 import edu.kit.mima.gui.formatter.syntaxtree.NodeType;
 import edu.kit.mima.gui.formatter.syntaxtree.SyntaxNode;
 import edu.kit.mima.gui.formatter.syntaxtree.SyntaxTree;

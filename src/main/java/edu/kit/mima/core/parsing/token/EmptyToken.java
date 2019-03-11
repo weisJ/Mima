@@ -26,7 +26,7 @@ public class EmptyToken implements Token {
     }
 
     @Override
-    public int getIndex() {
+    public int getIndexAttribute() {
         return -1;
     }
 

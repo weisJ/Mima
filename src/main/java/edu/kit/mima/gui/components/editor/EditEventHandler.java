@@ -1,0 +1,13 @@
+package edu.kit.mima.gui.components.editor;
+
+/**
+ * @author Jannis Weis
+ * @since 2018
+ */
+public interface EditEventHandler {
+
+    /**
+     * Action to perform after edit has occurred.
+     */
+    void notifyEdit();
+}

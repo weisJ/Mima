@@ -56,7 +56,7 @@ public class ArrayToken<T> implements Token<T[]> {
     }
 
     @Override
-    public int getIndex() {
+    public int getIndexAttribute() {
         return index;
     }
 

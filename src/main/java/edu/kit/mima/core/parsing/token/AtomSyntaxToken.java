@@ -19,7 +19,7 @@ public class AtomSyntaxToken<T> extends AtomToken<T> implements SyntaxToken<T> {
 
     @Override
     public int getOffset() {
-        return getIndex();
+        return getIndexAttribute();
     }
 
     @Override

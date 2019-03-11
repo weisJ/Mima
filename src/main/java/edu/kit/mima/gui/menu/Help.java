@@ -11,6 +11,7 @@ import org.commonmark.renderer.html.HtmlRenderer;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.JFrame;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.BufferedReader;
@@ -18,6 +19,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -29,7 +32,7 @@ import java.util.stream.Collectors;
  */
 public final class Help extends JFrame {
 
-    private static final String ENCODING = "UTF-8";
+    private static final Charset ENCODING = StandardCharsets.UTF_8;
     private static final String HELP_LOCAL = "Help.md";
     private static final String HELP_WEB = "https://raw.githubusercontent.com/weisJ/Mima/master/README.md";
     private static final int MAXIMUM_ATTEMPTS = 20;
@@ -46,7 +49,6 @@ public final class Help extends JFrame {
     private static boolean loadedFromWeb;
 
     private static JFXPanel jfxPanel;
-
     private static String source;
 
     /*
@@ -77,6 +79,24 @@ public final class Help extends JFrame {
             instance = new Help();
         }
         return instance;
+    }
+
+    /**
+     * Show the window.
+     *
+     * @param parent parent component
+     */
+    public static void showWindow(Component parent) {
+        Help s = getInstance();
+        s.setLocationRelativeTo(parent);
+        s.setVisible(true);
+    }
+
+    /**
+     * Hide window instance
+     */
+    public static void hideWindow() {
+        getInstance().setVisible(false);
     }
 
     private static void showHtml(final String htmlSource) {
@@ -141,7 +161,6 @@ public final class Help extends JFrame {
     /*
      * Load local fallback option
      */
-    @SuppressWarnings("OverlyBroadCatchBlock")
     private String loadFallback() {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(
                 Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(HELP_LOCAL)), ENCODING))) {

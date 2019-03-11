@@ -13,6 +13,7 @@ import edu.kit.mima.core.interpretation.environment.GlobalEnvironment;
 import edu.kit.mima.core.parsing.token.ProgramToken;
 import edu.kit.mima.core.parsing.token.Token;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -151,5 +152,25 @@ public class MimaRunner implements ExceptionListener {
      */
     public boolean isRunning() {
         return interpreter.isRunning();
+    }
+
+    public Debugger debugger(List<Integer> breakpoints) {
+        return new Debugger() {
+            @Override
+            public void pause() {
+                threadDebugController.pause();
+            }
+
+            @Override
+            public void resume() {
+                threadDebugController.resume();
+            }
+
+            @Override
+            public void step() {
+                threadDebugController.setAutoPause(true);
+                resume();
+            }
+        };
     }
 }

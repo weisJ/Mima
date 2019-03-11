@@ -13,8 +13,6 @@ import edu.kit.mima.core.parsing.token.ProgramToken;
 import edu.kit.mima.core.parsing.token.Token;
 import edu.kit.mima.core.parsing.token.TokenType;
 import edu.kit.mima.core.parsing.token.Tuple;
-import edu.kit.mima.core.query.programQuery.ProgramQuery;
-import edu.kit.mima.core.query.programQuery.ProgramQueryResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,22 +56,6 @@ public class Interpreter {
         running = false;
     }
 
-    /*
-     * Create jump associations for the given environment based on the tokens
-     * This needs to be done as forward referencing is allowed for jumps
-     */
-    private void resolveJumpPoints(final ProgramToken programToken, final Environment environment) {
-        try {
-            List<Token> tokens = ((ProgramQueryResult)new ProgramQuery(programToken)
-                    .whereEqual(Token::getType, TokenType.JUMP_POINT)).get(false);
-            for (var token : tokens) {
-                environment.defineJump(((Token)token.getValue()).getValue().toString(), token.getIndex());
-            }
-        } catch (IllegalArgumentException e) {
-            fail(e.getMessage());
-        }
-    }
-
     /**
      * Evaluate the Program.
      *
@@ -85,7 +67,7 @@ public class Interpreter {
         Environment runtimeEnvironment = globalEnvironment.extend(program);
         try {
             execute(() -> {
-                resolveJumpPoints(program, runtimeEnvironment);
+                program.getJumps().forEach((t, i) -> runtimeEnvironment.defineJump(t.getValue().toString(), i));
                 evaluateProgram(program, runtimeEnvironment, v -> {/*Stop program*/});
             });
         } catch (IllegalArgumentException | IllegalStateException e) {
@@ -125,7 +107,7 @@ public class Interpreter {
                 ProgramToken programToken = (ProgramToken) expression;
                 Environment scope = environment.extend(programToken);
                 scope.setReservedIndex(environment.getReservedIndex());
-                resolveJumpPoints(programToken, scope);
+                programToken.getJumps().forEach((t, i) -> scope.defineJump(t.getValue().toString(), i));
                 evaluateProgram(programToken, scope, callback);
                 break;
             case NUMBER:
@@ -161,7 +143,7 @@ public class Interpreter {
 
     public void jump(Environment toEnvironment, int instructionIndex, Consumer<Value> callback) {
         toEnvironment.setExpressionIndex(instructionIndex);
-        debugController.pause();
+        debugController.afterInstruction(toEnvironment.getProgramToken());
         evaluateProgram(toEnvironment.getProgramToken(), toEnvironment, callback);
     }
 
@@ -173,7 +155,7 @@ public class Interpreter {
         int startIndex = environment.getExpressionIndex();
         BiConsumer<Value, Integer> loop = LambdaUtil.createRecursive(func -> (last, i) -> {
            if (running && i != startIndex) {
-               debugController.pause();
+               debugController.afterInstruction(tokens[i]);
            }
            if (i < tokens.length && running) {
                environment.setExpressionIndex(i);
