@@ -13,6 +13,8 @@ import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Timer;
@@ -30,16 +32,20 @@ public class Tooltip extends ShadowPane implements ITooltip {
 
     public Tooltip(String text) {
         alignment = Alignment.NORTH;
+        textLabel = new JLabel();
+        textLabel.setOpaque(false);
+        textLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        setText(text);
+
+        bubbleBorder = new TextBubbleBorder(
+                new HSLColor(textLabel.getBackground()).adjustTone(60).getRGB()).setPointerSize(5).setThickness(1);
+
         JPanel labelPanel = new JPanel(new BorderLayout());
         labelPanel.setOpaque(false);
-        textLabel = new JLabel();
-        setText(text);
-        textLabel.setOpaque(false);
-        textLabel.setBorder(new EmptyBorder(2, 5, 5, 5));
         labelPanel.add(textLabel, BorderLayout.CENTER);
-        bubbleBorder = new TextBubbleBorder(
-                new HSLColor(labelPanel.getBackground()).adjustTone(60).getRGB()).setPointerSize(5).setThickness(1);
         labelPanel.setBorder(bubbleBorder);
+        labelPanel.setBackground(new HSLColor(labelPanel.getBackground()).adjustTone(20).getRGB());
+
         add(labelPanel);
         //Prevent events from propagating to components beneath
         addMouseListener(new MouseAdapter() {
@@ -77,49 +83,76 @@ public class Tooltip extends ShadowPane implements ITooltip {
     @Override
     public void setAlignment(Alignment alignment) {
         this.alignment = alignment;
-//        switch(alignment) {
-//            case NORTH:
-//                bubbleBorder.setPointerSide(Alignment.SOUTH);
-//                break;
-//            case NORTH_EAST:
-//                bubbleBorder.setPointerSide(Alignment.SOUTH_WEST);
-//                break;
-//            case EAST:
-//                bubbleBorder.setPointerSide(Alignment.WEST);
-//                break;
-//            case SOUTH_EAST:
-//                bubbleBorder.setPointerSide(Alignment.NORTH_WEST);
-//                break;
-//            case SOUTH:
-//                bubbleBorder.setPointerSide(Alignment.NORTH);
-//                break;
-//            case SOUTH_WEST:
-//                bubbleBorder.setPointerSide(Alignment.NORTH_EAST);
-//                break;
-//            case WEST:
-//                bubbleBorder.setPointerSide(Alignment.EAST);
-//                break;
-//            case NORTH_WEST:
-//                bubbleBorder.setPointerSide(Alignment.SOUTH_EAST);
-//                break;
-//            case CENTER:
-//                bubbleBorder.setPointerSide(Alignment.CENTER);
-//                break;
-//        }
+        adjustAlignment(alignment);
         bubbleBorder.setPointerSide(alignment.opposite());
+    }
+
+    /*
+     * Apply insets to adjust position
+     */
+    private void adjustAlignment(Alignment alignment) {
+        Rectangle bounds = getBounds();
+        Insets insets = getInsets();
+        switch (alignment) {
+            case NORTH:
+                setBounds(bounds.x, bounds.y + insets.bottom, bounds.width, bounds.height);
+                break;
+            case EAST:
+                setBounds(bounds.x - insets.left, bounds.y + insets.bottom / 2, bounds.width + insets.right / 2, bounds.height);
+                break;
+            case SOUTH:
+                setBounds(bounds.x, bounds.y + insets.top, bounds.width, bounds.height);
+                break;
+            case WEST:
+                setBounds(bounds.x + insets.left / 2, bounds.y + insets.bottom / 2, bounds.width + insets.left / 2, bounds.height);
+                break;
+            case NORTH_EAST:
+                setBounds(bounds.x - insets.left - insets.right, bounds.y + insets.bottom, bounds.width, bounds.height);
+                bubbleBorder.setPointerPadPercent(0);
+                break;
+            case SOUTH_EAST:
+                setBounds(bounds.x - insets.right - insets.left, bounds.y, bounds.width, bounds.height);
+                bubbleBorder.setPointerPadPercent(0);
+                break;
+            case NORTH_WEST:
+                setBounds(bounds.x + insets.right + insets.left, bounds.y + insets.bottom, bounds.width, bounds.height);
+                bubbleBorder.setPointerPadPercent(1);
+                break;
+            case SOUTH_WEST:
+                setBounds(bounds.x + insets.right + insets.left, bounds.y, bounds.width, bounds.height);
+                bubbleBorder.setPointerPadPercent(1);
+                break;
+            case CENTER:
+                break;
+        }
     }
 
     @Override
     public void showTooltip() {
-        alpha = 0;
+        setVisible(true);
+        startFadeTimer(true);
+    }
+
+    @Override
+    public void hideTooltip() {
+        startFadeTimer(false);
+    }
+
+    private void startFadeTimer(boolean fadeIn) {
+        float end = fadeIn ? 1 : 0;
+        alpha = fadeIn ? 0 : 1;
         var timer = new Timer();
         var task = new TimerTask() {
             @Override
             public void run() {
-                if (alpha == 1) {
+                if (alpha == end) {
                     timer.cancel();
+                    if (alpha == 0) {
+                        setVisible(false);
+                    }
                 }
-                alpha = (float) Math.min(alpha + 0.075, 1);
+                alpha = fadeIn ? (float) Math.min(alpha + 0.075, 1)
+                        : (float) Math.max(alpha - 0.075, 0);
                 repaint();
             }
         };
@@ -130,33 +163,34 @@ public class Tooltip extends ShadowPane implements ITooltip {
     protected void paintBorder(Graphics g) {
         int pointerSize = bubbleBorder.getPointerSize();
         Border border = getBorder();
+        //Move shadow according to alignment.
         switch (alignment) {
             case NORTH:
                 border.paintBorder(this, g, 0, 0, getWidth(), getHeight() - pointerSize);
                 break;
             case NORTH_EAST:
-                super.paintBorder(g);
+                border.paintBorder(this, g, 0, 0, getWidth(), getHeight() - pointerSize);
+                break;
+            case NORTH_WEST:
+                border.paintBorder(this, g, 0, 0, getWidth(), getHeight() - pointerSize);
                 break;
             case EAST:
                 border.paintBorder(this, g, pointerSize, 0, getWidth() - pointerSize, getHeight());
                 break;
-            case SOUTH_EAST:
-                super.paintBorder(g);
-                break;
             case SOUTH:
                 border.paintBorder(this, g, 0, pointerSize, getWidth(), getHeight() - pointerSize);
                 break;
+            case SOUTH_EAST:
+                border.paintBorder(this, g, 0, 0, getWidth(), getHeight());
+                break;
             case SOUTH_WEST:
-                super.paintBorder(g);
+                border.paintBorder(this, g, 0, 0, getWidth(), getHeight());
                 break;
             case WEST:
                 border.paintBorder(this, g, 0, 0, getWidth() - pointerSize, getHeight());
                 break;
-            case NORTH_WEST:
-                super.paintBorder(g);
-                break;
             case CENTER:
-                super.paintBorder(g);
+                border.paintBorder(this, g, 0, 0, getWidth(), getHeight());
                 break;
         }
     }

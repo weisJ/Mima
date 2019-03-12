@@ -22,7 +22,7 @@ public class Preferences {
     private static final String optionsPath = directory + "\\options.properties";
     private static final Preferences instance = new Preferences();
     private static final List<UserPreferenceChangedListener> listenerList = new ArrayList<>();
-    private static boolean notify = false;
+    private boolean notify;
     private final Properties options;
     private final Properties colorStyle;
 
@@ -40,7 +40,7 @@ public class Preferences {
             }
         }
         loadTheme(readString(PropertyKey.THEME_EDITOR));
-        Preferences.notify = true;
+        notify = true;
     }
 
     public static Preferences getInstance() {
@@ -55,8 +55,8 @@ public class Preferences {
         return Preferences.listenerList.remove(listener);
     }
 
-    private static void notifyListeners(PropertyKey key) {
-        if (!Preferences.notify) {
+    private void notifyListeners(PropertyKey key) {
+        if (!notify) {
             return;
         }
         for (var listener : listenerList) {

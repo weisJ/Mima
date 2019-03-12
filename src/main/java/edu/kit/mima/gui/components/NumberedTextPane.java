@@ -32,6 +32,7 @@ public class NumberedTextPane extends JPanel {
 
     private static final Dimension NUMBER_SIZE = new Dimension(30, 30);
 
+    private int offsetMultiplier = 5;
     private final HighlightTextPane pane;
     private final JScrollPane scrollPane;
     private final TreeMap<Integer, IndexComponent> componentMap;
@@ -58,7 +59,7 @@ public class NumberedTextPane extends JPanel {
         };
         var bounds = metrics.getStringBounds("100", getGraphics());
         int xOff = (int) bounds.getHeight() / 2;
-        int size = (int) bounds.getWidth() + 4 * xOff;
+        int size = (int) bounds.getWidth() + offsetMultiplier * xOff;
         setMinimumSize(NUMBER_SIZE);
         setPreferredSize(new Dimension(size, size));
         actionThresholdX = xOff + (int) bounds.getWidth();
@@ -75,7 +76,7 @@ public class NumberedTextPane extends JPanel {
         scrollPane = new JScrollPane(pane);
 
         HSLColor background = new HSLColor(getBackground());
-        setBackground(background.adjustShade(5).getRGB());
+        setBackground(background.adjustShade(15).getRGB());
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -177,6 +178,7 @@ public class NumberedTextPane extends JPanel {
 
         final int fontHeight = g.getFontMetrics(pane.getFont()).getHeight();
         final int fontDesc = g.getFontMetrics(pane.getFont()).getDescent();
+        final int fontAsc = g.getFontMetrics(pane.getFont()).getAscent();
         int startingY = -1;
 
         try {
@@ -195,7 +197,7 @@ public class NumberedTextPane extends JPanel {
         String digits = String.valueOf(Math.max(100, endLine));
         var bounds = metrics.getStringBounds(digits, g);
         int xOff = (int) bounds.getHeight() / 2;
-        int size = (int) bounds.getWidth() + 4 * xOff;
+        int size = (int) bounds.getWidth() + offsetMultiplier * xOff;
         setPreferredSize(new Dimension(size, size));
         actionThresholdX = xOff + (int) bounds.getWidth();
 
@@ -218,11 +220,16 @@ public class NumberedTextPane extends JPanel {
             if (line == componentIndex + 1) {
                 IndexComponent component = componentMap.get(componentIndex);
                 var dim = component.getPreferredSize();
-                int xPos = actionThresholdX + (int) (xOff * 0.75f);
-                int yPos = y - fontHeight / 2 - fontDesc / 2;
+                int xPos = actionThresholdX + xOff;
+                int yPos = y + (fontDesc - fontAsc) / 2 - dim.height / 2;
+//                g.setColor(Color.RED);
+//                g.drawLine(xPos, y - fontAsc, xPos + fontHeight, y - fontAsc);
+//                g.drawLine(xPos, y + fontDesc, xPos + fontHeight, y + fontDesc);
+//                g.setColor(Color.GREEN);
+//                g.drawLine(xPos, y + (fontDesc - fontAsc) / 2, xPos + fontHeight, y + (fontDesc - fontAsc) / 2);
                 component.setVisible(true);
                 component.paintComponent(g.create(xPos, yPos,
-                        (int) dim.getWidth(), (int) dim.getHeight()));
+                        dim.width, dim.height));
                 g.setColor(numberingColor);
                 componentIndex = componentKeys.hasNext() ? componentKeys.next() : -1;
             }

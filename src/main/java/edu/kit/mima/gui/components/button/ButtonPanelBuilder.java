@@ -9,6 +9,8 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.LayoutManager;
 import java.util.LinkedList;
@@ -22,7 +24,7 @@ import java.util.Queue;
  */
 public final class ButtonPanelBuilder {
 
-    private static final int BUTTON_DELAY = 600;
+    private static final int BUTTON_DELAY = 2000;
     private static final int BUTTON_VANISH_DELAY = 2000;
 
     private final Queue<JButton> buttons;
@@ -83,7 +85,7 @@ public final class ButtonPanelBuilder {
         return new ButtonBuilder(button, this);
     }
 
-    public static final class ButtonBuilder {
+    public final class ButtonBuilder {
 
         private final JButton button;
         private final ButtonPanelBuilder parent;
@@ -214,6 +216,11 @@ public final class ButtonPanelBuilder {
             return new ButtonBuilder(button, parent);
         }
 
+        public ButtonBuilder addSpace() {
+            parent.buttons.offer(button);
+            return new ButtonBuilder(new Separator(), parent);
+        }
+
         /**
          * Construct the ButtonPanel. Buttons are added in the order they were configured
          *
@@ -243,6 +250,26 @@ public final class ButtonPanelBuilder {
                     .put(KeyStroke.getKeyStroke(accelerator), accelerator);
             button.getActionMap().put(accelerator, clickAction);
             button.setToolTipText(" ");
+        }
+    }
+
+    private final class Separator extends JButton {
+        private Separator() {
+            setOpaque(false);
+            setEnabled(false);
+            setFocusable(false);
+            setBorderPainted(false);
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            var size = super.getPreferredSize();
+            return new Dimension(size.width / 2, size.height);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            //Draw nothing
         }
     }
 }

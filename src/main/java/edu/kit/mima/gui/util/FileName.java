@@ -57,12 +57,35 @@ public final class FileName {
         return name;
     }
 
+    /**
+     * Remove file extension from name
+     *
+     * @param file file to remove extension from.
+     * @return file name without extension.
+     */
     public static String removeExtension(File file) {
         if (!file.isDirectory() && file.getName().contains(".")) {
             return file.getName().substring(0, Math.max(file.getName().lastIndexOf('.'), 0));
         } else {
             return file.getName();
         }
+    }
+
+    /**
+     * Remove specified extensions from file.
+     *
+     * @param file      file to remove extension from
+     * @param blacklist extensions to remove
+     * @return file without extension.
+     */
+    public static String removeExtension(File file, String[] blacklist) {
+        String name = file.getName();
+        for (var s : blacklist) {
+            if (name.endsWith("." + s)) {
+                return removeExtension(file);
+            }
+        }
+        return name;
     }
 
     /**

@@ -140,9 +140,9 @@ public class EditorTabbedPane extends JTabbedPane {
     /**
      * Add {@link TabClosedEventHandler}
      *
-     * @param handler
+     * @param handler handler to add
      */
-    public void addTabClosedEventHanlder(TabClosedEventHandler handler) {
+    public void addTabClosedEventHandler(TabClosedEventHandler handler) {
         handlerList.add(handler);
     }
 

@@ -10,6 +10,7 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.LineBorder;
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Insets;
 
@@ -49,11 +50,19 @@ public class ComponentTest {
             frame.setGlassPane(new BetterGlassPane(frame));
 
             for (int i = 0; i < 64; i++) {
-                JPanel button = new JPanel();
+                JPanel button = new JPanel() {
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        var loc = getLocation();
+                        super.paintComponent(g);
+                        g.setColor(Color.RED);
+                        g.drawRect(getWidth() / 2, getHeight() / 2, 2, 2);
+                    }
+                };
                 button.setBorder(new LineBorder(Color.RED));
                 new TooltipComponent<>(button,
                         new Tooltip("Hallo Laaaaaaaaaaaaaaaaaaaaaanger Text \n Test1 \n Tes 2 \n\n\n\nHoher Text"),
-                        600, TooltipComponent.PERSISTENT, TooltipComponent.COMPONENT_BOTH);
+                        600, 2000, TooltipComponent.COMPONENT_BOTH);
                 frame.add(button);
             }
             frame.setBackground(Color.WHITE);

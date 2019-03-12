@@ -10,6 +10,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.text.BadLocationException;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Point;
@@ -156,6 +157,25 @@ public class HighlightTextPane extends JTextPane implements ChangeListener {
         }
     }
 
+    /*
+     * Update offsets for selection and highlight drawing.
+     */
+    private void updateSelectionView() {
+        try {
+            var firstView = modelToView2D(0);
+            xOff = firstView == null ? 0 : (int) firstView.getX();
+            var view = modelToView2D(getSelectionStart());
+            var endView = modelToView2D(getSelectionEnd());
+            selectionStart = view == null ? null : new Point((int) view.getX(), (int) view.getY());
+            selectionEnd = endView == null ? null : new Point((int) endView.getX(), (int) endView.getY());
+            yOff = endView == null ? -1 : (int) endView.getY();
+        } catch (NullPointerException | BadLocationException ignored) {
+            yOff = -1;
+            xOff = 0;
+        }
+        lineSelected = false;
+    }
+
     @Override
     public Color getSelectedTextColor() {
         return null;
@@ -169,21 +189,16 @@ public class HighlightTextPane extends JTextPane implements ChangeListener {
     @Override
     public void stateChanged(ChangeEvent e) {
         if (e.getSource() == getCaret()) {
-            try {
-                var firstView = modelToView2D(0);
-                xOff = firstView == null ? 0 : (int) firstView.getX();
-                var view = modelToView2D(getSelectionStart());
-                var endView = modelToView2D(getSelectionEnd());
-                selectionStart = view == null ? null : new Point((int) view.getX(), (int) view.getY());
-                selectionEnd = endView == null ? null : new Point((int) endView.getX(), (int) endView.getY());
-                yOff = endView == null ? -1 : (int) endView.getY();
-            } catch (BadLocationException ignored) {
-                yOff = -1;
-                xOff = 0;
-            }
-            lineSelected = false;
+            updateSelectionView();
             container.repaint();
         }
+    }
+
+    @Override
+    public void setFont(Font font) {
+        super.setFont(font);
+        repaint();
+        updateSelectionView();
     }
 
     /**

@@ -15,6 +15,11 @@ public enum Alignment {
     NORTH_WEST,
     CENTER;
 
+    /**
+     * Get the opposite alignment.
+     *
+     * @return Alignment opposite on the compass.
+     */
     public Alignment opposite() {
         switch (this) {
             case NORTH:

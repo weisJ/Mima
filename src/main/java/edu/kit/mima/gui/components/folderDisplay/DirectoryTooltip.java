@@ -4,6 +4,7 @@ import edu.kit.mima.gui.components.listeners.FilePopupActionHandler;
 import edu.kit.mima.gui.laf.icons.Icons;
 import edu.kit.mima.gui.util.FileName;
 import edu.kit.mima.gui.util.HSLColor;
+import edu.kit.mima.preferences.MimaConstants;
 
 import javax.swing.AbstractAction;
 import javax.swing.JMenuItem;
@@ -39,7 +40,7 @@ public class DirectoryTooltip extends JPopupMenu {
                         SwingUtilities.invokeLater(() -> handler.onClick(file));
                     }
                 });
-                String label = FileName.removeExtension(file);
+                String label = FileName.removeExtension(file, MimaConstants.EXTENSIONS);
                 if (label.isEmpty()) {
                     label = file.getName();
                 }
