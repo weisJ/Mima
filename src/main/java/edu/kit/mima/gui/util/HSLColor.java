@@ -42,7 +42,7 @@ public class HSLColor {
      *
      * @param h is the Hue value in degrees between 0 - 360
      * @param s is the Saturation percentage between 0 - 100
-     * @param l is the Lumanance percentage between 0 - 100
+     * @param l is the Luminance percentage between 0 - 100
      */
     public HSLColor(float h, float s, float l) {
         this(h, s, l, 1.0f);
@@ -53,7 +53,7 @@ public class HSLColor {
      *
      * @param h     the Hue value in degrees between 0 - 360
      * @param s     the Saturation percentage between 0 - 100
-     * @param l     the Lumanance percentage between 0 - 100
+     * @param l     the Luminance percentage between 0 - 100
      * @param alpha the alpha value between 0 - 1
      */
     public HSLColor(float h, float s, float l, float alpha) {
@@ -122,7 +122,7 @@ public class HSLColor {
 
         //  Calculate the Saturation
 
-        float s = 0;
+        float s;
 
         if (max == min)
             s = 0;
@@ -138,7 +138,7 @@ public class HSLColor {
      * Convert HSL values to a RGB Color with a default alpha value of 1.
      * H (Hue) is specified as degrees in the range 0 - 360.
      * S (Saturation) is specified as a percentage in the range 1 - 100.
-     * L (Lumanance) is specified as a percentage in the range 1 - 100.
+     * L (Luminance) is specified as a percentage in the range 1 - 100.
      *
      * @param hsl an array containing the 3 HSL values
      * @returns the RGB Color object
@@ -151,7 +151,7 @@ public class HSLColor {
      * Convert HSL values to a RGB Color.
      * H (Hue) is specified as degrees in the range 0 - 360.
      * S (Saturation) is specified as a percentage in the range 1 - 100.
-     * L (Lumanance) is specified as a percentage in the range 1 - 100.
+     * L (Luminance) is specified as a percentage in the range 1 - 100.
      *
      * @param hsl   an array containing the 3 HSL values
      * @param alpha the alpha value between 0 - 1
@@ -166,7 +166,7 @@ public class HSLColor {
      *
      * @param h Hue is specified as degrees in the range 0 - 360.
      * @param s Saturation is specified as a percentage in the range 1 - 100.
-     * @param l Lumanance is specified as a percentage in the range 1 - 100.
+     * @param l Luminance is specified as a percentage in the range 1 - 100.
      * @returns the RGB Color object
      */
     public static Color toRGB(float h, float s, float l) {
@@ -178,7 +178,7 @@ public class HSLColor {
      *
      * @param h     Hue is specified as degrees in the range 0 - 360.
      * @param s     Saturation is specified as a percentage in the range 1 - 100.
-     * @param l     Lumanance is specified as a percentage in the range 1 - 100.
+     * @param l     Luminance is specified as a percentage in the range 1 - 100.
      * @param alpha the alpha value between 0 - 1
      * @returns the RGB Color object
      */
@@ -205,7 +205,7 @@ public class HSLColor {
         s /= 100f;
         l /= 100f;
 
-        float q = 0;
+        float q;
 
         if (l < 0.5)
             q = l * (1 + s);
@@ -370,11 +370,9 @@ public class HSLColor {
     }
 
     public String toString() {
-        String toString =
-                "HSLColor[h=" + hsl[0] +
-                        ",s=" + hsl[1] +
-                        ",l=" + hsl[2] +
-                        ",alpha=" + alpha + "]";
-        return toString;
+        return "HSLColor[h=" + hsl[0] +
+                ",s=" + hsl[1] +
+                ",l=" + hsl[2] +
+                ",alpha=" + alpha + "]";
     }
 }

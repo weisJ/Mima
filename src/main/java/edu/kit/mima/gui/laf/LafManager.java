@@ -93,7 +93,7 @@ public final class LafManager implements UserPreferenceChangedListener {
         UIManager.put("TabbedPane.selectedLabelShift", 0);
         UIManager.put("TabbedPane.selectedTabPadInsets", new Insets(0, 0, 0, 0));
         UIManager.put("TabbedPane.tabAreaInsets", new Insets(0, 0, 0, 0));
-        UIManager.put("TabbedPane.separaterHighlight", UIManager.getColor("TabbedPane.selected"));
+        UIManager.put("TabbedPane.separatorHighlight", UIManager.getColor("TabbedPane.selected"));
         UIManager.put("TabbedPane.selected",
                 new HSLColor(UIManager.getColor("TabbedPane.background")).adjustTone(20));
         UIManager.put("swing.boldMetal", Boolean.FALSE);

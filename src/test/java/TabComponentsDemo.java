@@ -51,11 +51,9 @@ import java.awt.event.KeyEvent;
  */
 public class TabComponentsDemo extends JFrame {
 
-    private final int tabNumber = 5;
     private final JTabbedPane pane = new JTabbedPane();
     private final EditorTabbedPane tabbedPane = new EditorTabbedPane();
     private JMenuItem tabComponentsItem;
-    private JMenuItem scrollLayoutItem;
 
     public TabComponentsDemo(String title) {
         super(title);
@@ -90,6 +88,7 @@ public class TabComponentsDemo extends JFrame {
 
     public void runTest() {
         pane.removeAll();
+        int tabNumber = 5;
         for (int i = 0; i < tabNumber; i++) {
             String title = "Tab ".repeat(i) + i;
 //            pane.add(title, new JLabel(title));
@@ -129,7 +128,7 @@ public class TabComponentsDemo extends JFrame {
                 }
             }
         });
-        scrollLayoutItem = new JCheckBoxMenuItem("Set ScrollLayout");
+        JMenuItem scrollLayoutItem = new JCheckBoxMenuItem("Set ScrollLayout");
         scrollLayoutItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.ALT_MASK));
         scrollLayoutItem.addActionListener(e -> {
             if (pane.getTabLayoutPolicy() == JTabbedPane.WRAP_TAB_LAYOUT) {

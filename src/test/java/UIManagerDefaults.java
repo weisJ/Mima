@@ -26,7 +26,6 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -162,10 +161,8 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
         buildItemsMap();
 
         Vector<String> comboBoxItems = new Vector<>(50);
-        Iterator keys = items.keySet().iterator();
 
-        while (keys.hasNext()) {
-            Object key = keys.next();
+        for (Object key : items.keySet()) {
             comboBoxItems.add((String) key);
         }
 
@@ -402,10 +399,8 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
         model = new DefaultTableModel(COLUMN_NAMES, 0);
         Map attributes = items.get(itemName);
 
-        Iterator ai = attributes.keySet().iterator();
-
-        while (ai.hasNext()) {
-            String attribute = (String) ai.next();
+        for (Object o : attributes.keySet()) {
+            String attribute = (String) o;
             Object value = attributes.get(attribute);
 
             Vector<Object> row = new Vector<>(3);
@@ -446,7 +441,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
 
                 table.setRowHeight(row, rowHeight);
             }
-        } catch (ClassCastException e) {}
+        } catch (ClassCastException ignored) {}
     }
 
     /**
@@ -642,7 +637,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
                 frame.setVisible(true);
             } catch (Exception ex) {
                 System.out.println("Failed loading L&F: " + laf);
-                System.out.println(ex);
+                ex.printStackTrace();
             }
         }
     }
