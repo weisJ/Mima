@@ -27,5 +27,7 @@ public class IndexComponent extends JComponent {
             c.paint(g);
         }
         this.paint(g);
+//        g.setColor(Color.RED);
+//        g.drawRect(0,0, getPreferredSize().width, getPreferredSize().height);
     }
 }

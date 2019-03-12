@@ -13,6 +13,7 @@ import java.awt.SplashScreen;
 public final class App {
 
     private static MimaUserInterface frame;
+
     /**
      * Entry point for starting the Mima UI
      *
@@ -26,7 +27,6 @@ public final class App {
         Logger.setLevel(Logger.LogLevel.INFO);
         frame.setLocationRelativeTo(null);
         Icons.loadIcons();
-
         frame.setVisible(true);
         frame.requestFocus();
         frame.toFront();
@@ -37,3 +37,4 @@ public final class App {
         return frame != null;
     }
 }
+

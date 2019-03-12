@@ -5,16 +5,18 @@ import edu.kit.mima.core.interpretation.InterpreterException;
 import edu.kit.mima.core.running.MimaCompiler;
 import edu.kit.mima.core.running.MimaRunner;
 import edu.kit.mima.core.running.Program;
+import edu.kit.mima.gui.EditorHotKeys;
 import edu.kit.mima.gui.components.FixedScrollTable;
 import edu.kit.mima.gui.components.ZeroWidthSplitPane;
 import edu.kit.mima.gui.components.button.ButtonPanelBuilder;
+import edu.kit.mima.gui.components.button.IconButton;
 import edu.kit.mima.gui.components.console.Console;
 import edu.kit.mima.gui.components.console.LoadingIndicator;
 import edu.kit.mima.gui.components.editor.Editor;
-import edu.kit.mima.gui.components.editor.EditorHotKeys;
 import edu.kit.mima.gui.components.editor.highlighter.MimaHighlighter;
 import edu.kit.mima.gui.components.folderDisplay.FileDisplay;
 import edu.kit.mima.gui.components.tabbedEditor.EditorTabbedPane;
+import edu.kit.mima.gui.laf.icons.Icons;
 import edu.kit.mima.gui.loading.FileManager;
 import edu.kit.mima.gui.logging.Logger;
 import edu.kit.mima.gui.menu.Help;
@@ -71,9 +73,9 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
     private final MimaHighlighter highlighter = new MimaHighlighter();
     private final FileDisplay fileDisplay;
     private final JPanel controlPanel = new JPanel(new BorderLayout());
-    private final JButton runButton = new JButton("RUN");
+    private final JButton runButton = new IconButton(Icons.RUN_ACTIVE, Icons.RUN);
     private final JButton stepButton = new JButton("STEP");
-    private final JButton stopButton = new JButton("STOP");
+    private final JButton stopButton = new IconButton(Icons.STOP_INACTIVE, Icons.STOP);
 
     private Thread runThread;
 
@@ -194,12 +196,13 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
      */
     private void setupButtons() {
         final JPanel buttonPanel = new ButtonPanelBuilder(new FlowLayout(FlowLayout.RIGHT, 0, 0))
-                .addButton(stepButton).addAccelerator("alt S").setTooltip("Step (Alt + S)")
-                .addAction(this::stepButtonAction).setEnabled(false)
-                .addButton(runButton).addAccelerator("alt R").setTooltip("Run (Alt + R)")
-                .addAction(this::runButtonAction).setEnabled(false)
-                .addButton(stopButton).addAccelerator("alt P").setTooltip("Stop (Alt + P)")
-                .addAction(this::saveButtonAction)
+                .addButton(stepButton).addAccelerator("alt S").setTooltip("Step (Alt+S)")
+                .addAction(this::stepButtonAction)
+                .addButton(runButton).addAccelerator("alt R").setTooltip("Run (Alt+R)")
+                .addAction(this::runButtonAction)
+                .addButton(stopButton).addAccelerator("alt P").setTooltip("Stop (Alt+P)")
+                .addAction(this::stopButtonAction).setEnabled(false)
+                .addSpace()
                 .get();
         controlPanel.add(buttonPanel, BorderLayout.EAST);
     }
@@ -248,7 +251,7 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
      * Setup the editor
      */
     private void setupEditor() {
-        tabbedEditor.addTabClosedEventHanlder(c -> {
+        tabbedEditor.addTabClosedEventHandler(c -> {
             Editor editor = (Editor) c;
             try {
                 closeEditor(editor);
@@ -345,6 +348,8 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
     private void runButtonAction() {
         runThread = new Thread(() -> {
             stepButton.setEnabled(false);
+            stopButton.setEnabled(true);
+            stopButton.setEnabled(true);
             runButton.setEnabled(false);
             Logger.log("Running program: " + FileName.shorten(currentFileManager().getLastFile()));
             LoadingIndicator.start("Running", 3);
@@ -361,6 +366,7 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
                 stepButton.setEnabled(false);
                 runButton.setEnabled(false);
             }
+            stopButton.setEnabled(false);
         });
         runThread.start();
     }
@@ -386,6 +392,7 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
             LoadingIndicator.stop("Running (stopped)");
             runThread.interrupt();
             runButton.setEnabled(true);
+            stopButton.setEnabled(false);
         }
     }
 
@@ -446,7 +453,7 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
             editor.setText(fm.getText());
             String title = fm.getLastFile();
             title = title.substring(Math.max(Math.min(title.lastIndexOf('\\') + 1, title.length() - 1), 0));
-            tabbedEditor.addTab(title, editor);
+            tabbedEditor.addTab(title, Icons.foFile(title), editor);
             afterFileChange();
             console.clear();
             Logger.log("loaded: " + FileName.shorten(fm.getLastFile()));

@@ -41,7 +41,7 @@ public final class Icons {
     private static Icon loadIcon(String name) {
         try {
             return new SVGIcon(Objects.requireNonNull(instance.getClass()
-                    .getResource(name)).toURI().toString());
+                    .getResource(name)).toURI().toString(), 16, 16);
         } catch (TranscoderException | URISyntaxException e) {
             e.printStackTrace();
             System.out.println(name);
@@ -64,5 +64,9 @@ public final class Icons {
         } else {
             return FILE;
         }
+    }
+
+    public static Icon foFile(String name) {
+        return forFile(new File(name));
     }
 }

@@ -14,4 +14,5 @@ public interface ITooltip {
 
     void showTooltip();
 
+    void hideTooltip();
 }

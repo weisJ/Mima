@@ -1,6 +1,7 @@
-package edu.kit.mima.gui.components.editor;
+package edu.kit.mima.gui;
 
 import edu.kit.mima.core.parsing.lang.Punctuation;
+import edu.kit.mima.gui.components.editor.Editor;
 import edu.kit.mima.gui.formatter.Formatter;
 import edu.kit.mima.gui.logging.Logger;
 import edu.kit.mima.preferences.Preferences;
