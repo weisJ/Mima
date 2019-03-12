@@ -15,8 +15,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.Rectangle;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -47,23 +45,6 @@ public class Tooltip extends ShadowPane implements ITooltip {
         labelPanel.setBackground(new HSLColor(labelPanel.getBackground()).adjustTone(20).getRGB());
 
         add(labelPanel);
-        //Prevent events from propagating to components beneath
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                e.consume();
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-                e.consume();
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                e.consume();
-            }
-        });
     }
 
     /**

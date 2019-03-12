@@ -121,7 +121,7 @@ public class Formatter {
      * Starts at next node in iterator.
      *
      * @param iterator iterator of parent node
-     * @param sb string builder to which Strings a appended
+     * @param sb       string builder to which Strings a appended
      */
     private void maybeJump(Iterator<SyntaxNode> iterator, StringBuilder sb) {
         if (!iterator.hasNext()) {
@@ -135,8 +135,8 @@ public class Formatter {
      * parse a Node that may be followed by a jump delimiter
      *
      * @param iterator iterator of parent node
-     * @param sb string builder to which Strings a appended
-     * @param current current node in iterator
+     * @param sb       string builder to which Strings a appended
+     * @param current  current node in iterator
      */
     private void maybeJump(Iterator<SyntaxNode> iterator, StringBuilder sb, SyntaxNode current) {
         sb.append(printNode(current));

@@ -24,12 +24,12 @@ public class SyntaxTokenStream extends TokenStream {
 
     @Override
     public @Nullable SyntaxToken next() {
-        return (SyntaxToken)super.next();
+        return (SyntaxToken) super.next();
     }
 
     @Override
     public @Nullable SyntaxToken peek() {
-        return (SyntaxToken)super.peek();
+        return (SyntaxToken) super.peek();
     }
 
     @Override
@@ -78,7 +78,7 @@ public class SyntaxTokenStream extends TokenStream {
         }
         int stopIndex = getPosition();
         return new AtomSyntaxToken<>(TokenType.COMMENT, comment, SyntaxColor.COMMENT,
-                startIndex, stopIndex- startIndex);
+                startIndex, stopIndex - startIndex);
     }
 
     private SyntaxToken readNumber() {
@@ -95,7 +95,7 @@ public class SyntaxTokenStream extends TokenStream {
         String binary = "" + input.next();
         binary += readWhile(c -> c == '0' || c == '1');
         int stopIndex = getPosition();
-        return  new AtomSyntaxToken<>(TokenType.BINARY, binary, SyntaxColor.BINARY,
+        return new AtomSyntaxToken<>(TokenType.BINARY, binary, SyntaxColor.BINARY,
                 startIndex, stopIndex - startIndex);
     }
 

@@ -43,7 +43,8 @@ public enum EditorHotKeys implements Action {
             }
         }
     },
-    STRING_DELETE("BACK_SPACE" ) {//Todo
+    STRING_DELETE("BACK_SPACE") {//Todo
+
         @Override
         public void actionPerformed(ActionEvent e) {
 //            try {
@@ -56,6 +57,7 @@ public enum EditorHotKeys implements Action {
     },
     FORMAT("control alt F") {
         private final Formatter formatter = new Formatter();
+
         @Override
         public void actionPerformed(ActionEvent e) {
 //            String s = formatter.format(editor.getText());
@@ -92,9 +94,9 @@ public enum EditorHotKeys implements Action {
     };
 
 
+    private static final Preferences pref = Preferences.getInstance();
     private static Editor editor;
     private final String accelerator;
-    private static final Preferences pref = Preferences.getInstance();
 
     EditorHotKeys(String accelerator) {
         this.accelerator = accelerator;

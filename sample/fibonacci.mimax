@@ -1,11 +1,11 @@
 #This program computes the fibonacci numbers up to the specified value.
 #It uses a value 'cache' to minimize unnecessary computations
 
-§define const val = 8; #works up to val = 34
-§define argument = 0;
-§define offset = 1;
-§define tmp = 2;
-§define tmp2 = 3;
+Â§define const val = 8; #works up to val = 34
+Â§define argument = 0;
+Â§define offset = 1;
+Â§define tmp = 2;
+Â§define tmp2 = 3;
 
 LDC(val);
 CALL(FIB);

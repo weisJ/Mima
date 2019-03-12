@@ -31,12 +31,11 @@ import java.util.TreeMap;
 public class NumberedTextPane extends JPanel {
 
     private static final Dimension NUMBER_SIZE = new Dimension(30, 30);
-
-    private int offsetMultiplier = 5;
     private final HighlightTextPane pane;
     private final JScrollPane scrollPane;
     private final TreeMap<Integer, IndexComponent> componentMap;
     private final List<IndexListener> listenerList;
+    private int offsetMultiplier = 5;
     private Font font;
     private Color color;
     private int actionThresholdX;

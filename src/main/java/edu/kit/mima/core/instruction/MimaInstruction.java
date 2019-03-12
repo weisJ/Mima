@@ -24,7 +24,7 @@ public enum MimaInstruction implements Instruction {
         @Override
         protected MachineWord applyInternal(List<Value> arguments, Environment environment) {
             var argument = InstructionTools.getReferenceValue(arguments, 0);
-            MachineWord value = (MachineWord)argument.getValue();
+            MachineWord value = (MachineWord) argument.getValue();
             if (!(mima.getWordLength() == mima.getConstWordLength()) && (value.intValue() < 0)) {
                 InstructionTools.fail("can't pass negative values");
             }
@@ -39,7 +39,7 @@ public enum MimaInstruction implements Instruction {
         @Override
         protected MachineWord applyInternal(List<Value> arguments, Environment environment) {
             var argument = InstructionTools.getMemoryReference(arguments, 0);
-            mima.setAccumulator(mima.loadValue(((MachineWord)argument.getValue()).intValue()));
+            mima.setAccumulator(mima.loadValue(((MachineWord) argument.getValue()).intValue()));
             return null;
         }
     },
@@ -50,7 +50,7 @@ public enum MimaInstruction implements Instruction {
         @Override
         protected MachineWord applyInternal(List<Value> arguments, Environment environment) {
             var argument = InstructionTools.getMemoryReference(arguments, 0);
-            mima.storeValue(((MachineWord)argument.getValue()).intValue(), mima.getAccumulator());
+            mima.storeValue(((MachineWord) argument.getValue()).intValue(), mima.getAccumulator());
             return null;
         }
     },
@@ -63,7 +63,7 @@ public enum MimaInstruction implements Instruction {
             var argument = InstructionTools.getMemoryReference(arguments, 0);
             mima.setAccumulator(
                     mima.loadValue(
-                    mima.loadValue(((MachineWord)argument.getValue()).intValue()).intValue()));
+                            mima.loadValue(((MachineWord) argument.getValue()).intValue()).intValue()));
             return null;
         }
     },
@@ -75,7 +75,7 @@ public enum MimaInstruction implements Instruction {
         protected MachineWord applyInternal(List<Value> arguments, Environment environment) {
             var argument = InstructionTools.getMemoryReference(arguments, 0);
             mima.storeValue(mima.loadValue(
-                    ((MachineWord)argument.getValue()).intValue()).intValue(), mima.getAccumulator());
+                    ((MachineWord) argument.getValue()).intValue()).intValue(), mima.getAccumulator());
             return null;
         }
     },
@@ -108,7 +108,7 @@ public enum MimaInstruction implements Instruction {
             var argument = InstructionTools.getMemoryReference(arguments, 0);
             mima.setAccumulator(arithmeticLogicUnit.add(
                     MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
-                    mima.loadValue(((MachineWord)argument.getValue()).intValue())));
+                    mima.loadValue(((MachineWord) argument.getValue()).intValue())));
             return null;
         }
     },
@@ -121,7 +121,7 @@ public enum MimaInstruction implements Instruction {
             var argument = InstructionTools.getMemoryReference(arguments, 0);
             mima.setAccumulator(arithmeticLogicUnit.and(
                     MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
-                    mima.loadValue(((MachineWord)argument.getValue()).intValue())));
+                    mima.loadValue(((MachineWord) argument.getValue()).intValue())));
             return null;
         }
     },
@@ -134,7 +134,7 @@ public enum MimaInstruction implements Instruction {
             var argument = InstructionTools.getMemoryReference(arguments, 0);
             mima.setAccumulator(arithmeticLogicUnit.or(
                     MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
-                    mima.loadValue(((MachineWord)argument.getValue()).intValue())));
+                    mima.loadValue(((MachineWord) argument.getValue()).intValue())));
             return null;
         }
     },
@@ -147,7 +147,7 @@ public enum MimaInstruction implements Instruction {
             var argument = InstructionTools.getMemoryReference(arguments, 0);
             mima.setAccumulator(arithmeticLogicUnit.xor(
                     MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
-                    mima.loadValue(((MachineWord)argument.getValue()).intValue())));
+                    mima.loadValue(((MachineWord) argument.getValue()).intValue())));
             return null;
         }
     },
@@ -160,7 +160,7 @@ public enum MimaInstruction implements Instruction {
             var argument = InstructionTools.getMemoryReference(arguments, 0);
             mima.setAccumulator(arithmeticLogicUnit.negativeIfEquals(
                     MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
-                    mima.loadValue(((MachineWord)argument.getValue()).intValue())));
+                    mima.loadValue(((MachineWord) argument.getValue()).intValue())));
             return null;
         }
     };
@@ -201,7 +201,7 @@ public enum MimaInstruction implements Instruction {
 
     @Override
     public void apply(List<Value> arguments, Environment environment,
-                                       Consumer<Value> callback) {
+                      Consumer<Value> callback) {
         InstructionTools.checkArgNumber(arguments, this.argNum);
         callback.accept(new Value<>(ValueType.NUMBER, this.applyInternal(arguments, environment)));
     }

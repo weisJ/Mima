@@ -44,7 +44,7 @@ public final class PreProcessor extends Processor {
      * Create new PreProcessor to process preProcessor Statements.
      *
      * @param inputString string to process
-     * @param recursive whether to recursively parse and input included files
+     * @param recursive   whether to recursively parse and input included files
      */
     public PreProcessor(final String inputString, boolean recursive) {
         super(inputString);

@@ -23,10 +23,10 @@ import static edu.kit.mima.gui.logging.Logger.LogLevel.WARNING;
  */
 public final class Logger {
 
+    private static final Queue<ValueTuple<String, Color>> messageQueue = new LinkedList<>();
     private static Console console;
     private static LogLevel level = INFO;
     private static boolean locked = false;
-    private static final Queue<ValueTuple<String, Color>> messageQueue = new LinkedList<>();
 
     /*
      * Prevent instantiation

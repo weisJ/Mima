@@ -144,7 +144,7 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
      * Transform current line in editor
      *
      * @param function Function that takes in the current line and caret position in line
-     * @param index index in file
+     * @param index    index in file
      */
     public void transformLine(Function<String, String> function, int index) {
         var editorPane = numberedTextPane.getPane();
@@ -162,7 +162,8 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
 
     /**
      * Insert String into text
-     * @param text text to insert
+     *
+     * @param text   text to insert
      * @param offset location in file
      * @throws BadLocationException if location is outside bounds
      */

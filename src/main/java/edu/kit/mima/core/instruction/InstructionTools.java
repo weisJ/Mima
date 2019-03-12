@@ -58,7 +58,7 @@ public class InstructionTools {
             fail("must pass a memory address");
         }
         if (!(argument.getType() == ValueType.MEMORY_REFERENCE)
-                && ((MachineWord)(argument.getValue())).intValue() < 0) {
+                && ((MachineWord) (argument.getValue())).intValue() < 0) {
             fail("illegal memory address");
         }
         return argument;

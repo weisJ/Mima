@@ -82,7 +82,7 @@ public class Interpreter {
      */
     private void execute(Runnable continuation) {
         var func = continuation;
-        while(running) {
+        while (running) {
             try {
                 stackGuard.reset();
                 func.run();
@@ -97,7 +97,7 @@ public class Interpreter {
      */
     @SuppressWarnings("unchecked") /*Construction of tokens guarantees these types*/
     private void evaluate(final Token expression, final Environment environment,
-                                        final Consumer<Value> callback) throws Continuation  {
+                          final Consumer<Value> callback) throws Continuation {
         stackGuard.guard(() -> evaluate(expression, environment, callback));
         switch (expression.getType()) {
             case PROGRAM:
@@ -148,30 +148,30 @@ public class Interpreter {
     }
 
     private void evaluateProgram(ProgramToken programToken, Environment environment,
-                                 Consumer<Value> callback) throws Continuation  {
+                                 Consumer<Value> callback) throws Continuation {
         stackGuard.guard(() -> evaluateProgram(programToken, environment, callback));
         Token[] tokens = programToken.getValue();
         currentScope = environment;
         int startIndex = environment.getExpressionIndex();
         BiConsumer<Value, Integer> loop = LambdaUtil.createRecursive(func -> (last, i) -> {
-           if (running && i != startIndex) {
-               debugController.afterInstruction(tokens[i]);
-           }
-           if (i < tokens.length && running) {
-               environment.setExpressionIndex(i);
-               currentToken = tokens[i];
-               evaluate(currentToken, environment, v -> func.accept(v, i + 1));
-           } else {
-               environment.setExpressionIndex(0);
-               callback.accept(last);
-           }
+            if (running && i != startIndex && i < tokens.length) {
+                debugController.afterInstruction(tokens[i]);
+            }
+            if (i < tokens.length && running) {
+                environment.setExpressionIndex(i);
+                currentToken = tokens[i];
+                evaluate(currentToken, environment, v -> func.accept(v, i + 1));
+            } else {
+                environment.setExpressionIndex(0);
+                callback.accept(last);
+            }
         });
         loop.accept(null, startIndex);
     }
 
     @SuppressWarnings("unchecked") /*Construction of tokens guarantees these types*/
     private void evaluateDefinition(ArrayToken<Token> token, Environment environment,
-                                    Consumer<Value> callback) throws Continuation  {
+                                    Consumer<Value> callback) throws Continuation {
         stackGuard.guard(() -> evaluateDefinition(token, environment, callback));
         Token[] tokens = token.getValue();
         BiConsumer<Environment, Integer> loop = LambdaUtil.createRecursive(func -> (env, i) -> {
@@ -189,12 +189,12 @@ public class Interpreter {
                         if (Objects.equals(v, VOID)) {
                             fail("Not a definition body: " + definition.getSecond());
                         }
-                        if (((MachineWord)v.getValue()).intValue() < 0) {
+                        if (((MachineWord) v.getValue()).intValue() < 0) {
                             fail("Can't have negative memory references");
                         }
                         environment.defineVariable(
                                 definition.getFirst().getValue().toString(),
-                                (MachineWord)v.getValue()
+                                (MachineWord) v.getValue()
                         );
                         func.accept(environment, i + 1);
                     });
@@ -208,7 +208,7 @@ public class Interpreter {
 
     @SuppressWarnings("unchecked") /*Construction of tokens guarantees these types*/
     private void evaluateConstant(ArrayToken<Token> token, Environment environment,
-                                  Consumer<Value> callback) throws Continuation  {
+                                  Consumer<Value> callback) throws Continuation {
         stackGuard.guard(() -> evaluateConstant(token, environment, callback));
         Token[] tokens = token.getValue();
         BiConsumer<Environment, Integer> loop = LambdaUtil.createRecursive(func -> (env, i) -> {
@@ -220,7 +220,7 @@ public class Interpreter {
                     }
                     environment.defineConstant(
                             definition.getFirst().getValue().toString(),
-                            (MachineWord)v.getValue()
+                            (MachineWord) v.getValue()
                     );
                     func.accept(environment, i + 1);
                 });

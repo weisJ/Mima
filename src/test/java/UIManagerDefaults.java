@@ -3,7 +3,7 @@
  *  to create a table of key/value pairs for each Swing component.
  */
 
-import edu.kit.mima.gui.laf.CustomDarculaLaf;
+import edu.kit.mima.gui.laf.CustomDarculaLightLaf;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -36,7 +36,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
 
     private JComponent contentPane;
     private JMenuBar menuBar;
-    private JComboBox comboBox;
+    private JComboBox<String> comboBox;
     private JRadioButton byComponent;
     private JTable table;
     private TreeMap<String, TreeMap<String, Object>> items;
@@ -76,7 +76,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
      */
     public static void main(String[] args) {
         try {
-            UIManager.setLookAndFeel(CustomDarculaLaf.class.getCanonicalName());
+            UIManager.setLookAndFeel(CustomDarculaLightLaf.class.getCanonicalName());
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
@@ -105,7 +105,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
      *  This panel is added to the North of the content pane
      */
     private JComponent buildNorthComponent() {
-        comboBox = new JComboBox();
+        comboBox = new JComboBox<>();
 
         JLabel label = new JLabel("Select Item:");
         label.setDisplayedMnemonic('S');
@@ -167,7 +167,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
         }
 
         comboBox.removeItemListener(this);
-        comboBox.setModel(new DefaultComboBoxModel(comboBoxItems));
+        comboBox.setModel(new DefaultComboBoxModel<>(comboBoxItems));
         comboBox.setSelectedIndex(-1);
         comboBox.addItemListener(this);
         comboBox.requestFocusInWindow();
