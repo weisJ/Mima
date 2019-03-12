@@ -22,9 +22,9 @@ public class Preferences {
     private static final String optionsPath = directory + "\\options.properties";
     private static final Preferences instance = new Preferences();
     private static final List<UserPreferenceChangedListener> listenerList = new ArrayList<>();
-    private boolean notify;
     private final Properties options;
     private final Properties colorStyle;
+    private boolean notify;
 
     private Preferences() {
         options = new Properties();

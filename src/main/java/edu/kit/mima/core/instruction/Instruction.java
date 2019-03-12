@@ -17,7 +17,7 @@ public interface Instruction {
      *
      * @param arguments   function arguments array
      * @param environment runtime environment
-     * @param callback callback for method return value
+     * @param callback    callback for method return value
      */
     void apply(List<Value> arguments, Environment environment,
                Consumer<Value> callback);

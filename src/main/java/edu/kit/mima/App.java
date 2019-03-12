@@ -4,6 +4,7 @@ import edu.kit.mima.gui.laf.LafManager;
 import edu.kit.mima.gui.laf.icons.Icons;
 import edu.kit.mima.gui.logging.Logger;
 
+import javax.swing.SwingUtilities;
 import java.awt.SplashScreen;
 
 /**
@@ -21,16 +22,19 @@ public final class App {
      */
     public static void main(final String[] args) {
         SplashScreen.getSplashScreen();
-        LafManager.update();
-        String filePath = args != null && args.length >= 1 ? args[0] : null;
-        frame = new MimaUserInterface(filePath);
-        Logger.setLevel(Logger.LogLevel.INFO);
-        frame.setLocationRelativeTo(null);
-        Icons.loadIcons();
-        frame.setVisible(true);
-        frame.requestFocus();
-        frame.toFront();
-        frame.repaint();
+//        LafManager.update();
+        SwingUtilities.invokeLater(() -> {
+            LafManager.setDefaultTheme(true);
+            String filePath = args != null && args.length >= 1 ? args[0] : null;
+            frame = new MimaUserInterface(filePath);
+            Logger.setLevel(Logger.LogLevel.INFO);
+            frame.setLocationRelativeTo(null);
+            Icons.loadIcons();
+            frame.setVisible(true);
+            frame.requestFocus();
+            frame.toFront();
+            frame.repaint();
+        });
     }
 
     public static boolean isInitialized() {

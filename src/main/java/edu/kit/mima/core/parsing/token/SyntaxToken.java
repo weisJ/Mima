@@ -31,6 +31,7 @@ public interface SyntaxToken<T> extends Token<T> {
 
     /**
      * Set color of token
+     *
      * @param color color
      */
     void setColor(Color color);

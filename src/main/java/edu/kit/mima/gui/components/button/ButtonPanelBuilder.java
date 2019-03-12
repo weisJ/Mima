@@ -154,7 +154,8 @@ public final class ButtonPanelBuilder {
          * @return this
          */
         public <T extends JComponent & ITooltip> ButtonBuilder setTooltip(T component) {
-            new TooltipComponent<>(button, component, BUTTON_DELAY, BUTTON_VANISH_DELAY, TooltipComponent.COMPONENT_BOTH);
+            new TooltipComponent<>(button, component, BUTTON_DELAY, BUTTON_VANISH_DELAY, TooltipComponent.COMPONENT_BOTH)
+                    .setActive(true);
             button.setToolTipText(null);
             return this;
         }

@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
  * @since 2018
  */
 public class TokenStream {
+    protected static final char NEW_LINE = '\n';
     private static final List<String> KEYWORDS = List.of(Keyword.getKeywords());
     private static final Pattern WHITESPACE = Pattern.compile("[ \t\n\r\f]");
     private static final Pattern NUMBER_START = Pattern.compile(Symbol.NUMBER_SIGNED);
@@ -27,8 +28,6 @@ public class TokenStream {
     private static final Pattern LETTER = Pattern.compile(Symbol.LETTERS);
     private static final Pattern PUNCTUATION = Pattern.compile('['
             + String.valueOf(Punctuation.getPunctuation()) + ']');
-
-    protected static final char NEW_LINE = '\n';
     protected final CharInputStream input;
 
     private @Nullable Token current;

@@ -11,10 +11,10 @@ import edu.kit.mima.core.parsing.inputStream.TokenStream;
  */
 public class ParserException extends RuntimeException {
 
+    protected final String message;
     private final int line;
     private final int column;
     private final int position;
-    protected final String message;
 
     /**
      * ParsingExpression

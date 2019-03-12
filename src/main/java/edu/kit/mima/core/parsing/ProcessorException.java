@@ -9,10 +9,10 @@ public class ProcessorException extends ParserException {
     /**
      * ParsingExpression
      *
-     * @param message  exception message
+     * @param message exception message
      */
     public ProcessorException(String message) {
-        super(message, 0,0,0);
+        super(message, 0, 0, 0);
     }
 
     @Override

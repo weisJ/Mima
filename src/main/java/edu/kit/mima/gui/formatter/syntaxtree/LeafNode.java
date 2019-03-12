@@ -11,9 +11,10 @@ public class LeafNode extends SimpleSyntaxNode {
 
     /**
      * Create new LeafNode that has no children
-     * @param type type of node
+     *
+     * @param type     type of node
      * @param position position of node
-     * @param parent parent node
+     * @param parent   parent node
      */
     public LeafNode(NodeType type, int position, SyntaxNode parent) {
         super(type, position, position, parent);

@@ -19,9 +19,9 @@ public class SimpleSyntaxNode implements SyntaxNode {
     /**
      * Create new syntax node
      *
-     * @param type node type
-     * @param begin begin position of node
-     * @param end end positon of node
+     * @param type   node type
+     * @param begin  begin position of node
+     * @param end    end positon of node
      * @param parent parent node
      */
     public SimpleSyntaxNode(NodeType type, int begin, int end, SyntaxNode parent) {
@@ -35,6 +35,11 @@ public class SimpleSyntaxNode implements SyntaxNode {
     @Override
     public NodeType getType() {
         return type;
+    }
+
+    @Override
+    public void setType(NodeType type) {
+        this.type = type;
     }
 
     @Override
@@ -94,11 +99,6 @@ public class SimpleSyntaxNode implements SyntaxNode {
             return true;
         }
         return false;
-    }
-
-    @Override
-    public void setType(NodeType type) {
-        this.type = type;
     }
 
     @Override

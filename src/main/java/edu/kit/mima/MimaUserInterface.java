@@ -222,7 +222,7 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
                     }
                 });
             } else {
-                System.out.println("clicked");
+//                TooltipUtil.showTooltip(new Tooltip("File not supported."));
             }
         });
     }

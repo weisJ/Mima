@@ -23,9 +23,8 @@ public class ZeroWidthSplitPane extends JSplitPane {
     }
 
     @Override
-    public void layout() {
-        super.layout();
-
+    public void doLayout() {
+        super.doLayout();
         // increase divider width or height
         BasicSplitPaneDivider divider = ((BasicSplitPaneUI) getUI()).getDivider();
         Rectangle bounds = divider.getBounds();

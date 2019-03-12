@@ -36,7 +36,7 @@ public final class LafManager implements UserPreferenceChangedListener {
         return currentLaf;
     }
 
-    private static void setDefaultTheme(boolean dark) {
+    public static void setDefaultTheme(boolean dark) {
         try {
             if (dark) {
                 UIManager.setLookAndFeel(CustomDarculaLaf.class.getCanonicalName());

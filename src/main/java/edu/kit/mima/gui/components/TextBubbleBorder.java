@@ -201,7 +201,7 @@ public class TextBubbleBorder extends AbstractBorder {
      * Get the Alignment the pointer follows.
      * Default is {@link Alignment#NORTH}
      *
-     * @return aligment
+     * @return alignment
      */
     public Alignment getPointerSide() {
         return pointerSide;

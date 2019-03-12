@@ -24,7 +24,7 @@ public enum MimaXInstruction implements Instruction {
         @Override
         protected MachineWord applyInternal(List<Value> arguments, Environment environment) {
             var argument = InstructionTools.getReferenceValue(arguments, 0);
-            mima.setAccumulator(arithmeticLogicUnit.add(mima.getAccumulator(), (MachineWord)argument.getValue()));
+            mima.setAccumulator(arithmeticLogicUnit.add(mima.getAccumulator(), (MachineWord) argument.getValue()));
             return null;
         }
     },
@@ -118,8 +118,8 @@ public enum MimaXInstruction implements Instruction {
     protected int getOffsetAddress(List<Value> arguments) {
         var first = InstructionTools.getReferenceValue(arguments, 0);
         var second = InstructionTools.getReferenceValue(arguments, 1);
-        int address = ((MachineWord)first.getValue()).intValue()
-                + ((MachineWord)second.getValue()).intValue();
+        int address = ((MachineWord) first.getValue()).intValue()
+                + ((MachineWord) second.getValue()).intValue();
         if (address < 0) {
             InstructionTools.fail("illegal memory address");
         }
@@ -133,7 +133,7 @@ public enum MimaXInstruction implements Instruction {
 
     @Override
     public void apply(List<Value> arguments, Environment environment,
-                                Consumer<Value> callback) {
+                      Consumer<Value> callback) {
         InstructionTools.checkArgNumber(arguments, this.argNum);
         callback.accept(new Value<>(ValueType.NUMBER, this.applyInternal(arguments, environment)));
     }

@@ -73,6 +73,7 @@ public class ProgramQueryResult implements QueryResult<Token> {
 
     /**
      * Return query result
+     *
      * @param recursive whether to recursively include program tokens
      * @return List of tokens matching query
      */
