@@ -8,12 +8,9 @@ import edu.kit.mima.gui.laf.icons.Icons;
  */
 public class Breakpoint extends IndexComponent {
 
-    private final int index;
-    private final IconPanel iconPanel;
-
     public Breakpoint(int lineIndex) {
-        this.index = lineIndex;
-        iconPanel = new IconPanel(Icons.BREAKPOINT, Alignment.NORTH_WEST);
+        int index = lineIndex;
+        IconPanel iconPanel = new IconPanel(Icons.BREAKPOINT, Alignment.NORTH_WEST);
         setPreferredSize(iconPanel.getPreferredSize());
         add(iconPanel);
     }

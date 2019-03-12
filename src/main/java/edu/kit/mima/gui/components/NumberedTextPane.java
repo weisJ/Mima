@@ -110,7 +110,7 @@ public class NumberedTextPane extends JPanel {
     }
 
     /**
-     * Remove index listenr
+     * Remove index listener
      *
      * @param listener listener to remove
      */
@@ -140,7 +140,7 @@ public class NumberedTextPane extends JPanel {
     }
 
     /**
-     * Returns whether a given index has a component associatet to it.
+     * Returns whether a given index has a component associated to it.
      *
      * @param index index to check.
      * @return true if index has component.

@@ -292,7 +292,6 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
         }));
     }
 
-    @SuppressWarnings("IOResourceOpenedButNotSafelyClosed")
     private void loadDefaults(UIDefaults defaults) {
         final Properties properties = new Properties();
         final String osSuffix = SystemInfo.isMac ? "mac" : SystemInfo.isWindows ? "windows" : "linux";

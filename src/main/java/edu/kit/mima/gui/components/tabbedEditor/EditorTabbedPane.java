@@ -49,7 +49,7 @@ public class EditorTabbedPane extends JTabbedPane {
     private TabAcceptor tabAcceptor;
 
     public EditorTabbedPane() {
-        var c = UIManager.getColor("TabbedPane.separaterHighlight");
+        var c = UIManager.getColor("TabbedPane.separatorHighlight");
         lineColor = c == null ? UIManager.getColor("TabbedPane.selected") : c;
         selectedColor = new HSLColor(lineColor).adjustTone(10).adjustSaturation(40).getRGB();
         tabBorderColor = new HSLColor(getBackground()).adjustTone(10).getRGB();
