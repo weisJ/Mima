@@ -19,6 +19,7 @@ public class ThreadDebugController implements DebugController {
     private Thread workingThread;
     private boolean isActive;
     private boolean autoPause;
+    private boolean shouldDie;
 
     /**
      * Create new ThreadDebugController.
@@ -88,17 +89,22 @@ public class ThreadDebugController implements DebugController {
             return;
         }
         autoPause = false;
+        shouldDie = true;
         synchronized (lock) {
             isActive = false;
         }
         try {
+            System.out.println("wait");
+            resume();
             workingThread.join();
+            System.out.println("done");
         } catch (InterruptedException ignored) {/*doesn't matter thread should die*/}
+        shouldDie = false;
     }
 
     @Override
     public void afterInstruction(Token currentInstruction) {
-        if ((autoPause || breaks.contains(currentInstruction.getFilePos()))
+        if (!shouldDie && (autoPause || breaks.contains(currentInstruction.getFilePos()))
                 && currentInstruction.getType() != TokenType.PROGRAM) {
             pause();
         }

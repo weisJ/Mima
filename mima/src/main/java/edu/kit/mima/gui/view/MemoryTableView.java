@@ -10,6 +10,7 @@ import javax.swing.JTable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -65,7 +66,8 @@ public class MemoryTableView implements MemoryView {
         Environment scope = mimaRunner.getCurrentEnvironment();
         Map<String, Integer> map = new HashMap<>();
         while (scope != null) {
-            map.putAll(scope.getDefinitions().get(0).entrySet().stream()
+            map.putAll(new HashSet<>(scope.getDefinitions().get(0).entrySet())
+                    .stream()
                     .filter(e -> !map.containsKey(e.getKey()))
                     .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().intValue())));
             scope = scope.returnToParent();

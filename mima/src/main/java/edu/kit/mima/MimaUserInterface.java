@@ -296,8 +296,6 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
             if (editor == null) return;
             fileDisplay.setFile(new File(fileManagers.get(editor).getLastFile()));
         });
-//        tabbedEditor.setBorder(new MatteBorder(1,0,0,0,
-//                UIManager.getColor("Border.light")));
     }
 
     private void setupComponents() {
@@ -333,8 +331,7 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
         fm.close();
         fileManagers.remove(editor).getLastFile();
         if (tabbedEditor.getTabCount() <= 1) {
-//            runButton.setEnabled(false);
-//            stepButton.setEnabled(false);
+            //Todo disable button if no file is selected.
         }
     }
 
@@ -421,12 +418,14 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
                 memoryView.updateView();
                 if (debug) {
                     debugger.setBreakpoints(currentEditor().getBreakpoints());
-                    debugger.start();
+                    debugger.start(v -> {
+                        currentEditor().markLine(-1);
+                        LoadingIndicator.stop("Executing (done)");
+                    });
                 } else {
-                    mimaRunner.start();
+                    mimaRunner.start(v -> LoadingIndicator.stop("Executing (done)"));
                 }
                 memoryView.updateView();
-                LoadingIndicator.stop("Executing (done)");
             } catch (InterpreterException e) {
                 LoadingIndicator.error("Execution failed: " + e.getMessage());
             } catch (MimaRuntimeException ignored) { }
