@@ -7,6 +7,8 @@ import edu.kit.mima.core.instruction.MimaInstruction;
 import edu.kit.mima.core.instruction.MimaXInstruction;
 import edu.kit.mima.core.interpretation.ExceptionListener;
 import edu.kit.mima.core.interpretation.Interpreter;
+import edu.kit.mima.core.interpretation.Value;
+import edu.kit.mima.core.interpretation.ValueType;
 import edu.kit.mima.core.interpretation.environment.Environment;
 import edu.kit.mima.core.interpretation.environment.GlobalEnvironment;
 import edu.kit.mima.core.parsing.token.ProgramToken;
@@ -21,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -49,10 +52,10 @@ public class MimaRunner extends AbstractObservable implements ExceptionListener 
         mima = new Mima(InstructionSet.MIMA_X.getWordLength(), InstructionSet.MIMA_X.getConstCordLength());
     }
 
-    public void start() {
+    public void start(Consumer<Value> callback) {
         threadDebugController.setBreaks(Collections.emptyList());
         mima.reset();
-        startInterpreter();
+        startInterpreter(callback);
         do {
             threadDebugController.resume();
             checkForException();
@@ -63,7 +66,7 @@ public class MimaRunner extends AbstractObservable implements ExceptionListener 
     /**
      * Start the interpreter
      */
-    private void startInterpreter() {
+    private void startInterpreter(Consumer<Value> callback) {
         if (program == null) {
             throw new IllegalStateException("must parse program before starting");
         }
@@ -71,7 +74,10 @@ public class MimaRunner extends AbstractObservable implements ExceptionListener 
         createGlobalEnvironment();
         sharedException.set(null);
         Thread workingThread = new Thread(
-                () -> interpreter.evaluateTopLevel(program.getProgramToken(), globalEnvironment, v -> {})
+                () -> {
+                    interpreter.evaluateTopLevel(program.getProgramToken(), globalEnvironment, v -> {});
+                    callback.accept(new Value<>(ValueType.NUMBER, mima.getAccumulator()));
+                }
         );
         threadDebugController.setWorkingThread(workingThread);
         threadDebugController.start();
@@ -143,7 +149,7 @@ public class MimaRunner extends AbstractObservable implements ExceptionListener 
 
     public Environment getCurrentEnvironment() {
         if (!isRunning()) {
-            return EMPTY_ENV;
+            return globalEnvironment;
         }
         var scope = interpreter.getCurrentScope();
         return scope == null ? globalEnvironment : scope;
@@ -188,12 +194,12 @@ public class MimaRunner extends AbstractObservable implements ExceptionListener 
         }
 
         @Override
-        public void start() {
+        public void start(Consumer<Value> callback) {
             active = true;
             paused = false;
             getPropertyChangeSupport().firePropertyChange(Debugger.PAUSE_PROPERTY, false, true);
             mima.reset();
-            startInterpreter();
+            startInterpreter(callback);
             continueExecution();
         }
 

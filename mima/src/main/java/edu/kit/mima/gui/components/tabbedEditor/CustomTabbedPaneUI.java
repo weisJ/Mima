@@ -48,7 +48,7 @@ public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
             return;
         }
         g = g.create();
-        xOff = 0;
+        xOff = tabbedPane.dropSourceIndex >= 0 ? tabbedPane.getBoundsAt(tabbedPane.dropSourceIndex).width : 0;
         int tabCount = tabbedPane.getTabCount();
         var sourceBounds = tabbedPane.dropSourceIndex >= 0
                 ? tabbedPane.getBoundsAt(tabbedPane.dropSourceIndex)
@@ -59,7 +59,6 @@ public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
                 g.setColor(dropColor);
                 g.fillRect(0, b.y, sourceBounds.width, sourceBounds.height);
                 g.translate(sourceBounds.width, 0);
-                xOff = sourceBounds.width;
             }
             if (i != tabbedPane.dropSourceIndex) {
                 drawTab(g, i, i == selectedIndex);
@@ -68,7 +67,6 @@ public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
         if (tabCount == tabbedPane.dropTargetIndex) {
             g.setColor(dropColor);
             g.fillRect(0, sourceBounds.y, sourceBounds.width, sourceBounds.height);
-            xOff = sourceBounds.width;
         }
         ((CustomTabbedPaneLayout) tabbedPane.getLayout()).layoutTabComponents();
         tabbedPane.repaint();
@@ -149,10 +147,14 @@ public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
                 int x = outerX + (outerWidth - preferredSize.width) / 2;
                 int y = outerY + (outerHeight - preferredSize.height) / 2;
                 int tabPlacement = tabPane.getTabPlacement();
-                if (i < tabbedPane.dropTargetIndex && i > tabbedPane.dropSourceIndex) {
+                if (tabbedPane.dropTargetIndex >= 0) {
+                    if (i < tabbedPane.dropTargetIndex && i > tabbedPane.dropSourceIndex) {
+                        x -= xOff;
+                    } else if (i >= tabbedPane.dropTargetIndex && i < tabbedPane.dropSourceIndex) {
+                        x += xOff;
+                    }
+                } else if (i > tabbedPane.dropSourceIndex) {
                     x -= xOff;
-                } else if (i >= tabbedPane.dropTargetIndex && i < tabbedPane.dropSourceIndex) {
-                    x += xOff;
                 }
                 boolean isSelected = i == tabPane.getSelectedIndex();
                 c.setBounds(x + getTabLabelShiftX(tabPlacement, i, isSelected),

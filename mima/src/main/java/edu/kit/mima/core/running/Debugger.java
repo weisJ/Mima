@@ -1,7 +1,10 @@
 package edu.kit.mima.core.running;
 
+import edu.kit.mima.core.interpretation.Value;
 import edu.kit.mima.gui.components.Breakpoint;
 import edu.kit.mima.gui.observing.Observable;
+
+import java.util.function.Consumer;
 
 /**
  * @author Jannis Weis
@@ -11,7 +14,7 @@ public interface Debugger extends Observable {
     String RUNNING_PROPERTY = "running";
     String PAUSE_PROPERTY = "paused";
 
-    void start();
+    void start(Consumer<Value> callback);
 
     void pause();
 
