@@ -226,6 +226,10 @@ public class HighlightTextPane extends JTextPane implements ChangeListener {
      * @param lineIndex index of line to select.
      */
     public void selectLine(int lineIndex) {
+        if (lineIndex < 0) {
+            setCaretPosition(getCaretPosition());
+            moveCaretPosition(getCaretPosition());
+        }
         try {
             try {
                 setCaretPosition(DocumentUtil.getLineStartOffset(this, lineIndex + 1) - 1);

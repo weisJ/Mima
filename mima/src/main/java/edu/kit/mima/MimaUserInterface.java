@@ -5,13 +5,14 @@ import edu.kit.mima.core.interpretation.InterpreterException;
 import edu.kit.mima.core.running.Debugger;
 import edu.kit.mima.core.running.MimaCompiler;
 import edu.kit.mima.core.running.MimaRunner;
+import edu.kit.mima.core.running.MimaRuntimeException;
 import edu.kit.mima.core.running.Program;
 import edu.kit.mima.gui.EditorHotKeys;
 import edu.kit.mima.gui.components.FixedScrollTable;
 import edu.kit.mima.gui.components.ZeroWidthSplitPane;
 import edu.kit.mima.gui.components.button.ButtonPanelBuilder;
 import edu.kit.mima.gui.components.button.IconButton;
-import edu.kit.mima.gui.components.button.ToggleIconButton;
+import edu.kit.mima.gui.components.button.RunnableIconButton;
 import edu.kit.mima.gui.components.console.Console;
 import edu.kit.mima.gui.components.console.LoadingIndicator;
 import edu.kit.mima.gui.components.editor.Editor;
@@ -32,7 +33,6 @@ import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
 import edu.kit.mima.preferences.UserPreferenceChangedListener;
 
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
@@ -40,9 +40,12 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSplitPane;
 import javax.swing.KeyStroke;
+import javax.swing.UIManager;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.MatteBorder;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -78,10 +81,6 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
     private final FileDisplay fileDisplay;
     private final JPanel controlPanel = new JPanel(new BorderLayout());
 
-    private final JButton runButton = new IconButton(Icons.RUN_ACTIVE, Icons.RUN);
-    private final JButton stepButton = new JButton("STEP");
-    private final JButton stopButton = new IconButton(Icons.STOP_INACTIVE, Icons.STOP);
-
     private Thread runThread;
 
     /**
@@ -98,6 +97,10 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
         memoryTable = new FixedScrollTable(new String[]{"Address", "Value"}, 100);
         memoryView = new MemoryTableView(mimaRunner, memoryTable);
         fileDisplay = new FileDisplay();
+        debugger.addPauseListener(t -> {
+            currentEditor().markLine(t.getFilePos());
+            memoryView.updateView();
+        });
 
         Logger.setConsole(console);
         setupEditorPane();
@@ -122,7 +125,11 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
 
     private void startSession(String filePath) {
         if (filePath == null || filePath.isEmpty()) {
-            String[] files = Preferences.getInstance().readString(PropertyKey.LAST_FILE).split("\"");
+            String filesString = Preferences.getInstance().readString(PropertyKey.LAST_FILE);
+            if (filesString.length() < 2) {
+                return;
+            }
+            String[] files = filesString.substring(1).split("\"");
             for (String file : files) {
                 openFile(file);
             }
@@ -174,7 +181,7 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
     private JMenuBar createMenu() {
         JRadioButtonMenuItem binaryView = new JRadioButtonMenuItem("Binary View");
         //@formatter:off
-        return new MenuBuilder()
+        var menu = new MenuBuilder()
                 .addMenu("File").setMnemonic('F')
                     .addItem("New", () -> openFile(FileManager::newFile), "control N")
                     .addItem("Load", () -> openFile(FileManager::load), "control L")
@@ -194,41 +201,58 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
                     .addItem("Show Help", () -> Help.showWindow(this))
                 .get();
         //@formatter:on
+        menu.setBorder(new MatteBorder(0, 0, 1, 0, UIManager.getColor("Border.light")));
+        return menu;
     }
 
     /**
      * Setup the the action buttons
      */
     private void setupButtons() {
+        RunnableIconButton runButton = new RunnableIconButton(Icons.RUN_INACTIVE, Icons.RUN, Icons.RUN_ACTIVE);
+        RunnableIconButton debugButton = new RunnableIconButton(Icons.DEBUG_INACTIVE, Icons.DEBUG, Icons.DEBUG_ACTIVE);
         // @formatter:off
-        final JPanel buttonPanel = new ButtonPanelBuilder(new FlowLayout(FlowLayout.RIGHT, 0, 0))
-                .addButton(new ToggleIconButton(Icons.PAUSE_INACTIVE, Icons.PAUSE))
+        final JPanel buttonPanel = new ButtonPanelBuilder()
+                .addButton(new IconButton(Icons.PAUSE_INACTIVE, Icons.PAUSE))
                     .bindVisible(debugger, debugger::isRunning, Debugger.RUNNING_PROPERTY)
-//                    .setVisible(false)
-                .addButton(new ToggleIconButton(Icons.RESUME, Icons.BREAKPOINT))
-                .addSpace()
-                .addButton(stepButton).addAccelerator("alt S").setTooltip("Step (Alt+S)")
-                    .addAction(this::stepButtonAction)
+                    .bindEnabled(debugger, () -> !debugger.isPaused(), Debugger.PAUSE_PROPERTY)
+                    .addAction(debugger::pause)
+                    .setVisible(false)
+                .addButton(new IconButton(Icons.RESUME_INACTIVE, Icons.RESUME))
+                    .addAction(debugger::resume)
+                    .bindEnabled(debugger, debugger::isPaused, Debugger.PAUSE_PROPERTY)
+                    .bindVisible(debugger, debugger::isRunning, Debugger.RUNNING_PROPERTY)
+                    .setVisible(false)
+                .addButton(new IconButton(Icons.REDO_INACTIVE, Icons.REDO))
+                    .addAccelerator("alt S").setTooltip("Step (Alt+S)")
+                    .addAction(debugger::step)
+                    .bindEnabled(debugger, debugger::isPaused, Debugger.PAUSE_PROPERTY)
+                    .bindVisible(debugger, debugger::isRunning, Debugger.RUNNING_PROPERTY)
+                    .setVisible(false)
+                .addSeparator()
+                    .bindVisible(debugger, debugger::isRunning, Debugger.RUNNING_PROPERTY)
+                    .setVisible(false)
+                .addButton(debugButton)
+                    .addAction(this::debugButtonAction)
+                    .bindEnabled(debugger, () -> !debugger.isRunning(), Debugger.RUNNING_PROPERTY)
+                    .bind(debugger, () -> debugButton.setRunning(debugger.isRunning()), Debugger.RUNNING_PROPERTY)
                 .addButton(runButton).addAccelerator("alt R").setTooltip("Run (Alt+R)")
                     .addAction(this::runButtonAction)
                     .bindEnabled(mimaRunner, () -> !mimaRunner.isRunning(), MimaRunner.RUNNING_PROPERTY)
-                .addButton(stopButton).addAccelerator("alt P").setTooltip("Stop (Alt+P)")
+                    .bind(debugger, () -> runButton.setRunning(!debugger.isRunning() && mimaRunner.isRunning()), Debugger.RUNNING_PROPERTY)
+                .addButton(new IconButton(Icons.STOP_INACTIVE, Icons.STOP)).addAccelerator("alt P").setTooltip("Stop (Alt+P)")
                     .addAction(this::stopButtonAction).setEnabled(false)
                     .bindEnabled(mimaRunner, mimaRunner::isRunning, MimaRunner.RUNNING_PROPERTY)
                 .addSpace()
                 .addButton(new IconButton(Icons.UNDO_INACTIVE, Icons.UNDO))
                     .addAction(() -> currentEditor().undo()).setTooltip("Redo (Ctrl+Z)")
-                    .bindClassEnabled(History.class, () -> currentEditor().canUndo(),
-                            History.LENGTH_PROPERTY, History.POSITION_PROPERTY)
-                    .bindEnabled(tabbedEditor, () -> currentEditor().canUndo(),
-                            EditorTabbedPane.SELECTED_TAB_PROPERTY)
+                    .bindClassEnabled(History.class, () -> currentEditor().canUndo(), History.LENGTH_PROPERTY, History.POSITION_PROPERTY)
+                    .bindEnabled(tabbedEditor, () -> currentEditor().canUndo(), EditorTabbedPane.SELECTED_TAB_PROPERTY)
                     .setEnabled(false)
                 .addButton(new IconButton(Icons.REDO_INACTIVE, Icons.REDO))
                     .addAction(() -> currentEditor().redo()).setTooltip("Redo (Ctrl+Shift+Z)")
-                    .bindClassEnabled(History.class, () -> currentEditor().canRedo(),
-                            History.LENGTH_PROPERTY, History.POSITION_PROPERTY)
-                    .bindEnabled(tabbedEditor, () -> currentEditor().canRedo(),
-                            EditorTabbedPane.SELECTED_TAB_PROPERTY)
+                    .bindClassEnabled(History.class, () -> currentEditor().canRedo(), History.LENGTH_PROPERTY, History.POSITION_PROPERTY)
+                    .bindEnabled(tabbedEditor, () -> currentEditor().canRedo(), EditorTabbedPane.SELECTED_TAB_PROPERTY)
                     .setEnabled(false)
                 .addSpace()
                 .get();
@@ -269,8 +293,11 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
         });
         tabbedEditor.addChangeListener(e -> {
             Editor editor = (Editor) tabbedEditor.getSelectedComponent();
+            if (editor == null) return;
             fileDisplay.setFile(new File(fileManagers.get(editor).getLastFile()));
         });
+//        tabbedEditor.setBorder(new MatteBorder(1,0,0,0,
+//                UIManager.getColor("Border.light")));
     }
 
     private void setupComponents() {
@@ -284,6 +311,9 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
         splitPane.setLeftComponent(memoryConsole);
         splitPane.setRightComponent(tabbedEditor);
         controlPanel.add(fileDisplay, BorderLayout.WEST);
+        controlPanel.setBorder(new CompoundBorder(new MatteBorder(0, 0, 1, 0,
+                UIManager.getColor("Border.light")),
+                new EmptyBorder(2, 2, 2, 2)));
         add(controlPanel, BorderLayout.NORTH);
         add(splitPane, BorderLayout.CENTER);
 
@@ -301,9 +331,10 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
             });
         }
         fm.close();
+        fileManagers.remove(editor).getLastFile();
         if (tabbedEditor.getTabCount() <= 1) {
-            runButton.setEnabled(false);
-            stepButton.setEnabled(false);
+//            runButton.setEnabled(false);
+//            stepButton.setEnabled(false);
         }
     }
 
@@ -349,7 +380,7 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
      */
     private void quit() {
         try {
-            StringBuilder openFiles = new StringBuilder();
+            StringBuilder openFiles = new StringBuilder("\"");
             for (var fm : fileManagers.values()) {
                 if (fm.unsaved()) {
                     fm.savePopUp(() -> {
@@ -374,43 +405,42 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
     }
 
     private void runButtonAction() {
+        executionAction(false);
+    }
+
+    private void debugButtonAction() {
+        executionAction(true);
+    }
+
+    private void executionAction(boolean debug) {
         runThread = new Thread(() -> {
-            stepButton.setEnabled(false);
-            Logger.log("Running program: " + FileName.shorten(currentFileManager().getLastFile()));
-            LoadingIndicator.start("Running", 3);
+            Logger.log("Executing program: " + FileName.shorten(currentFileManager().getLastFile()));
+            LoadingIndicator.start("Executing", 3);
             try {
                 mimaRunner.setProgram(new Program(mimaCompiler.compile(currentEditor().getText()), getInstructionSet()));
                 memoryView.updateView();
-                mimaRunner.run();
+                if (debug) {
+                    debugger.setBreakpoints(currentEditor().getBreakpoints());
+                    debugger.start();
+                } else {
+                    mimaRunner.start();
+                }
                 memoryView.updateView();
-                stepButton.setEnabled(true);
-                LoadingIndicator.stop("Running (done)");
+                LoadingIndicator.stop("Executing (done)");
             } catch (InterpreterException e) {
-                LoadingIndicator.error("Running failed: " + e.getMessage());
-            }
+                LoadingIndicator.error("Execution failed: " + e.getMessage());
+            } catch (MimaRuntimeException ignored) { }
         });
         runThread.start();
     }
 
-    private void stepButtonAction() {
-        try {
-            mimaRunner.step();
-            if (mimaRunner.getCurrentStatement() != null) {
-                Logger.log("Instruction: " + mimaRunner.getCurrentStatement().simpleName());
-            }
-            runButton.setEnabled(false);
-            memoryView.updateView();
-            runButton.setEnabled(!mimaRunner.isRunning());
-            stepButton.setEnabled(mimaRunner.isRunning());
-        } catch (InterpreterException e) {
-            Logger.error(e.getMessage());
-            runButton.setEnabled(false);
-        }
-    }
-
     private void stopButtonAction() {
-        if (runThread != null && runThread.isAlive()) {
+        if (runThread != null) {
             LoadingIndicator.stop("Running (stopped)");
+            if (debugger.isRunning()) {
+                currentEditor().markLine(-1);
+            }
+            mimaRunner.stop();
             runThread.interrupt();
         }
     }
@@ -454,6 +484,7 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
             for (var entry : fileManagers.entrySet()) {
                 if (entry.getValue() != fm
                         && entry.getValue().getLastFile().equals(fm.getLastFile())) {
+                    fileManagers.remove(editor);
                     tabbedEditor.setSelectedComponent(entry.getKey());
                     return;
                 }

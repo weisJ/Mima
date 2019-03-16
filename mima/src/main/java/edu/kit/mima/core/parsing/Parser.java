@@ -62,6 +62,7 @@ public final class Parser extends Processor {
         scopeIndex++;
         int tokenIndex = 0;
         errors.addAll(skipError());
+        int line = input.getLine();
         while (!input.isEmpty() && !finishedScope) {
             try {
                 skipEndOfInstruction = true;
@@ -85,7 +86,7 @@ public final class Parser extends Processor {
                 input.next();
             }
         }
-        return new ValueTuple<>(new ProgramToken(program.toArray(new Token[0])), new ArrayList<>(errors));
+        return new ValueTuple<>(new ProgramToken(program.toArray(new Token[0]), line), new ArrayList<>(errors));
     }
 
     /*
@@ -112,7 +113,7 @@ public final class Parser extends Processor {
                 return program;
             }
             if (isPunctuation(Punctuation.SCOPE_CLOSED)) {
-                return new AtomToken<>(TokenType.SCOPE_END, scopeIndex, input.getLine());
+                return new AtomToken<>(TokenType.SCOPE_END, scopeIndex, -1, input.getLine());
             }
             if (isPunctuation(Punctuation.OPEN_BRACKET)) {
                 input.next();
@@ -141,11 +142,12 @@ public final class Parser extends Processor {
      */
     private Token maybeJumpAssociation(Supplier<Token> supplier) {
         Token expression = supplier.get();
+        int line = input.getLine();
         if (isPunctuation(Punctuation.JUMP_DELIMITER)) {
             input.next();
             return new BinaryToken<>(TokenType.JUMP_POINT,
                     expression,
-                    maybeJumpAssociation(supplier), input.getLine());
+                    maybeJumpAssociation(supplier), -1, line);
         }
         return expression;
     }
@@ -162,12 +164,13 @@ public final class Parser extends Processor {
      * Parse a function call
      */
     private Token parseCall(Token reference) {
+        int line = input.getLine();
         return new BinaryToken<>(TokenType.CALL, reference, delimited(
                 Punctuation.OPEN_BRACKET,
                 Punctuation.CLOSED_BRACKET,
                 Punctuation.COMMA,
                 this::parseExpression,
-                true), input.getLine());
+                true), -1, line);
     }
 
     /*
@@ -175,6 +178,7 @@ public final class Parser extends Processor {
      */
     private Token maybeConstant() {
         skipKeyword(Keyword.DEFINITION);
+        int line = input.getLine();
         if (isKeyword(Keyword.CONSTANT)) {
             input.next();
             return new AtomToken<>(TokenType.CONSTANT, delimited(
@@ -182,14 +186,14 @@ public final class Parser extends Processor {
                     Punctuation.INSTRUCTION_END,
                     Punctuation.COMMA,
                     this::parseConstant,
-                    false), input.getLine());
+                    false), -1, input.getLine());
         }
         return new AtomToken<>(TokenType.DEFINITION, delimited(
                 CharInputStream.EMPTY_CHAR,
                 Punctuation.INSTRUCTION_END,
                 Punctuation.COMMA,
                 this::parseDefinition,
-                false), input.getLine());
+                false), -1, line);
     }
 
     /*
@@ -197,10 +201,11 @@ public final class Parser extends Processor {
      */
     private BinaryToken parseConstant() {
         Token reference = input.next();
+        int line = input.getLine();
         skipPunctuation(Punctuation.DEFINITION_DELIMITER);
         Token value = parseExpression();
         assert reference != null;
-        return new BinaryToken<>(TokenType.CONSTANT, reference, value, input.getLine());
+        return new BinaryToken<>(TokenType.CONSTANT, reference, value, -1, line);
     }
 
     /*
@@ -208,13 +213,14 @@ public final class Parser extends Processor {
      */
     private BinaryToken parseDefinition() {
         Token reference = input.next();
+        int line = input.getLine();
         if (reference != null && reference.getType() == TokenType.IDENTIFICATION) {
             if (isPunctuation(Punctuation.DEFINITION_DELIMITER)) {
                 input.next();
                 Token value = parseExpression();
-                return new BinaryToken<>(TokenType.DEFINITION, reference, value, input.getLine());
+                return new BinaryToken<>(TokenType.DEFINITION, reference, value, -1, line);
             }
-            return new BinaryToken<>(TokenType.DEFINITION, reference, new EmptyToken(), input.getLine());
+            return new BinaryToken<>(TokenType.DEFINITION, reference, new EmptyToken(), -1, line);
         }
         return input.error("expected identifier");
     }

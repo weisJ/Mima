@@ -19,6 +19,7 @@ public class ZeroWidthSplitPane extends JSplitPane {
 
     public ZeroWidthSplitPane() {
         setDividerSize(1);
+        setBorder(null);
         setContinuousLayout(true);
     }
 
@@ -55,7 +56,6 @@ public class ZeroWidthSplitPane extends JSplitPane {
 
         private ZeroSizeDivider(BasicSplitPaneUI ui) {
             super(ui);
-            super.setBorder(null);
             setBackground(UIManager.getColor("InternalFrame.borderColor"));
         }
 

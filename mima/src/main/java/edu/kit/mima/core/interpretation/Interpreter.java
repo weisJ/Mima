@@ -3,6 +3,7 @@ package edu.kit.mima.core.interpretation;
 import edu.kit.mima.core.controller.DebugController;
 import edu.kit.mima.core.data.MachineWord;
 import edu.kit.mima.core.interpretation.environment.Environment;
+import edu.kit.mima.core.interpretation.environment.GlobalEnvironment;
 import edu.kit.mima.core.interpretation.stack.Continuation;
 import edu.kit.mima.core.interpretation.stack.StackGuard;
 import edu.kit.mima.core.parsing.Parser;
@@ -40,7 +41,6 @@ public class Interpreter {
     private Token currentToken;
     private Environment currentScope;
 
-
     /**
      * Construct new Interpreter that uses the given number of bits in arguments
      *
@@ -62,13 +62,14 @@ public class Interpreter {
      * @param program           program input created by {@link Parser}
      * @param globalEnvironment the global runtime environment
      */
-    public void evaluateTopLevel(final ProgramToken program, final Environment globalEnvironment) {
+    public void evaluateTopLevel(final ProgramToken program, final Environment globalEnvironment, Consumer<Value> callback) {
         running = true;
         Environment runtimeEnvironment = globalEnvironment.extend(program);
         try {
+            debugController.pause();
             execute(() -> {
                 program.getJumps().forEach((t, i) -> runtimeEnvironment.defineJump(t.getValue().toString(), i));
-                evaluateProgram(program, runtimeEnvironment, v -> {/*Stop program*/});
+                evaluateProgram(program, runtimeEnvironment, callback);
             });
         } catch (IllegalArgumentException | IllegalStateException e) {
             exceptionListener.notifyException(e);
@@ -143,7 +144,6 @@ public class Interpreter {
 
     public void jump(Environment toEnvironment, int instructionIndex, Consumer<Value> callback) {
         toEnvironment.setExpressionIndex(instructionIndex);
-        debugController.afterInstruction(toEnvironment.getProgramToken());
         evaluateProgram(toEnvironment.getProgramToken(), toEnvironment, callback);
     }
 
@@ -154,10 +154,16 @@ public class Interpreter {
         currentScope = environment;
         int startIndex = environment.getExpressionIndex();
         BiConsumer<Value, Integer> loop = LambdaUtil.createRecursive(func -> (last, i) -> {
-            if (running && i != startIndex && i < tokens.length) {
+            if (!isRunning()) {
+                return;
+            }
+            if (i < tokens.length) {
+                currentToken = tokens[i];
+            }
+            if (i < tokens.length && (i != startIndex || !(environment instanceof GlobalEnvironment))) {
                 debugController.afterInstruction(tokens[i]);
             }
-            if (i < tokens.length && running) {
+            if (i < tokens.length) {
                 environment.setExpressionIndex(i);
                 currentToken = tokens[i];
                 evaluate(currentToken, environment, v -> func.accept(v, i + 1));

@@ -14,6 +14,7 @@ import java.util.Objects;
 public class AtomToken<T> implements Token<T> {
 
     private final TokenType type;
+    private final int filePos;
     private int index;
     private T value;
 
@@ -23,11 +24,13 @@ public class AtomToken<T> implements Token<T> {
      * @param type  type of token
      * @param value value of token
      * @param index index of token
+     * @param filePos position in file
      */
-    public AtomToken(TokenType type, T value, int index) {
+    public AtomToken(TokenType type, T value, int index, int filePos) {
         this.type = type;
         this.value = value;
         this.index = index;
+        this.filePos = filePos;
     }
 
     /**
@@ -37,7 +40,7 @@ public class AtomToken<T> implements Token<T> {
      * @param value value of token
      */
     public AtomToken(TokenType type, T value) {
-        this(type, value, -1);
+        this(type, value, -1, -1);
     }
 
     @Override
@@ -46,8 +49,13 @@ public class AtomToken<T> implements Token<T> {
     }
 
     @Override
-    public int getIndexAttribute() {
+    public int getIndex() {
         return index;
+    }
+
+    @Override
+    public int getFilePos() {
+        return filePos;
     }
 
     @Override

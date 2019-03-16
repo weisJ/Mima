@@ -26,8 +26,13 @@ public class EmptyToken implements Token {
     }
 
     @Override
-    public int getIndexAttribute() {
+    public int getIndex() {
         return -1;
+    }
+
+    @Override
+    public int getFilePos() {
+        return 0;
     }
 
     @Override

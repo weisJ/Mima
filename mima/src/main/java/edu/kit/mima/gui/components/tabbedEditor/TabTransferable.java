@@ -12,8 +12,8 @@ import java.awt.datatransfer.Transferable;
 public class TabTransferable implements Transferable {
     private TabTransferData transferData;
 
-    public TabTransferable(EditorTabbedPane tabbedPane, int a_tabIndex) {
-        transferData = new TabTransferData(tabbedPane, a_tabIndex);
+    public TabTransferable(EditorTabbedPane tabbedPane, int tabIndex) {
+        transferData = new TabTransferData(tabbedPane, tabIndex);
     }
 
     @NotNull

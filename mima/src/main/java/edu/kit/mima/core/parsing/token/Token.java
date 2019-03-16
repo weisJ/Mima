@@ -35,14 +35,18 @@ public interface Token<T> {
     TokenType getType();
 
     /**
-     * Index attribute of token
-     * May be used as an index or position attribute.
-     * The current use of this value is dependent of the implementation
-     * and usage of the token.
+     * Index of token in program
      *
      * @return index attribute
      */
-    int getIndexAttribute();
+    int getIndex();
+
+    /**
+     * Get position of token in file.
+     *
+     * @return position in file.
+     */
+    int getFilePos();
 
     /**
      * Set index of token
