@@ -87,8 +87,8 @@ public class IconButton extends JButton {
         });
     }
 
-    protected boolean useAlternative() {
-        return isEnabled();
+    protected Icon currentIcon() {
+        return isEnabled() ? active : inactive;
     }
 
     @Override
@@ -106,26 +106,12 @@ public class IconButton extends JButton {
             }
             g2.fillRoundRect(0, 0, getWidth(), getHeight(), 5, 5);
         }
-        if (useAlternative()) {
-            active.paintIcon(this, g2, border, border);
-        } else {
-            inactive.paintIcon(this, g2, border, border);
-        }
+        currentIcon().paintIcon(this, g2, border, border);
         g2.dispose();
     }
 
     @Override
     public void updateUI() {
-    }
-
-    /**
-     * Set whether to show the button
-     *
-     * @param active if true button gets displayed
-     */
-    public void showButton(boolean active) {
-        this.visible = active;
-        repaint();
     }
 
     @Override
@@ -134,6 +120,7 @@ public class IconButton extends JButton {
         nextStatus = b;
         if (!locked) {
             super.setEnabled(b);
+            repaint();
             locked = true;
             //Lock button to prevent spamming
             new Thread(() -> {
@@ -142,6 +129,7 @@ public class IconButton extends JButton {
                         wait(300);
                         locked = false;
                         super.setEnabled(nextStatus);
+                        repaint();
                     } catch (InterruptedException ignored) { }
                 }
             }).start();

@@ -6,12 +6,15 @@ import edu.kit.mima.gui.components.tooltip.TooltipComponent;
 import edu.kit.mima.gui.observing.ClassObservable;
 import edu.kit.mima.gui.observing.Observable;
 import edu.kit.mima.gui.util.BindingUtil;
+import edu.kit.mima.gui.util.HSLColor;
 
 import javax.swing.Action;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
+import javax.swing.UIManager;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridLayout;
@@ -31,6 +34,7 @@ public final class ButtonPanelBuilder {
     private static final int BUTTON_DELAY = 2000;
     private static final int BUTTON_VANISH_DELAY = 2000;
 
+    private final JPanel panel;
     private final Queue<JButton> buttons;
     private final LayoutManager layoutManager;
 
@@ -38,10 +42,13 @@ public final class ButtonPanelBuilder {
      * Create new ButtonPanelBuilder
      */
     public ButtonPanelBuilder() {
-        this(new GridLayout());
+        panel = new JPanel();
+        buttons = new LinkedList<>();
+        this.layoutManager = new BoxLayout(panel, BoxLayout.X_AXIS);
     }
 
     public ButtonPanelBuilder(LayoutManager layoutManager) {
+        panel = new JPanel();
         buttons = new LinkedList<>();
         this.layoutManager = layoutManager;
     }
@@ -156,6 +163,21 @@ public final class ButtonPanelBuilder {
             return this;
         }
 
+        public <T extends JComponent> ButtonBuilder bind(T observed, Runnable binding, String... property) {
+            BindingUtil.bind(observed, binding, property);
+            return this;
+        }
+
+        public <T extends Observable> ButtonBuilder bind(T observed, Runnable binding, String... property) {
+            BindingUtil.bind(observed, binding, property);
+            return this;
+        }
+
+        public <T extends ClassObservable> ButtonBuilder bindClass(Class<T> observed, Runnable binding, String... property) {
+            BindingUtil.bindClass(observed, binding, property);
+            return this;
+        }
+
         public <T extends JComponent> ButtonBuilder bindVisible(T observed, Supplier<Boolean> binding, String... property) {
             BindingUtil.bind(observed, () -> button.setVisible(binding.get()), property);
             return this;
@@ -263,6 +285,11 @@ public final class ButtonPanelBuilder {
 
         public ButtonBuilder addSpace() {
             parent.buttons.offer(button);
+            return new ButtonBuilder(new Spacer(), parent);
+        }
+
+        public ButtonBuilder addSeparator() {
+            parent.buttons.offer(button);
             return new ButtonBuilder(new Separator(), parent);
         }
 
@@ -273,7 +300,6 @@ public final class ButtonPanelBuilder {
          */
         public JPanel get() {
             parent.buttons.offer(button);
-            final JPanel panel = new JPanel();
             LayoutManager lm = parent.layoutManager;
             if (lm instanceof GridLayout) {
                 lm = new GridLayout(1, parent.buttons.size());
@@ -298,8 +324,17 @@ public final class ButtonPanelBuilder {
         }
     }
 
-    private final class Separator extends JButton {
-        private Separator() {
+    private class Separator extends Spacer {
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            g.setColor(new HSLColor(UIManager.getColor("Button.light")).adjustShade(20).getRGB());
+            g.drawLine(getWidth() / 2, 0, getWidth() / 2, getHeight());
+        }
+    }
+
+    private class Spacer extends JButton {
+        private Spacer() {
             setOpaque(false);
             setEnabled(false);
             setFocusable(false);

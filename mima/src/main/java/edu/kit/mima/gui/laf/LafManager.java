@@ -9,6 +9,7 @@ import edu.kit.mima.preferences.UserPreferenceChangedListener;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.metal.DefaultMetalTheme;
 import javax.swing.plaf.metal.MetalLookAndFeel;
 import java.awt.Frame;
@@ -95,7 +96,10 @@ public final class LafManager implements UserPreferenceChangedListener {
         UIManager.put("TabbedPane.tabAreaInsets", new Insets(0, 0, 0, 0));
         UIManager.put("TabbedPane.separatorHighlight", UIManager.getColor("TabbedPane.selected"));
         UIManager.put("TabbedPane.selected",
-                new HSLColor(UIManager.getColor("TabbedPane.background")).adjustTone(20));
+                new HSLColor(UIManager.getColor("TabbedPane.background")).adjustTone(20).getRGB());
+        UIManager.put("Border.light",
+                new HSLColor(UIManager.getColor("TabbedPane.background")).adjustTone(30).getRGB());
+        UIManager.put("Button.separator", new ColorUIResource(95, 95, 95));
         UIManager.put("swing.boldMetal", Boolean.FALSE);
     }
 

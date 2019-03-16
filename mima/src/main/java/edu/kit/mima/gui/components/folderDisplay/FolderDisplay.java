@@ -18,7 +18,7 @@ import java.io.File;
  * @author Jannis Weis
  * @since 2018
  */
-public class FolderDisplay extends JPanel {
+/*default*/ class FolderDisplay extends JPanel {
 
     /**
      * FolderDisplay panel
@@ -27,7 +27,7 @@ public class FolderDisplay extends JPanel {
      * @param file    file associated with this component
      * @param handler action handler for popup
      */
-    FolderDisplay(String name, File file, FilePopupActionHandler handler) {
+    /* default*/ FolderDisplay(String name, File file, FilePopupActionHandler handler) {
         this(name, file, Icons.forFile(file), handler);
     }
 
@@ -39,17 +39,18 @@ public class FolderDisplay extends JPanel {
      * @param icon    file icon
      * @param handler action handler for popup
      */
-    FolderDisplay(String name, File file, Icon icon, FilePopupActionHandler handler) {
-        setBorder(new EmptyBorder(0, 0, 0, 0));
+    /* default*/ FolderDisplay(String name, File file, Icon icon, FilePopupActionHandler handler) {
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+        setOpaque(false);
         var tooltip = new DirectoryTooltip(file, handler);
         addMouseListener(new PopupListener(tooltip, MouseEvent.BUTTON1, true));
-        add(new IconPanel(icon, Alignment.WEST));
+        add(new IconPanel(icon, Alignment.NORTH_WEST));
         if (name != null && name.length() != 0) {
             String title = file.isDirectory() ? name : name.substring(0, name.lastIndexOf('.'));
-            var label = new JLabel(title);
+            JLabel label = new JLabel(title);
             label.setBorder(new EmptyBorder(0, 2, 0, 2));
             add(label);
         }
     }
+
 }

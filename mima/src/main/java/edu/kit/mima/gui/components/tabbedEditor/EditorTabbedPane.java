@@ -1,15 +1,11 @@
 package edu.kit.mima.gui.components.tabbedEditor;
 
-import edu.kit.mima.gui.util.HSLColor;
-
 import javax.swing.Icon;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.datatransfer.DataFlavor;
@@ -22,7 +18,6 @@ import java.awt.dnd.DragSourceEvent;
 import java.awt.dnd.DragSourceListener;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.InvalidDnDOperationException;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,68 +28,69 @@ import java.util.List;
  */
 @SuppressWarnings("IntegerDivisionInFloatingPointContext")
 public class EditorTabbedPane extends JTabbedPane {
-    public static String SELECTED_TAB_PROPERTY = "selectedTab";
     /*default*/ static final String NAME = "TabTransferData";
     /*default*/ static final DataFlavor FLAVOR = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType, NAME);
-    private static final int LINE_WIDTH = 3;
+    public static String SELECTED_TAB_PROPERTY = "selectedTab";
     /*default*/ static GhostGlassPane glassPane = new GhostGlassPane();
-    private final Rectangle2D lineRect = new Rectangle2D.Double();
-    private final Color lineColor;
-    private final Color selectedColor;
-    private final Color tabBorderColor;
-    private final Color selectedBackground;
     private final List<TabClosedEventHandler> handlerList;
-
+    /*default*/ int dropTargetIndex = -1;
+    /*default*/ int dropSourceIndex = -1;
     private int selectedTab;
-
-    /*default*/ boolean isDrawRect = false;
+    private boolean dragging = false;
     private boolean hasGhost = true;
     private TabAcceptor tabAcceptor;
 
     public EditorTabbedPane() {
-        var c = UIManager.getColor("TabbedPane.separatorHighlight");
-        lineColor = c == null ? UIManager.getColor("TabbedPane.selected") : c;
-        selectedColor = new HSLColor(lineColor).adjustTone(10).adjustSaturation(40).getRGB();
-        tabBorderColor = new HSLColor(getBackground()).adjustTone(10).getRGB();
-        selectedBackground = new HSLColor(getBackground()).adjustTone(20).adjustSaturation(5).getRGB();
+        setUI(new CustomTabbedPaneUI(this));
+
         handlerList = new ArrayList<>();
         setFocusable(false); //Prevent focus dotted line from appearing
+        setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
         addChangeListener(e -> {
             firePropertyChange(SELECTED_TAB_PROPERTY, selectedTab, getSelectedIndex());
             selectedTab = getSelectedIndex();
         });
         final DragSourceListener dsl = new DragSourceListener() {
             public void dragEnter(DragSourceDragEvent e) {
-                e.getDragSourceContext().setCursor(DragSource.DefaultMoveDrop);
+                checkExit(e);
+            }
+
+            private void checkExit(DragSourceEvent e) {
+                var p = e.getLocation();
+                SwingUtilities.convertPointFromScreen(p, EditorTabbedPane.this);
+                var show = !getTabAreaBound().contains(p);
+                if (show) {
+                    dropTargetIndex = -1;
+                }
+                glassPane.showDrag(show);
             }
 
             public void dragExit(DragSourceEvent e) {
-                e.getDragSourceContext()
-                        .setCursor(DragSource.DefaultMoveNoDrop);
-                lineRect.setRect(0, 0, 0, 0);
-                isDrawRect = false;
+                glassPane.showDrag(true);
+                dropTargetIndex = -1;
                 glassPane.setPoint(new Point(-1000, -1000));
-                glassPane.repaint();
+                var p = MouseInfo.getPointerInfo().getLocation();
+                SwingUtilities.convertPointFromScreen(p, glassPane);
+                glassPane.setMouseLocation(p);
             }
 
             public void dragOver(DragSourceDragEvent e) {
+                checkExit(e);
                 TabTransferData data = DnDUtil.getTabTransferData(e);
                 if (data == null) {
-                    e.getDragSourceContext().setCursor(
-                            DragSource.DefaultMoveNoDrop);
-                    return;
+                    e.getDragSourceContext().setCursor(DragSource.DefaultMoveNoDrop);
                 }
-                e.getDragSourceContext().setCursor(
-                        DragSource.DefaultMoveDrop);
             }
 
             public void dragDropEnd(DragSourceDropEvent e) {
-                isDrawRect = false;
-                lineRect.setRect(0, 0, 0, 0);
                 if (hasGhost()) {
-                    glassPane.setVisible(false);
+                    glassPane.showDrag(false);
                     glassPane.setImage(null);
                 }
+                getTabComponentAt(dropSourceIndex).setVisible(true);
+                dragging = false;
+                dropTargetIndex = -1;
+                dropSourceIndex = -1;
             }
 
             public void dropActionChanged(DragSourceDragEvent e) {
@@ -107,9 +103,9 @@ public class EditorTabbedPane extends JTabbedPane {
             if (dragTabIndex < 0) {
                 return;
             }
-
             initGlassPane(e.getComponent(), e.getDragOrigin(), dragTabIndex);
             try {
+                dragging = true;
                 e.startDrag(DragSource.DefaultMoveDrop,
                         new TabTransferable(EditorTabbedPane.this, dragTabIndex), dsl);
             } catch (InvalidDnDOperationException ex) {
@@ -127,12 +123,17 @@ public class EditorTabbedPane extends JTabbedPane {
     @Override
     public void insertTab(String title, Icon icon, Component component, String tip, int index) {
         super.insertTab(title, icon, component, tip, index);
-        final ButtonClose buttonClose = new ButtonClose(title, icon, this::closeTab);
-        setTabComponentAt(index, buttonClose);
+        final TabComponent tabComponent = new TabComponent(title, icon, this::closeTab);
+        setTabComponentAt(index, tabComponent);
         setSelectedIndex(index);
     }
 
-    private void closeTab(ButtonClose sender) {
+    /**
+     * Close a tab
+     *
+     * @param sender tab component that sends the close request.
+     */
+    private void closeTab(TabComponent sender) {
         int i = indexOfTabComponent(sender);
         for (var handler : handlerList) {
             if (handler != null) {
@@ -181,44 +182,56 @@ public class EditorTabbedPane extends JTabbedPane {
         tabAcceptor = acceptor;
     }
 
+    /**
+     * Set whether tp paint the ghost image when dragging.
+     *
+     * @param flag true if ghost should be painted.
+     */
     public void setPaintGhost(boolean flag) {
         hasGhost = flag;
     }
 
+    /**
+     * Returns whether a ghost image is painted while dragging.
+     *
+     * @return true if painted.
+     */
     public boolean hasGhost() {
         return hasGhost;
     }
 
+    /**
+     * Set the title for the selected tab.
+     *
+     * @param title new title
+     */
+    public void setSelectedTitle(String title) {
+        ((TabComponent) getTabComponentAt(getSelectedIndex())).setTitle(title);
+    }
+
     /*default*/ Point buildGhostLocation(Point location) {
         Point ghostLocation = new Point(location);
-
         switch (getTabPlacement()) {
-            case JTabbedPane.TOP: {
-                ghostLocation.y = 1;
+            case JTabbedPane.TOP:
+                ghostLocation.y = 0;
                 ghostLocation.x -= glassPane.getGhostWidth() / 2;
-            }
-            break;
-
-            case JTabbedPane.BOTTOM: {
+                break;
+            case JTabbedPane.BOTTOM:
                 ghostLocation.y = getHeight() - 1 - glassPane.getGhostHeight();
                 ghostLocation.x -= glassPane.getGhostWidth() / 2;
-            }
-            break;
-
-            case JTabbedPane.LEFT: {
-                ghostLocation.x = 1;
+                break;
+            case JTabbedPane.LEFT:
+                ghostLocation.x = 0;
                 ghostLocation.y -= glassPane.getGhostHeight() / 2;
-            }
-            break;
-
-            case JTabbedPane.RIGHT: {
+                break;
+            case JTabbedPane.RIGHT:
                 ghostLocation.x = getWidth() - 1 - glassPane.getGhostWidth();
                 ghostLocation.y -= glassPane.getGhostHeight() / 2;
-            }
-            break;
+                break;
         }
-
         ghostLocation = SwingUtilities.convertPoint(EditorTabbedPane.this, ghostLocation, glassPane);
+        ghostLocation.x = Math.min(Math.max(getX(), ghostLocation.x), getX() + getWidth() - glassPane.getGhostWidth());
+        ghostLocation.y = Math.min(Math.max(getY(), ghostLocation.y), getY() + getHeight() - glassPane.getGhostHeight());
         return ghostLocation;
     }
 
@@ -260,83 +273,28 @@ public class EditorTabbedPane extends JTabbedPane {
         return r.contains(point) ? getTabCount() : -1;
     }
 
-    /*default*/ void initTargetLeftRightLine(int next, TabTransferData transferData) {
-        if (next < 0) {
-            lineRect.setRect(0, 0, 0, 0);
-            isDrawRect = false;
-            return;
-        }
-
-        if ((transferData.getTabbedPane() == this)
-                && (transferData.getTabIndex() == next
-                            || next - transferData.getTabIndex() == 1)) {
-            lineRect.setRect(0, 0, 0, 0);
-            isDrawRect = false;
-        } else if (getTabCount() == 0) {
-            lineRect.setRect(0, 0, 0, 0);
-            isDrawRect = false;
-        } else if (next == 0) {
-            Rectangle rect = getBoundsAt(0);
-            lineRect.setRect(-LINE_WIDTH / 2, rect.y, LINE_WIDTH, rect.height);
-            isDrawRect = true;
-        } else if (next == getTabCount()) {
-            Rectangle rect = getBoundsAt(getTabCount() - 1);
-            lineRect.setRect((rect.x + rect.width) - (LINE_WIDTH / 2), rect.y,
-                    LINE_WIDTH, rect.height);
-            isDrawRect = true;
-        } else {
-            Rectangle rect = getBoundsAt(next - 1);
-            lineRect.setRect((rect.x + rect.width) - (LINE_WIDTH / 2), rect.y,
-                    LINE_WIDTH, rect.height);
-            isDrawRect = true;
-        }
-    }
-
-    /*default*/ void initTargetTopBottomLine(int next, TabTransferData a_data) {
-        if (next < 0) {
-            lineRect.setRect(0, 0, 0, 0);
-            isDrawRect = false;
-            return;
-        }
-
-        if ((a_data.getTabbedPane() == this)
-                && (a_data.getTabIndex() == next
-                            || next - a_data.getTabIndex() == 1)) {
-            lineRect.setRect(0, 0, 0, 0);
-            isDrawRect = false;
-        } else if (getTabCount() == 0) {
-            lineRect.setRect(0, 0, 0, 0);
-            isDrawRect = false;
-        } else if (next == getTabCount()) {
-            Rectangle rect = getBoundsAt(getTabCount() - 1);
-            lineRect.setRect(rect.x, (rect.y + rect.height) - (LINE_WIDTH / 2),
-                    rect.width, LINE_WIDTH);
-            isDrawRect = true;
-        } else if (next == 0) {
-            Rectangle rect = getBoundsAt(0);
-            lineRect.setRect(rect.x, -LINE_WIDTH / 2, rect.width, LINE_WIDTH);
-            isDrawRect = true;
-        } else {
-            Rectangle rect = getBoundsAt(next - 1);
-            lineRect.setRect(rect.x, (rect.y + rect.height) - (LINE_WIDTH / 2),
-                    rect.width, LINE_WIDTH);
-            isDrawRect = true;
-        }
-    }
-
-    private void initGlassPane(Component c, Point tabPt, int a_tabIndex) {
+    private void initGlassPane(Component c, Point tabPos, int tabIndex) {
         getRootPane().setGlassPane(glassPane);
         if (hasGhost()) {
-            Rectangle rect = getBoundsAt(a_tabIndex);
+            Rectangle rect = getBoundsAt(tabIndex);
             BufferedImage image = new BufferedImage(c.getWidth(),
                     c.getHeight(), BufferedImage.TYPE_INT_ARGB);
             Graphics g = image.getGraphics();
             c.paint(g);
             image = image.getSubimage(rect.x, rect.y, rect.width, rect.height);
             glassPane.setImage(image);
+            dropSourceIndex = tabIndex;
+            dropTargetIndex = tabIndex;
+            getTabComponentAt(tabIndex).setVisible(false);
         }
-        glassPane.setPoint(buildGhostLocation(tabPt));
+        glassPane.setPoint(buildGhostLocation(tabPos));
         glassPane.setVisible(true);
+    }
+
+    @Override
+    public void paint(Graphics g) {
+        getUI().paint(g, this);
+        super.paint(g);
     }
 
     private Rectangle getTabAreaBound() {
@@ -344,50 +302,11 @@ public class EditorTabbedPane extends JTabbedPane {
         return new Rectangle(0, 0, getWidth(), lastTab.y + lastTab.height);
     }
 
-    private boolean isStacked() {
-        if (getTabCount() <= 0) {
-            return false;
+    /*default*/ void initTarget(Point location) {
+        int newLocation = getTargetTabIndex(location);
+        if (newLocation < 0 && dragging) {
+            return;
         }
-        var boundsArea = getTabAreaBound();
-        var boundsTab = getBoundsAt(0);
-        switch (getTabPlacement()) {
-            case JTabbedPane.TOP:
-            case JTabbedPane.BOTTOM:
-                return boundsArea.height > boundsTab.height;
-            case JTabbedPane.LEFT:
-            case JTabbedPane.RIGHT:
-                return boundsArea.width > boundsTab.width;
-        }
-        return false;
-    }
-
-    public void paintComponent(Graphics g) {
-        super.paintComponent(g);
-
-        if (isDrawRect) {
-            Graphics2D g2 = (Graphics2D) g;
-            g2.setPaint(lineColor);
-            g2.fill(lineRect);
-        }
-
-        for (int i = 0; i < getTabCount(); i++) {
-            var bounds = getBoundsAt(i);
-            int yOff = bounds.height / 6;
-            if (i == getSelectedIndex()) {
-                g.setColor(selectedBackground);
-                g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
-                g.setColor(selectedColor);
-                g.fillRect(bounds.x, bounds.y + bounds.height - yOff, bounds.width, yOff);
-            } else {
-                g.setColor(getBackground());
-                g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
-            }
-            g.setColor(tabBorderColor);
-            g.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
-        }
-    }
-
-    public void setSelectedTitle(String title) {
-        ((ButtonClose) getTabComponentAt(getSelectedIndex())).setTitle(title);
+        dropTargetIndex = newLocation;
     }
 }

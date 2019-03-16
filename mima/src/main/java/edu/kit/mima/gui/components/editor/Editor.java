@@ -25,6 +25,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
@@ -44,6 +45,7 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
     private boolean stylize;
     private boolean changeLock;
     private boolean repaint;
+    private int currentMark = -1;
 
     /**
      * Editor that supports highlighting and text history
@@ -104,6 +106,15 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
             event.notifyEdit();
         }
         update();
+    }
+
+    /**
+     * Get all placed breakpoints.
+     *
+     * @return Array of breakpoints.
+     */
+    public Breakpoint[] getBreakpoints() {
+        return Arrays.stream(numberedTextPane.getIndexComponents()).map(c -> (Breakpoint) c).toArray(Breakpoint[]::new);
     }
 
     /**
@@ -197,6 +208,21 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
      */
     public void insert(String text, int offset) throws BadLocationException {
         numberedTextPane.getPane().getStyledDocument().insertString(offset, text, new SimpleAttributeSet());
+    }
+
+    /**
+     * Select line in editor.
+     *
+     * @param index line to select
+     */
+    public void selectLine(int index) {
+        numberedTextPane.getPane().selectLine(index);
+    }
+
+    public void markLine(int index) {
+        numberedTextPane.getPane().unmarkLine(currentMark);
+        numberedTextPane.getPane().markLine(index, new Color(0x2D71D2));
+        currentMark = index;
     }
 
     /*----------Getter-and-Setter----------*/

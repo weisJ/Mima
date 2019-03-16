@@ -16,6 +16,7 @@ public class ArrayToken<T> implements Token<T[]> {
     private static final Pattern INDENT = Pattern.compile("\n");
     private static final String INDENT_REPLACEMENT = "\n\t";
     private final String className;
+    private final int filePos;
     private int index;
     private T[] values;
 
@@ -24,10 +25,12 @@ public class ArrayToken<T> implements Token<T[]> {
      *
      * @param values array
      * @param index  index
+     * @param filePos position inf file
      */
-    public ArrayToken(T[] values, int index) {
+    public ArrayToken(T[] values, int index, int filePos) {
         this.values = values;
         this.index = index;
+        this.filePos = filePos;
         className = values.getClass().getSimpleName().substring(0, values.getClass().getSimpleName().length() - 2);
     }
 
@@ -37,7 +40,7 @@ public class ArrayToken<T> implements Token<T[]> {
      * @param values array
      */
     public ArrayToken(T[] values) {
-        this(values, -1);
+        this(values, -1, -1);
     }
 
     @Override
@@ -56,8 +59,13 @@ public class ArrayToken<T> implements Token<T[]> {
     }
 
     @Override
-    public int getIndexAttribute() {
+    public int getIndex() {
         return index;
+    }
+
+    @Override
+    public int getFilePos() {
+        return filePos;
     }
 
     @Override

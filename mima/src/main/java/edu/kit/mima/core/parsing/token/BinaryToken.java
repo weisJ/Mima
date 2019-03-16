@@ -16,6 +16,7 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
     private static final Pattern INDENT = Pattern.compile("\n");
     private static final String INDENT_REPLACEMENT = "\n\t";
     private final TokenType type;
+    private final int filePos;
     private int index;
     private T first;
     private K second;
@@ -27,12 +28,14 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
      * @param first  first value
      * @param second second value
      * @param index  index of token
+     * @param filePos position in file
      */
-    public BinaryToken(TokenType type, T first, K second, int index) {
+    public BinaryToken(TokenType type, T first, K second, int index, int filePos) {
         this.type = type;
         this.first = first;
         this.second = second;
         this.index = index;
+        this.filePos = filePos;
     }
 
     /**
@@ -43,7 +46,7 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
      * @param second second value
      */
     public BinaryToken(TokenType type, T first, K second) {
-        this(type, first, second, -1);
+        this(type, first, second, -1, -1);
     }
 
     /**
@@ -87,8 +90,13 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
     }
 
     @Override
-    public int getIndexAttribute() {
+    public int getIndex() {
         return index;
+    }
+
+    @Override
+    public int getFilePos() {
+        return filePos;
     }
 
     @Override

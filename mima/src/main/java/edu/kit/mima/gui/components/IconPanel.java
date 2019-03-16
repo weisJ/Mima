@@ -67,4 +67,9 @@ public class IconPanel extends JPanel {
     public void paint(Graphics g) {
         icon.paintIcon(this, g, xOff, yOff);
     }
+
+    @Override
+    public Dimension getMaximumSize() {
+        return new Dimension(icon.getIconWidth(), icon.getIconHeight());
+    }
 }

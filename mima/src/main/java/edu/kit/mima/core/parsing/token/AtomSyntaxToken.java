@@ -12,14 +12,14 @@ public class AtomSyntaxToken<T> extends AtomToken<T> implements SyntaxToken<T> {
     private Color color;
 
     public AtomSyntaxToken(TokenType type, T value, Color color, int index, int length) {
-        super(type, value, index);
+        super(type, value, index, index);
         this.length = length;
         this.color = color;
     }
 
     @Override
     public int getOffset() {
-        return getIndexAttribute();
+        return getIndex();
     }
 
     @Override
@@ -35,5 +35,10 @@ public class AtomSyntaxToken<T> extends AtomToken<T> implements SyntaxToken<T> {
     @Override
     public void setColor(Color color) {
         this.color = color;
+    }
+
+    @Override
+    public int getFilePos() {
+        return getIndex();
     }
 }

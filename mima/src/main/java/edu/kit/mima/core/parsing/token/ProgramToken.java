@@ -21,6 +21,7 @@ public class ProgramToken implements Token<Token[]> {
 
     private static final Pattern INDENT = Pattern.compile("\n");
     private static final String INDENT_REPLACEMENT = "\n\t";
+    private final int filePos;
     private Token[] program;
     private Map<Token, Integer> jumpMap;
 
@@ -29,8 +30,9 @@ public class ProgramToken implements Token<Token[]> {
      *
      * @param program token array
      */
-    public ProgramToken(Token[] program) {
+    public ProgramToken(Token[] program, int filePos) {
         this.program = program;
+        this.filePos = filePos;
         jumpMap = new HashMap<>();
         resolveJumps();
     }
@@ -42,7 +44,7 @@ public class ProgramToken implements Token<Token[]> {
         List<Token> tokens = ((ProgramQueryResult) new ProgramQuery(this)
                 .whereEqual(Token::getType, TokenType.JUMP_POINT)).get(false);
         for (var token : tokens) {
-            jumpMap.put((Token) token.getValue(), token.getIndexAttribute());
+            jumpMap.put((Token) token.getValue(), token.getIndex());
         }
     }
 
@@ -71,8 +73,13 @@ public class ProgramToken implements Token<Token[]> {
     }
 
     @Override
-    public int getIndexAttribute() {
+    public int getIndex() {
         return 0;
+    }
+
+    @Override
+    public int getFilePos() {
+        return filePos;
     }
 
     @Override
@@ -87,7 +94,7 @@ public class ProgramToken implements Token<Token[]> {
 
     @Override
     public String simpleName() {
-        return Arrays.stream(program).map(Token::simpleName).collect(Collectors.joining("\n"));
+        return "...";
     }
 
     @Override

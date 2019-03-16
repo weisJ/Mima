@@ -26,4 +26,9 @@ public class EmptySyntaxToken extends EmptyToken implements SyntaxToken {
     @Override
     public void setColor(Color color) {
     }
+
+    @Override
+    public int getFilePos() {
+        return 0;
+    }
 }

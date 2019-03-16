@@ -9,9 +9,9 @@ public class TabTransferData {
     private int tabIndex;
 
 
-    public TabTransferData(EditorTabbedPane a_tabbedPane, int a_tabIndex) {
-        tabbedPane = a_tabbedPane;
-        tabIndex = a_tabIndex;
+    public TabTransferData(EditorTabbedPane tabbedPane, int tabIndex) {
+        this.tabbedPane = tabbedPane;
+        this.tabIndex = tabIndex;
     }
 
     public EditorTabbedPane getTabbedPane() {

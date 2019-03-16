@@ -7,15 +7,21 @@ import edu.kit.mima.core.instruction.MimaInstruction;
 import edu.kit.mima.core.instruction.MimaXInstruction;
 import edu.kit.mima.core.interpretation.ExceptionListener;
 import edu.kit.mima.core.interpretation.Interpreter;
-import edu.kit.mima.core.interpretation.InterpreterException;
 import edu.kit.mima.core.interpretation.environment.Environment;
 import edu.kit.mima.core.interpretation.environment.GlobalEnvironment;
 import edu.kit.mima.core.parsing.token.ProgramToken;
 import edu.kit.mima.core.parsing.token.Token;
+import edu.kit.mima.gui.components.Breakpoint;
+import edu.kit.mima.gui.logging.Logger;
 import edu.kit.mima.gui.observing.AbstractObservable;
 
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 /**
  * @author Jannis Weis
@@ -24,9 +30,10 @@ import java.util.concurrent.atomic.AtomicReference;
 public class MimaRunner extends AbstractObservable implements ExceptionListener {
 
     public static final String RUNNING_PROPERTY = "running";
-    private final static Environment EMPTY_ENV = new Environment(null, new ProgramToken(new Token[0]));
+    private final static Environment EMPTY_ENV = new Environment(null, new ProgramToken(new Token[0], -1));
     private final AtomicReference<Exception> sharedException;
     private final ThreadDebugController threadDebugController;
+    private final MimaDebugger debugger;
 
     private Interpreter interpreter;
     private Mima mima;
@@ -35,30 +42,41 @@ public class MimaRunner extends AbstractObservable implements ExceptionListener 
 
 
     public MimaRunner() {
+        debugger = new MimaDebugger();
         interpreter = new Interpreter(0, null, null);
         sharedException = new AtomicReference<>();
         threadDebugController = new ThreadDebugController();
-        threadDebugController.addStopHandler(() -> interpreter.setRunning(false));
         mima = new Mima(InstructionSet.MIMA_X.getWordLength(), InstructionSet.MIMA_X.getConstCordLength());
+    }
+
+    public void start() {
+        threadDebugController.setBreaks(Collections.emptyList());
+        mima.reset();
+        startInterpreter();
+        do {
+            threadDebugController.resume();
+            checkForException();
+        } while (threadDebugController.isActive() && isRunning());
+        getPropertyChangeSupport().firePropertyChange(RUNNING_PROPERTY, true, false);
     }
 
     /**
      * Start the interpreter
      */
-    private void start() {
+    private void startInterpreter() {
         if (program == null) {
             throw new IllegalStateException("must parse program before starting");
         }
-        getPropertyChangeSupport().firePropertyChange(RUNNING_PROPERTY, false, true);
         interpreter = new Interpreter(program.getInstructionSet().getConstCordLength(), threadDebugController, this);
         createGlobalEnvironment();
         sharedException.set(null);
         Thread workingThread = new Thread(
-                () -> interpreter.evaluateTopLevel(program.getProgramToken(), globalEnvironment)
+                () -> interpreter.evaluateTopLevel(program.getProgramToken(), globalEnvironment, v -> {})
         );
         threadDebugController.setWorkingThread(workingThread);
         threadDebugController.start();
         interpreter.setRunning(true);
+        getPropertyChangeSupport().firePropertyChange(RUNNING_PROPERTY, false, true);
     }
 
     /**
@@ -79,31 +97,10 @@ public class MimaRunner extends AbstractObservable implements ExceptionListener 
      * Stop the interpreter
      */
     public void stop() {
-        getPropertyChangeSupport().firePropertyChange(RUNNING_PROPERTY, isRunning(), false);
+        boolean running = isRunning();
+        debugger.active = false;
         threadDebugController.stop();
-    }
-
-    /**
-     * Run the program
-     */
-    public void run() {
-        mima.reset();
-        do {
-            step();
-        } while (interpreter.isRunning());
-        getPropertyChangeSupport().firePropertyChange(RUNNING_PROPERTY, true, false);
-    }
-
-    /**
-     * Perform one step of the program
-     */
-    public void step() {
-        if (!interpreter.isRunning()) {
-            start();
-        } else if (!threadDebugController.isActive()) {
-            threadDebugController.resume();
-        }
-        checkForException();
+        getPropertyChangeSupport().firePropertyChange(RUNNING_PROPERTY, running, false);
     }
 
     private void checkForException() {
@@ -111,7 +108,8 @@ public class MimaRunner extends AbstractObservable implements ExceptionListener 
             Thread.onSpinWait();
         }
         if (sharedException.get() != null) {
-            throw new InterpreterException(sharedException.get().getMessage());
+            Logger.error(sharedException.get().getMessage());
+            stop();
         }
     }
 
@@ -165,48 +163,116 @@ public class MimaRunner extends AbstractObservable implements ExceptionListener 
     }
 
     public Debugger debugger() {
-        return new Debugger() {
-            @Override
-            public void addPropertyChangeListener(String property, PropertyChangeListener listener) {
-                MimaRunner.this.addPropertyChangeListener(property, listener);
-            }
+        return debugger;
+    }
 
-            @Override
-            public void addPropertyChangeListener(PropertyChangeListener listener) {
-                MimaRunner.this.addPropertyChangeListener(listener);
-            }
+    private class MimaDebugger implements Debugger {
+        private final List<PauseListener> listenerList = new ArrayList<>();
+        private boolean active = false;
+        private boolean paused = false;
 
-            @Override
-            public void removePropertyChangeListener(String property, PropertyChangeListener listener) {
-                MimaRunner.this.removePropertyChangeListener(property, listener);
-            }
-
-            @Override
-            public void removePropertyChangeListener(PropertyChangeListener listener) {
-                MimaRunner.this.removePropertyChangeListener(listener);
-            }
-
-            @Override
-            public void pause() {
-                threadDebugController.pause();
-            }
-
-            @Override
-            public void resume() {
-                threadDebugController.setAutoPause(false);
+        private void continueExecution() {
+            do {
                 threadDebugController.resume();
+                checkForException();
+            } while (threadDebugController.isActive() && isRunning());
+            if (!threadDebugController.isActive()) {
+                paused = true;
+                notifyListeners(getCurrentStatement());
+                getPropertyChangeSupport().firePropertyChange(Debugger.PAUSE_PROPERTY, false, true);
             }
+            if (!isRunning()) {
+                active = false;
+                getPropertyChangeSupport().firePropertyChange(RUNNING_PROPERTY, true, false);
+            }
+        }
 
-            @Override
-            public void step() {
-                threadDebugController.setAutoPause(true);
-                resume();
-            }
+        @Override
+        public void start() {
+            active = true;
+            paused = false;
+            getPropertyChangeSupport().firePropertyChange(Debugger.PAUSE_PROPERTY, false, true);
+            mima.reset();
+            startInterpreter();
+            continueExecution();
+        }
 
-            @Override
-            public boolean isRunning() {
-                return MimaRunner.this.isRunning();
+        @Override
+        public void pause() {
+            paused = true;
+            threadDebugController.pause();
+            notifyListeners(getCurrentStatement());
+            getPropertyChangeSupport().firePropertyChange(Debugger.PAUSE_PROPERTY, false, true);
+        }
+
+        private void notifyListeners(Token currentStatement) {
+            for (var listener : listenerList) {
+                if (listener != null) {
+                    listener.paused(currentStatement);
+                }
             }
-        };
+        }
+
+        @Override
+        public void resume() {
+            paused = false;
+            threadDebugController.setAutoPause(false);
+            continueExecution();
+        }
+
+        @Override
+        public void step() {
+            paused = false;
+            threadDebugController.setAutoPause(true);
+            threadDebugController.resume();
+            notifyListeners(getCurrentStatement());
+            checkForException();
+        }
+
+        @Override
+        public boolean isRunning() {
+            return MimaRunner.this.isRunning() && active;
+        }
+
+        @Override
+        public boolean isPaused() {
+            return active && paused;
+        }
+
+        @Override
+        public void setBreakpoints(Breakpoint[] breakpoints) {
+            threadDebugController.setBreaks(Arrays.stream(breakpoints)
+                    .map(Breakpoint::getLineIndex).collect(Collectors.toList()));
+        }
+
+        @Override
+        public void addPauseListener(PauseListener listener) {
+            listenerList.add(listener);
+        }
+
+        @Override
+        public void removePauseListener(PauseListener listener) {
+            listenerList.remove(listener);
+        }
+
+        @Override
+        public void addPropertyChangeListener(String property, PropertyChangeListener listener) {
+            MimaRunner.this.addPropertyChangeListener(property, listener);
+        }
+
+        @Override
+        public void addPropertyChangeListener(PropertyChangeListener listener) {
+            MimaRunner.this.addPropertyChangeListener(listener);
+        }
+
+        @Override
+        public void removePropertyChangeListener(String property, PropertyChangeListener listener) {
+            MimaRunner.this.removePropertyChangeListener(property, listener);
+        }
+
+        @Override
+        public void removePropertyChangeListener(PropertyChangeListener listener) {
+            MimaRunner.this.removePropertyChangeListener(listener);
+        }
     }
 }

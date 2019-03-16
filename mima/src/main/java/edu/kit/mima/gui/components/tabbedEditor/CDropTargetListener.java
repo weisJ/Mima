@@ -1,6 +1,6 @@
 package edu.kit.mima.gui.components.tabbedEditor;
 
-import javax.swing.JTabbedPane;
+import javax.swing.Icon;
 import java.awt.Component;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -30,21 +30,13 @@ public class CDropTargetListener implements DropTargetListener {
     }
 
     public void dragExit(DropTargetEvent e) {
-        tabbedPane.isDrawRect = false;
     }
 
     public void dropActionChanged(DropTargetDragEvent e) {
     }
 
     public void dragOver(final DropTargetDragEvent e) {
-        TabTransferData data = DnDUtil.getTabTransferData(e);
-
-        if (tabbedPane.getTabPlacement() == JTabbedPane.TOP
-                || tabbedPane.getTabPlacement() == JTabbedPane.BOTTOM) {
-            tabbedPane.initTargetLeftRightLine(tabbedPane.getTargetTabIndex(e.getLocation()), data);
-        } else {
-            tabbedPane.initTargetTopBottomLine(tabbedPane.getTargetTabIndex(e.getLocation()), data);
-        }
+        tabbedPane.initTarget(e.getLocation());
 
         tabbedPane.repaint();
         if (tabbedPane.hasGhost()) {
@@ -56,13 +48,12 @@ public class CDropTargetListener implements DropTargetListener {
     public void drop(DropTargetDropEvent event) {
         if (isDropAcceptable(event)) {
             convertTab(Objects.requireNonNull(DnDUtil.getTabTransferData(event)),
-                    tabbedPane.getTargetTabIndex(event.getLocation()));
+//                    tabbedPane.getTargetTabIndex(event.getLocation()))
+                    tabbedPane.dropTargetIndex);
             event.dropComplete(true);
         } else {
             event.dropComplete(false);
         }
-
-        tabbedPane.isDrawRect = false;
         tabbedPane.repaint();
     }
 
@@ -75,6 +66,8 @@ public class CDropTargetListener implements DropTargetListener {
 
         Component cmp = source.getComponentAt(sourceIndex);
         String str = source.getTitleAt(sourceIndex);
+        Icon icon = source.getIconAt(sourceIndex);
+        String tooltip = source.getToolTipTextAt(sourceIndex);
         if (tabbedPane != source) {
             source.remove(sourceIndex);
 
@@ -84,7 +77,7 @@ public class CDropTargetListener implements DropTargetListener {
                 if (targetIndex < 0) {
                     targetIndex = 0;
                 }
-                tabbedPane.insertTab(str, null, cmp, null, targetIndex);
+                tabbedPane.insertTab(str, icon, cmp, tooltip, targetIndex);
             }
             tabbedPane.setSelectedComponent(cmp);
             return;
@@ -96,15 +89,15 @@ public class CDropTargetListener implements DropTargetListener {
 
         if (targetIndex == tabbedPane.getTabCount()) {
             source.remove(sourceIndex);
-            tabbedPane.addTab(str, cmp);
+            tabbedPane.addTab(str, icon, cmp, tooltip);
             tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
         } else if (sourceIndex > targetIndex) {
             source.remove(sourceIndex);
-            tabbedPane.insertTab(str, null, cmp, null, targetIndex);
+            tabbedPane.insertTab(str, icon, cmp, tooltip, targetIndex);
             tabbedPane.setSelectedIndex(targetIndex);
         } else {
             source.remove(sourceIndex);
-            tabbedPane.insertTab(str, null, cmp, null, targetIndex - 1);
+            tabbedPane.insertTab(str, icon, cmp, tooltip, targetIndex - 1);
             tabbedPane.setSelectedIndex(targetIndex - 1);
         }
     }

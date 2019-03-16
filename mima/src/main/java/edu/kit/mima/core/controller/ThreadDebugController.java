@@ -1,10 +1,12 @@
 package edu.kit.mima.core.controller;
 
 import edu.kit.mima.core.parsing.token.Token;
+import edu.kit.mima.core.parsing.token.TokenType;
 import edu.kit.mima.gui.logging.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Jannis Weis
@@ -13,7 +15,7 @@ import java.util.List;
 public class ThreadDebugController implements DebugController {
 
     private final Object lock = new Object();
-    private final List<Runnable> beforeStop;
+    private Set<Integer> breaks;
     private Thread workingThread;
     private boolean isActive;
     private boolean autoPause;
@@ -22,9 +24,9 @@ public class ThreadDebugController implements DebugController {
      * Create new ThreadDebugController.
      */
     public ThreadDebugController() {
-        beforeStop = new ArrayList<>();
         isActive = false;
         autoPause = false;
+        breaks = new HashSet<>();
     }
 
     /**
@@ -37,24 +39,6 @@ public class ThreadDebugController implements DebugController {
         isActive = false;
     }
 
-    /**
-     * Add action to be executed before thread is stopped.
-     *
-     * @param handler handler to add
-     */
-    public void addStopHandler(Runnable handler) {
-        beforeStop.add(handler);
-    }
-
-    /**
-     * Remove action that is currently executed before thread is stopped.
-     *
-     * @param handler handler to remove
-     * @return true if handler was removed successfully
-     */
-    public boolean removeStopHandler(Runnable handler) {
-        return beforeStop.remove(handler);
-    }
 
     /**
      * Returns whether the thread is currently active
@@ -103,12 +87,9 @@ public class ThreadDebugController implements DebugController {
         if (workingThread == null) {
             return;
         }
+        autoPause = false;
         synchronized (lock) {
             isActive = false;
-            for (Runnable runnable : beforeStop) {
-                runnable.run();
-            }
-            lock.notify();
         }
         try {
             workingThread.join();
@@ -117,9 +98,20 @@ public class ThreadDebugController implements DebugController {
 
     @Override
     public void afterInstruction(Token currentInstruction) {
-        if (autoPause) {
+        if ((autoPause || breaks.contains(currentInstruction.getFilePos()))
+                && currentInstruction.getType() != TokenType.PROGRAM) {
             pause();
         }
+    }
+
+    /**
+     * Set break points.
+     *
+     * @param breaks break point collection.
+     */
+    public void setBreaks(Collection<Integer> breaks) {
+        this.breaks.clear();
+        this.breaks.addAll(breaks);
     }
 
     /**

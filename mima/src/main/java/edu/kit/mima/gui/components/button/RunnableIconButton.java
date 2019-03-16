@@ -8,24 +8,27 @@ import java.awt.event.ActionListener;
  * @author Jannis Weis
  * @since 2018
  */
-public class ToggleIconButton extends IconButton implements ActionListener {
+public class RunnableIconButton extends IconButton implements ActionListener {
 
     private boolean toggled;
+    private Icon running;
+    private boolean isRunning;
 
-    public ToggleIconButton(Icon icon) {
-        this(icon, icon);
-    }
-
-    public ToggleIconButton(Icon inactive, Icon active) {
+    public RunnableIconButton(Icon inactive, Icon active, Icon running) {
         super(inactive, active);
+        this.running = running;
         this.inactive = inactive;
         this.active = active;
         addActionListener(this);
     }
 
     @Override
-    protected boolean useAlternative() {
-        return toggled;
+    protected Icon currentIcon() {
+        return isRunning ? running : isEnabled() ? active : inactive;
+    }
+
+    public void setRunning(boolean running) {
+        isRunning = running;
     }
 
     @Override

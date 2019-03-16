@@ -6,7 +6,7 @@ import java.beans.PropertyChangeListener;
  * @author Jannis Weis
  * @since 2018
  */
-public interface ClassObservable<T> {
+public interface ClassObservable {
 
     void addStaticPropertyChangeListener(String property, PropertyChangeListener listener);
 

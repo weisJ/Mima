@@ -23,10 +23,10 @@ import java.util.function.Consumer;
  * @author Jannis Weis
  * @since 2018
  */
-public class ButtonClose extends JPanel {
+public class TabComponent extends JPanel {
     private final JLabel text;
 
-    public ButtonClose(final String title, Icon icon, Consumer<ButtonClose> onClick) {
+    public TabComponent(final String title, Icon icon, Consumer<TabComponent> onClick) {
         Icon icone = icon == null ? new EmptyIcon(0, 0) : icon;
         JLabel ic = new JLabel(icone);
         ic.setSize(icone.getIconWidth(), icone.getIconHeight());
@@ -38,7 +38,7 @@ public class ButtonClose extends JPanel {
         button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                onClick.accept(ButtonClose.this);
+                onClick.accept(TabComponent.this);
             }
         });
         button.setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));

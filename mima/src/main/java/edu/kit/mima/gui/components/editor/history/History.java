@@ -15,7 +15,7 @@ import java.util.LinkedList;
  * @author Jannis Weis
  * @since 2018
  */
-public class History<T> extends AbstractObservable implements ClassObservable<History> {
+public class History<T> extends AbstractObservable implements ClassObservable {
 
     public static final String LENGTH_PROPERTY = "historyLength";
     public static final String POSITION_PROPERTY = "historyPosition";

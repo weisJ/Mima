@@ -9,7 +9,6 @@ import edu.kit.mima.gui.util.FileName;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.border.EmptyBorder;
 import java.awt.AWTException;
 import java.awt.Point;
 import java.awt.Robot;
@@ -31,7 +30,6 @@ public class FileDisplay extends JPanel {
      */
     public FileDisplay() {
         this.handler = f -> {};
-        setBorder(new EmptyBorder(0, 5, 0, 5));
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         add(new IconPanel(Icons.FOLDER_ROOT, Alignment.CENTER));
     }
@@ -63,7 +61,7 @@ public class FileDisplay extends JPanel {
             sb.append(directories[i]).append(SEPARATOR);
         }
         if (sb.length() == 0) {
-            add(new IconPanel(Icons.FOLDER_ROOT, Alignment.WEST));
+            add(new IconPanel(Icons.FOLDER_ROOT, Alignment.NORTH_WEST));
         } else {
             add(new FolderDisplay(null, new File(sb.toString()), Icons.FOLDER_ROOT, handler));
         }
@@ -71,7 +69,7 @@ public class FileDisplay extends JPanel {
             String s = directories[i];
             sb.append(s).append(SEPARATOR);
             if (!s.contains(":")) {
-                add(new IconPanel(Icons.DIVIDER, Alignment.WEST));
+                add(new IconPanel(Icons.DIVIDER, Alignment.NORTH_WEST));
                 add(new FolderDisplay(s, new File(sb.toString()), handler));
             }
         }
