@@ -13,11 +13,11 @@ public class FontFamily implements Iterable<Font> {
 
     private final Set<Font> styles = new TreeSet<>(new FontNameComparator());
 
-    public FontFamily(String name) {
+    public FontFamily(final String name) {
         this.name = name;
     }
 
-    public boolean add(Font font) {
+    public boolean add(final Font font) {
         return styles.add(font);
     }
 

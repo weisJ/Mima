@@ -3,13 +3,8 @@ package edu.kit.mima.gui.menu;
 import edu.kit.mima.core.parsing.token.Tuple;
 import edu.kit.mima.core.parsing.token.ValueTuple;
 import edu.kit.mima.gui.components.ZeroWidthSplitPane;
+import org.jetbrains.annotations.NotNull;
 
-import javax.swing.DefaultListSelectionModel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.UIManager;
 import java.awt.CardLayout;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -21,15 +16,23 @@ import java.util.Comparator;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import javax.swing.DefaultListSelectionModel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.UIManager;
 
 /**
+ * Builder for Panel with {@link CardLayout} that uses a sidebar for navigation.
+ *
  * @author Jannis Weis
  * @since 2018
  */
 public class CardPanelBuilder {
 
-    private final JPanel panel;
-    private final SortedMap<Integer, Tuple<String, JPanel>> panelMap;
+    @NotNull private final JPanel panel;
+    @NotNull private final SortedMap<Integer, Tuple<String, JPanel>> panelMap;
     private int count = 0;
 
     public CardPanelBuilder() {
@@ -37,42 +40,67 @@ public class CardPanelBuilder {
         panelMap = new TreeMap<>();
     }
 
-    public CardPanelItem addItem(String title) {
+    /**
+     * Add new Item.
+     *
+     * @param title title of item.
+     * @return new {@link CardPanelItem}
+     */
+    @NotNull
+    public CardPanelItem addItem(final String title) {
         return addItem(title, true);
     }
 
-    public CardPanelItem addItem(String title, boolean alignLeft) {
+    /**
+     * Create new item.
+     *
+     * @param title     title of item.
+     * @param alignLeft whether it is left aligned.
+     * @return new {@link CardPanelItem}
+     */
+    @NotNull
+    public CardPanelItem addItem(final String title, final boolean alignLeft) {
         return new CardPanelItem(title, this, alignLeft);
     }
 
-    /*default*/ CardPanelItem nextItem(String title, CardPanelItem item, boolean alignRight) {
+    /*default*/
+    @NotNull CardPanelItem nextItem(final String title,
+                                    @NotNull final CardPanelItem item,
+                                    final boolean alignRight) {
         this.panelMap.put(count++, new ValueTuple<>(item.getTitle(), item.getPanel()));
         return new CardPanelItem(title, this, alignRight);
     }
 
-    /*default*/ void addToComponent(Container parent) {
-        String[] items = panelMap.values().stream().map(Tuple::getFirst).toArray(String[]::new);
-        Optional<String> maxElement = Arrays.stream(items).max(Comparator.comparingInt(String::length));
+    /**
+     * Add the panel to the given container.
+     *
+     * @param parent container to add this to
+     */
+    /*default*/ void addToComponent(@NotNull final Container parent) {
+        final String[] items = panelMap.values().stream()
+                .map(Tuple::getFirst).toArray(String[]::new);
+        final Optional<String> maxElement = Arrays.stream(items)
+                .max(Comparator.comparingInt(String::length));
         int minWidth = 100;
         if (maxElement.isPresent()) {
-            Font font = UIManager.getFont("List.font");
-            FontMetrics metrics = new FontMetrics(font) {
+            final Font font = UIManager.getFont("List.font");
+            final FontMetrics metrics = new FontMetrics(font) {
             };
-            Rectangle2D bounds = metrics.getStringBounds(maxElement.get(), null);
+            final Rectangle2D bounds = metrics.getStringBounds(maxElement.get(), null);
             minWidth = Math.max(minWidth, (int) bounds.getWidth());
         }
-        JList<String> sidebar = new JList<>();
+        final JList<String> sidebar = new JList<>();
         sidebar.setDragEnabled(false);
         sidebar.setListData(items);
         sidebar.setSelectionMode(DefaultListSelectionModel.SINGLE_SELECTION);
         panelMap.forEach((i, t) -> panel.add(t.getSecond(), t.getFirst()));
 
-        JSplitPane cardPanel = new ZeroWidthSplitPane();
+        final JSplitPane cardPanel = new ZeroWidthSplitPane();
         cardPanel.setDividerLocation(JSplitPane.HORIZONTAL_SPLIT);
 
         sidebar.addListSelectionListener(e -> {
             if (e.getValueIsAdjusting()) {
-                CardLayout cl = (CardLayout) (panel.getLayout());
+                final CardLayout cl = (CardLayout) (panel.getLayout());
                 cl.show(panel, sidebar.getSelectedValue());
                 cardPanel.repaint();
             }
@@ -81,11 +109,11 @@ public class CardPanelBuilder {
             sidebar.setSelectedIndex(0);
         }
 
-        JScrollPane sideBarPane = new JScrollPane();
+        final JScrollPane sideBarPane = new JScrollPane();
         sideBarPane.setViewportView(sidebar);
 
-        Dimension minDim = new Dimension(minWidth, parent.getHeight());
-        Dimension maxDim = new Dimension(parent.getWidth() / 2, parent.getHeight());
+        final Dimension minDim = new Dimension(minWidth, parent.getHeight());
+        final Dimension maxDim = new Dimension(parent.getWidth() / 2, parent.getHeight());
         sideBarPane.setMinimumSize(minDim);
         panel.setMinimumSize(maxDim);
 

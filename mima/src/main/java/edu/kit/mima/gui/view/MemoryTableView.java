@@ -5,8 +5,8 @@ import edu.kit.mima.core.data.MachineWord;
 import edu.kit.mima.core.interpretation.environment.Environment;
 import edu.kit.mima.core.running.MimaRunner;
 import edu.kit.mima.gui.components.FixedScrollTable;
+import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JTable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -14,8 +14,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.swing.JTable;
 
 /**
+ * Implementation of {@link MemoryView} based on Mima.
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -29,13 +32,14 @@ public class MemoryTableView implements MemoryView {
     private final FixedScrollTable table;
     private boolean binaryView = false;
 
-    public MemoryTableView(MimaRunner mimaRunner, FixedScrollTable table) {
+    public MemoryTableView(final MimaRunner mimaRunner, final FixedScrollTable table) {
         this.mimaRunner = mimaRunner;
         this.table = table;
     }
 
     private static String getAssociation(final Map<String, Integer> associations, final int value) {
-        return associations.entrySet().stream().filter(entry -> entry.getValue() == value).findFirst()
+        return associations.entrySet().stream()
+                .filter(entry -> entry.getValue() == value).findFirst()
                 .map(Map.Entry::getKey).orElse(null);
     }
 
@@ -50,7 +54,7 @@ public class MemoryTableView implements MemoryView {
      *
      * @param binaryView true if binary should be used.
      */
-    public void setBinaryView(boolean binaryView) {
+    public void setBinaryView(final boolean binaryView) {
         if (this.binaryView != binaryView) {
             this.binaryView = binaryView;
             updateView();
@@ -62,52 +66,56 @@ public class MemoryTableView implements MemoryView {
      *
      * @return memory table
      */
+    @NotNull
     public Object[][] getMemoryTable() {
         Environment scope = mimaRunner.getCurrentEnvironment();
-        Map<String, Integer> map = new HashMap<>();
+        final Map<String, Integer> map = new HashMap<>();
         while (scope != null) {
             map.putAll(new HashSet<>(scope.getDefinitions().get(0).entrySet())
-                    .stream()
-                    .filter(e -> !map.containsKey(e.getKey()))
-                    .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().intValue())));
+                               .stream()
+                               .filter(e -> !map.containsKey(e.getKey()))
+                               .collect(Collectors.toMap(Map.Entry::getKey,
+                                                         e -> e.getValue().intValue())));
             scope = scope.returnToParent();
         }
         return createMemoryTable(map);
     }
 
     /**
-     * Get the memory table labeled with the corresponding memory associations
+     * Get the memory table labeled with the corresponding memory associations.
      *
      * @param associations memory associations to use
      * @return MemoryTable formatted for an n(rows) x 2(columns) {@link JTable}
      */
-    private Object[][] createMemoryTable(Map<String, Integer> associations) {
-        Mima mima = mimaRunner.getMima();
-        var memoryM = mima.getMemory();
-        var accumulator = mima.getAccumulator();
-        var stackPointer = mima.getStackPointer();
+    private Object[][] createMemoryTable(@NotNull final Map<String, Integer> associations) {
+        final Mima mima = mimaRunner.getMima();
+        final var memoryM = mima.getMemory();
+        final var accumulator = mima.getAccumulator();
+        final var stackPointer = mima.getStackPointer();
 
         final Map<Integer, MachineWord> values = memoryM.getMapping();
         final List<Object[]> data = new ArrayList<>();
-        data.add(new Object[]{ACCUMULATOR, binaryView ? accumulator.binaryRepresentation() : accumulator.intValue()});
+        data.add(new Object[]{ACCUMULATOR, binaryView
+                ? accumulator.binaryRepresentation()
+                : accumulator.intValue()});
 
         final List<Object[]> memory = new ArrayList<>();
-        var entryList = new ArrayList<>(values.entrySet());
+        final var entryList = new ArrayList<>(values.entrySet());
         entryList.sort(Comparator.comparingInt(Map.Entry::getKey));
-        for (Map.Entry<Integer, MachineWord> entry : entryList) {
-            String valueString = binaryView
+        for (final Map.Entry<Integer, MachineWord> entry : entryList) {
+            final String valueString = binaryView
                     ? entry.getValue().binaryRepresentation()
                     : String.valueOf(entry.getValue().intValue());
-            Object[] element = associations.containsValue(entry.getKey())
+            final Object[] element = associations.containsValue(entry.getKey())
                     ? new Object[]{entry.getKey()
                     + " (" + getAssociation(associations, entry.getKey())
                     + ')', valueString}
                     : new Object[]{entry.getKey(), valueString};
             boolean skip;
             try {
-                int value = Integer.parseInt(element[0].toString());
+                final int value = Integer.parseInt(element[0].toString());
                 skip = value < 0;
-            } catch (NumberFormatException e) {
+            } catch (@NotNull final NumberFormatException e) {
                 data.add(element);
                 skip = true;
             }

@@ -3,12 +3,9 @@ package edu.kit.mima.gui.components.tooltip;
 import edu.kit.mima.gui.components.Alignment;
 import edu.kit.mima.gui.components.ShadowPane;
 import edu.kit.mima.gui.components.TextBubbleBorder;
-import edu.kit.mima.gui.util.HSLColor;
+import edu.kit.mima.util.HSLColor;
+import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
 import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Graphics;
@@ -17,8 +14,14 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.util.Timer;
 import java.util.TimerTask;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 
 /**
+ * Tooltip Component with Shadow.
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -28,7 +31,12 @@ public class Tooltip extends ShadowPane implements ITooltip {
     private Alignment alignment;
     private float alpha = 0;
 
-    public Tooltip(String text) {
+    /**
+     * Create new Tooltip.
+     *
+     * @param text text of tooltip.
+     */
+    public Tooltip(@NotNull final String text) {
         alignment = Alignment.NORTH;
         textLabel = new JLabel();
         textLabel.setOpaque(false);
@@ -36,9 +44,10 @@ public class Tooltip extends ShadowPane implements ITooltip {
         setText(text);
 
         bubbleBorder = new TextBubbleBorder(
-                new HSLColor(textLabel.getBackground()).adjustTone(60).getRGB()).setPointerSize(5).setThickness(1);
+                new HSLColor(textLabel.getBackground()).adjustTone(60)
+                        .getRGB()).setPointerSize(5).setThickness(1);
 
-        JPanel labelPanel = new JPanel(new BorderLayout());
+        final JPanel labelPanel = new JPanel(new BorderLayout());
         labelPanel.setOpaque(false);
         labelPanel.add(textLabel, BorderLayout.CENTER);
         labelPanel.setBorder(bubbleBorder);
@@ -52,7 +61,7 @@ public class Tooltip extends ShadowPane implements ITooltip {
      *
      * @param text tooltip text
      */
-    public void setText(String text) {
+    public void setText(@NotNull final String text) {
         textLabel.setText("<html>" + text.replaceAll("\n", "<\\br>") + "</html>");
     }
 
@@ -62,7 +71,7 @@ public class Tooltip extends ShadowPane implements ITooltip {
     }
 
     @Override
-    public void setAlignment(Alignment alignment) {
+    public void setAlignment(@NotNull final Alignment alignment) {
         this.alignment = alignment;
         adjustAlignment(alignment);
         bubbleBorder.setPointerSide(alignment.opposite());
@@ -71,39 +80,50 @@ public class Tooltip extends ShadowPane implements ITooltip {
     /*
      * Apply insets to adjust position
      */
-    private void adjustAlignment(Alignment alignment) {
-        Rectangle bounds = getBounds();
-        Insets insets = getInsets();
+    private void adjustAlignment(final Alignment alignment) {
+        final Rectangle bounds = getBounds();
+        final Insets insets = getInsets();
         switch (alignment) {
             case NORTH:
-                setBounds(bounds.x, bounds.y + insets.bottom, bounds.width, bounds.height);
+                setBounds(bounds.x, bounds.y + insets.bottom,
+                          bounds.width, bounds.height);
                 break;
             case EAST:
-                setBounds(bounds.x - insets.left, bounds.y + insets.bottom / 2, bounds.width + insets.right / 2, bounds.height);
+                setBounds(bounds.x - insets.left, bounds.y + insets.bottom / 2,
+                          bounds.width + insets.right / 2, bounds.height);
                 break;
             case SOUTH:
-                setBounds(bounds.x, bounds.y + insets.top, bounds.width, bounds.height);
+                setBounds(bounds.x, bounds.y + insets.top,
+                          bounds.width, bounds.height);
                 break;
             case WEST:
-                setBounds(bounds.x + insets.left / 2, bounds.y + insets.bottom / 2, bounds.width + insets.left / 2, bounds.height);
+                setBounds(bounds.x + insets.left / 2, bounds.y + insets.bottom / 2,
+                          bounds.width + insets.left / 2, bounds.height);
                 break;
             case NORTH_EAST:
-                setBounds(bounds.x - insets.left - insets.right, bounds.y + insets.bottom, bounds.width, bounds.height);
+                setBounds(bounds.x - insets.left - insets.right,
+                          bounds.y + insets.bottom,
+                          bounds.width, bounds.height);
                 bubbleBorder.setPointerPadPercent(0);
                 break;
             case SOUTH_EAST:
-                setBounds(bounds.x - insets.right - insets.left, bounds.y, bounds.width, bounds.height);
+                setBounds(bounds.x - insets.right - insets.left,
+                          bounds.y, bounds.width, bounds.height);
                 bubbleBorder.setPointerPadPercent(0);
                 break;
             case NORTH_WEST:
-                setBounds(bounds.x + insets.right + insets.left, bounds.y + insets.bottom, bounds.width, bounds.height);
+                setBounds(bounds.x + insets.right + insets.left,
+                          bounds.y + insets.bottom, bounds.width, bounds.height);
                 bubbleBorder.setPointerPadPercent(1);
                 break;
             case SOUTH_WEST:
-                setBounds(bounds.x + insets.right + insets.left, bounds.y, bounds.width, bounds.height);
+                setBounds(bounds.x + insets.right + insets.left,
+                          bounds.y, bounds.width, bounds.height);
                 bubbleBorder.setPointerPadPercent(1);
                 break;
             case CENTER:
+                break;
+            default:
                 break;
         }
     }
@@ -119,11 +139,11 @@ public class Tooltip extends ShadowPane implements ITooltip {
         startFadeTimer(false);
     }
 
-    private void startFadeTimer(boolean fadeIn) {
-        float end = fadeIn ? 1 : 0;
+    private void startFadeTimer(final boolean fadeIn) {
+        final float end = fadeIn ? 1 : 0;
         alpha = fadeIn ? 0 : 1;
-        var timer = new Timer();
-        var task = new TimerTask() {
+        final var timer = new Timer();
+        final var task = new TimerTask() {
             @Override
             public void run() {
                 if (alpha == end) {
@@ -141,9 +161,9 @@ public class Tooltip extends ShadowPane implements ITooltip {
     }
 
     @Override
-    protected void paintBorder(Graphics g) {
-        int pointerSize = bubbleBorder.getPointerSize();
-        Border border = getBorder();
+    protected void paintBorder(final Graphics g) {
+        final int pointerSize = bubbleBorder.getPointerSize();
+        final Border border = getBorder();
         //Move shadow according to alignment.
         switch (alignment) {
             case NORTH:
@@ -173,12 +193,14 @@ public class Tooltip extends ShadowPane implements ITooltip {
             case CENTER:
                 border.paintBorder(this, g, 0, 0, getWidth(), getHeight());
                 break;
+            default:
+                break;
         }
     }
 
     @Override
-    public void paint(Graphics g) {
-        Graphics2D g2d = (Graphics2D) g.create();
+    public void paint(@NotNull final Graphics g) {
+        final Graphics2D g2d = (Graphics2D) g.create();
         g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
         super.paint(g2d);
         g2d.dispose();

@@ -1,14 +1,18 @@
 package edu.kit.mima.gui.components;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.awt.Graphics;
+import java.awt.Rectangle;
 import javax.swing.JSplitPane;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
-import java.awt.Graphics;
-import java.awt.Rectangle;
 
 /**
+ * Split Pane with zero width splitters.
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -17,6 +21,9 @@ public class ZeroWidthSplitPane extends JSplitPane {
     private static final int DIVIDER_DRAG_SIZE = 9;
     private static final int DIVIDER_DRAG_OFFSET = 4;
 
+    /**
+     * Create new Zero With split pane.
+     */
     public ZeroWidthSplitPane() {
         setDividerSize(1);
         setBorder(null);
@@ -26,9 +33,8 @@ public class ZeroWidthSplitPane extends JSplitPane {
     @Override
     public void doLayout() {
         super.doLayout();
-        // increase divider width or height
-        BasicSplitPaneDivider divider = ((BasicSplitPaneUI) getUI()).getDivider();
-        Rectangle bounds = divider.getBounds();
+        final BasicSplitPaneDivider divider = ((BasicSplitPaneUI) getUI()).getDivider();
+        final Rectangle bounds = divider.getBounds();
         if (orientation == HORIZONTAL_SPLIT) {
             bounds.x -= DIVIDER_DRAG_OFFSET;
             bounds.width = DIVIDER_DRAG_SIZE;
@@ -46,6 +52,7 @@ public class ZeroWidthSplitPane extends JSplitPane {
     }
 
     private class SplitPaneWithZeroSizeDividerUI extends BasicSplitPaneUI {
+        @NotNull
         @Override
         public BasicSplitPaneDivider createDefaultDivider() {
             return new ZeroSizeDivider(this);
@@ -54,32 +61,33 @@ public class ZeroWidthSplitPane extends JSplitPane {
 
     private class ZeroSizeDivider extends BasicSplitPaneDivider {
 
-        private ZeroSizeDivider(BasicSplitPaneUI ui) {
+        private ZeroSizeDivider(@NotNull final BasicSplitPaneUI ui) {
             super(ui);
             setBackground(UIManager.getColor("InternalFrame.borderColor"));
         }
 
         @Override
-        public void setBorder(Border border) {
+        public void setBorder(final Border border) {
             // ignore
         }
 
         @Override
-        public void paint(Graphics g) {
+        public void paint(@NotNull final Graphics g) {
             g.setColor(getBackground());
-            if (orientation == HORIZONTAL_SPLIT)
+            if (orientation == HORIZONTAL_SPLIT) {
                 g.drawLine(DIVIDER_DRAG_OFFSET, 0, DIVIDER_DRAG_OFFSET, getHeight() - 1);
-            else
+            } else {
                 g.drawLine(0, DIVIDER_DRAG_OFFSET, getWidth() - 1, DIVIDER_DRAG_OFFSET);
+            }
         }
 
         @Override
-        protected void dragDividerTo(int location) {
+        protected void dragDividerTo(final int location) {
             super.dragDividerTo(location + DIVIDER_DRAG_OFFSET);
         }
 
         @Override
-        protected void finishDraggingTo(int location) {
+        protected void finishDraggingTo(final int location) {
             super.finishDraggingTo(location + DIVIDER_DRAG_OFFSET);
         }
     }

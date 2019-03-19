@@ -1,14 +1,10 @@
 package edu.kit.mima.gui.components;
 
 import edu.kit.mima.gui.components.listeners.IndexListener;
-import edu.kit.mima.gui.util.DocumentUtil;
-import edu.kit.mima.gui.util.HSLColor;
+import edu.kit.mima.util.DocumentUtil;
+import edu.kit.mima.util.HSLColor;
+import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -21,9 +17,14 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextPane;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 
 /**
- * An LineNumber wrapper for a {@link JTextPane}
+ * An LineNumber wrapper for a {@link JTextPane}.
  *
  * @author Jannis Weis
  * @since 2018
@@ -31,10 +32,10 @@ import java.util.TreeMap;
 public class NumberedTextPane extends JPanel {
 
     private static final Dimension NUMBER_SIZE = new Dimension(30, 30);
-    private final HighlightTextPane pane;
-    private final JScrollPane scrollPane;
-    private final TreeMap<Integer, IndexComponent> componentMap;
-    private final List<IndexListener> listenerList;
+    @NotNull private final HighlightTextPane pane;
+    @NotNull private final JScrollPane scrollPane;
+    @NotNull private final TreeMap<Integer, IndexComponent> componentMap;
+    @NotNull private final List<IndexListener> listenerList;
     private int offsetMultiplier = 5;
     private Font font;
     private Color color;
@@ -47,18 +48,18 @@ public class NumberedTextPane extends JPanel {
      * @param font   Font of line number
      * @param color  Color of line number
      */
-    public NumberedTextPane(Component parent, Font font, Color color) {
+    public NumberedTextPane(@NotNull final Component parent, final Font font, final Color color) {
         componentMap = new TreeMap<>();
         listenerList = new ArrayList<>();
         this.font = font;
         this.color = color;
 
         //Calculate default numbering width
-        var metrics = new FontMetrics(font) {
+        final var metrics = new FontMetrics(font) {
         };
-        var bounds = metrics.getStringBounds("100", getGraphics());
-        int xOff = (int) bounds.getHeight() / 2;
-        int size = (int) bounds.getWidth() + offsetMultiplier * xOff;
+        final var bounds = metrics.getStringBounds("100", getGraphics());
+        final int xOff = (int) bounds.getHeight() / 2;
+        final int size = (int) bounds.getWidth() + offsetMultiplier * xOff;
         setMinimumSize(NUMBER_SIZE);
         setPreferredSize(new Dimension(size, size));
         actionThresholdX = xOff + (int) bounds.getWidth();
@@ -66,7 +67,7 @@ public class NumberedTextPane extends JPanel {
         //Add number rendering to panel.
         pane = new HighlightTextPane(parent) {
             @Override
-            public void paintComponent(Graphics g) {
+            public void paintComponent(@NotNull final Graphics g) {
                 super.paintComponent(g);
                 NumberedTextPane.this.repaint();
             }
@@ -74,17 +75,17 @@ public class NumberedTextPane extends JPanel {
         //Internally simulate scrolling.
         scrollPane = new JScrollPane(pane);
 
-        HSLColor background = new HSLColor(getBackground());
+        final HSLColor background = new HSLColor(getBackground());
         setBackground(background.adjustShade(15).getRGB());
         addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mouseClicked(@NotNull final MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    Point p = e.getPoint();
+                    final Point p = e.getPoint();
                     try {
-                        int index = DocumentUtil.getLineOfOffset(pane, pane.viewToModel2D(p));
+                        final int index = DocumentUtil.getLineOfOffset(pane, pane.viewToModel2D(p));
                         if (p.x > actionThresholdX) {
-                            for (var listener : listenerList) {
+                            for (final var listener : listenerList) {
                                 if (listener != null) {
                                     listener.indexClicked(index);
                                 }
@@ -93,7 +94,8 @@ public class NumberedTextPane extends JPanel {
                         } else {
                             pane.selectLine(index);
                         }
-                    } catch (BadLocationException ignored) { }
+                    } catch (@NotNull final BadLocationException ignored) {
+                    }
                 }
             }
         });
@@ -104,28 +106,27 @@ public class NumberedTextPane extends JPanel {
      *
      * @param listener listener to add.
      */
-    public void addIndexListener(IndexListener listener) {
+    public void addIndexListener(final IndexListener listener) {
         listenerList.add(listener);
     }
 
     /**
-     * Remove index listener
+     * Remove index listener.
      *
      * @param listener listener to remove
      */
-    public void removeIndexListener(IndexListener listener) {
+    public void removeIndexListener(final IndexListener listener) {
         listenerList.remove(listener);
     }
 
     /**
-     * Add component at specific index.
-     * If the index is not available nothing happens.
-     * If the index isn't available anymore the component will automatically be removed.
+     * Add component at specific index. If the index is not available nothing happens. If the index
+     * isn't available anymore the component will automatically be removed.
      *
      * @param component component to add
      * @param index     index of component.
      */
-    public void addComponentAt(IndexComponent component, int index) {
+    public void addComponentAt(final IndexComponent component, final int index) {
         componentMap.put(index, component);
     }
 
@@ -134,7 +135,7 @@ public class NumberedTextPane extends JPanel {
      *
      * @param index index of component to remove.
      */
-    public void removeComponentAt(int index) {
+    public void removeComponentAt(final int index) {
         componentMap.remove(index);
     }
 
@@ -144,13 +145,13 @@ public class NumberedTextPane extends JPanel {
      * @param index index to check.
      * @return true if index has component.
      */
-    public boolean hasComponentAt(int index) {
+    public boolean hasComponentAt(final int index) {
         return componentMap.containsKey(index);
     }
 
     /**
-     * Get components at line index.
-     * Note the array indices do not correspond to the indices in the panel.
+     * Get components at line index. Note the array indices do not correspond to the indices in the
+     * panel.
      *
      * @return array of components.
      */
@@ -159,12 +160,12 @@ public class NumberedTextPane extends JPanel {
     }
 
     /**
-     * Paint the line Numbers
+     * Paint the line Numbers.
      *
      * @param g Graphics object
      */
     @Override
-    public void paint(final Graphics g) {
+    public void paint(@NotNull final Graphics g) {
         super.paint(g);
         final int start = pane.viewToModel2D(scrollPane.getViewport().getViewPosition());
         final int end = pane.viewToModel2D(new Point(
@@ -181,31 +182,33 @@ public class NumberedTextPane extends JPanel {
         int startingY = -1;
 
         try {
-            startingY = (((int) pane.modelToView2D(start).getY()
-                                  - scrollPane.getViewport().getViewPosition().y) + fontHeight) - fontDesc;
-        } catch (final BadLocationException e1) {
+            startingY = (((int) pane.modelToView2D(start)
+                    .getY() - scrollPane.getViewport().getViewPosition().y)
+                                 + fontHeight) - fontDesc;
+        } catch (@NotNull final BadLocationException e1) {
             e1.printStackTrace();
         }
 
         g.setFont(font);
-        Color numberingColor = new HSLColor(color).adjustShade(30).getRGB();
-        Color currentNumberColor = new HSLColor(color).adjustTone(5).getRGB();
+        final Color numberingColor = new HSLColor(color).adjustShade(30).getRGB();
+        final Color currentNumberColor = new HSLColor(color).adjustTone(5).getRGB();
         g.setColor(numberingColor);
 
-        var metrics = g.getFontMetrics(font);
-        String digits = String.valueOf(Math.max(100, endLine));
-        var bounds = metrics.getStringBounds(digits, g);
-        int xOff = (int) bounds.getHeight() / 2;
-        int size = (int) bounds.getWidth() + offsetMultiplier * xOff;
+        final var metrics = g.getFontMetrics(font);
+        final String digits = String.valueOf(Math.max(100, endLine));
+        final var bounds = metrics.getStringBounds(digits, g);
+        final int xOff = (int) bounds.getHeight() / 2;
+        final int size = (int) bounds.getWidth() + offsetMultiplier * xOff;
         setPreferredSize(new Dimension(size, size));
         actionThresholdX = xOff + (int) bounds.getWidth();
 
-        var componentKeys = componentMap.navigableKeySet().iterator();
+        final var componentKeys = componentMap.navigableKeySet().iterator();
         int componentIndex = componentKeys.hasNext() ? componentKeys.next() : -1;
 
         for (int line = startLine, y = startingY; line <= endLine; y += fontHeight, line++) {
-            String number = Integer.toString(line);
-            int padding = (int) metrics.getStringBounds("0".repeat(digits.length() - number.length()), g).getWidth();
+            final String number = Integer.toString(line);
+            final int padding = (int) metrics
+                    .getStringBounds("0".repeat(digits.length() - number.length()), g).getWidth();
             if (line == currentLineIndex() + 1 && pane.getYOff() >= 0) {
                 g.setColor(new HSLColor(getBackground()).adjustTone(20).getRGB());
                 g.fillRect(0, pane.getYOff(), getWidth(), fontHeight);
@@ -217,18 +220,13 @@ public class NumberedTextPane extends JPanel {
                 g.drawString(Integer.toString(line), xOff + padding, y);
             }
             if (line == componentIndex + 1) {
-                IndexComponent component = componentMap.get(componentIndex);
-                var dim = component.getPreferredSize();
-                int xPos = actionThresholdX + xOff;
-                int yPos = y + (fontDesc - fontAsc) / 2 - dim.height / 2;
-//                g.setColor(Color.RED);
-//                g.drawLine(xPos, y - fontAsc, xPos + fontHeight, y - fontAsc);
-//                g.drawLine(xPos, y + fontDesc, xPos + fontHeight, y + fontDesc);
-//                g.setColor(Color.GREEN);
-//                g.drawLine(xPos, y + (fontDesc - fontAsc) / 2, xPos + fontHeight, y + (fontDesc - fontAsc) / 2);
+                final IndexComponent component = componentMap.get(componentIndex);
+                final var dim = component.getPreferredSize();
+                final int xPos = actionThresholdX + xOff;
+                final int yPos = y + (fontDesc - fontAsc) / 2 - dim.height / 2;
                 component.setVisible(true);
                 component.paintComponent(g.create(xPos, yPos,
-                        dim.width, dim.height));
+                                                  dim.width, dim.height));
                 g.setColor(numberingColor);
                 componentIndex = componentKeys.hasNext() ? componentKeys.next() : -1;
             }
@@ -236,25 +234,26 @@ public class NumberedTextPane extends JPanel {
     }
 
     /**
-     * Get the JTextPane of the NumberedTextPane
+     * Get the JTextPane of the NumberedTextPane.
      *
      * @return JTextPane with lineNumbers
      */
+    @NotNull
     public HighlightTextPane getPane() {
         return pane;
     }
 
     /**
-     * Set the numbering font
+     * Set the numbering font.
      *
      * @param font font to use
      */
-    public void setNumberingFont(Font font) {
+    public void setNumberingFont(final Font font) {
         this.font = font;
     }
 
     /**
-     * Get the current line index
+     * Get the current line index.
      *
      * @return index of line the caret is currently in.
      */
@@ -262,16 +261,17 @@ public class NumberedTextPane extends JPanel {
         int currentLineIndex = -1;
         try {
             currentLineIndex = DocumentUtil.getLineOfOffset(pane, pane.getCaretPosition());
-        } catch (BadLocationException ignored) { }
+        } catch (@NotNull final BadLocationException ignored) {
+        }
         return currentLineIndex;
     }
 
     /**
-     * Set the color for line numbers
+     * Set the color for line numbers.
      *
      * @param color color to use
      */
-    public void setNumberingColor(Color color) {
+    public void setNumberingColor(final Color color) {
         this.color = color;
     }
 }

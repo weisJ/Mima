@@ -1,10 +1,14 @@
 package edu.kit.mima.gui.components.button;
 
-import javax.swing.Icon;
+import org.jetbrains.annotations.NotNull;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.Icon;
 
 /**
+ * Extension of {@link IconButton} that has a different icon based on a running state.
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -14,7 +18,16 @@ public class RunnableIconButton extends IconButton implements ActionListener {
     private Icon running;
     private boolean isRunning;
 
-    public RunnableIconButton(Icon inactive, Icon active, Icon running) {
+    /**
+     * Create RunnableIconButton.
+     *
+     * @param inactive inactive icon
+     * @param active   active icon.
+     * @param running  running button.
+     */
+    public RunnableIconButton(@NotNull final Icon inactive,
+                              @NotNull final Icon active,
+                              @NotNull final Icon running) {
         super(inactive, active);
         this.running = running;
         this.inactive = inactive;
@@ -27,21 +40,21 @@ public class RunnableIconButton extends IconButton implements ActionListener {
         return isRunning ? running : isEnabled() ? active : inactive;
     }
 
-    public void setRunning(boolean running) {
+    public void setRunning(final boolean running) {
         isRunning = running;
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(final ActionEvent e) {
         toggled = !toggled;
     }
 
     /**
-     * Toggle the icon
+     * Toggle the icon.
      *
      * @param activeIcon whether to use the active icon
      */
-    public void toggle(boolean activeIcon) {
+    public void toggle(final boolean activeIcon) {
         toggled = activeIcon;
     }
 }

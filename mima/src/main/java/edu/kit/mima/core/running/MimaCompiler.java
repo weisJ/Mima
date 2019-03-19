@@ -4,39 +4,54 @@ import edu.kit.mima.core.CodeChecker;
 import edu.kit.mima.core.parsing.Parser;
 import edu.kit.mima.core.parsing.preprocessor.PreProcessor;
 import edu.kit.mima.core.parsing.token.ProgramToken;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * Compiler for Mima Code.
+ *
  * @author Jannis Weis
  * @since 2018
  */
 public class MimaCompiler {
 
-    private final List<CompilationEventHandler> compilationEventHandlers;
-
-    public MimaCompiler() {
-        compilationEventHandlers = new ArrayList<>();
-    }
-
-    public ProgramToken compile(String input) {
+    /**
+     * Compile given input.
+     *
+     * @param input file input.
+     * @return compiled {@link ProgramToken}.
+     */
+    public ProgramToken compile(@NotNull final String input) {
         return compile(input, true, true, true);
     }
 
-    public ProgramToken compile(String input, boolean throwErrors, boolean preProcess, boolean performCheck) {
-        List<Exception> errors = new ArrayList<>();
+    /**
+     * Compile given input.
+     *
+     * @param input        input file
+     * @param throwErrors  whether errors should be thrown or ignored.
+     * @param preProcess   whether preprocessor statements should be processed.
+     * @param performCheck whether code checking should be performed.
+     * @return compiled {@link ProgramToken}.
+     */
+    public ProgramToken compile(@NotNull String input,
+                                final boolean throwErrors,
+                                final boolean preProcess,
+                                final boolean performCheck) {
+        final List<Exception> errors = new ArrayList<>();
         if (preProcess) {
-            var processed = new PreProcessor(input, true).process();
+            final var processed = new PreProcessor(input, true).process();
             errors.addAll(processed.getSecond());
             input = processed.getFirst();
         }
-        var parsed = new Parser(input).parse();
-        var programToken = parsed.getFirst();
+        final var parsed = new Parser(input).parse();
+        final var programToken = parsed.getFirst();
         errors.addAll(parsed.getSecond());
         if (!errors.isEmpty() && throwErrors) {
-            String message = errors.stream()
+            final String message = errors.stream()
                     .map(Exception::getMessage)
                     .collect(Collectors.joining("\n"));
             throw new IllegalArgumentException("Invalid Tokens \n" + message);
@@ -44,28 +59,15 @@ public class MimaCompiler {
         if (performCheck) {
             checkCode(programToken);
         }
-        for (var handler : compilationEventHandlers) {
-            handler.notifyCompilation(programToken);
-        }
         return programToken;
     }
 
     /**
-     * Check Code for probable bugs
+     * Check Code for probable bugs.
      *
      * @param programToken program to check
      */
-    public void checkCode(ProgramToken programToken) {
+    private void checkCode(final ProgramToken programToken) {
         CodeChecker.checkCode(programToken);
     }
-
-    public void addCompilationEventHandler(final CompilationEventHandler handler) {
-        this.compilationEventHandlers.add(handler);
-    }
-
-    public boolean removeCompilationEventHandler(final CompilationEventHandler handler) {
-        return this.compilationEventHandlers.remove(handler);
-    }
-
-
 }

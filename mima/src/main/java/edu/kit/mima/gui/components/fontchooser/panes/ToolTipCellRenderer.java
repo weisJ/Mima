@@ -1,15 +1,23 @@
 package edu.kit.mima.gui.components.fontchooser.panes;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.awt.Component;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComponent;
 import javax.swing.JList;
-import java.awt.Component;
 
 public class ToolTipCellRenderer extends DefaultListCellRenderer {
 
+    @NotNull
     @Override
-    public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-        JComponent listCellRendererComponent = (JComponent) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+    public Component getListCellRendererComponent(@NotNull final JList<?> list,
+                                                  @NotNull final Object value,
+                                                  final int index,
+                                                  final boolean isSelected,
+                                                  final boolean cellHasFocus) {
+        final JComponent listCellRendererComponent = (JComponent) super
+                .getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         listCellRendererComponent.setToolTipText(value.toString());
         return listCellRendererComponent;
     }

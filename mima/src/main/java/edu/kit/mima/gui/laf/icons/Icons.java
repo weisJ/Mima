@@ -3,15 +3,19 @@ package edu.kit.mima.gui.laf.icons;
 import edu.kit.mima.preferences.MimaConstants;
 import org.apache.batik.transcoder.TranscoderException;
 import org.jdesktop.swingx.icon.EmptyIcon;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
-import javax.swing.Icon;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.Objects;
+import javax.swing.Icon;
 
 /**
+ * Icons class for the App. Contains all used icons.
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -50,15 +54,19 @@ public final class Icons {
     private Icons() {
     }
 
-    private static Icon loadIcon(String name) {
+    @NotNull
+    private static Icon loadIcon(@NotNull final String name) {
         return loadIcon(name, 16, 16);
     }
 
-    private static Icon loadIcon(String name, int w, int h) {
+    @NotNull
+    @Contract("_, _, _ -> new")
+    private static Icon loadIcon(@NotNull final String name, final int w, final int h) {
         try {
-            return new SVGIcon(Objects.requireNonNull(instance.getClass()
-                    .getResource(name)).toURI().toString(), w, h);
-        } catch (TranscoderException | URISyntaxException e) {
+            return new SVGIcon(Objects.requireNonNull(
+                    instance.getClass()
+                            .getResource(name)).toURI().toString(), w, h);
+        } catch (@NotNull final TranscoderException | URISyntaxException e) {
             e.printStackTrace();
         }
         return new EmptyIcon();
@@ -68,8 +76,15 @@ public final class Icons {
         System.out.println("Loaded Icons");
     }
 
-    public static Icon forFile(File file) {
-        String name = file.getName();
+    /**
+     * Get the appropriate icon for a file.
+     *
+     * @param file file to get icon for.
+     * @return icon associated with the given file.
+     */
+    @NotNull
+    public static Icon forFile(@NotNull final File file) {
+        final String name = file.getName();
         if (file.isDirectory()) {
             return FOLDER;
         } else if (name.endsWith("." + MimaConstants.MIMA_EXTENSION)) {
@@ -80,7 +95,8 @@ public final class Icons {
             String fileType = null;
             try {
                 fileType = Files.probeContentType(file.toPath());
-            } catch (IOException ignored) { }
+            } catch (@NotNull final IOException ignored) {
+            }
             if (fileType != null && fileType.startsWith("text")) {
                 return TEXT_FILE;
             } else {
@@ -89,7 +105,14 @@ public final class Icons {
         }
     }
 
-    public static Icon foFile(String name) {
+    /**
+     * Get the appropriate icon for a file from filepath.
+     *
+     * @param name path of file.
+     * @return icon associated with the given file.
+     */
+    @NotNull
+    public static Icon forFile(@NotNull final String name) {
         return forFile(new File(name));
     }
 }

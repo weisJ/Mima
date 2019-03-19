@@ -1,12 +1,13 @@
 package edu.kit.mima.gui.laf;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.awt.Color;
 import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.metal.DefaultMetalTheme;
-import java.awt.Color;
 
 /**
- * @author Jannis Weis
- * @since 2018
+ * Metal theme with light colours for {@link CustomDarculaLightLaf}.
  */
 public class LightMetalTheme extends DefaultMetalTheme {
     public static final ColorUIResource primary1 = new ColorUIResource(10, 36, 106);
@@ -18,61 +19,73 @@ public class LightMetalTheme extends DefaultMetalTheme {
     private static final ColorUIResource primary2 = new ColorUIResource(91, 135, 206);
     private static final ColorUIResource primary3 = new ColorUIResource(166, 202, 240);
 
+    @NotNull
     @Override
     public String getName() {
         return "Light Metal Theme";
     }
 
+    @NotNull
     @Override
     public ColorUIResource getControl() {
         return lightGray;
     }
 
+    @NotNull
     @Override
     public ColorUIResource getSeparatorBackground() {
         return white;
     }
 
+    @NotNull
     @Override
     public ColorUIResource getSeparatorForeground() {
         return darkGray;
     }
 
+    @NotNull
     @Override
     public ColorUIResource getMenuBackground() {
         return lightGray;
     }
 
+    @NotNull
     @Override
     public ColorUIResource getMenuSelectedBackground() {
         return darkBlue;
     }
 
+    @NotNull
     @Override
     public ColorUIResource getMenuSelectedForeground() {
         return white;
     }
 
+    @NotNull
     @Override
     public ColorUIResource getAcceleratorSelectedForeground() {
         return white;
     }
 
+    @NotNull
     @Override
     public ColorUIResource getFocusColor() {
         return new ColorUIResource(Color.black);
     }
 
+    @NotNull
     @Override
     protected ColorUIResource getPrimary1() {
         return primary1;
     }
 
+    @NotNull
     @Override
     protected ColorUIResource getPrimary2() {
         return primary2;
     }
 
+    @NotNull
     @Override
     protected ColorUIResource getPrimary3() {
         return primary3;

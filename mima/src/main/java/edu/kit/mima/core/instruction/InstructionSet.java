@@ -1,21 +1,27 @@
 package edu.kit.mima.core.instruction;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * Basic Instruction sets for Mima(X). Holds references to all instruction names and the used word
+ * length for values.
+ *
  * @author Jannis Weis
  * @since 2018
  */
 public enum InstructionSet {
     /**
-     * Mima instruction Set
+     * Mima instruction Set.
      */
     MIMA(24, 20) {
+        @NotNull
         @Override
         public String[] getInstructions() {
-            List<String> instructions = Arrays.stream(MimaInstruction.values())
+            final List<String> instructions = Arrays.stream(MimaInstruction.values())
                     .map(MimaInstruction::toString)
                     .collect(Collectors.toList());
             instructions.add("HALT");
@@ -25,17 +31,18 @@ public enum InstructionSet {
         }
     },
     /**
-     * MimaX instruction set
+     * MimaX instruction set.
      */
     MIMA_X(24, 24) {
+        @NotNull
         @Override
         public String[] getInstructions() {
-            List<String> instructions = Arrays.stream(MimaXInstruction.values())
+            final List<String> instructions = Arrays.stream(MimaXInstruction.values())
                     .map(MimaXInstruction::toString)
                     .collect(Collectors.toList());
             instructions.addAll(Arrays.stream(MimaInstruction.values())
-                    .map(MimaInstruction::toString)
-                    .collect(Collectors.toList()));
+                                        .map(MimaInstruction::toString)
+                                        .collect(Collectors.toList()));
             instructions.add("JMP");
             instructions.add("JMN");
             instructions.add("HALT");
@@ -49,19 +56,18 @@ public enum InstructionSet {
     private final int constCordLength;
 
     /**
-     * Instruction set with given number of bits for machine words
-     * and argument machine words
+     * Instruction set with given number of bits for machine words and argument machine words.
      *
      * @param wordLength      number of bits in machine word
      * @param constCordLength number of bits in argument machine word
      */
-    InstructionSet(int wordLength, int constCordLength) {
+    InstructionSet(final int wordLength, final int constCordLength) {
         this.wordLength = wordLength;
         this.constCordLength = constCordLength;
     }
 
     /**
-     * Get the wordLength
+     * Get the wordLength.
      *
      * @return number of bits in machine word
      */
@@ -70,7 +76,7 @@ public enum InstructionSet {
     }
 
     /**
-     * Get the constant wordLength
+     * Get the constant wordLength.
      *
      * @return number of bits in argument machine word
      */
@@ -79,9 +85,10 @@ public enum InstructionSet {
     }
 
     /**
-     * Get the instruction identifiers as String array
+     * Get the instruction identifiers as String array.
      *
      * @return instruction identifiers
      */
+    @NotNull
     public abstract String[] getInstructions();
 }

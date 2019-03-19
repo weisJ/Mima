@@ -1,25 +1,18 @@
 package edu.kit.mima.gui.components.editor;
 
+import edu.kit.mima.api.history.History;
 import edu.kit.mima.gui.components.Breakpoint;
 import edu.kit.mima.gui.components.NumberedTextPane;
 import edu.kit.mima.gui.components.editor.highlighter.Highlighter;
-import edu.kit.mima.gui.components.editor.history.History;
 import edu.kit.mima.gui.components.editor.view.HighlightViewFactory;
-import edu.kit.mima.gui.logging.Logger;
-import edu.kit.mima.gui.util.HSLColor;
+import edu.kit.mima.logging.Logger;
 import edu.kit.mima.preferences.ColorKey;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
 import edu.kit.mima.preferences.UserPreferenceChangedListener;
+import edu.kit.mima.util.HSLColor;
+import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.text.AbstractDocument;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyledDocument;
-import javax.swing.text.StyledEditorKit;
-import javax.swing.text.ViewFactory;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
@@ -28,18 +21,28 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyledDocument;
+import javax.swing.text.StyledEditorKit;
+import javax.swing.text.ViewFactory;
 
 /**
- * Editor that supports highlighting and text history
+ * Editor that supports highlighting and text history. If the instance of an Editor isn't used
+ * anymore the {@link #close} method should be called to prevent the history from remaining in
+ * memory.
  *
  * @author Jannis Weis
  * @since 2018
  */
-public class Editor extends JScrollPane implements UserPreferenceChangedListener {
+public class Editor extends JScrollPane implements UserPreferenceChangedListener, AutoCloseable {
 
-    private final NumberedTextPane numberedTextPane;
-    private final TextHistoryController historyController;
-    private final List<EditEventHandler> editEventHandlers;
+    @NotNull private final NumberedTextPane numberedTextPane;
+    @NotNull private final TextHistoryController historyController;
+    @NotNull private final List<EditEventHandler> editEventHandlers;
 
     private Highlighter highlighter;
     private boolean stylize;
@@ -48,18 +51,18 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
     private int currentMark = -1;
 
     /**
-     * Editor that supports highlighting and text history
+     * Editor that supports highlighting and text history.
      */
     public Editor() {
         Preferences.registerUserPreferenceChangedListener(this);
-        var pref = Preferences.getInstance();
-        Font font = pref.readFont(PropertyKey.EDITOR_FONT);
-        Color breakpointColor = new HSLColor(getBackground())
+        final var pref = Preferences.getInstance();
+        final Font font = pref.readFont(PropertyKey.EDITOR_FONT);
+        final Color breakpointColor = new HSLColor(getBackground())
                 .adjustHue(5).adjustShade(30).adjustSaturation(30).getRGB();
 
         numberedTextPane = new NumberedTextPane(this, new Font("Monospaced", Font.PLAIN, 12),
-                pref.readColor(ColorKey.EDITOR_TEXT_SECONDARY));
-        var editorPane = numberedTextPane.getPane();
+                                                pref.readColor(ColorKey.EDITOR_TEXT_SECONDARY));
+        final var editorPane = numberedTextPane.getPane();
         numberedTextPane.addIndexListener(index -> {
             if (numberedTextPane.hasComponentAt(index)) {
                 editorPane.unmarkLine(index);
@@ -70,9 +73,10 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
             }
         });
 
-        JPanel textPanel = new JPanel();
+        final JPanel textPanel = new JPanel();
         editorPane.setFont(font);
         editorPane.setEditorKit(new StyledEditorKit() {
+            @NotNull
             public ViewFactory getViewFactory() {
                 return new HighlightViewFactory();
             }
@@ -96,7 +100,7 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
     }
 
     /**
-     * Call steps performed after an edit has occurred
+     * Call steps performed after an edit has occurred.
      */
     public void notifyEdit() {
         if (changeLock) {
@@ -113,12 +117,14 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
      *
      * @return Array of breakpoints.
      */
+    @NotNull
     public Breakpoint[] getBreakpoints() {
-        return Arrays.stream(numberedTextPane.getIndexComponents()).map(c -> (Breakpoint) c).toArray(Breakpoint[]::new);
+        return Arrays.stream(numberedTextPane.getIndexComponents())
+                .map(c -> (Breakpoint) c).toArray(Breakpoint[]::new);
     }
 
     /**
-     * Update the document
+     * Update the document.
      */
     public void update() {
         if (!repaint) {
@@ -137,16 +143,17 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
     }
 
     /**
-     * Get the history
+     * Get the history.
      *
      * @return the history
      */
+    @NotNull
     public History getHistory() {
         return historyController.getHistory();
     }
 
     /**
-     * Undo last file change
+     * Undo last file change.
      */
     public void undo() {
         historyController.undo();
@@ -154,7 +161,7 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
     }
 
     /**
-     * Redo the last undo
+     * Redo the last undo.
      */
     public void redo() {
         historyController.redo();
@@ -180,34 +187,35 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
     }
 
     /**
-     * Transform current line in editor
+     * Transform current line in editor.
      *
      * @param function Function that takes in the current line and caret position in line
      * @param index    index in file
      */
-    public void transformLine(Function<String, String> function, int index) {
-        var editorPane = numberedTextPane.getPane();
-        String text = editorPane.getText();
-        int lower = text.substring(0, index).lastIndexOf('\n') + 1;
-        int upper = text.substring(index).indexOf('\n') + index;
-        String newLine = function.apply(text.substring(lower, upper));
+    public void transformLine(@NotNull final Function<String, String> function, final int index) {
+        final var editorPane = numberedTextPane.getPane();
+        final String text = editorPane.getText();
+        final int lower = text.substring(0, index).lastIndexOf('\n') + 1;
+        final int upper = text.substring(index).indexOf('\n') + index;
+        final String newLine = function.apply(text.substring(lower, upper));
         try {
             editorPane.getDocument().remove(lower, upper - lower);
             editorPane.getDocument().insertString(lower, newLine, new SimpleAttributeSet());
-        } catch (BadLocationException e) {
+        } catch (@NotNull final BadLocationException e) {
             Logger.error(e.getMessage());
         }
     }
 
     /**
-     * Insert String into text
+     * Insert String into text.
      *
      * @param text   text to insert
      * @param offset location in file
      * @throws BadLocationException if location is outside bounds
      */
-    public void insert(String text, int offset) throws BadLocationException {
-        numberedTextPane.getPane().getStyledDocument().insertString(offset, text, new SimpleAttributeSet());
+    public void insert(final String text, final int offset) throws BadLocationException {
+        numberedTextPane.getPane()
+                .getStyledDocument().insertString(offset, text, new SimpleAttributeSet());
     }
 
     /**
@@ -215,11 +223,16 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
      *
      * @param index line to select
      */
-    public void selectLine(int index) {
+    public void selectLine(final int index) {
         numberedTextPane.getPane().selectLine(index);
     }
 
-    public void markLine(int index) {
+    /**
+     * Mark a line. At most one line can me marked at any time.
+     *
+     * @param index index of line
+     */
+    public void markLine(final int index) {
         numberedTextPane.getPane().unmarkLine(currentMark);
         numberedTextPane.getPane().markLine(index, new Color(0x2D71D2));
         currentMark = index;
@@ -229,7 +242,7 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
 
 
     /**
-     * Get the current font
+     * Get the current font.
      *
      * @return current font
      */
@@ -238,18 +251,18 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
     }
 
     /**
-     * Set the current font
+     * Set the current font.
      *
      * @param font font to use
      */
-    public void setEditorFont(Font font) {
+    public void setEditorFont(@NotNull final Font font) {
         numberedTextPane.getPane().setFont(font);
         getVerticalScrollBar().setUnitIncrement(font.getSize() / 2);
         repaint();
     }
 
     /**
-     * Set whether the text should be stylized
+     * Set whether the text should be stylized.
      *
      * @param stylize whether to stylize the text
      */
@@ -258,7 +271,7 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
     }
 
     /**
-     * Set Highlighter to use for syntax highlighting
+     * Set Highlighter to use for syntax highlighting.
      *
      * @param highlighter highlighter
      */
@@ -267,7 +280,7 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
     }
 
     /**
-     * Add an action that should be performed after an edit to the text has been occurred
+     * Add an action that should be performed after an edit to the text has been occurred.
      *
      * @param handler handler to add
      */
@@ -277,19 +290,19 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
 
 
     @Override
-    public synchronized void addMouseListener(MouseListener l) {
+    public synchronized void addMouseListener(final MouseListener l) {
         super.addMouseListener(l);
         numberedTextPane.getPane().addMouseListener(l);
     }
 
     @Override
-    public synchronized void removeMouseListener(MouseListener l) {
+    public synchronized void removeMouseListener(final MouseListener l) {
         super.removeMouseListener(l);
         numberedTextPane.getPane().removeMouseListener(l);
     }
 
     /**
-     * Remove EditEventHandler
+     * Remove EditEventHandler.
      *
      * @param handler handler to remove
      * @return true if removed successfully
@@ -299,7 +312,19 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
     }
 
     /**
-     * Get the text contained in the editor
+     * Get specific part of text.
+     *
+     * @param startIndex start index
+     * @param length     length of tex tto get
+     * @return Text from startIndex to startIndex + length
+     * @throws BadLocationException if location is out of bounds
+     */
+    public String getText(final int startIndex, final int length) throws BadLocationException {
+        return numberedTextPane.getPane().getText(startIndex, length);
+    }
+
+    /**
+     * Get the text contained in the editor.
      *
      * @return text in editor
      */
@@ -308,15 +333,18 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
     }
 
     /**
-     * Set the text in the editor
+     * Set the text in the editor.
      *
      * @param text text to set
      */
-    public void setText(final String text) {
-        int pos = getCaretPosition();
+    public void setText(@NotNull final String text) {
+        final int pos = getCaretPosition();
         try {
-            historyController.addReplaceHistory(0, numberedTextPane.getPane().getText().length(), text);
-        } catch (BadLocationException ignored) { }
+            historyController.addReplaceHistory(0,
+                                                numberedTextPane.getPane().getText().length(),
+                                                text);
+        } catch (@NotNull final BadLocationException ignored) {
+        }
         historyController.setActive(false);
         numberedTextPane.getPane().setText(text);
         historyController.setActive(true);
@@ -324,26 +352,16 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
     }
 
     /**
-     * Get specific part of text
+     * Get the current caret position.
      *
-     * @param startIndex start index
-     * @param length     length of tex tto get
-     * @return Text from startIndex to startIndex + length
-     * @throws BadLocationException if location is out of bounds
-     */
-    public String getText(int startIndex, int length) throws BadLocationException {
-        return numberedTextPane.getPane().getText(startIndex, length);
-    }
-
-    /**
-     * Get the current caret position
+     * @return caret position
      */
     public int getCaretPosition() {
         return numberedTextPane.getPane().getCaretPosition();
     }
 
     /**
-     * Set the caret position
+     * Set the caret position.
      *
      * @param caretPosition new caret Position
      */
@@ -352,28 +370,27 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
     }
 
     /**
-     * Set the limit of characters per line.
-     * The Editor will then be drawing a line at this position.
-     * A value <= 0 signals that no line should be drawn.
+     * Set the limit of characters per line. The Editor will then be drawing a line at this
+     * position. A value <= 0 signals that no line should be drawn.
      *
      * @param limit character limit
      */
-    public void showCharacterLimit(int limit) {
+    public void showCharacterLimit(final int limit) {
         numberedTextPane.getPane().setVertLine(limit);
     }
 
     /**
-     * Get the history controller.
-     * Should only be called from EditorDocumentFilter
+     * Get the history controller. Should only be called from EditorDocumentFilter.
      *
      * @return the history controller
      */
+    @NotNull
     /*default*/ TextHistoryController getHistoryController() {
         return historyController;
     }
 
     /**
-     * Use change history. If yes undo/redo will be supported
+     * Use change history. If yes undo/redo will be supported.
      *
      * @param useHistory whether to use history
      * @param capacity   capacity of history
@@ -385,22 +402,27 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
     }
 
     /**
-     * Reset the history
+     * Reset the history.
      */
     public void resetHistory() {
         historyController.reset();
     }
 
-    public void setRepaint(boolean repaint) {
+    /**
+     * Set whether the editor should be accented or not.
+     *
+     * @param repaint true if accented.
+     */
+    public void setRepaint(final boolean repaint) {
         this.repaint = repaint;
         numberedTextPane.getPane().setIgnoreRepaint(!repaint);
     }
 
     @Override
-    public void notifyUserPreferenceChanged(PropertyKey key) {
-        var pref = Preferences.getInstance();
+    public void notifyUserPreferenceChanged(@NotNull final PropertyKey key) {
+        final var pref = Preferences.getInstance();
         if (key == PropertyKey.THEME) {
-            var editorPane = numberedTextPane.getPane();
+            final var editorPane = numberedTextPane.getPane();
             editorPane.setBackground(pref.readColor(ColorKey.EDITOR_BACKGROUND));
             editorPane.setCaretColor(pref.readColor(ColorKey.EDITOR_TEXT));
             numberedTextPane.setNumberingColor(pref.readColor(ColorKey.EDITOR_TEXT_SECONDARY));
@@ -411,5 +433,10 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
         } else if (key == PropertyKey.EDITOR_HISTORY_SIZE) {
             historyController.setCapacity(pref.readInteger(key));
         }
+    }
+
+    @Override
+    public void close() {
+        getHistory().close();
     }
 }

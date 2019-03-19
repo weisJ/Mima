@@ -1,10 +1,8 @@
 package edu.kit.mima.gui.components.button;
 
-import edu.kit.mima.gui.util.HSLColor;
+import edu.kit.mima.util.HSLColor;
+import org.jetbrains.annotations.NotNull;
 
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JPanel;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -13,8 +11,13 @@ import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JPanel;
 
 /**
+ * Button that is visualized by an {@link Icon} based on state.
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -31,11 +34,22 @@ public class IconButton extends JButton {
     private boolean locked;
     private boolean nextStatus;
 
-    public IconButton(Icon icon) {
+    /**
+     * Create Button with always the same icon.
+     *
+     * @param icon icon to show.
+     */
+    public IconButton(@NotNull final Icon icon) {
         this(icon, icon);
     }
 
-    public IconButton(Icon inactive, Icon active) {
+    /**
+     * Create Button with inactive and active icon.
+     *
+     * @param inactive inactive icon.
+     * @param active   active icon.
+     */
+    public IconButton(@NotNull final Icon inactive, @NotNull final Icon active) {
         super();
         this.inactive = inactive;
         this.active = active;
@@ -52,35 +66,35 @@ public class IconButton extends JButton {
         ));
         addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseEntered(MouseEvent e) {
+            public void mouseEntered(final MouseEvent e) {
                 hover = true;
                 repaint();
             }
 
             @Override
-            public void mouseExited(MouseEvent e) {
+            public void mouseExited(final MouseEvent e) {
                 hover = false;
                 repaint();
             }
 
             @Override
-            public void mousePressed(MouseEvent e) {
+            public void mousePressed(final MouseEvent e) {
                 clicking = true;
                 repaint();
             }
 
             @Override
-            public void mouseReleased(MouseEvent e) {
+            public void mouseReleased(final MouseEvent e) {
                 clicking = false;
                 repaint();
             }
 
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mouseClicked(final MouseEvent e) {
                 if (!visible) {
                     return;
                 }
-                for (var l : getActionListeners()) {
+                for (final var l : getActionListeners()) {
                     l.actionPerformed(new ActionEvent(IconButton.this, 0, ""));
                 }
             }
@@ -92,11 +106,11 @@ public class IconButton extends JButton {
     }
 
     @Override
-    protected void paintComponent(Graphics g) {
+    protected void paintComponent(@NotNull final Graphics g) {
         if (!visible) {
             return;
         }
-        Graphics2D g2 = (Graphics2D) g.create();
+        final Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         if (isEnabled() && hover) {
             if (clicking) {
@@ -115,7 +129,7 @@ public class IconButton extends JButton {
     }
 
     @Override
-    public void setEnabled(boolean b) {
+    public void setEnabled(final boolean b) {
         //Remember state for when button is unlocked again.
         nextStatus = b;
         if (!locked) {
@@ -130,7 +144,8 @@ public class IconButton extends JButton {
                         locked = false;
                         super.setEnabled(nextStatus);
                         repaint();
-                    } catch (InterruptedException ignored) { }
+                    } catch (InterruptedException ignored) {
+                    }
                 }
             }).start();
         }

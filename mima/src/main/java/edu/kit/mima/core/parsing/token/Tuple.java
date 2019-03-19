@@ -1,34 +1,36 @@
 package edu.kit.mima.core.parsing.token;
 
 /**
+ * Tuple class with two values.
+ *
  * @author Jannis Weis
  * @since 2018
  */
 public interface Tuple<T, K> {
 
     /**
-     * Get the first value
+     * Get the first value.
      *
      * @return first value
      */
     T getFirst();
 
     /**
-     * Set first value
+     * Set first value.
      *
      * @param first first value
      */
     void setFirst(T first);
 
     /**
-     * Get the second value
+     * Get the second value.
      *
      * @return second value
      */
     K getSecond();
 
     /**
-     * Set second value
+     * Set second value.
      *
      * @param second second value
      */

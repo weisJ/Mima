@@ -14,6 +14,10 @@ import edu.kit.mima.core.parsing.token.ProgramToken;
 import edu.kit.mima.core.parsing.token.Token;
 import edu.kit.mima.core.parsing.token.TokenType;
 import edu.kit.mima.core.parsing.token.Tuple;
+import edu.kit.mima.util.LambdaUtil;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,35 +26,41 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
- * Interprets the result of {@link Parser}
+ * Interprets the result of {@link Parser}.
  *
  * @author Jannis Weis
  * @since 2018
  */
 public class Interpreter {
 
-    private static final Value<MachineWord> VOID = new Value<>(ValueType.VOID, null);
+    @Nullable
+    private static final Value<MachineWord> VOID = new Value<>(ValueType.VOID,
+                                                               new MachineWord(0, 0));
 
     private final int wordLength;
+    @NotNull
     private final StackGuard stackGuard;
 
     private final DebugController debugController;
-    private final ExceptionListener exceptionListener;
+    private final ExceptionHandler exceptionHandler;
 
     private boolean running;
+    @Nullable
     private Token currentToken;
     private Environment currentScope;
 
     /**
-     * Construct new Interpreter that uses the given number of bits in arguments
+     * Construct new Interpreter that uses the given number of bits in arguments.
      *
-     * @param wordLength        number of bits in arguments
-     * @param debugController   the debug controller
-     * @param exceptionListener the exception listener
+     * @param wordLength       number of bits in arguments
+     * @param debugController  the debug controller
+     * @param exceptionHandler the exception listener
      */
-    public Interpreter(final int wordLength, DebugController debugController, ExceptionListener exceptionListener) {
+    public Interpreter(final int wordLength,
+                       final DebugController debugController,
+                       final ExceptionHandler exceptionHandler) {
         this.debugController = debugController;
-        this.exceptionListener = exceptionListener;
+        this.exceptionHandler = exceptionHandler;
         this.wordLength = wordLength;
         stackGuard = new StackGuard();
         running = false;
@@ -62,32 +72,34 @@ public class Interpreter {
      * @param program           program input created by {@link Parser}
      * @param globalEnvironment the global runtime environment
      */
-    public void evaluateTopLevel(final ProgramToken program, final Environment globalEnvironment, Consumer<Value> callback) {
+    public void evaluateTopLevel(@NotNull final ProgramToken program,
+                                 @NotNull final Environment globalEnvironment) {
         running = true;
-        Environment runtimeEnvironment = globalEnvironment.extend(program);
+        final Environment runtimeEnvironment = globalEnvironment.extend(program);
         try {
             debugController.pause();
             execute(() -> {
-                program.getJumps().forEach((t, i) -> runtimeEnvironment.defineJump(t.getValue().toString(), i));
-                evaluateProgram(program, runtimeEnvironment, callback);
+                program.getJumps().forEach((t, i) -> runtimeEnvironment
+                        .defineJump(t.getValue().toString(), i));
+                evaluateProgram(program, runtimeEnvironment, v -> { });
             });
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            exceptionListener.notifyException(e);
+        } catch (@NotNull final IllegalArgumentException | IllegalStateException e) {
+            exceptionHandler.notifyException(e);
         }
     }
 
     /**
-     * Start and monitor program execution
+     * Start and monitor program execution.
      *
      * @param continuation continuation to invoke execution with
      */
-    private void execute(Runnable continuation) {
+    private void execute(final Runnable continuation) {
         var func = continuation;
         while (running) {
             try {
                 stackGuard.reset();
                 func.run();
-            } catch (Continuation cont) {
+            } catch (@NotNull final Continuation cont) {
                 func = cont.getContinuation();
             }
         }
@@ -97,18 +109,19 @@ public class Interpreter {
      * Evaluate different tokens
      */
     @SuppressWarnings("unchecked") /*Construction of tokens guarantees these types*/
-    private void evaluate(final Token expression, final Environment environment,
-                          final Consumer<Value> callback) throws Continuation {
+    private void evaluate(@NotNull final Token expression, @NotNull final Environment environment,
+                          @NotNull final Consumer<Value> callback) throws Continuation {
         stackGuard.guard(() -> evaluate(expression, environment, callback));
         switch (expression.getType()) {
             case PROGRAM:
                 /*
                  * Subprograms need to have own scope for variable shadowing.
                  */
-                ProgramToken programToken = (ProgramToken) expression;
-                Environment scope = environment.extend(programToken);
+                final ProgramToken programToken = (ProgramToken) expression;
+                final Environment scope = environment.extend(programToken);
                 scope.setReservedIndex(environment.getReservedIndex());
-                programToken.getJumps().forEach((t, i) -> scope.defineJump(t.getValue().toString(), i));
+                programToken.getJumps().forEach((t, i) -> scope
+                        .defineJump(t.getValue().toString(), i));
                 evaluateProgram(programToken, scope, callback);
                 break;
             case NUMBER:
@@ -124,15 +137,16 @@ public class Interpreter {
                 callback.accept(evaluateIdentification(expression, environment));
                 break;
             case DEFINITION:
-                var defToken = (ArrayToken<Token>) expression.getValue();
+                final var defToken = (ArrayToken<Token>) expression.getValue();
                 evaluateDefinition(defToken, environment, callback);
                 break;
             case CONSTANT:
-                var constToken = (ArrayToken<Token>) expression.getValue();
+                final var constToken = (ArrayToken<Token>) expression.getValue();
                 evaluateConstant(constToken, environment, callback);
                 break;
             case CALL:
-                evaluateFunction((BinaryToken<Token, ArrayToken<Token>>) expression, environment, callback);
+                evaluateFunction((BinaryToken<Token, ArrayToken<Token>>) expression,
+                                 environment, callback);
                 break;
             case JUMP_POINT:
                 evaluate(((Tuple<Token, Token>) expression).getSecond(), environment, callback);
@@ -142,25 +156,29 @@ public class Interpreter {
         }
     }
 
-    public void jump(Environment toEnvironment, int instructionIndex, Consumer<Value> callback) {
+    public void jump(@NotNull final Environment toEnvironment,
+                     final int instructionIndex,
+                     @NotNull final Consumer<Value> callback) {
         toEnvironment.setExpressionIndex(instructionIndex);
         evaluateProgram(toEnvironment.getProgramToken(), toEnvironment, callback);
     }
 
-    private void evaluateProgram(ProgramToken programToken, Environment environment,
-                                 Consumer<Value> callback) throws Continuation {
+    private void evaluateProgram(@NotNull final ProgramToken programToken,
+                                 @NotNull final Environment environment,
+                                 @NotNull final Consumer<Value> callback) throws Continuation {
         stackGuard.guard(() -> evaluateProgram(programToken, environment, callback));
-        Token[] tokens = programToken.getValue();
+        final Token[] tokens = programToken.getValue();
         currentScope = environment;
-        int startIndex = environment.getExpressionIndex();
-        BiConsumer<Value, Integer> loop = LambdaUtil.createRecursive(func -> (last, i) -> {
+        final int startIndex = environment.getExpressionIndex();
+        final BiConsumer<Value, Integer> loop = LambdaUtil.createRecursive(func -> (last, i) -> {
             if (!isRunning()) {
                 return;
             }
             if (i < tokens.length) {
                 currentToken = tokens[i];
             }
-            if (i < tokens.length && (i != startIndex || !(environment instanceof GlobalEnvironment))) {
+            if (i < tokens.length
+                    && (i != startIndex || !(environment instanceof GlobalEnvironment))) {
                 debugController.afterInstruction(tokens[i]);
             }
             if (i < tokens.length) {
@@ -176,8 +194,9 @@ public class Interpreter {
     }
 
     @SuppressWarnings("unchecked") /*Construction of tokens guarantees these types*/
-    private void evaluateDefinition(ArrayToken<Token> token, Environment environment,
-                                    Consumer<Value> callback) throws Continuation {
+    private void evaluateDefinition(@NotNull final ArrayToken<Token> token,
+                                    @NotNull final Environment environment,
+                                    @NotNull final Consumer<Value> callback) throws Continuation {
         stackGuard.guard(() -> evaluateDefinition(token, environment, callback));
         Token[] tokens = token.getValue();
         BiConsumer<Environment, Integer> loop = LambdaUtil.createRecursive(func -> (env, i) -> {
@@ -213,8 +232,9 @@ public class Interpreter {
     }
 
     @SuppressWarnings("unchecked") /*Construction of tokens guarantees these types*/
-    private void evaluateConstant(ArrayToken<Token> token, Environment environment,
-                                  Consumer<Value> callback) throws Continuation {
+    private void evaluateConstant(@NotNull final ArrayToken<Token> token,
+                                  @NotNull final Environment environment,
+                                  @NotNull final Consumer<Value> callback) throws Continuation {
         stackGuard.guard(() -> evaluateConstant(token, environment, callback));
         Token[] tokens = token.getValue();
         BiConsumer<Environment, Integer> loop = LambdaUtil.createRecursive(func -> (env, i) -> {
@@ -240,8 +260,9 @@ public class Interpreter {
     /*
      * Evaluate a function call
      */
-    private void evaluateFunction(BinaryToken<Token, ArrayToken<Token>> value, Environment environment,
-                                  Consumer<Value> callback) throws Continuation {
+    private void evaluateFunction(@NotNull final BinaryToken<Token, ArrayToken<Token>> value,
+                                  @NotNull final Environment environment,
+                                  final Consumer<Value> callback) throws Continuation {
         stackGuard.guard(() -> evaluateFunction(value, environment, callback));
         Token[] arguments = value.getSecond().getValue();
         BiConsumer<List<Value>, Integer> loop = LambdaUtil.createRecursive(func -> (args, i) -> {
@@ -261,15 +282,18 @@ public class Interpreter {
     /*
      * Evaluate a number string
      */
-    private Value<MachineWord> evaluateNumber(final String value) {
+    @NotNull
+    @Contract("_ -> new")
+    private Value<MachineWord> evaluateNumber(@NotNull final String value) {
         return new Value<>(ValueType.NUMBER, new MachineWord(Integer.parseInt(value), wordLength));
     }
 
     /*
      * Evaluate a binary string
      */
-    private Value<MachineWord> evaluateBinary(final String binary) {
-        Boolean[] bits = new StringBuilder(binary).reverse().toString()
+    @NotNull
+    private Value<MachineWord> evaluateBinary(@NotNull final String binary) {
+        final Boolean[] bits = new StringBuilder(binary).reverse().toString()
                 .chars().mapToObj(i -> i == '1').toArray(Boolean[]::new);
         return new Value<>(ValueType.NUMBER, new MachineWord(bits, wordLength));
     }
@@ -277,10 +301,12 @@ public class Interpreter {
     /*
      * Evaluate a Identification reference
      */
-    private Value evaluateIdentification(final Token token, final Environment environment) {
-        MachineWord value;
-        ValueType type;
-        String name = token.getValue().toString();
+    @Nullable
+    private Value evaluateIdentification(@NotNull final Token token,
+                                         @NotNull final Environment environment) {
+        final MachineWord value;
+        final ValueType type;
+        final String name = token.getValue().toString();
         if (environment.lookupVariable(name) != null) {
             value = environment.getVariable(name);
             type = ValueType.MEMORY_REFERENCE;
@@ -295,15 +321,16 @@ public class Interpreter {
         return new Value<>(type, value);
     }
 
-    private Value<MachineWord> fail(String message) {
-        exceptionListener.notifyException(new InterpreterException(message));
+    @Nullable
+    private Value<MachineWord> fail(final String message) {
+        exceptionHandler.notifyException(new InterpreterException(message));
         debugController.stop();
         running = false;
         return VOID;
     }
 
     /**
-     * Returns whether the interpreter is running
+     * Returns whether the interpreter is running.
      *
      * @return true if running
      */
@@ -312,27 +339,28 @@ public class Interpreter {
     }
 
     /**
-     * Set the current running status of the interpreter.
-     * If false no statements will be evaluated. Is not a pause method, stopping
-     * the interpreter yields in returning out of the evaluateTopLevel() method.
+     * Set the current running status of the interpreter. If false no statements will be evaluated.
+     * Is not a pause method, stopping the interpreter yields in returning out of the
+     * evaluateTopLevel() method.
      *
      * @param running running status
      */
-    public void setRunning(boolean running) {
+    public void setRunning(final boolean running) {
         this.running = running;
     }
 
     /**
-     * Return the current token
+     * Return the current token.
      *
      * @return current Token
      */
+    @Nullable
     public Token getCurrentToken() {
         return currentToken;
     }
 
     /**
-     * Get the current evaluation scope
+     * Get the current evaluation scope.
      *
      * @return Environment object of current scope
      */

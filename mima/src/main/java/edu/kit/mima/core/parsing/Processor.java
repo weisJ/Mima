@@ -1,10 +1,11 @@
 package edu.kit.mima.core.parsing;
 
-import edu.kit.mima.core.parsing.inputStream.CharInputStream;
-import edu.kit.mima.core.parsing.inputStream.TokenStream;
+import edu.kit.mima.core.parsing.inputstream.CharInputStream;
+import edu.kit.mima.core.parsing.inputstream.TokenStream;
 import edu.kit.mima.core.parsing.token.ArrayToken;
 import edu.kit.mima.core.parsing.token.Token;
 import edu.kit.mima.core.parsing.token.TokenType;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -12,11 +13,14 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
+ * Abstract Processor containing basic functions for processing.
+ *
  * @author Jannis Weis
  * @since 2018
  */
 public abstract class Processor {
 
+    @NotNull
     protected final TokenStream input;
 
     public Processor(final String input) {
@@ -24,14 +28,14 @@ public abstract class Processor {
     }
 
     /**
-     * Cause an unexpected token error to happen
+     * Cause an unexpected token error to happen.
      */
     protected @Nullable Token unexpected() {
         return input.error("Unexpected token: " + input.peek());
     }
 
     /**
-     * Return expressions contained in the delimiters as ArrayToken
+     * Return expressions contained in the delimiters as ArrayToken.
      *
      * @param start     start character (empty char if no begin is defined)
      * @param stop      stop character
@@ -40,12 +44,15 @@ public abstract class Processor {
      * @param skipLast  whether the stop delimiter should be skipped
      * @return Expressions in ArrayToken
      */
-    protected ArrayToken<Token> delimited(char start, char stop, char separator,
-                                          Supplier<Token> parser, boolean skipLast) {
+    @NotNull
+    protected ArrayToken<Token> delimited(final char start, final char stop,
+                                          final char separator,
+                                          @NotNull final Supplier<Token> parser,
+                                          final boolean skipLast) {
         if (start != CharInputStream.EMPTY_CHAR) {
             skipPunctuation(start);
         }
-        List<Token> tokens = new ArrayList<>();
+        final List<Token> tokens = new ArrayList<>();
         boolean first = true;
         while (!input.isEmpty()) {
             if (isPunctuation(stop)) {
@@ -59,7 +66,7 @@ public abstract class Processor {
             if (isPunctuation(stop)) {
                 break;
             }
-            Token token = parser.get();
+            final Token token = parser.get();
             if (token.getType() != TokenType.ERROR) {
                 tokens.add(token);
             }
@@ -76,8 +83,8 @@ public abstract class Processor {
      * @param expected expected punctuation
      * @return true if punctuation matches
      */
-    protected boolean isPunctuation(char expected) {
-        Token token = input.peek();
+    protected boolean isPunctuation(final char expected) {
+        final Token token = input.peek();
         return token != null
                 && (token.getType() == TokenType.PUNCTUATION)
                 && (token.getValue().equals(String.valueOf(expected)));
@@ -90,20 +97,20 @@ public abstract class Processor {
      * @param keyword expected keyword
      * @return true if keyword matches
      */
-    protected boolean isKeyword(String keyword) {
-        Token token = input.peek();
+    protected boolean isKeyword(final String keyword) {
+        final Token token = input.peek();
         return token != null
                 && (token.getType() == TokenType.KEYWORD)
                 && (token.getValue().equals(keyword));
     }
 
     /**
-     * Tries to skip the given punctuation and causes an error if the current token
-     * is not the given punctuation
+     * Tries to skip the given punctuation and causes an error if the current token is not the given
+     * punctuation.
      *
      * @param c punctuation to skip
      */
-    protected void skipPunctuation(char c) {
+    protected void skipPunctuation(final char c) {
         if (isPunctuation(c)) {
             input.next();
         } else {
@@ -112,12 +119,12 @@ public abstract class Processor {
     }
 
     /**
-     * Tries to skip the given keyword and causes an error if the current token
-     * is not the given keyword
+     * Tries to skip the given keyword and causes an error if the current token is not the given
+     * keyword.
      *
      * @param keyword keyword to skip
      */
-    protected void skipKeyword(String keyword) {
+    protected void skipKeyword(final String keyword) {
         if (isKeyword(keyword)) {
             input.next();
         } else {
@@ -130,14 +137,15 @@ public abstract class Processor {
      *
      * @return List of occurred errors
      */
+    @NotNull
     protected List<ParserException> skipError() {
         boolean error = true;
-        List<ParserException> errors = new ArrayList<>();
+        final List<ParserException> errors = new ArrayList<>();
         while (error) {
             try {
                 input.peek();
                 error = false;
-            } catch (ParserException e) {
+            } catch (@NotNull final ParserException e) {
                 errors.add(e);
             }
         }

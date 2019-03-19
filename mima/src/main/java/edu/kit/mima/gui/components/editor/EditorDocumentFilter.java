@@ -1,9 +1,11 @@
 package edu.kit.mima.gui.components.editor;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.regex.Pattern;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
-import java.util.regex.Pattern;
 
 /**
  * Document filter for use with {@link Editor}.
@@ -28,7 +30,9 @@ public class EditorDocumentFilter extends DocumentFilter {
     }
 
     @Override
-    public void replace(final DocumentFilter.FilterBypass fb, final int offset, final int length, final String text,
+    public void replace(@NotNull final DocumentFilter.FilterBypass fb,
+                        final int offset, final int length,
+                        final String text,
                         final AttributeSet attrs) throws BadLocationException {
 
         String replacedText = text;
@@ -42,7 +46,9 @@ public class EditorDocumentFilter extends DocumentFilter {
     }
 
     @Override
-    public void insertString(final DocumentFilter.FilterBypass fb, final int offset, final String string,
+    public void insertString(@NotNull final DocumentFilter.FilterBypass fb,
+                             final int offset,
+                             @NotNull final String string,
                              final AttributeSet attr) throws BadLocationException {
         String replacedText = string;
         while (TAB.matcher(replacedText).matches()) {
@@ -55,8 +61,8 @@ public class EditorDocumentFilter extends DocumentFilter {
     }
 
     @Override
-    public void remove(final DocumentFilter.FilterBypass fb, final int offset,
-                       final int length) throws BadLocationException {
+    public void remove(@NotNull final DocumentFilter.FilterBypass fb,
+                       final int offset, final int length) throws BadLocationException {
         editor.getHistoryController().addRemoveHistory(offset, length);
         super.remove(fb, offset, length);
         editor.notifyEdit();

@@ -2,13 +2,16 @@ package edu.kit.mima.core.controller;
 
 import edu.kit.mima.core.parsing.token.Token;
 import edu.kit.mima.core.parsing.token.TokenType;
-import edu.kit.mima.gui.logging.Logger;
+import edu.kit.mima.logging.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * Implementation of {@link DebugController} using a threat to handle control flow.
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -35,14 +38,14 @@ public class ThreadDebugController implements DebugController {
      *
      * @param workingThread working thread to control.
      */
-    public void setWorkingThread(Thread workingThread) {
+    public void setWorkingThread(final Thread workingThread) {
         this.workingThread = workingThread;
         isActive = false;
     }
 
 
     /**
-     * Returns whether the thread is currently active
+     * Returns whether the thread is currently active.
      *
      * @return true if active
      */
@@ -56,7 +59,7 @@ public class ThreadDebugController implements DebugController {
             isActive = false;
             try {
                 lock.wait();
-            } catch (InterruptedException e) {
+            } catch (@NotNull final InterruptedException e) {
                 Logger.error(e.getMessage());
                 isActive = true;
             }
@@ -98,12 +101,14 @@ public class ThreadDebugController implements DebugController {
             resume();
             workingThread.join();
             System.out.println("done");
-        } catch (InterruptedException ignored) {/*doesn't matter thread should die*/}
+        } catch (@NotNull final InterruptedException ignored) {
+            /*doesn't matter thread should die*/
+        }
         shouldDie = false;
     }
 
     @Override
-    public void afterInstruction(Token currentInstruction) {
+    public void afterInstruction(@NotNull final Token currentInstruction) {
         if (!shouldDie && (autoPause || breaks.contains(currentInstruction.getFilePos()))
                 && currentInstruction.getType() != TokenType.PROGRAM) {
             pause();
@@ -115,18 +120,17 @@ public class ThreadDebugController implements DebugController {
      *
      * @param breaks break point collection.
      */
-    public void setBreaks(Collection<Integer> breaks) {
+    public void setBreaks(@NotNull final Collection<Integer> breaks) {
         this.breaks.clear();
         this.breaks.addAll(breaks);
     }
 
     /**
-     * Sets whether the thread should be automatically paused after
-     * each step;
+     * Sets whether the thread should be automatically paused after each step.
      *
      * @param autoPause true if debugger should auto pause after each step
      */
-    public void setAutoPause(boolean autoPause) {
+    public void setAutoPause(final boolean autoPause) {
         this.autoPause = autoPause;
     }
 }

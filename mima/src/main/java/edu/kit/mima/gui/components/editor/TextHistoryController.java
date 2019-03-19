@@ -1,9 +1,10 @@
 package edu.kit.mima.gui.components.editor;
 
-import edu.kit.mima.gui.components.editor.history.FileHistoryObject;
-import edu.kit.mima.gui.components.editor.history.FileHistoryObject.ChangeType;
-import edu.kit.mima.gui.components.editor.history.History;
-import edu.kit.mima.gui.logging.Logger;
+import edu.kit.mima.api.history.FileHistoryObject;
+import edu.kit.mima.api.history.FileHistoryObject.ChangeType;
+import edu.kit.mima.api.history.History;
+import edu.kit.mima.logging.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
@@ -18,11 +19,12 @@ public class TextHistoryController {
 
     private static final int MAXIMUM_AMEND_LENGTH = 10;
     private final JTextPane editorPane;
+    @NotNull
     private final History<FileHistoryObject> history;
     private boolean active;
 
     /**
-     * History Controller that controls the creation of HistoryObjects
+     * History Controller that controls the creation of HistoryObjects.
      *
      * @param editorPane    editor pane to control
      * @param historyLength how many events the history should date back
@@ -34,13 +36,15 @@ public class TextHistoryController {
     }
 
     /**
-     * Add History Object for Replace Event
+     * Add History Object for Replace Event.
      *
      * @param offset offset in document
      * @param length length of change
      * @param text   text inserted instead of old text
+     * @throws BadLocationException if offset or offset + length is not inside the document bounds.
      */
-    public void addReplaceHistory(final int offset, final int length, final String text) throws BadLocationException {
+    public void addReplaceHistory(final int offset, final int length,
+                                  @NotNull final String text) throws BadLocationException {
         if (!active) {
             return;
         }
@@ -51,18 +55,20 @@ public class TextHistoryController {
             if (old.isEmpty()) {
                 addInsertHistory(offset, text);
             } else {
-                history.add(new FileHistoryObject(editorPane, offset, text, old, ChangeType.REPLACE));
+                history.add(new FileHistoryObject(editorPane,
+                                                  offset,
+                                                  text, old, ChangeType.REPLACE));
             }
         }
     }
 
     /**
-     * Add History Object for Insert Event
+     * Add History Object for Insert Event.
      *
      * @param offset offset in document
      * @param text   text inserted
      */
-    public void addInsertHistory(final int offset, final String text) {
+    public void addInsertHistory(final int offset, @NotNull final String text) {
         if (!active) {
             return;
         }
@@ -74,15 +80,16 @@ public class TextHistoryController {
                 && (offset == (fhs.getCaretOffset() + fhs.getText().length()))
                 && (fhs.getText().length() < MAXIMUM_AMEND_LENGTH)) {
             history.setCurrent(
-                    new FileHistoryObject(editorPane, fhs.getCaretOffset(), fhs.getText() + text, "",
-                            ChangeType.INSERT));
+                    new FileHistoryObject(editorPane, fhs.getCaretOffset(),
+                                          fhs.getText() + text, "",
+                                          ChangeType.INSERT));
         } else {
             history.add(new FileHistoryObject(editorPane, offset, text, "", ChangeType.INSERT));
         }
     }
 
     /**
-     * Add History Object for Remove Event
+     * Add History Object for Remove Event.
      *
      * @param offset offset in document
      * @param length length of text removed
@@ -95,7 +102,7 @@ public class TextHistoryController {
         String text = null;
         try {
             text = editorPane.getDocument().getText(offset, length);
-        } catch (final BadLocationException e) {
+        } catch (@NotNull final BadLocationException e) {
             Logger.error(e.getMessage());
         }
         assert text != null;
@@ -107,38 +114,44 @@ public class TextHistoryController {
                 && (fhs.getOldText().length() < MAXIMUM_AMEND_LENGTH)) {
             history.setCurrent(
                     new FileHistoryObject(editorPane, offset, "", text + fhs.getOldText(),
-                            ChangeType.REMOVE));
+                                          ChangeType.REMOVE));
         } else {
             history.add(new FileHistoryObject(editorPane, offset, "", text, ChangeType.REMOVE));
         }
     }
 
     /**
-     * Undo last file change
+     * Undo last file change.
      */
     public void undo() {
-        if (!canUndo()) return;
+        if (!canUndo()) {
+            return;
+        }
         try {
             final FileHistoryObject fhs = history.back();
             final boolean isActive = active;
             setActive(false);
             fhs.undo();
             setActive(isActive);
-        } catch (IndexOutOfBoundsException ignored) { }
+        } catch (@NotNull final IndexOutOfBoundsException ignored) {
+        }
     }
 
     /**
-     * Redo the last undo
+     * Redo the last undo.
      */
     public void redo() {
-        if (!canRedo()) return;
+        if (!canRedo()) {
+            return;
+        }
         try {
             final FileHistoryObject fhs = history.forward();
             final boolean isActive = active;
             setActive(false);
             fhs.redo();
             setActive(isActive);
-        } catch (IndexOutOfBoundsException ignored) { }
+        } catch (@NotNull final IndexOutOfBoundsException ignored) {
+        }
     }
 
     /**
@@ -160,14 +173,14 @@ public class TextHistoryController {
     }
 
     /**
-     * Reset the History
+     * Reset the History.
      */
     public void reset() {
         history.reset();
     }
 
     /**
-     * Set the history capacity
+     * Set the history capacity.
      *
      * @param capacity history capacity
      */
@@ -176,7 +189,7 @@ public class TextHistoryController {
     }
 
     /**
-     * Returns whether the history controller is currently active
+     * Returns whether the history controller is currently active.
      *
      * @return true if active
      */
@@ -185,7 +198,7 @@ public class TextHistoryController {
     }
 
     /**
-     * Set whether the Controller should respond to changes in the document
+     * Set whether the Controller should respond to changes in the document.
      *
      * @param active true if it should respond
      */
@@ -198,6 +211,7 @@ public class TextHistoryController {
      *
      * @return the history
      */
+    @NotNull
     public History getHistory() {
         return history;
     }

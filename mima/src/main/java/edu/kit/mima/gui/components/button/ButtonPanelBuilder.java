@@ -1,20 +1,15 @@
 package edu.kit.mima.gui.components.button;
 
+import edu.kit.mima.api.observing.ClassObservable;
+import edu.kit.mima.api.observing.Observable;
 import edu.kit.mima.gui.components.tooltip.ITooltip;
 import edu.kit.mima.gui.components.tooltip.Tooltip;
 import edu.kit.mima.gui.components.tooltip.TooltipComponent;
-import edu.kit.mima.gui.observing.ClassObservable;
-import edu.kit.mima.gui.observing.Observable;
-import edu.kit.mima.gui.util.BindingUtil;
-import edu.kit.mima.gui.util.HSLColor;
+import edu.kit.mima.util.BindingUtil;
+import edu.kit.mima.util.HSLColor;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
-import javax.swing.Action;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.KeyStroke;
-import javax.swing.UIManager;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridLayout;
@@ -22,9 +17,16 @@ import java.awt.LayoutManager;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.function.Supplier;
+import javax.swing.Action;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.KeyStroke;
+import javax.swing.UIManager;
 
 /**
- * Builder for creating a button panel
+ * Builder for creating a button panel.
  *
  * @author Jannis Weis
  * @since 2018
@@ -34,12 +36,12 @@ public final class ButtonPanelBuilder {
     private static final int BUTTON_DELAY = 2000;
     private static final int BUTTON_VANISH_DELAY = 2000;
 
-    private final JPanel panel;
-    private final Queue<JButton> buttons;
+    @NotNull private final JPanel panel;
+    @NotNull private final Queue<JButton> buttons;
     private final LayoutManager layoutManager;
 
     /**
-     * Create new ButtonPanelBuilder
+     * Create new ButtonPanelBuilder.
      */
     public ButtonPanelBuilder() {
         panel = new JPanel();
@@ -47,51 +49,66 @@ public final class ButtonPanelBuilder {
         this.layoutManager = new BoxLayout(panel, BoxLayout.X_AXIS);
     }
 
-    public ButtonPanelBuilder(LayoutManager layoutManager) {
+    /**
+     * Create {@link ButtonPanelBuilder} with given {@link LayoutManager}.
+     *
+     * @param layoutManager Layout manager for arranging the buttons.
+     */
+    public ButtonPanelBuilder(final LayoutManager layoutManager) {
         panel = new JPanel();
         buttons = new LinkedList<>();
         this.layoutManager = layoutManager;
     }
 
     /**
-     * Add Button to the ButtonPanel
+     * Add Button to the ButtonPanel.
      *
      * @param label       Label
      * @param action      Action to perform when clicked
      * @param accelerator Key combination to trigger button event
      * @return ButtonBuilder
      */
-    public ButtonBuilder addButton(final String label, final Runnable action, final String accelerator) {
+    @NotNull
+    @Contract("_, _, _ -> new")
+    public ButtonBuilder addButton(final String label,
+                                   @NotNull final Runnable action,
+                                   final String accelerator) {
         return new ButtonBuilder(label, action, accelerator, this);
     }
 
     /**
-     * Add Button to the ButtonPanel
+     * Add Button to the ButtonPanel.
      *
      * @param label  Label
      * @param action Action to perform when clicked
      * @return ButtonBuilder
      */
-    public ButtonBuilder addButton(final String label, final Runnable action) {
+    @NotNull
+    @Contract("_, _ -> new")
+    public ButtonBuilder addButton(final String label, @NotNull final Runnable action) {
         return new ButtonBuilder(label, action, this);
     }
 
     /**
-     * Add Button to the ButtonPanel
+     * Add Button to the ButtonPanel.
      *
      * @param label Label
      * @return ButtonBuilder
      */
+    @NotNull
+    @Contract("_ -> new")
     public ButtonBuilder addButton(final String label) {
         return new ButtonBuilder(label, this);
     }
 
     /**
-     * Add external Button to the ButtonPanel
+     * Add external Button to the ButtonPanel.
      *
      * @param button button to add
      * @return ButtonBuilder
      */
+    @NotNull
+    @Contract("_ -> new")
     public ButtonBuilder addButton(final JButton button) {
         return new ButtonBuilder(button, this);
     }
@@ -101,15 +118,19 @@ public final class ButtonPanelBuilder {
         private final JButton button;
         private final ButtonPanelBuilder parent;
 
-        private ButtonBuilder(final String label, final Runnable action, final String accelerator,
-                              final ButtonPanelBuilder parent) {
+        private ButtonBuilder(final String label,
+                              @NotNull final Runnable action,
+                              final String accelerator,
+                              @NotNull final ButtonPanelBuilder parent) {
             button = new JButton(label);
             this.parent = parent;
             setAction(action);
             setAccelerator(accelerator);
         }
 
-        private ButtonBuilder(final String label, final Runnable action, final ButtonPanelBuilder parent) {
+        private ButtonBuilder(final String label,
+                              @NotNull final Runnable action,
+                              @NotNull final ButtonPanelBuilder parent) {
             button = new JButton(label);
             this.parent = parent;
             setAction(action);
@@ -126,178 +147,332 @@ public final class ButtonPanelBuilder {
         }
 
         /**
-         * Set the accelerator for the current button
+         * Set the accelerator for the current button.
          *
          * @param accelerator key combination to trigger button event
          * @return this
          */
+        @Contract("_ -> this")
+        @NotNull
         public ButtonBuilder addAccelerator(final String accelerator) {
             setAccelerator(accelerator);
             return this;
         }
 
         /**
-         * Set the action for the current button
+         * Set the action for the current button.
          *
          * @param action action to perform at button press
          * @return this
          */
-        public ButtonBuilder addAction(final Runnable action) {
+        @Contract("_ -> this")
+        @NotNull
+        public ButtonBuilder addAction(@NotNull final Runnable action) {
             setAction(action);
             return this;
         }
 
         /**
-         * Set whether the button is enabled
+         * Set whether the button is enabled.
          *
          * @param enabled boolean
          * @return this
          */
+        @Contract("_ -> this")
+        @NotNull
         public ButtonBuilder setEnabled(final boolean enabled) {
             button.setEnabled(enabled);
             return this;
         }
 
+        /**
+         * Set whether the button should be visible.
+         *
+         * @param visible true if visible
+         * @return this
+         */
+        @Contract("_ -> this")
+        @NotNull
         public ButtonBuilder setVisible(final boolean visible) {
-            button.setVisible(false);
+            button.setVisible(visible);
             return this;
         }
 
-        public <T extends JComponent> ButtonBuilder bind(T observed, Runnable binding, String... property) {
+        /**
+         * Bind an action to an property event occurring in the observed instance.
+         *
+         * @param observed observed object
+         * @param binding  binding method to run
+         * @param property properties to listen to
+         * @param <T>      observed object must extend {@link JComponent}
+         * @return this
+         */
+        @Contract("_, _, _ -> this")
+        @NotNull
+        public <T extends JComponent> ButtonBuilder bind(@NotNull final T observed,
+                                                         @NotNull final Runnable binding,
+                                                         @NotNull final String... property) {
             BindingUtil.bind(observed, binding, property);
             return this;
         }
 
-        public <T extends Observable> ButtonBuilder bind(T observed, Runnable binding, String... property) {
+        /**
+         * Bind an action to an property event occurring in the observed instance.
+         *
+         * @param observed observed object
+         * @param binding  binding method to run
+         * @param property properties to listen to
+         * @param <T>      observed object must extend {@link Observable}
+         * @return this
+         */
+        @Contract("_, _, _ -> this")
+        @NotNull
+        public <T extends Observable> ButtonBuilder bind(@NotNull final T observed,
+                                                         @NotNull final Runnable binding,
+                                                         @NotNull final String... property) {
             BindingUtil.bind(observed, binding, property);
             return this;
         }
 
-        public <T extends ClassObservable> ButtonBuilder bindClass(Class<T> observed, Runnable binding, String... property) {
-            BindingUtil.bindClass(observed, binding, property);
+        /**
+         * Bind an action to an property event occurring in the observed class.
+         *
+         * @param clazz    class to observe
+         * @param binding  binding method to run
+         * @param property properties to listen to
+         * @param <T>      observed class must extend {@link ClassObservable}
+         * @return this
+         */
+        @Contract("_, _, _ -> this")
+        @NotNull
+        public <T extends ClassObservable> ButtonBuilder bindClass(
+                final Class<T> clazz,
+                @NotNull final Runnable binding,
+                @NotNull final String... property) {
+            BindingUtil.bindClass(clazz, binding, property);
             return this;
         }
 
-        public <T extends JComponent> ButtonBuilder bindVisible(T observed, Supplier<Boolean> binding, String... property) {
+        /**
+         * Bind the visibility to an property event occurring in the observed instance.
+         *
+         * @param observed observed object
+         * @param binding  binding method to determine status
+         * @param property properties to listen to
+         * @param <T>      observed object must extend {@link JComponent}
+         * @return this
+         */
+        @Contract("_, _, _ -> this")
+        @NotNull
+        public <T extends JComponent> ButtonBuilder bindVisible(
+                @NotNull final T observed,
+                @NotNull final Supplier<Boolean> binding,
+                @NotNull final String... property) {
             BindingUtil.bind(observed, () -> button.setVisible(binding.get()), property);
             return this;
         }
 
-        public <T extends JComponent> ButtonBuilder bindEnabled(T observed, Supplier<Boolean> binding, String... property) {
-            BindingUtil.bind(observed, () -> button.setEnabled(binding.get()), property);
-            return this;
-        }
-
-        public <T extends Observable> ButtonBuilder bindVisible(T observed, Supplier<Boolean> binding, String... property) {
+        /**
+         * Bind the visibility to an property event occurring in the observed instance.
+         *
+         * @param observed observed object
+         * @param binding  binding method to determine status
+         * @param property properties to listen to
+         * @param <T>      observed object must extend {@link Observable}
+         * @return this
+         */
+        @Contract("_, _, _ -> this")
+        @NotNull
+        public <T extends Observable> ButtonBuilder bindVisible(
+                @NotNull final T observed,
+                @NotNull final Supplier<Boolean> binding,
+                @NotNull final String... property) {
             BindingUtil.bind(observed, () -> button.setVisible(binding.get()), property);
             return this;
         }
 
-        public <T extends Observable> ButtonBuilder bindEnabled(T observed, Supplier<Boolean> binding, String... property) {
+        /**
+         * Bind the enabled to an property event occurring in the observed instance.
+         *
+         * @param observed observed object
+         * @param binding  binding method to determine status
+         * @param property properties to listen to
+         * @param <T>      observed object must extend {@link JComponent}
+         * @return this
+         */
+        @Contract("_, _, _ -> this")
+        @NotNull
+        public <T extends JComponent> ButtonBuilder bindEnabled(
+                @NotNull final T observed,
+                @NotNull final Supplier<Boolean> binding,
+                @NotNull final String... property) {
             BindingUtil.bind(observed, () -> button.setEnabled(binding.get()), property);
             return this;
         }
 
-        public <T extends ClassObservable> ButtonBuilder bindClassVisible(Class<T> observed,
-                                                                          Supplier<Boolean> binding,
-                                                                          String... property) {
-            BindingUtil.bindClass(observed, () -> button.setVisible(binding.get()), property);
+        /**
+         * Bind the enabled to an property event occurring in the observed instance.
+         *
+         * @param observed observed object
+         * @param binding  binding method to determine status
+         * @param property properties to listen to
+         * @param <T>      observed object must extend {@link Observable}
+         * @return this
+         */
+        @Contract("_, _, _ -> this")
+        @NotNull
+        public <T extends Observable> ButtonBuilder bindEnabled(
+                @NotNull final T observed,
+                @NotNull final Supplier<Boolean> binding,
+                @NotNull final String... property) {
+            BindingUtil.bind(observed, () -> button.setEnabled(binding.get()), property);
             return this;
         }
 
-        public <T extends ClassObservable> ButtonBuilder bindClassEnabled(Class<T> observed,
-                                                                          Supplier<Boolean> binding,
-                                                                          String... property) {
-            BindingUtil.bindClass(observed, () -> button.setEnabled(binding.get()), property);
+        /**
+         * Bind the visibility status to an property event occurring in the observed class.
+         *
+         * @param clazz    class to observe
+         * @param binding  binding method to determine status
+         * @param property properties to listen to
+         * @param <T>      observed class must extend {@link ClassObservable}
+         * @return this
+         */
+        @Contract("_, _, _ -> this")
+        @NotNull
+        public <T extends ClassObservable> ButtonBuilder bindClassVisible(
+                final Class<T> clazz,
+                @NotNull final Supplier<Boolean> binding,
+                @NotNull final String... property) {
+            BindingUtil.bindClass(clazz, () -> button.setVisible(binding.get()), property);
+            return this;
+        }
+
+        /**
+         * Bind the enabled status to an property event occurring in the observed class.
+         *
+         * @param clazz    class to observe
+         * @param binding  binding method to determine status
+         * @param property properties to listen to
+         * @param <T>      observed class must extend {@link ClassObservable}
+         * @return this
+         */
+        @Contract("_, _, _ -> this")
+        @NotNull
+        public <T extends ClassObservable> ButtonBuilder bindClassEnabled(
+                final Class<T> clazz,
+                @NotNull final Supplier<Boolean> binding,
+                @NotNull final String... property) {
+            BindingUtil.bindClass(clazz, () -> button.setEnabled(binding.get()), property);
             return this;
         }
 
 
         /**
-         * Set tooltip component
+         * Set tooltip component.
          *
          * @param component component for tooltip
+         * @param <T>       component bust be of type {@link JComponent} and {@link ITooltip}.
          * @return this
          */
-        public <T extends JComponent & ITooltip> ButtonBuilder setTooltip(T component) {
-            new TooltipComponent<>(button, component, BUTTON_DELAY, BUTTON_VANISH_DELAY, TooltipComponent.COMPONENT_BOTH)
-                    .setActive(true);
+        @Contract("_ -> this")
+        @NotNull
+        public <T extends JComponent & ITooltip> ButtonBuilder setTooltip(
+                @NotNull final T component) {
+            new TooltipComponent<>(button, component, BUTTON_DELAY, BUTTON_VANISH_DELAY,
+                                   TooltipComponent.COMPONENT_BOTH).setActive(true);
             button.setToolTipText(null);
             return this;
         }
 
         /**
-         * Set the text for the default tooltip
+         * Set the text for the default tooltip.
          *
          * @param text tooltip text
          * @return this
          */
-        public ButtonBuilder setTooltip(String text) {
+        @NotNull
+        public ButtonBuilder setTooltip(@NotNull final String text) {
             return setTooltip(new Tooltip(text));
         }
 
         /**
-         * Add next Button
+         * Add next Button.
          *
          * @param label       Label
          * @param action      action to perform at button press
          * @param accelerator key combination to trigger button action
          * @return ButtonBuilder
          */
-        public ButtonBuilder addButton(final String label, final Runnable action, final String accelerator) {
+        @NotNull
+        @Contract("_, _, _ -> new")
+        public ButtonBuilder addButton(final String label,
+                                       @NotNull final Runnable action,
+                                       final String accelerator) {
             parent.buttons.offer(button);
             return new ButtonBuilder(label, action, accelerator, parent);
         }
 
         /**
-         * Add next Button
+         * Add next Button.
          *
          * @param label  Label
          * @param action action to perform at button press
          * @return ButtonBuilder
          */
-        public ButtonBuilder addButton(final String label, final Runnable action) {
+        @NotNull
+        @Contract("_, _ -> new")
+        public ButtonBuilder addButton(final String label, @NotNull final Runnable action) {
             parent.buttons.offer(button);
             return new ButtonBuilder(label, action, parent);
         }
 
         /**
-         * Add next Button
+         * Add next Button.
          *
          * @param label Label
          * @return ButtonBuilder
          */
+        @NotNull
+        @Contract("_ -> new")
         public ButtonBuilder addButton(final String label) {
             parent.buttons.offer(button);
             return new ButtonBuilder(label, parent);
         }
 
         /**
-         * Add external Button to the ButtonPanel
+         * Add external Button to the ButtonPanel.
          *
          * @param button button to add
          * @return ButtonBuilder
          */
+        @NotNull
+        @Contract("_ -> new")
         public ButtonBuilder addButton(final JButton button) {
             parent.buttons.offer(this.button);
             return new ButtonBuilder(button, parent);
         }
 
+        @NotNull
+        @Contract(" -> new")
         public ButtonBuilder addSpace() {
             parent.buttons.offer(button);
             return new ButtonBuilder(new Spacer(), parent);
         }
 
+        @NotNull
+        @Contract(" -> new")
         public ButtonBuilder addSeparator() {
             parent.buttons.offer(button);
             return new ButtonBuilder(new Separator(), parent);
         }
 
         /**
-         * Construct the ButtonPanel. Buttons are added in the order they were configured
+         * Construct the ButtonPanel. Buttons are added in the order they were configured.
          *
          * @return JPanel containing the buttons next to each other
          */
+        @NotNull
         public JPanel get() {
             parent.buttons.offer(button);
             LayoutManager lm = parent.layoutManager;
@@ -311,7 +486,7 @@ public final class ButtonPanelBuilder {
             return panel;
         }
 
-        private void setAction(final Runnable action) {
+        private void setAction(@NotNull final Runnable action) {
             button.addActionListener(e -> action.run());
         }
 
@@ -320,13 +495,12 @@ public final class ButtonPanelBuilder {
             button.getInputMap(JButton.WHEN_IN_FOCUSED_WINDOW)
                     .put(KeyStroke.getKeyStroke(accelerator), accelerator);
             button.getActionMap().put(accelerator, clickAction);
-            button.setToolTipText(" ");
         }
     }
 
     private class Separator extends Spacer {
         @Override
-        protected void paintComponent(Graphics g) {
+        protected void paintComponent(@NotNull final Graphics g) {
             super.paintComponent(g);
             g.setColor(new HSLColor(UIManager.getColor("Button.light")).adjustShade(20).getRGB());
             g.drawLine(getWidth() / 2, 0, getWidth() / 2, getHeight());
@@ -341,15 +515,15 @@ public final class ButtonPanelBuilder {
             setBorderPainted(false);
         }
 
+        @NotNull
         @Override
         public Dimension getPreferredSize() {
-            var size = super.getPreferredSize();
+            final var size = super.getPreferredSize();
             return new Dimension(size.width / 2, size.height);
         }
 
         @Override
-        protected void paintComponent(Graphics g) {
-            //Draw nothing
+        protected void paintComponent(final Graphics g) {
         }
     }
 }

@@ -5,6 +5,9 @@ import edu.kit.mima.core.parsing.token.ImmutableTuple;
 import edu.kit.mima.core.parsing.token.ProgramToken;
 
 /**
+ * Program class that contains the parsed {@link ProgramToken} and its corresponding {@link
+ * InstructionSet}.
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -19,7 +22,7 @@ public class Program implements ImmutableTuple<ProgramToken, InstructionSet> {
      * @param programToken   programToken
      * @param instructionSet instructionSet
      */
-    public Program(ProgramToken programToken, InstructionSet instructionSet) {
+    public Program(final ProgramToken programToken, final InstructionSet instructionSet) {
         this.instructionSet = instructionSet;
         this.programToken = programToken;
     }
@@ -34,7 +37,7 @@ public class Program implements ImmutableTuple<ProgramToken, InstructionSet> {
     }
 
     /**
-     * Get InstructionSet
+     * Get InstructionSet.
      *
      * @return instructionSet
      */

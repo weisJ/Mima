@@ -3,6 +3,8 @@ package edu.kit.mima.gui.components.editor.highlighter;
 import javax.swing.JTextPane;
 
 /**
+ * Highlighter for {@link edu.kit.mima.gui.components.editor.Editor}.
+ *
  * @author Jannis Weis
  * @since 2018
  */

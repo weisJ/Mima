@@ -1,6 +1,8 @@
 package edu.kit.mima.core.parsing.token;
 
 /**
+ * Simple Implementation of {@link ValueTuple}.
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -9,7 +11,13 @@ public class ValueTuple<T, K> implements Tuple<T, K> {
     private T first;
     private K second;
 
-    public ValueTuple(T first, K second) {
+    /**
+     * Create new Value Tuple.
+     *
+     * @param first  first value
+     * @param second second value
+     */
+    public ValueTuple(final T first, final K second) {
         this.first = first;
         this.second = second;
     }
@@ -20,7 +28,7 @@ public class ValueTuple<T, K> implements Tuple<T, K> {
     }
 
     @Override
-    public void setFirst(T first) {
+    public void setFirst(final T first) {
         this.first = first;
     }
 
@@ -30,7 +38,7 @@ public class ValueTuple<T, K> implements Tuple<T, K> {
     }
 
     @Override
-    public void setSecond(K second) {
+    public void setSecond(final K second) {
         this.second = second;
     }
 }

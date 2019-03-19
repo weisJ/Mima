@@ -1,6 +1,8 @@
 package edu.kit.mima.preferences;
 
 /**
+ * Listener for events where the {@link Preferences} have changed.
+ *
  * @author Jannis Weis
  * @since 2018
  */

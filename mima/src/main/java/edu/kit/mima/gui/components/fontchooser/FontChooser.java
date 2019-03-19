@@ -17,6 +17,7 @@
  *
  * swing@connectina.com
  */
+
 package edu.kit.mima.gui.components.fontchooser;
 
 import edu.kit.mima.gui.components.fontchooser.listeners.FamilyListSelectionListener;
@@ -29,22 +30,23 @@ import edu.kit.mima.gui.components.fontchooser.panes.FamilyPane;
 import edu.kit.mima.gui.components.fontchooser.panes.PreviewPane;
 import edu.kit.mima.gui.components.fontchooser.panes.SizePane;
 import edu.kit.mima.gui.components.fontchooser.panes.StylePane;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.event.ChangeListener;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.ResourceBundle;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.event.ChangeListener;
 
 
 /**
- * Provides a pane of controls designed to allow a user to
- * select a {@code Font}.
+ * Provides a pane of controls designed to allow a user to select a {@code Font}.
  *
  * @author Christos Bohoris
  * @see Font
@@ -63,17 +65,19 @@ public class FontChooser extends JPanel implements FontContainer {
     private final JPanel fontPanel = new JPanel();
     private final JPanel previewPanel = new JPanel();
     private final FamilyPane familyPane = new FamilyPane();
-    private final AbstractPreviewPane previewPane;
+    @NotNull private final AbstractPreviewPane previewPane;
     private final StylePane stylePane = new StylePane();
     private final SizePane sizePane = new SizePane();
-    private final FamilyListSelectionListener familyPaneListener = new FamilyListSelectionListener(this);
-    private final StyleListSelectionListener stylePaneListener = new StyleListSelectionListener(this);
-    private final SizeListSelectionListener sizePaneListener = new SizeListSelectionListener(this);
-    private FontSelectionModel selectionModel;
+    private final FamilyListSelectionListener familyPaneListener =
+            new FamilyListSelectionListener(this);
+    private final StyleListSelectionListener stylePaneListener =
+            new StyleListSelectionListener(this);
+    private final SizeListSelectionListener sizePaneListener =
+            new SizeListSelectionListener(this);
+    @Nullable private FontSelectionModel selectionModel;
 
     /**
-     * Creates a FontChooser pane with an initial default Font
-     * (Sans Serif, Plain, 12).
+     * Creates a FontChooser pane with an initial default Font (Sans Serif, Plain, 12).
      */
     public FontChooser() {
         this(new Font(Font.SANS_SERIF, Font.PLAIN, DEFAULT_FONT_SIZE));
@@ -84,21 +88,22 @@ public class FontChooser extends JPanel implements FontContainer {
      *
      * @param initialFont the initial Font set in the chooser
      */
-    public FontChooser(Font initialFont) {
+    public FontChooser(@NotNull final Font initialFont) {
         this(initialFont, new PreviewPane());
     }
 
-    public FontChooser(Font initialFont, AbstractPreviewPane previewPane) {
+    public FontChooser(@NotNull final Font initialFont, @NotNull final AbstractPreviewPane previewPane) {
         this(new DefaultFontSelectionModel(initialFont), previewPane);
     }
 
     /**
-     * Creates a FontChooser pane with the specified
-     * {@code FontSelectionModel}.
+     * Creates a FontChooser pane with the specified {@code FontSelectionModel}.
      *
-     * @param model the {@code FontSelectionModel} to be used
+     * @param model       the {@code FontSelectionModel} to be used
+     * @param previewPane the preview pane
      */
-    public FontChooser(FontSelectionModel model, AbstractPreviewPane previewPane) {
+    public FontChooser(final FontSelectionModel model,
+                       @NotNull final AbstractPreviewPane previewPane) {
         this.previewPane = previewPane;
         resourceBundle = ResourceBundle.getBundle("FontChooser");
         setSelectionModel(model);
@@ -110,25 +115,25 @@ public class FontChooser extends JPanel implements FontContainer {
     }
 
     /**
-     * Gets the current Font value from the FontChooser.
-     * By default, this delegates to the model.
+     * Gets the current Font value from the FontChooser. By default, this delegates to the model.
      *
      * @return the current Font value of the FontChooser
      */
+    @Nullable
     @Override
     public Font getSelectedFont() {
         return selectionModel.getSelectedFont();
     }
 
     /**
-     * Sets the current font of the FontChooser to the specified font.
-     * The {@code FontSelectionModel} will fire a {@code ChangeEvent}
+     * Sets the current font of the FontChooser to the specified font. The {@code
+     * FontSelectionModel} will fire a {@code ChangeEvent}
      *
      * @param font the font to be set in the font chooser
      * @see JComponent#addPropertyChangeListener
      */
     @Override
-    public void setSelectedFont(Font font) {
+    public void setSelectedFont(final Font font) {
         familyPane.removeListSelectionListener(familyPaneListener);
         stylePane.removeListSelectionListener(stylePaneListener);
         sizePane.removeListSelectionListener(sizePaneListener);
@@ -143,6 +148,7 @@ public class FontChooser extends JPanel implements FontContainer {
      *
      * @return a {@code FontSelectionModel} object
      */
+    @Nullable
     public FontSelectionModel getSelectionModel() {
         return selectionModel;
     }
@@ -152,11 +158,11 @@ public class FontChooser extends JPanel implements FontContainer {
      *
      * @param newModel the new {@code FontSelectionModel} object
      */
-    public void setSelectionModel(FontSelectionModel newModel) {
+    public void setSelectionModel(@Nullable final FontSelectionModel newModel) {
         if (newModel == null) {
             throw new IllegalArgumentException("New model must not be null");
         }
-        FontSelectionModel oldModel = selectionModel;
+        final FontSelectionModel oldModel = selectionModel;
         selectionModel = newModel;
         selectionModel.addChangeListener(stylePane);
         firePropertyChange(SELECTION_MODEL_PROPERTY, oldModel, newModel);
@@ -167,7 +173,7 @@ public class FontChooser extends JPanel implements FontContainer {
      *
      * @param listener the {@code ChangeListener} to be added
      */
-    public void addChangeListener(ChangeListener listener) {
+    public void addChangeListener(final ChangeListener listener) {
         selectionModel.addChangeListener(listener);
     }
 
@@ -176,7 +182,7 @@ public class FontChooser extends JPanel implements FontContainer {
      *
      * @param listener the {@code ChangeListener} to be removed
      */
-    public void removeChangeListener(ChangeListener listener) {
+    public void removeChangeListener(final ChangeListener listener) {
         selectionModel.removeChangeListener(listener);
     }
 
@@ -207,7 +213,7 @@ public class FontChooser extends JPanel implements FontContainer {
     private void addPreview() {
         previewPanel.setLayout(new GridBagLayout());
         add(previewPanel, BorderLayout.PAGE_END);
-        GridBagConstraints gridBagConstraints = new GridBagConstraints();
+        final GridBagConstraints gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
@@ -218,14 +224,14 @@ public class FontChooser extends JPanel implements FontContainer {
     private void addPreviewLabel() {
         previewLabel.setText(resourceBundle.getString("font.preview"));
         previewLabel.setLabelFor(sizePane);
-        GridBagConstraints gridBagConstraints = new GridBagConstraints();
+        final GridBagConstraints gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.anchor = GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new Insets(0, 0, 5, 0);
         previewPanel.add(previewLabel, gridBagConstraints);
     }
 
     private void addSizePane() {
-        GridBagConstraints gridBagConstraints = new GridBagConstraints();
+        final GridBagConstraints gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = GridBagConstraints.VERTICAL;
         gridBagConstraints.anchor = GridBagConstraints.LINE_START;
@@ -235,7 +241,7 @@ public class FontChooser extends JPanel implements FontContainer {
     }
 
     private void addStylePane() {
-        GridBagConstraints gridBagConstraints = new GridBagConstraints();
+        final GridBagConstraints gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = GridBagConstraints.VERTICAL;
         gridBagConstraints.anchor = GridBagConstraints.LINE_START;
@@ -245,7 +251,7 @@ public class FontChooser extends JPanel implements FontContainer {
     }
 
     private void addFamilyPane() {
-        GridBagConstraints gridBagConstraints = new GridBagConstraints();
+        final GridBagConstraints gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = GridBagConstraints.BOTH;
         gridBagConstraints.anchor = GridBagConstraints.LINE_START;
@@ -258,7 +264,7 @@ public class FontChooser extends JPanel implements FontContainer {
     private void addSizeLabel() {
         sizeLabel.setLabelFor(sizePane);
         sizeLabel.setText(resourceBundle.getString("font.size"));
-        GridBagConstraints gridBagConstraints = new GridBagConstraints();
+        final GridBagConstraints gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.anchor = GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new Insets(0, 0, 5, 0);
         fontPanel.add(sizeLabel, gridBagConstraints);
@@ -267,7 +273,7 @@ public class FontChooser extends JPanel implements FontContainer {
     private void addStyleLabel() {
         styleLabel.setLabelFor(stylePane);
         styleLabel.setText(resourceBundle.getString("font.style"));
-        GridBagConstraints gridBagConstraints = new GridBagConstraints();
+        final GridBagConstraints gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.anchor = GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new Insets(0, 0, 5, DEFAULT_SPACE);
         fontPanel.add(styleLabel, gridBagConstraints);
@@ -275,7 +281,7 @@ public class FontChooser extends JPanel implements FontContainer {
 
     private void addFamilyLabel() {
         familyLabel.setLabelFor(familyPane);
-        GridBagConstraints gridBagConstraints = new GridBagConstraints();
+        final GridBagConstraints gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.anchor = GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new Insets(0, 0, 5, DEFAULT_SPACE);
         fontPanel.add(familyLabel, gridBagConstraints);
@@ -303,7 +309,7 @@ public class FontChooser extends JPanel implements FontContainer {
     }
 
     @Override
-    public void setPreviewFont(Font font) {
+    public void setPreviewFont(final Font font) {
         previewPane.setPreviewFont(font);
     }
 }

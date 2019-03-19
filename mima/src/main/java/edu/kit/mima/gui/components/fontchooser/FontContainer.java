@@ -1,5 +1,7 @@
 package edu.kit.mima.gui.components.fontchooser;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.awt.Font;
 
 
@@ -14,7 +16,7 @@ public interface FontContainer {
 
     String getSelectedFamily();
 
-    Font getSelectedFont();
+    @Nullable Font getSelectedFont();
 
     void setSelectedFont(Font font);
 

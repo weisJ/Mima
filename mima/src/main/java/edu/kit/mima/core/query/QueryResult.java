@@ -1,12 +1,14 @@
 package edu.kit.mima.core.query;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
- * Result of a Query
+ * Result of a Query.
  *
  * @param <T> type of elements this query result holds
  * @author Jannis Weis
@@ -21,8 +23,7 @@ public interface QueryResult<T> {
     Query<T> and();
 
     /**
-     * Start a new query on the prior output (or original data)
-     * and keep the output of this result.
+     * Start a new query on the prior output (or original data) and keep the output of this result.
      *
      * @return Query
      */
@@ -33,10 +34,10 @@ public interface QueryResult<T> {
      *
      * @return sourceData \ foundData.
      */
-    QueryResult<T> invert();
+    @NotNull QueryResult<T> invert();
 
     /**
-     * Get the query Result as a list
+     * Get the query Result as a list.
      *
      * @return List result
      */

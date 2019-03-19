@@ -1,7 +1,7 @@
 package edu.kit.mima.core.syntax;
 
 import edu.kit.mima.core.instruction.InstructionSet;
-import edu.kit.mima.core.parsing.inputStream.CharInputStream;
+import edu.kit.mima.core.parsing.inputstream.CharInputStream;
 import edu.kit.mima.core.parsing.lang.Keyword;
 import edu.kit.mima.core.parsing.lang.Punctuation;
 import edu.kit.mima.core.parsing.token.AtomSyntaxToken;
@@ -9,6 +9,9 @@ import edu.kit.mima.core.parsing.token.EmptySyntaxToken;
 import edu.kit.mima.core.parsing.token.SyntaxToken;
 import edu.kit.mima.core.parsing.token.Token;
 import edu.kit.mima.core.parsing.token.TokenType;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -20,21 +23,29 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
+ * Parser for building a Syntax token from input file.
+ *
  * @author Jannis Weis
  * @since 2018
  */
 public class SyntaxParser {
-    private final SyntaxTokenStream input;
-    private final List<SyntaxToken> tokens;
+    @NotNull private final SyntaxTokenStream input;
+    @NotNull private final List<SyntaxToken> tokens;
 
     private final Set<String> instructions;
-    private final List<SyntaxToken> jumps;
-    private final List<SyntaxToken> variables;
-    private final List<SyntaxToken> constants;
-    private final List<SyntaxToken> unresolvedIdentifications;
+    @NotNull private final List<SyntaxToken> jumps;
+    @NotNull private final List<SyntaxToken> variables;
+    @NotNull private final List<SyntaxToken> constants;
+    @NotNull private final List<SyntaxToken> unresolvedIdentifications;
     private boolean insideCall = false;
 
-    public SyntaxParser(String input, InstructionSet instructionSet) {
+    /**
+     * Create SyntaxParser from input and instruction set.
+     *
+     * @param input          input file
+     * @param instructionSet instruction set for input. Is needed to determine valid functions.
+     */
+    public SyntaxParser(final String input, @NotNull final InstructionSet instructionSet) {
         this.input = new SyntaxTokenStream(input);
         this.tokens = new ArrayList<>();
         this.unresolvedIdentifications = new ArrayList<>();
@@ -44,6 +55,12 @@ public class SyntaxParser {
         this.instructions = Set.of(instructionSet.getInstructions());
     }
 
+    /**
+     * Parse the input.
+     *
+     * @return Array of {@link SyntaxToken}.
+     */
+    @NotNull
     public SyntaxToken[] parse() {
         tokens.clear();
         while (!input.isEmpty()) {
@@ -59,14 +76,14 @@ public class SyntaxParser {
     }
 
     private void resolveIdentifications() {
-        Set<String> jumpIdent = jumps.stream()
+        final Set<String> jumpIdent = jumps.stream()
                 .map(t -> t.getValue().toString()).collect(Collectors.toSet());
-        Set<String> variablesIdent = variables.stream()
+        final Set<String> variablesIdent = variables.stream()
                 .map(t -> t.getValue().toString()).collect(Collectors.toSet());
-        Set<String> constantsIdent = constants.stream()
+        final Set<String> constantsIdent = constants.stream()
                 .map(t -> t.getValue().toString()).collect(Collectors.toSet());
-        for (SyntaxToken token : unresolvedIdentifications) {
-            String name = token.getValue().toString();
+        for (final SyntaxToken token : unresolvedIdentifications) {
+            final String name = token.getValue().toString();
             if (jumpIdent.contains(name)) {
                 token.setColor(SyntaxColor.JUMP);
             } else if (variablesIdent.contains(name)) {
@@ -77,11 +94,14 @@ public class SyntaxParser {
         }
     }
 
-    private SyntaxToken maybeJumpAssociation(Supplier<SyntaxToken> supplier) {
-        SyntaxToken expression = supplier.get();
+    private SyntaxToken maybeJumpAssociation(final Supplier<SyntaxToken> supplier) {
+        final SyntaxToken expression = supplier.get();
         if (isPunctuation(Punctuation.JUMP_DELIMITER)) {
-            SyntaxToken token = new AtomSyntaxToken<>(TokenType.JUMP_POINT, expression.getValue(), SyntaxColor.JUMP,
-                    expression.getOffset(), expression.getLength());
+            SyntaxToken token = new AtomSyntaxToken<>(TokenType.JUMP_POINT,
+                                                      expression.getValue(),
+                                                      SyntaxColor.JUMP,
+                                                      expression.getOffset(),
+                                                      expression.getLength());
             jumps.add(token);
             return token;
         } else {
@@ -93,15 +113,18 @@ public class SyntaxParser {
         return maybeCall(this::parseAtomic);
     }
 
-    private SyntaxToken maybeCall(Supplier<SyntaxToken> supplier) {
-        SyntaxToken expression = supplier.get();
+    private SyntaxToken maybeCall(final Supplier<SyntaxToken> supplier) {
+        final SyntaxToken expression = supplier.get();
         if (isPunctuation(Punctuation.OPEN_BRACKET)) {
-            SyntaxToken token = instructions.contains(expression.getValue().toString())
-                    ? new AtomSyntaxToken<>(TokenType.CALL, expression.getValue(), SyntaxColor.INSTRUCTION,
-                    expression.getOffset(), expression.getLength())
+            final SyntaxToken token = instructions.contains(expression.getValue().toString())
+                    ? new AtomSyntaxToken<>(TokenType.CALL,
+                                            expression.getValue(),
+                                            SyntaxColor.INSTRUCTION,
+                                            expression.getOffset(),
+                                            expression.getLength())
                     : new EmptySyntaxToken();
             insideCall = true;
-            SyntaxToken[] tokenA = delimited(
+            final SyntaxToken[] tokenA = delimited(
                     Punctuation.OPEN_BRACKET,
                     Punctuation.CLOSED_BRACKET,
                     Punctuation.COMMA,
@@ -115,11 +138,9 @@ public class SyntaxParser {
         }
     }
 
+    @NotNull
     private SyntaxToken parseAtomic() {
-        SyntaxToken token = peek();
-        if (token == null) {
-            return new EmptySyntaxToken();
-        }
+        final SyntaxToken token = peek();
         switch (token.getType()) {
             case PUNCTUATION:
                 return parsePunctuation();
@@ -140,21 +161,22 @@ public class SyntaxParser {
         }
     }
 
+    @NotNull
     private SyntaxToken parseString() {
-        SyntaxToken token = next();
-        String value = token.getValue().toString();
+        final SyntaxToken token = next();
+        final String value = token.getValue().toString();
         if (value.charAt(value.length() - 1) == Punctuation.STRING) {
             return token;
         } else {
             return new AtomSyntaxToken<>(TokenType.PUNCTUATION,
-                    String.valueOf(Punctuation.STRING),
-                    SyntaxColor.STRING, token.getOffset(), 1);
+                                         String.valueOf(Punctuation.STRING),
+                                         SyntaxColor.STRING, token.getOffset(), 1);
         }
     }
 
+    @NotNull
     private SyntaxToken maybeDefinition() {
-        SyntaxToken token = next();
-        assert token != null;
+        final SyntaxToken token = next();
         if (token.getValue().equals(Keyword.DEFINITION)) {
             tokens.add(token);
             return maybeConstant();
@@ -162,17 +184,18 @@ public class SyntaxParser {
         return token;
     }
 
+    @NotNull
+    @Contract(" -> new")
     private SyntaxToken maybeConstant() {
-        SyntaxToken token = peek();
-        assert token != null;
-        Supplier<SyntaxToken> supplier;
+        final SyntaxToken token = peek();
+        final Supplier<SyntaxToken> supplier;
         if (token.getValue().equals(Keyword.CONSTANT)) {
             tokens.add(next());
             supplier = () -> parseDefinition(constants, SyntaxColor.CONSTANT);
         } else {
             supplier = () -> parseDefinition(variables, SyntaxColor.REFERENCE);
         }
-        SyntaxToken[] tokenA = delimited(
+        final SyntaxToken[] tokenA = delimited(
                 CharInputStream.EMPTY_CHAR,
                 Punctuation.INSTRUCTION_END,
                 Punctuation.COMMA,
@@ -182,9 +205,11 @@ public class SyntaxParser {
         return new EmptySyntaxToken();
     }
 
-    private SyntaxToken parseDefinition(List<SyntaxToken> referenceList, Color color) {
-        SyntaxToken reference = next();
-        if (reference != null && reference.getType() == TokenType.IDENTIFICATION) {
+    @Nullable
+    private SyntaxToken parseDefinition(@NotNull final List<SyntaxToken> referenceList,
+                                        final Color color) {
+        final SyntaxToken reference = next();
+        if (reference.getType() == TokenType.IDENTIFICATION) {
             reference.setColor(color);
             referenceList.add(reference);
             if (isPunctuation(Punctuation.DEFINITION_DELIMITER)) {
@@ -199,8 +224,9 @@ public class SyntaxParser {
         return new EmptySyntaxToken();
     }
 
+    @NotNull
     private SyntaxToken parseIdentification() {
-        SyntaxToken token = next();
+        final SyntaxToken token = next();
         token.setColor(SyntaxColor.ERROR);
         if (insideCall) {
             unresolvedIdentifications.add(token);
@@ -208,9 +234,9 @@ public class SyntaxParser {
         return token;
     }
 
+    @NotNull
     private SyntaxToken parsePunctuation() {
-        SyntaxToken token = next();
-        assert token != null;
+        final SyntaxToken token = next();
         switch (token.getValue().toString().charAt(0)) {
             case Punctuation.DEFINITION_DELIMITER:
             case Punctuation.JUMP_DELIMITER:
@@ -233,6 +259,7 @@ public class SyntaxParser {
         }
     }
 
+    @NotNull
     private SyntaxToken peek() {
         SyntaxToken token = input.peek();
         if (token == null) {
@@ -249,8 +276,9 @@ public class SyntaxParser {
         return token;
     }
 
+    @NotNull
     private SyntaxToken next() {
-        SyntaxToken token = peek();
+        final SyntaxToken token = peek();
         input.next();
         return token;
     }
@@ -261,15 +289,14 @@ public class SyntaxParser {
      * @param expected expected punctuation
      * @return true if punctuation matches
      */
-    private boolean isPunctuation(char expected) {
-        Token token = peek();
-        return token != null
-                && (token.getType() == TokenType.PUNCTUATION)
-                && (token.getValue().equals(String.valueOf(expected)));
+    private boolean isPunctuation(final char expected) {
+        final Token token = peek();
+        return token.getType() == TokenType.PUNCTUATION
+                && token.getValue().equals(String.valueOf(expected));
     }
 
     /**
-     * Return expressions contained in the delimiters as ArrayToken
+     * Return expressions contained in the delimiters as ArrayToken.
      *
      * @param start     start character (empty char if no begin is defined)
      * @param stop      stop character
@@ -278,9 +305,13 @@ public class SyntaxParser {
      * @param skipLast  whether the stop delimiter should be skipped
      * @return Expressions in ArrayToken
      */
-    private SyntaxToken[] delimited(char start, char stop, char separator,
-                                    Supplier<SyntaxToken> parser, boolean skipLast) {
-        List<SyntaxToken> tokenList = new ArrayList<>();
+    @NotNull
+    private SyntaxToken[] delimited(final char start,
+                                    final char stop,
+                                    final char separator,
+                                    @NotNull final Supplier<SyntaxToken> parser,
+                                    final boolean skipLast) {
+        final List<SyntaxToken> tokenList = new ArrayList<>();
         if (start != CharInputStream.EMPTY_CHAR) {
             if (isPunctuation(start)) {
                 tokenList.add(parsePunctuation());

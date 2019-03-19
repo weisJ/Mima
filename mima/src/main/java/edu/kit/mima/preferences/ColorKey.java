@@ -1,6 +1,10 @@
 package edu.kit.mima.preferences;
 
+import org.jetbrains.annotations.Contract;
+
 /**
+ * Property keys for colours.
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -27,10 +31,11 @@ public enum ColorKey {
 
     private final String keyValue;
 
-    ColorKey(String keyValue) {
+    ColorKey(final String keyValue) {
         this.keyValue = keyValue;
     }
 
+    @Contract(pure = true)
     @Override
     public String toString() {
         return keyValue;
