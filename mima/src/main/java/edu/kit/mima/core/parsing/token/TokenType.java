@@ -1,6 +1,8 @@
 package edu.kit.mima.core.parsing.token;
 
 /**
+ * Possible types of {@link Token}.
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -8,76 +10,76 @@ public enum TokenType {
 
     /*Higher level types*/
     /**
-     * Program type
+     * Program type.
      */
     PROGRAM,
     /**
-     * Function type
+     * Function type.
      */
     CALL,
     /**
-     * Jump point type
+     * Jump point type.
      */
     JUMP_POINT,
 
     /*Lower level types*/
     /**
-     * Keyword type
+     * Keyword type.
      */
     KEYWORD,
     /**
-     * Punctuation type
+     * Punctuation type.
      */
     PUNCTUATION,
     /**
-     * Number type
+     * Number type.
      */
     NUMBER,
     /**
-     * Binary number type
+     * Binary number type.
      */
     BINARY,
     /**
-     * String type
+     * String type.
      */
     STRING,
     /**
-     * Comment type
+     * Comment type.
      */
     COMMENT,
     /**
-     * new line type
+     * new line type.
      */
     NEW_LINE,
 
     /**
-     * Identification type
+     * Identification type.
      */
     IDENTIFICATION,
     /**
-     * Definition type
+     * Definition type.
      */
     DEFINITION,
     /**
-     * Constant type
+     * Constant type.
      */
     CONSTANT,
 
     /*Utility types*/
     /**
-     * Array type
+     * Array type.
      */
     ARRAY,
     /**
-     * Empty type
+     * Empty type.
      */
     EMPTY,
     /**
-     * Error type. Used internally for signalling the parsing failed
+     * Error type. Used internally for signalling the parsing failed.
      */
     ERROR,
     /**
-     * End of Scope
+     * End of Scope.
      */
     SCOPE_END
 }

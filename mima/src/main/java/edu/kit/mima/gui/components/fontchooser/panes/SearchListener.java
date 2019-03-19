@@ -1,12 +1,14 @@
 package edu.kit.mima.gui.components.fontchooser.panes;
 
-import javax.swing.JTextField;
+import org.jetbrains.annotations.NotNull;
+
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.TreeSet;
+import javax.swing.JTextField;
 
 public class SearchListener extends KeyAdapter {
 
@@ -14,21 +16,21 @@ public class SearchListener extends KeyAdapter {
 
     private final FamilyPane familyPane;
 
-    public SearchListener(FamilyPane familyPane) {
+    public SearchListener(final FamilyPane familyPane) {
         this.familyPane = familyPane;
     }
 
     @Override
-    public void keyTyped(KeyEvent e) {
-        JTextField searchField = (JTextField) e.getSource();
-        String searchString = searchField.getText().toLowerCase(Locale.ENGLISH);
-        Optional<String> first = fontFamilyNames.stream()
+    public void keyTyped(@NotNull final KeyEvent e) {
+        final JTextField searchField = (JTextField) e.getSource();
+        final String searchString = searchField.getText().toLowerCase(Locale.ENGLISH);
+        final Optional<String> first = fontFamilyNames.stream()
                 .filter(family -> family.toLowerCase(Locale.ENGLISH).contains(searchString))
                 .findFirst();
         first.ifPresent(familyPane::setSelectedFamily);
     }
 
-    public void addFamilyName(String name) {
+    public void addFamilyName(final String name) {
         fontFamilyNames.add(name);
     }
 }

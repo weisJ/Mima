@@ -1,10 +1,10 @@
 package edu.kit.mima.core.data;
 
-
 import edu.kit.mima.core.Mima;
+import org.jetbrains.annotations.NotNull;
 
 /**
- * MachineWord used in {@link Mima}
+ * MachineWord used in {@link Mima}. Stores integer value with given number of bits.
  *
  * @author Jannis Weis
  * @since 2018
@@ -12,19 +12,19 @@ import edu.kit.mima.core.Mima;
 public class MachineWord {
 
     private final int wordLength;
-    /*
-     * Bits with msb at index length - 1
+    /**
+     * Bits with msb at index length - 1 and lsb at index 0.
      */
     private boolean[] bits;
 
     /**
-     * Create new MachineWord with the given number of bits
-     * bits.length must be equal to wordLength
+     * Create new MachineWord with the given number of bits bits.length must be equal to wordLength
      *
      * @param bits       bits
      * @param wordLength number of bits
      */
     public MachineWord(final boolean[] bits, final int wordLength) {
+        assert wordLength > 0;
         if (wordLength > bits.length) {
             throw new IllegalArgumentException("too many bits");
         }
@@ -34,8 +34,7 @@ public class MachineWord {
     }
 
     /**
-     * Create new MachineWord with the given number of bits
-     * bits.length must be equal to wordLength
+     * Create new MachineWord with the given number of bits bits.length must be equal to wordLength
      *
      * @param bits       bits
      * @param wordLength number of bits
@@ -52,7 +51,7 @@ public class MachineWord {
     }
 
     /**
-     * Create new MachineWord with the given number of bits
+     * Create new MachineWord with the given number of bits.
      *
      * @param value      value as integer
      * @param wordLength number of bits
@@ -63,7 +62,7 @@ public class MachineWord {
     }
 
     /**
-     * Cast the value to the given number of bits
+     * Cast the value to the given number of bits.
      *
      * @param word       machineWord to cast
      * @param wordLength length to cast to
@@ -74,31 +73,34 @@ public class MachineWord {
     }
 
     /**
-     * Get the binary representation of this machine value
+     * Get the binary representation of this machine value.
      *
      * @return binary representation beginning with the msb on the left
      */
+    @NotNull
     public String binaryRepresentation() {
-        StringBuilder sb = new StringBuilder();
-        for (boolean bit : bits) {
+        final StringBuilder sb = new StringBuilder();
+        for (final boolean bit : bits) {
             sb.append(bit ? 1 : 0);
         }
         return sb.reverse().toString();
     }
 
+    @NotNull
     @Override
     public String toString() {
         return String.valueOf(intValue());
     }
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    @NotNull
     @Override
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     public MachineWord clone() {
         return new MachineWord(bits, wordLength);
     }
 
     /**
-     * Get the number of bits
+     * Get the number of bits.
      *
      * @return number of bits
      */
@@ -107,7 +109,7 @@ public class MachineWord {
     }
 
     /**
-     * Get the bits
+     * Get the bits.
      *
      * @return bits array
      */
@@ -116,7 +118,7 @@ public class MachineWord {
     }
 
     /**
-     * Set the bits
+     * Set the bits.
      *
      * @param bits bits array
      */
@@ -125,10 +127,11 @@ public class MachineWord {
     }
 
     /**
-     * Invert all bits
+     * Invert all bits.
      *
      * @return this
      */
+    @NotNull
     public final MachineWord invert() {
         for (int i = 0; i < wordLength; i++) {
             bits[i] = !bits[i];
@@ -137,7 +140,7 @@ public class MachineWord {
     }
 
     /**
-     * Get the most significant bit value
+     * Get the most significant bit value.
      *
      * @return 1 if msb is set else 0
      */
@@ -146,7 +149,16 @@ public class MachineWord {
     }
 
     /**
-     * Get the value when interpreted as an integer
+     * Get the least significant bit value.
+     *
+     * @return 1 if lsb is set else 0.
+     */
+    public int lsb() {
+        return bits[0] ? 1 : 0;
+    }
+
+    /**
+     * Get the value when interpreted as an integer.
      *
      * @return Integer value
      */
@@ -168,7 +180,7 @@ public class MachineWord {
     }
 
     /**
-     * Set the value when interpreted as integer
+     * Set the value when interpreted as integer.
      *
      * @param value value
      */

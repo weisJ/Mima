@@ -1,6 +1,8 @@
 package edu.kit.mima.gui.components.editor.view;
 
 /**
+ * Keys for Highlighting.
+ *
  * @author Jannis Weis
  * @since 2018
  */

@@ -1,10 +1,11 @@
 package edu.kit.mima.gui.components.fontchooser.listeners;
 
 import edu.kit.mima.gui.components.fontchooser.FontContainer;
+import org.jetbrains.annotations.NotNull;
 
+import java.awt.Font;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import java.awt.Font;
 
 
 /**
@@ -14,16 +15,16 @@ public class StyleListSelectionListener implements ListSelectionListener {
 
     private final FontContainer fontContainer;
 
-    public StyleListSelectionListener(FontContainer fontContainer) {
+    public StyleListSelectionListener(final FontContainer fontContainer) {
         this.fontContainer = fontContainer;
     }
 
     @Override
-    public void valueChanged(ListSelectionEvent e) {
+    public void valueChanged(@NotNull final ListSelectionEvent e) {
         if (!e.getValueIsAdjusting()) {
-            String selectedStyle = fontContainer.getSelectedStyle();
-            Font oldFont = fontContainer.getSelectedFont();
-            Font newFont = new Font(selectedStyle, oldFont.getStyle(), oldFont.getSize());
+            final String selectedStyle = fontContainer.getSelectedStyle();
+            final Font oldFont = fontContainer.getSelectedFont();
+            final Font newFont = new Font(selectedStyle, oldFont.getStyle(), oldFont.getSize());
             fontContainer.setSelectedFont(newFont);
             fontContainer.setPreviewFont(newFont);
         }

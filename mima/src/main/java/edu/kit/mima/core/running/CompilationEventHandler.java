@@ -3,6 +3,8 @@ package edu.kit.mima.core.running;
 import edu.kit.mima.core.parsing.token.ProgramToken;
 
 /**
+ * Event handler for compilation events.
+ *
  * @author Jannis Weis
  * @since 2018
  */

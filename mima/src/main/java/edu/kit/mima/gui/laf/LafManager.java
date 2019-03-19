@@ -1,22 +1,26 @@
 package edu.kit.mima.gui.laf;
 
 import edu.kit.mima.App;
-import edu.kit.mima.gui.util.HSLColor;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
 import edu.kit.mima.preferences.UserPreferenceChangedListener;
+import edu.kit.mima.util.HSLColor;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
+import java.awt.Frame;
+import java.awt.Insets;
+import java.awt.Window;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.metal.DefaultMetalTheme;
 import javax.swing.plaf.metal.MetalLookAndFeel;
-import java.awt.Frame;
-import java.awt.Insets;
-import java.awt.Window;
 
 /**
+ * Manager for the Look and Feel.
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -24,6 +28,7 @@ public final class LafManager implements UserPreferenceChangedListener {
 
     private static final String DARK_NAME = "Dark";
     private static final String LIGHT_NAME = "Light";
+    @NotNull
     private static LafManager instance = new LafManager();
     private static String currentLaf;
 
@@ -33,19 +38,25 @@ public final class LafManager implements UserPreferenceChangedListener {
 
     private LafManager() { }
 
+    @Contract(pure = true)
     public static String getCurrentLaf() {
         return currentLaf;
     }
 
-    public static void setDefaultTheme(boolean dark) {
+    /**
+     * Set the LaF to one of the two defaults.
+     *
+     * @param dark true if dark false if light.
+     */
+    public static void setDefaultTheme(final boolean dark) {
         try {
             if (dark) {
                 UIManager.setLookAndFeel(CustomDarculaLaf.class.getCanonicalName());
             } else {
                 UIManager.setLookAndFeel(CustomDarculaLightLaf.class.getCanonicalName());
             }
-            updateLAF();
-        } catch (ClassNotFoundException
+            updateLaf();
+        } catch (@NotNull final ClassNotFoundException
                 | InstantiationException
                 | IllegalAccessException
                 | UnsupportedLookAndFeelException e) {
@@ -53,12 +64,12 @@ public final class LafManager implements UserPreferenceChangedListener {
         }
     }
 
-    private static void setTheme(String loaf) {
+    private static void setTheme(final String loaf) {
         try {
             MetalLookAndFeel.setCurrentTheme(new DefaultMetalTheme());
             UIManager.setLookAndFeel(loaf);
-            updateLAF();
-        } catch (ClassNotFoundException
+            updateLaf();
+        } catch (@NotNull final ClassNotFoundException
                 | InstantiationException
                 | IllegalAccessException
                 | UnsupportedLookAndFeelException e) {
@@ -66,22 +77,25 @@ public final class LafManager implements UserPreferenceChangedListener {
         }
     }
 
-    private static void updateLAF() {
+    private static void updateLaf() {
         installFixes();
         if (App.isInitialized()) {
-            for (Frame f : Frame.getFrames()) {
-                updateLAFRecursively(f);
+            for (final Frame f : Frame.getFrames()) {
+                updateLafRecursively(f);
             }
         }
     }
 
-    private static void updateLAFRecursively(Window window) {
-        for (Window childWindow : window.getOwnedWindows()) {
-            updateLAFRecursively(childWindow);
+    private static void updateLafRecursively(final Window window) {
+        for (final Window childWindow : window.getOwnedWindows()) {
+            updateLafRecursively(childWindow);
         }
         SwingUtilities.updateComponentTreeUI(window);
     }
 
+    /**
+     * Update the LaF.
+     */
     public static void update() {
         instance.notifyUserPreferenceChanged(PropertyKey.THEME_PATH);
     }
@@ -96,18 +110,20 @@ public final class LafManager implements UserPreferenceChangedListener {
         UIManager.put("TabbedPane.tabAreaInsets", new Insets(0, 0, 0, 0));
         UIManager.put("TabbedPane.separatorHighlight", UIManager.getColor("TabbedPane.selected"));
         UIManager.put("TabbedPane.selected",
-                new HSLColor(UIManager.getColor("TabbedPane.background")).adjustTone(20).getRGB());
+                      new HSLColor(UIManager.getColor("TabbedPane.background"))
+                              .adjustTone(20).getRGB());
         UIManager.put("Border.light",
-                new HSLColor(UIManager.getColor("TabbedPane.background")).adjustTone(30).getRGB());
+                      new HSLColor(UIManager.getColor("TabbedPane.background"))
+                              .adjustTone(30).getRGB());
         UIManager.put("Button.separator", new ColorUIResource(95, 95, 95));
         UIManager.put("swing.boldMetal", Boolean.FALSE);
     }
 
     @Override
-    public void notifyUserPreferenceChanged(PropertyKey key) {
+    public void notifyUserPreferenceChanged(final PropertyKey key) {
         if (key == PropertyKey.THEME_PATH) {
-            var pref = Preferences.getInstance();
-            String name = pref.readString(PropertyKey.THEME);
+            final var pref = Preferences.getInstance();
+            final String name = pref.readString(PropertyKey.THEME);
             currentLaf = name;
             if (name.equals(DARK_NAME)) {
                 setDefaultTheme(true);

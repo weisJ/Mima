@@ -7,6 +7,8 @@ import edu.kit.mima.core.interpretation.ValueType;
 import java.util.List;
 
 /**
+ * Utility functions for {@link Instruction}s.
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -17,26 +19,26 @@ public class InstructionTools {
     }
 
     /**
-     * Check the argument for given number of arguments
+     * Check the argument for given number of arguments.
      *
      * @param args                   arguments list
      * @param expectedArgumentNumber expected number of arguments
      */
-    public static void checkArgNumber(List<Value> args, int expectedArgumentNumber) {
+    public static void checkArgNumber(final List<Value> args, final int expectedArgumentNumber) {
         if (args.size() != expectedArgumentNumber) {
             fail("invalid number of arguments");
         }
     }
 
     /**
-     * Fetch an reference value from argument list
+     * Fetch an reference value from argument list.
      *
      * @param arguments argument list
      * @param index     index of argument
      * @return reference argument value
      */
-    public static Value getReferenceValue(List<Value> arguments, int index) {
-        var argument = arguments.get(index);
+    public static Value getReferenceValue(final List<Value> arguments, final int index) {
+        final var argument = arguments.get(index);
         if (argument.getType() != ValueType.CONSTANT && argument.getType() != ValueType.NUMBER) {
             fail("can't pass a reference");
         }
@@ -44,13 +46,15 @@ public class InstructionTools {
     }
 
     /**
-     * Check whether argument is a memory reference and if it is, whether the value is legal address
+     * Check whether argument is a memory reference and if it is, whether the value is legal
+     * address.
      *
      * @param arguments argument list
      * @param index     index of argument in list
+     * @return Value with memory reference
      */
-    public static Value getMemoryReference(List<Value> arguments, int index) {
-        var argument = arguments.get(index);
+    public static Value getMemoryReference(final List<Value> arguments, final int index) {
+        final var argument = arguments.get(index);
         if (argument == null
                 || !(argument.getType() == ValueType.NUMBER
                              || argument.getType() == ValueType.CONSTANT
@@ -65,14 +69,14 @@ public class InstructionTools {
     }
 
     /**
-     * Fetch jump reference
+     * Fetch jump reference.
      *
      * @param arguments argument list
      * @param index     index of argument in argument list
      * @return jump reference
      */
-    public static Value getJumpReference(List<Value> arguments, int index) {
-        var argument = arguments.get(index);
+    public static Value getJumpReference(final List<Value> arguments, final int index) {
+        final var argument = arguments.get(index);
         if (argument.getType() != ValueType.JUMP_REFERENCE) {
             throw new IllegalArgumentException("must pass jump reference");
         }
@@ -81,7 +85,7 @@ public class InstructionTools {
 
 
     /**
-     * Throw error with given message
+     * Throw error with given message.
      *
      * @param message fail message
      */

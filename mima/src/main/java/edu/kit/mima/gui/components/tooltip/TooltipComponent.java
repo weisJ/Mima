@@ -3,10 +3,10 @@ package edu.kit.mima.gui.components.tooltip;
 import edu.kit.mima.core.parsing.token.Tuple;
 import edu.kit.mima.core.parsing.token.ValueTuple;
 import edu.kit.mima.gui.components.Alignment;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import java.awt.AWTEvent;
 import java.awt.Dimension;
 import java.awt.MouseInfo;
@@ -16,12 +16,18 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionAdapter;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 /**
+ * Tooltip wrapper for handling the display management.
+ *
  * @author Jannis Weis
  * @since 2018
  */
-public class TooltipComponent<T extends JComponent & ITooltip> implements MouseListener, TooltipConstants {
+public class TooltipComponent<T extends JComponent & ITooltip> implements MouseListener,
+                                                                          TooltipConstants {
 
     private boolean installed;
     private boolean overContainer;
@@ -44,17 +50,18 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
      * Register a tooltip component.
      *
      * @param container      container to attach tooltip to.
-     * @param content        content of tooltip. Must be of type {@link JComponent} and implement the
-     *                       {@link ITooltip} interface.
+     * @param content        content of tooltip. Must be of type {@link JComponent} and implement
+     *                       the {@link ITooltip} interface.
      * @param delay          display delay
      * @param vanishingDelay vanishing delay or {@link TooltipConstants#PERSISTENT}.
+     * @param centerAt       one of {@link TooltipConstants}.
      */
     public TooltipComponent(
-            JComponent container,
-            T content,
-            int delay,
-            int vanishingDelay,
-            int centerAt) {
+            @NotNull final JComponent container,
+            @NotNull final T content,
+            final int delay,
+            final int vanishingDelay,
+            final int centerAt) {
         this.centerAt = centerAt >= 0 && centerAt <= 4 ? centerAt : COMPONENT_BOTH;
         this.container = container;
         this.content = content;
@@ -66,14 +73,15 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
         container.addMouseListener(this);
         content.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
-            public void mouseMoved(MouseEvent e) {
+            public void mouseMoved(@NotNull final MouseEvent e) {
                 if (overContainer) {
                     mouseExited(SwingUtilities.convertMouseEvent(content, e, container));
                 }
             }
         });
         content.addMouseListener(new EventPropagator());
-        Toolkit.getDefaultToolkit().addAWTEventListener(this::atAWTEvent, AWTEvent.MOUSE_EVENT_MASK);
+        Toolkit.getDefaultToolkit().addAWTEventListener(this::atAwtEvent,
+                                                        AWTEvent.MOUSE_EVENT_MASK);
     }
 
     /**
@@ -82,16 +90,19 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
      * @param active true if active
      * @return this
      */
-    public TooltipComponent setActive(boolean active) {
+    @NotNull
+    public TooltipComponent setActive(final boolean active) {
         this.active = active;
         return this;
     }
 
-    private void atAWTEvent(AWTEvent event) {
-        if (!active || thread == null) return;
+    private void atAwtEvent(final AWTEvent event) {
+        if (!active || thread == null) {
+            return;
+        }
         if (event instanceof MouseEvent) {
-            MouseEvent evt = (MouseEvent) event;
-            int id = evt.getID();
+            final MouseEvent evt = (MouseEvent) event;
+            final int id = evt.getID();
             if (id == MouseEvent.MOUSE_PRESSED) {
                 inside = false;
                 thread.interrupt();
@@ -111,7 +122,8 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
                             try {
                                 wait(delay);
                                 mouseEntered(evt);
-                            } catch (InterruptedException ignored) { }
+                            } catch (InterruptedException ignored) {
+                            }
                         }
                     }).start();
                 }
@@ -124,8 +136,10 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
     }
 
     @Override
-    public void mouseEntered(MouseEvent e) {
-        if (!active || (thread != null && thread.isAlive())) return;
+    public void mouseEntered(final MouseEvent e) {
+        if (!active || (thread != null && thread.isAlive())) {
+            return;
+        }
         inside = true;
         if (visible) {
             return; //Prevent flickering and iterated instantiation.
@@ -157,22 +171,25 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
                             hideTooltip();
                         }
                     }
-                } catch (InterruptedException ignored) { }
+                } catch (@NotNull final InterruptedException ignored) {
+                }
             }
         });
         thread.start();
     }
 
     @Override
-    public void mouseExited(MouseEvent e) {
-        if (!active) return;
+    public void mouseExited(@NotNull final MouseEvent e) {
+        if (!active) {
+            return;
+        }
         /*
          * As entering the tooltip causes the container to think the mouse has left we need to
          * check if it really has left. If not tooltip shouldn't be hidden.
          */
-        Point p = SwingUtilities.convertPoint(container, e.getPoint(), container.getParent());
+        final Point p = SwingUtilities.convertPoint(container, e.getPoint(), container.getParent());
         if (isOnContainer(p)) {
-            for (var ml : container.getMouseListeners()) {
+            for (final var ml : container.getMouseListeners()) {
                 //Listeners of container should also think it hasn't been exited
                 if (ml != this) {
                     ml.mouseEntered(e);
@@ -183,7 +200,7 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
             return;
         }
         //Notify listeners of container that it has been exited.
-        for (var ml : container.getMouseListeners()) {
+        for (final var ml : container.getMouseListeners()) {
             if (!(ml instanceof TooltipComponent)) {
                 ml.mouseExited(e);
             }
@@ -201,21 +218,21 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
+    public void mouseClicked(final MouseEvent e) {
     }
 
     @Override
-    public void mousePressed(MouseEvent e) {
+    public void mousePressed(final MouseEvent e) {
     }
 
     @Override
-    public void mouseReleased(MouseEvent e) {
+    public void mouseReleased(final MouseEvent e) {
     }
 
     /*
      * Checks if the given mouse position is inside of the container
      */
-    private boolean isOnContainer(Point p) {
+    private boolean isOnContainer(@NotNull final Point p) {
         return p.x > container.getX() && p.x < container.getX() + container.getWidth()
                 && p.y > container.getY() && p.y < container.getY() + container.getHeight();
     }
@@ -224,8 +241,8 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
      * Install tooltip
      */
     private void install() {
-        JPanel layer = (JPanel) container.getRootPane().getGlassPane();
-        Dimension size = container.getRootPane().getSize();
+        final JPanel layer = (JPanel) container.getRootPane().getGlassPane();
+        final Dimension size = container.getRootPane().getSize();
         if (layer.getLayout() != null) {
             layer.setLayout(null);
             layer.setPreferredSize(size);
@@ -235,11 +252,11 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
     }
 
     /**
-     * Uninstall the Tooltip
+     * Uninstall the Tooltip.
      */
     public void uninstall() {
-        var root = container.getRootPane();
-        JPanel layer = (JPanel) root.getGlassPane();
+        final var root = container.getRootPane();
+        final JPanel layer = (JPanel) root.getGlassPane();
         content.setVisible(false);
         layer.remove(content);
         layer.revalidate();
@@ -249,12 +266,12 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
     }
 
     /**
-     * Show tooltip once and then remove it.
-     * Note: the given position has to be relative to the whole screen.
+     * Show tooltip once and then remove it. Note: the given position has to be relative to the
+     * whole screen.
      *
      * @param p position to show at.
      */
-    public void showOnce(Point p) {
+    public void showOnce(final Point p) {
         showOnce = true;
         mousePos = p;
         active = true;
@@ -262,7 +279,7 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
     }
 
     /**
-     * Show Tooltip at mousePosition
+     * Show Tooltip at mousePosition.
      */
     public void showTooltip() {
         mousePos = MouseInfo.getPointerInfo().getLocation();
@@ -270,12 +287,11 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
     }
 
     /**
-     * Install tooltip and show it.
-     * If already installed show it.
+     * Install tooltip and show it. If already installed show it.
      *
      * @param mousePos Position of mouse.
      */
-    public void showTooltip(Point mousePos) {
+    public void showTooltip(final Point mousePos) {
         this.mousePos = mousePos;
         showTooltipInternal();
     }
@@ -301,11 +317,11 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
         if (!installed) {
             install();
         }
-        var root = container.getRootPane();
-        JPanel layer = (JPanel) root.getGlassPane();
-        var size = content.getPreferredSize();
-        var pa = calculatePositionIn(layer, size, mousePos);
-        Point p = pa.getFirst();
+        final var root = container.getRootPane();
+        final JPanel layer = (JPanel) root.getGlassPane();
+        final var size = content.getPreferredSize();
+        final var pa = calculatePositionIn(layer, size, mousePos);
+        final Point p = pa.getFirst();
         content.showTooltip();
         content.setBounds(p.x, p.y, size.width, size.height);
         content.setAlignment(pa.getSecond());
@@ -319,9 +335,15 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
     /*
      * Calculate the position inside the given layer
      */
-    private Tuple<Point, Alignment> calculatePositionIn(JComponent layer, Dimension size, Point mousePos) {
-        var containerPos = SwingUtilities.convertPoint(container,
-                new Point(container.getWidth() / 2, container.getHeight() / 2), layer);
+    @NotNull
+    @Contract("_, _, _ -> new")
+    private Tuple<Point, Alignment> calculatePositionIn(@NotNull final JComponent layer,
+                                                        @NotNull final Dimension size,
+                                                        @NotNull final Point mousePos) {
+        final var containerPos = SwingUtilities.convertPoint(container,
+                                                             new Point(container.getWidth() / 2,
+                                                                       container.getHeight() / 2),
+                                                             layer);
         SwingUtilities.convertPointFromScreen(mousePos, layer);
         var pos = new Point();
         switch (centerAt) {
@@ -338,6 +360,8 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
             case COMPONENT_Y_MOUSE_X:
                 pos.x = mousePos.x;
                 pos.y = containerPos.y;
+                break;
+            default:
                 break;
         }
         //Default alignment is centered if it cant hook onto the component.
@@ -386,8 +410,11 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
     /*
      * Calculate the positon based on the alignment.
      */
-    private Point posFromAlignment(Dimension size, Point relativeTo, Alignment alignment) {
-        Point p = new Point();
+    @NotNull
+    private Point posFromAlignment(@NotNull final Dimension size,
+                                   @NotNull final Point relativeTo,
+                                   @Nullable final Alignment alignment) {
+        final Point p = new Point();
         if (alignment == null) {
             return p;
         }
@@ -426,33 +453,35 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
                 break;
             case CENTER:
                 break;
+            default:
+                break;
         }
         return p;
     }
 
     private class EventPropagator extends MouseAdapter {
         @Override
-        public void mouseClicked(MouseEvent e) {
+        public void mouseClicked(final MouseEvent e) {
             if (overContainer) {
-                for (var ml : container.getMouseListeners()) {
+                for (final var ml : container.getMouseListeners()) {
                     ml.mouseClicked(e);
                 }
             }
         }
 
         @Override
-        public void mousePressed(MouseEvent e) {
+        public void mousePressed(final MouseEvent e) {
             if (overContainer) {
-                for (var ml : container.getMouseListeners()) {
+                for (final var ml : container.getMouseListeners()) {
                     ml.mousePressed(e);
                 }
             }
         }
 
         @Override
-        public void mouseReleased(MouseEvent e) {
+        public void mouseReleased(final MouseEvent e) {
             if (overContainer) {
-                for (var ml : container.getMouseListeners()) {
+                for (final var ml : container.getMouseListeners()) {
                     ml.mouseReleased(e);
                 }
             }

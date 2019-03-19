@@ -13,6 +13,8 @@ import edu.kit.mima.preferences.MimaConstants;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
 import org.apache.tika.parser.txt.CharsetDetector;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.Point;
 import java.io.BufferedInputStream;
@@ -28,14 +30,18 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
+ * Preprocessor for Mima files.
+ *
  * @author Jannis Weis
  * @since 2018
  */
 public final class PreProcessor extends Processor {
 
+    @NotNull
     private final StringBuilder processedInput;
+    @NotNull
     private final CharsetDetector charsetDetector;
-    private final Set<String> processedFiles;
+    @NotNull private final Set<String> processedFiles;
     private List<ParserException> errors;
     private boolean recursive;
     private boolean isHome = false;
@@ -46,7 +52,7 @@ public final class PreProcessor extends Processor {
      * @param inputString string to process
      * @param recursive   whether to recursively parse and input included files
      */
-    public PreProcessor(final String inputString, boolean recursive) {
+    public PreProcessor(@NotNull final String inputString, final boolean recursive) {
         super(inputString);
         this.processedInput = new StringBuilder(inputString);
         this.charsetDetector = new CharsetDetector();
@@ -56,13 +62,15 @@ public final class PreProcessor extends Processor {
     }
 
     /**
-     * PreProcessor constructor for recursive including
+     * PreProcessor constructor for recursive including.
      *
      * @param inputString    string to process
      * @param processedFiles set of processed files
      * @param isHome         whether the file to process is on the working directory
      */
-    private PreProcessor(final String inputString, final Set<String> processedFiles, boolean isHome) {
+    private PreProcessor(@NotNull final String inputString,
+                         @NotNull final Set<String> processedFiles,
+                         final boolean isHome) {
         super(inputString);
         this.processedInput = new StringBuilder(inputString);
         this.charsetDetector = new CharsetDetector();
@@ -76,12 +84,14 @@ public final class PreProcessor extends Processor {
      *
      * @return processed String.
      */
+    @NotNull
+    @Contract(" -> new")
     public Tuple<String, List<ParserException>> process() {
-        List<Point> deleteRanges = new ArrayList<>();
+        final List<Point> deleteRanges = new ArrayList<>();
         errors = new ArrayList<>();
         errors.addAll(skipError());
         while (!input.isEmpty()) {
-            int index = input.getPosition();
+            final int index = input.getPosition();
             try {
                 if (isPunctuation(Punctuation.PRE_PROC)) {
                     input.next();
@@ -89,25 +99,28 @@ public final class PreProcessor extends Processor {
                 } else {
                     input.next();
                 }
-            } catch (ParserException e) {
+            } catch (@NotNull final ParserException e) {
                 errors.add(e);
                 deleteRanges.add(new Point(index - 1, input.getPosition() - 1));
             }
         }
         deleteRanges.sort((p, q) -> Integer.compare(q.y, p.y));
-        for (Point p : deleteRanges) {
+        for (final Point p : deleteRanges) {
             processedInput.delete(p.x, p.y);
         }
         return new ValueTuple<>(processedInput.toString(), errors);
     }
 
     /**
-     * Process preprocessor statement
+     * Process preprocessor statement.
      *
      * @param beginIndex begin index of statement
-     * @return Point (x,y) where x denotes the start of the statement and y the end of statement inside file.
+     * @return Point (x,y) where x denotes the start of the statement and y the end of statement
+     *         inside file.
      */
-    private Point processStatement(int beginIndex) {
+    @NotNull
+    @Contract("_ -> new")
+    private Point processStatement(final int beginIndex) {
         if (isKeyword(Keyword.INPUT)) {
             input.next();
             processInput();
@@ -119,30 +132,31 @@ public final class PreProcessor extends Processor {
     }
 
     /**
-     * Process inputFile
+     * Process inputFile.
      */
     private void processInput() {
-        Token token = input.peek();
+        final Token token = input.peek();
         if (token != null && token.getType() == TokenType.STRING) {
             if (!recursive) {
                 input.next();
                 return;
             }
             input.next();
-            String path = token.getValue().toString();
-            String newPath = parseInputPath(path);
+            final String path = token.getValue().toString();
+            final String newPath = parseInputPath(path);
 
-            var pref = Preferences.getInstance();
-            File workingDir = new File(pref.readString(PropertyKey.DIRECTORY_WORKING));
-            File homeDir = new File(pref.readString(PropertyKey.DIRECTORY_MIMA));
+            final var pref = Preferences.getInstance();
+            final File workingDir = new File(pref.readString(PropertyKey.DIRECTORY_WORKING));
+            final File homeDir = new File(pref.readString(PropertyKey.DIRECTORY_MIMA));
             boolean success = false;
-            for (String ext : MimaConstants.EXTENSIONS) {
+            for (final String ext : MimaConstants.EXTENSIONS) {
                 if (success
-                        || (!isHome
-                                    && workingDir.exists()
-                                    && tryPath(workingDir.getAbsolutePath() + newPath + '.' + ext, false))
+                        || (!isHome && workingDir.exists()
+                                    && tryPath(workingDir.getAbsolutePath() + newPath
+                                                       + '.' + ext, false))
                         || (homeDir.exists()
-                                    && tryPath(homeDir.getAbsolutePath() + newPath + '.' + ext, true))
+                                    && tryPath(homeDir.getAbsolutePath() + newPath
+                                                       + '.' + ext, true))
                         || (tryPath(path, false))) {
                     success = true;
                 }
@@ -162,17 +176,17 @@ public final class PreProcessor extends Processor {
      * @param isHome whether current file is located inside the home directory
      * @return true if successful
      */
-    private boolean tryPath(String path, boolean isHome) {
+    private boolean tryPath(@NotNull final String path, final boolean isHome) {
         if (processedFiles.contains(path)) {
             return true;
         }
         try {
-            String file = loadFile(path);
+            final String file = loadFile(path);
             processedFiles.add(path);
 
             processedInput.append("\n#<<File = ").append(path).append(">>#\n");
-            var processed = new PreProcessor(file, processedFiles, isHome).process();
-            List<ParserException> err = processed.getSecond();
+            final var processed = new PreProcessor(file, processedFiles, isHome).process();
+            final List<ParserException> err = processed.getSecond();
             if (!err.isEmpty()) {
                 errors.add(new ProcessorException("File not found: \"" + path + "\""));
                 errors.addAll(err);
@@ -180,7 +194,7 @@ public final class PreProcessor extends Processor {
             processedInput.append(processed.getFirst());
             processedInput.append("\n#<<File>>#\n");
             return true;
-        } catch (IOException e) {
+        } catch (@NotNull final IOException e) {
             return false;
         }
     }
@@ -191,27 +205,28 @@ public final class PreProcessor extends Processor {
      * @param path path to convert
      * @return converted path
      */
-    private String parseInputPath(String path) {
-        String[] hierarchy = path.replaceAll("\\s+", "").split("\\.");
-        StringBuilder newPath = new StringBuilder();
-        for (String s : hierarchy) {
+    @NotNull
+    private String parseInputPath(@NotNull final String path) {
+        final String[] hierarchy = path.replaceAll("\\s+", "").split("\\.");
+        final StringBuilder newPath = new StringBuilder();
+        for (final String s : hierarchy) {
             newPath.append('\\').append(s);
         }
         return newPath.toString();
     }
 
     /**
-     * Load file
+     * Load file.
      *
      * @param path path to file
      * @return content of file
      * @throws IOException if file is not found or could not be loaded
      */
-    private String loadFile(String path) throws IOException {
-        String charSet = charsetDetector
+    private String loadFile(@NotNull final String path) throws IOException {
+        final String charSet = charsetDetector
                 .setText(new BufferedInputStream(new FileInputStream(path)))
                 .detect().getName();
-        try (BufferedReader reader = new BufferedReader(
+        try (final BufferedReader reader = new BufferedReader(
                 new InputStreamReader(new FileInputStream(path), charSet))) {
             return reader.lines().collect(Collectors.joining("\n"));
         }

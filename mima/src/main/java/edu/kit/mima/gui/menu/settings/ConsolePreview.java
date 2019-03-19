@@ -7,6 +7,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 
 /**
+ * Preview for {@link Console}.
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -14,6 +16,9 @@ public class ConsolePreview extends AbstractPreviewPane {
 
     private Console console;
 
+    /**
+     * Create new Console Preview.
+     */
     public ConsolePreview() {
         console = new Console();
         console.print("Test Test Console");
@@ -22,12 +27,12 @@ public class ConsolePreview extends AbstractPreviewPane {
     }
 
     @Override
-    public void setPreviewFont(Font previewFont) {
+    public void setPreviewFont(final Font previewFont) {
         console.setConsoleFont(previewFont);
     }
 
     @Override
-    public void setDimension(Dimension dimension) {
+    public void setDimension(final Dimension dimension) {
         console.setPreferredSize(dimension);
         setPreferredSize(dimension);
     }

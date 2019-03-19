@@ -1,5 +1,6 @@
 package edu.kit.mima;
 
+import edu.kit.mima.api.history.History;
 import edu.kit.mima.core.instruction.InstructionSet;
 import edu.kit.mima.core.interpretation.InterpreterException;
 import edu.kit.mima.core.running.Debugger;
@@ -14,36 +15,27 @@ import edu.kit.mima.gui.components.button.ButtonPanelBuilder;
 import edu.kit.mima.gui.components.button.IconButton;
 import edu.kit.mima.gui.components.button.RunnableIconButton;
 import edu.kit.mima.gui.components.console.Console;
-import edu.kit.mima.gui.components.console.LoadingIndicator;
 import edu.kit.mima.gui.components.editor.Editor;
 import edu.kit.mima.gui.components.editor.highlighter.MimaHighlighter;
-import edu.kit.mima.gui.components.editor.history.History;
-import edu.kit.mima.gui.components.folderDisplay.FileDisplay;
-import edu.kit.mima.gui.components.tabbedEditor.EditorTabbedPane;
+import edu.kit.mima.gui.components.folderdisplay.FileDisplay;
+import edu.kit.mima.gui.components.tabbededitor.EditorTabbedPane;
 import edu.kit.mima.gui.laf.icons.Icons;
-import edu.kit.mima.gui.loading.FileManager;
-import edu.kit.mima.gui.logging.Logger;
 import edu.kit.mima.gui.menu.Help;
 import edu.kit.mima.gui.menu.MenuBuilder;
 import edu.kit.mima.gui.menu.settings.Settings;
-import edu.kit.mima.gui.util.FileName;
 import edu.kit.mima.gui.view.MemoryTableView;
+import edu.kit.mima.loading.FileManager;
+import edu.kit.mima.logging.LoadingIndicator;
+import edu.kit.mima.logging.Logger;
 import edu.kit.mima.preferences.MimaConstants;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
 import edu.kit.mima.preferences.UserPreferenceChangedListener;
+import edu.kit.mima.util.BindingUtil;
+import edu.kit.mima.util.FileName;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JMenuBar;
-import javax.swing.JPanel;
-import javax.swing.JRadioButtonMenuItem;
-import javax.swing.JSplitPane;
-import javax.swing.KeyStroke;
-import javax.swing.UIManager;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.MatteBorder;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -56,9 +48,20 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JMenuBar;
+import javax.swing.JPanel;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JSplitPane;
+import javax.swing.KeyStroke;
+import javax.swing.UIManager;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.MatteBorder;
 
 /**
- * Mima Editor Frame
+ * Mima Editor Frame.
  *
  * @author Jannis Weis
  * @since 2018
@@ -68,25 +71,27 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
     private static final Dimension FULLSCREEN = Toolkit.getDefaultToolkit().getScreenSize();
     private static final String TITLE = "Mima-IDE";
 
-    private final MimaCompiler mimaCompiler;
-    private final MimaRunner mimaRunner;
-    private final Debugger debugger;
-    private final MemoryTableView memoryView;
+    @NotNull private final MimaCompiler mimaCompiler;
+    @NotNull private final MimaRunner mimaRunner;
+    @NotNull private final Debugger debugger;
+    @NotNull private final MemoryTableView memoryView;
 
-    private final Map<Editor, FileManager> fileManagers;
-    private final Console console;
-    private final FixedScrollTable memoryTable;
-    private final EditorTabbedPane tabbedEditor;
+    @NotNull private final Map<Editor, FileManager> fileManagers;
+    @NotNull private final Console console;
+    @NotNull private final FixedScrollTable memoryTable;
+    @NotNull private final EditorTabbedPane tabbedEditor;
     private final MimaHighlighter highlighter = new MimaHighlighter();
-    private final FileDisplay fileDisplay;
+    @NotNull private final FileDisplay fileDisplay;
     private final JPanel controlPanel = new JPanel(new BorderLayout());
 
     private Thread runThread;
 
     /**
-     * Create a new Mima UI window
+     * Create a new Mima UI window.
+     *
+     * @param filePath path of file to open
      */
-    public MimaUserInterface(String filePath) {
+    public MimaUserInterface(@Nullable final String filePath) {
         mimaCompiler = new MimaCompiler();
         mimaRunner = new MimaRunner();
         debugger = mimaRunner.debugger();
@@ -97,16 +102,16 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
         memoryTable = new FixedScrollTable(new String[]{"Address", "Value"}, 100);
         memoryView = new MemoryTableView(mimaRunner, memoryTable);
         fileDisplay = new FileDisplay();
-        debugger.addPauseListener(t -> {
-            currentEditor().markLine(t.getFilePos());
+        BindingUtil.bind(debugger, () -> {
+            currentEditor().markLine(mimaRunner.getCurrentStatement().getFilePos());
             memoryView.updateView();
-        });
+        }, Debugger.PAUSE_PROPERTY);
 
         Logger.setConsole(console);
         setupEditorPane();
         setupFileDisplay();
         startSession(filePath);
-        for (var editor : fileManagers.keySet()) {
+        for (final var editor : fileManagers.keySet()) {
             editor.setRepaint(true);
             editor.update();
         }
@@ -117,20 +122,20 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
         memoryView.updateView();
     }
 
-    private boolean isMimaFile(File file) {
-        String name = file.getName();
+    private boolean isMimaFile(@NotNull final File file) {
+        final String name = file.getName();
         return name.endsWith("." + MimaConstants.MIMA_EXTENSION)
                 || name.endsWith("." + MimaConstants.MIMA_X_EXTENSION);
     }
 
-    private void startSession(String filePath) {
+    private void startSession(@Nullable final String filePath) {
         if (filePath == null || filePath.isEmpty()) {
-            String filesString = Preferences.getInstance().readString(PropertyKey.LAST_FILE);
+            final String filesString = Preferences.getInstance().readString(PropertyKey.LAST_FILE);
             if (filesString.length() < 2) {
                 return;
             }
-            String[] files = filesString.substring(1).split("\"");
-            for (String file : files) {
+            final String[] files = filesString.substring(1).split("\"");
+            for (final String file : files) {
                 openFile(file);
             }
         } else {
@@ -138,29 +143,19 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
         }
     }
 
-    private void openFile(String path) {
-        openFile(fm -> {
-            try {
-                fm.load(path);
-            } catch (IOException e) {
-                Logger.error("Could not load file: " + e.getMessage());
-            }
-        });
-    }
-
     /**
-     * Setup general Frame properties
+     * Setup general Frame properties.
      */
     private void setupWindow() {
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             @Override
-            public void windowClosing(WindowEvent e) {
+            public void windowClosing(final WindowEvent e) {
                 quit();
             }
 
             @Override
-            public void windowActivated(WindowEvent e) {
+            public void windowActivated(final WindowEvent e) {
                 if (Settings.isOpen()) {
                     Settings.getInstance().toFront();
                     Settings.getInstance().repaint();
@@ -168,20 +163,24 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
             }
         });
         setResizable(true);
-        var dimension = new Dimension((int) FULLSCREEN.getWidth() / 2, (int) FULLSCREEN.getHeight() / 2);
+        final var dimension = new Dimension((int) FULLSCREEN.getWidth() / 2,
+                                            (int) FULLSCREEN.getHeight() / 2);
         setSize(dimension);
         setPreferredSize(dimension);
         setTitle(TITLE);
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("images/mima.png")));
+        setIconImage(
+                Toolkit.getDefaultToolkit()
+                        .getImage(getClass().getClassLoader().getResource("images/mima.png")));
     }
 
     /**
-     * Setup the MenuBar with all of its components
+     * Setup the MenuBar with all of its components.
      */
+    @NotNull
     private JMenuBar createMenu() {
-        JRadioButtonMenuItem binaryView = new JRadioButtonMenuItem("Binary View");
+        final JRadioButtonMenuItem binaryView = new JRadioButtonMenuItem("Binary View");
         //@formatter:off
-        var menu = new MenuBuilder()
+        final var menu = new MenuBuilder()
                 .addMenu("File").setMnemonic('F')
                     .addItem("New", () -> openFile(FileManager::newFile), "control N")
                     .addItem("Load", () -> openFile(FileManager::load), "control L")
@@ -206,11 +205,16 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
     }
 
     /**
-     * Setup the the action buttons
+     * Setup the the action buttons.
      */
+    @SuppressWarnings("CheckStyle")
     private void setupButtons() {
-        RunnableIconButton runButton = new RunnableIconButton(Icons.RUN_INACTIVE, Icons.RUN, Icons.RUN_ACTIVE);
-        RunnableIconButton debugButton = new RunnableIconButton(Icons.DEBUG_INACTIVE, Icons.DEBUG, Icons.DEBUG_ACTIVE);
+        final RunnableIconButton runButton = new RunnableIconButton(Icons.RUN_INACTIVE,
+                                                                    Icons.RUN,
+                                                                    Icons.RUN_ACTIVE);
+        final RunnableIconButton debugButton = new RunnableIconButton(Icons.DEBUG_INACTIVE,
+                                                                      Icons.DEBUG,
+                                                                      Icons.DEBUG_ACTIVE);
         // @formatter:off
         final JPanel buttonPanel = new ButtonPanelBuilder()
                 .addButton(new IconButton(Icons.PAUSE_INACTIVE, Icons.PAUSE))
@@ -251,7 +255,7 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
                     .setEnabled(false)
                 .addButton(new IconButton(Icons.REDO_INACTIVE, Icons.REDO))
                     .addAction(() -> currentEditor().redo()).setTooltip("Redo (Ctrl+Shift+Z)")
-                    .bindClassEnabled(History.class, () -> currentEditor().canRedo(), History.LENGTH_PROPERTY, History.POSITION_PROPERTY)
+                    .bindClassEnabled(History.class,() -> currentEditor().canRedo(), History.LENGTH_PROPERTY, History.POSITION_PROPERTY)
                     .bindEnabled(tabbedEditor, () -> currentEditor().canRedo(), EditorTabbedPane.SELECTED_TAB_PROPERTY)
                     .setEnabled(false)
                 .addSpace()
@@ -260,6 +264,9 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
         controlPanel.add(buttonPanel, BorderLayout.EAST);
     }
 
+    /*
+     * Create FileDisplay behaviour
+     */
     private void setupFileDisplay() {
         fileDisplay.setHandler(file -> {
             fileDisplay.requestFocus();
@@ -270,7 +277,7 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
                 openFile(fm -> {
                     try {
                         fm.load(file.getAbsolutePath());
-                    } catch (IOException e) {
+                    } catch (@NotNull final IOException e) {
                         Logger.error(e.getMessage());
                     }
                 });
@@ -280,37 +287,40 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
 
 
     /**
-     * Setup the editor
+     * Setup the editor.
      */
     private void setupEditorPane() {
         tabbedEditor.addTabClosedEventHandler(c -> {
-            Editor editor = (Editor) c;
+            final Editor editor = (Editor) c;
             try {
                 closeEditor(editor);
-            } catch (IOException e) {
+            } catch (@NotNull final IOException e) {
                 throw new IllegalArgumentException("didn't save");
             }
         });
         tabbedEditor.addChangeListener(e -> {
-            Editor editor = (Editor) tabbedEditor.getSelectedComponent();
-            if (editor == null) return;
+            final Editor editor = (Editor) tabbedEditor.getSelectedComponent();
+            if (editor == null) {
+                return;
+            }
             fileDisplay.setFile(new File(fileManagers.get(editor).getLastFile()));
         });
     }
 
     private void setupComponents() {
-        JSplitPane memoryConsole = new ZeroWidthSplitPane();
+        final JSplitPane memoryConsole = new ZeroWidthSplitPane();
         memoryConsole.setOrientation(JSplitPane.VERTICAL_SPLIT);
         memoryConsole.setTopComponent(memoryTable);
         memoryConsole.setBottomComponent(console);
         memoryConsole.setContinuousLayout(true);
-        JSplitPane splitPane = new ZeroWidthSplitPane();
+        final JSplitPane splitPane = new ZeroWidthSplitPane();
         splitPane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setLeftComponent(memoryConsole);
         splitPane.setRightComponent(tabbedEditor);
         controlPanel.add(fileDisplay, BorderLayout.WEST);
-        controlPanel.setBorder(new CompoundBorder(new MatteBorder(0, 0, 1, 0,
-                UIManager.getColor("Border.light")),
+        controlPanel.setBorder(new CompoundBorder(
+                new MatteBorder(0, 0, 1, 0,
+                                UIManager.getColor("Border.light")),
                 new EmptyBorder(2, 2, 2, 2)));
         add(controlPanel, BorderLayout.NORTH);
         add(splitPane, BorderLayout.CENTER);
@@ -321,39 +331,42 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
         splitPane.setContinuousLayout(true);
     }
 
-    private void closeEditor(Editor editor) throws IOException {
-        var fm = fileManagers.get(editor);
+    private void closeEditor(@NotNull final Editor editor) throws IOException {
+        final var fm = fileManagers.get(editor);
         if (fm.unsaved()) {
             fm.savePopUp(() -> {
                 throw new IllegalArgumentException("aborted");
             });
         }
         fm.close();
+        editor.close();
         fileManagers.remove(editor).getLastFile();
         if (tabbedEditor.getTabCount() <= 1) {
             //Todo disable button if no file is selected.
         }
     }
 
+    @NotNull
     private Editor openEditor() {
-        var fm = new FileManager(this, MimaConstants.EXTENSIONS);
+        final var fm = new FileManager(this, MimaConstants.EXTENSIONS);
         fm.addFileEventHandler(highlighter);
-        Editor editor = new Editor();
+        final Editor editor = new Editor();
         fileManagers.put(editor, fm);
         editor.setRepaint(false);
         editor.setHighlighter(highlighter);
         editor.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mouseClicked(final MouseEvent e) {
                 fileDisplay.setFile(new File(fm.getLastFile()));
                 EditorHotKeys.setEditor(editor);
             }
         });
-        editor.addEditEventHandler(() ->
-                fm.setText(editor.getText().replaceAll(String.format("%n"), "\n")));
+        editor.addEditEventHandler(() -> fm
+                .setText(editor.getText().replaceAll(String.format("%n"), "\n")));
         editor.useStyle(true);
         editor.update();
-        editor.useHistory(true, Preferences.getInstance().readInteger(PropertyKey.EDITOR_HISTORY_SIZE));
+        editor.useHistory(true,
+                          Preferences.getInstance().readInteger(PropertyKey.EDITOR_HISTORY_SIZE));
         editor.showCharacterLimit(80); //Todo Preference
         editor.setText(fm.getText());
         setupHotKeys(editor);
@@ -361,11 +374,11 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
     }
 
     /**
-     * Setup HotKey functionality
+     * Setup HotKey functionality.
      */
-    private void setupHotKeys(Editor editor) {
+    private void setupHotKeys(@NotNull final Editor editor) {
         EditorHotKeys.setEditor(editor);
-        for (EditorHotKeys key : EditorHotKeys.values()) {
+        for (final EditorHotKeys key : EditorHotKeys.values()) {
             editor.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
                     .put(KeyStroke.getKeyStroke(key.getAccelerator()), key.toString());
             editor.getActionMap().put(key.toString(), key);
@@ -373,12 +386,12 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
     }
 
     /**
-     * Quit the program
+     * Quit the program.
      */
     private void quit() {
         try {
-            StringBuilder openFiles = new StringBuilder("\"");
-            for (var fm : fileManagers.values()) {
+            final StringBuilder openFiles = new StringBuilder("\"");
+            for (final var fm : fileManagers.values()) {
                 if (fm.unsaved()) {
                     fm.savePopUp(() -> {
                         throw new IllegalArgumentException("aborted");
@@ -387,7 +400,7 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
                 openFiles.append(fm.getLastFile()).append("\"");
                 fm.close();
             }
-            var pref = Preferences.getInstance();
+            final var pref = Preferences.getInstance();
             pref.saveString(PropertyKey.LAST_FILE, openFiles.toString());
             pref.saveOptions();
             dispose();
@@ -395,8 +408,8 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
             Help.close();
             mimaRunner.stop();
             System.exit(0);
-        } catch (final IllegalArgumentException ignored) {
-        } catch (final IOException e) {
+        } catch (@NotNull final IllegalArgumentException ignored) {
+        } catch (@NotNull final IOException e) {
             Logger.error(e.getMessage());
         }
     }
@@ -409,12 +422,14 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
         executionAction(true);
     }
 
-    private void executionAction(boolean debug) {
+    private void executionAction(final boolean debug) {
         runThread = new Thread(() -> {
-            Logger.log("Executing program: " + FileName.shorten(currentFileManager().getLastFile()));
+            Logger.log("Executing program: "
+                               + FileName.shorten(currentFileManager().getLastFile()));
             LoadingIndicator.start("Executing", 3);
             try {
-                mimaRunner.setProgram(new Program(mimaCompiler.compile(currentEditor().getText()), getInstructionSet()));
+                mimaRunner.setProgram(new Program(mimaCompiler.compile(currentEditor().getText()),
+                                                  getInstructionSet()));
                 memoryView.updateView();
                 if (debug) {
                     debugger.setBreakpoints(currentEditor().getBreakpoints());
@@ -426,9 +441,10 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
                     mimaRunner.start(v -> LoadingIndicator.stop("Executing (done)"));
                 }
                 memoryView.updateView();
-            } catch (InterpreterException e) {
+            } catch (@NotNull final InterpreterException e) {
                 LoadingIndicator.error("Execution failed: " + e.getMessage());
-            } catch (MimaRuntimeException ignored) { }
+            } catch (@NotNull final MimaRuntimeException ignored) {
+            }
         });
         runThread.start();
     }
@@ -451,7 +467,8 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
             } else {
                 save();
             }
-        } catch (IllegalArgumentException ignored) { }
+        } catch (@NotNull final IllegalArgumentException ignored) {
+        }
     }
 
     private Editor currentEditor() {
@@ -470,17 +487,27 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
         }
     }
 
+    private void openFile(@NotNull final String path) {
+        openFile(fm -> {
+            try {
+                fm.load(path);
+            } catch (@NotNull final IOException e) {
+                Logger.error("Could not load file: " + e.getMessage());
+            }
+        });
+    }
+
     /**
-     * Wrapper function for opening a file
+     * Wrapper function for opening a file.
      *
      * @param loadAction function that loads the new file
      */
-    private void openFile(final Consumer<FileManager> loadAction) {
+    private void openFile(@NotNull final Consumer<FileManager> loadAction) {
         try {
-            Editor editor = openEditor();
-            var fm = fileManagers.get(editor);
+            final Editor editor = openEditor();
+            final var fm = fileManagers.get(editor);
             loadAction.accept(fm);
-            for (var entry : fileManagers.entrySet()) {
+            for (final var entry : fileManagers.entrySet()) {
                 if (entry.getValue() != fm
                         && entry.getValue().getLastFile().equals(fm.getLastFile())) {
                     fileManagers.remove(editor);
@@ -490,8 +517,9 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
             }
             editor.setText(fm.getText());
             String title = fm.getLastFile();
-            title = title.substring(Math.max(Math.min(title.lastIndexOf('\\') + 1, title.length() - 1), 0));
-            tabbedEditor.addTab(title, Icons.foFile(title), editor);
+            title = title.substring(Math.max(Math.min(title.lastIndexOf('\\') + 1,
+                                                      title.length() - 1), 0));
+            tabbedEditor.addTab(title, Icons.forFile(title), editor);
             afterFileChange();
             console.clear();
 
@@ -499,8 +527,8 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
             editor.resetHistory();
             editor.update();
             Logger.log("loaded: " + FileName.shorten(fm.getLastFile()));
-        } catch (final IllegalArgumentException ignored) {
-        } catch (final IllegalStateException e) {
+        } catch (@NotNull final IllegalArgumentException ignored) {
+        } catch (@NotNull final IllegalStateException e) {
             Logger.error(e.getMessage());
         }
     }
@@ -509,11 +537,11 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
      * Update window title to current file name.
      */
     private void afterFileChange() {
-        String file = currentFileManager().getLastFile();
+        final String file = currentFileManager().getLastFile();
         setTitle(TITLE + ' ' + FileName.shorten(file));
-        File parent = new File(currentFileManager().getLastFile()).getParentFile();
-        var pref = Preferences.getInstance();
-        String workDir = parent != null
+        final File parent = new File(currentFileManager().getLastFile()).getParentFile();
+        final var pref = Preferences.getInstance();
+        final String workDir = parent != null
                 ? parent.getAbsolutePath()
                 : pref.readString(PropertyKey.DIRECTORY_MIMA);
         pref.saveString(PropertyKey.DIRECTORY_WORKING, workDir);
@@ -525,6 +553,7 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
      *
      * @return the current instruction set
      */
+    @NotNull
     private InstructionSet getInstructionSet() {
         return currentFileManager().getLastExtension().equals(MimaConstants.MIMA_X_EXTENSION)
                 ? InstructionSet.MIMA_X
@@ -532,15 +561,16 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
     }
 
     /**
-     * Save current file
+     * Save current file.
      */
     private void save() {
         try {
-            String fileM = "Saving \"" + FileName.shorten(currentFileManager().getLastFile()) + "\"";
+            String fileM = "Saving \""
+                    + FileName.shorten(currentFileManager().getLastFile()) + "\"";
             LoadingIndicator.start(fileM, 3);
             currentFileManager().save();
             LoadingIndicator.stop(fileM + " (done)");
-        } catch (final IllegalArgumentException | IOException e) {
+        } catch (@NotNull final IllegalArgumentException | IOException e) {
             LoadingIndicator.error("Saving failed: " + e.getMessage());
         }
     }
@@ -554,13 +584,13 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
     }
 
     @Override
-    public void notifyUserPreferenceChanged(PropertyKey key) {
+    public void notifyUserPreferenceChanged(final PropertyKey key) {
         if (key == PropertyKey.EDITOR_HISTORY_SIZE
                 || key == PropertyKey.EDITOR_HISTORY) {
-            var pref = Preferences.getInstance();
-            for (var editor : fileManagers.keySet()) {
+            final var pref = Preferences.getInstance();
+            for (final var editor : fileManagers.keySet()) {
                 editor.useHistory(pref.readBoolean(PropertyKey.EDITOR_HISTORY),
-                        pref.readInteger(PropertyKey.EDITOR_HISTORY_SIZE));
+                                  pref.readInteger(PropertyKey.EDITOR_HISTORY_SIZE));
             }
         }
     }

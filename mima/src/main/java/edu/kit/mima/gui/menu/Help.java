@@ -8,9 +8,9 @@ import javafx.scene.web.WebView;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JFrame;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -23,9 +23,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import javax.swing.JFrame;
 
 /**
- * Help menu frame for {@link MimaUserInterface}
+ * Help menu frame for {@link MimaUserInterface}.
  *
  * @author Jannis Weis
  * @since 2018
@@ -49,13 +50,15 @@ public final class Help extends JFrame {
     private static boolean loadedFromWeb;
 
     private static JFXPanel jfxPanel;
+    @Nullable
     private static String source;
 
     /*
      * Construct the Help Screen
      */
     private Help() {
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("images/mima.png")));
+        setIconImage(Toolkit.getDefaultToolkit()
+                             .getImage(getClass().getClassLoader().getResource("images/mima.png")));
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         setSize((int) SIZE.getHeight() / 3, (int) SIZE.getWidth() / 3);
         setTitle("Help");
@@ -70,7 +73,7 @@ public final class Help extends JFrame {
     }
 
     /**
-     * Get an help screen instance
+     * Get an help screen instance.
      *
      * @return instance of Help
      */
@@ -86,14 +89,14 @@ public final class Help extends JFrame {
      *
      * @param parent parent component
      */
-    public static void showWindow(Component parent) {
-        Help s = getInstance();
+    public static void showWindow(final Component parent) {
+        final Help s = getInstance();
         s.setLocationRelativeTo(parent);
         s.setVisible(true);
     }
 
     /**
-     * Hide window instance
+     * Hide window instance.
      */
     public static void hideWindow() {
         getInstance().setVisible(false);
@@ -102,17 +105,20 @@ public final class Help extends JFrame {
     private static void showHtml(final String htmlSource) {
         Platform.runLater(() -> {
             final WebView webView = new WebView();
-            webView.getEngine().loadContent("<html><body text=\"#D8D8D8\" "
-                    + "bgcolor=\"#3c3f41\""
-                    + "style='font-family: Menlo,Monaco,Consolas,\"Liberation Mono\",\"Courier New\",monospace'>"
-                    + htmlSource
-                    + "</body></html>");
+            webView.getEngine().loadContent(
+                    "<html><body text=\"#D8D8D8\" "
+                            + "bgcolor=\"#3c3f41\""
+                            + "style='font-family: "
+                            + "Menlo,Monaco,Consolas,\"Liberation Mono\",\"Courier New\","
+                            + "monospace'>"
+                            + htmlSource
+                            + "</body></html>");
             jfxPanel.setScene(new Scene(webView));
         });
     }
 
     /**
-     * Close the Help Window
+     * Close the Help Window.
      */
     public static void close() {
         if (loadSource != null) {
@@ -136,9 +142,8 @@ public final class Help extends JFrame {
     }
 
     /*
-     * Load ReadME from github
+     * Load ReadMe from github
      */
-    @SuppressWarnings("OverlyBroadCatchBlock")
     private @Nullable String loadMarkdown() {
         try {
             final URLConnection urlConnection = new URL(HELP_WEB).openConnection();
@@ -153,7 +158,7 @@ public final class Help extends JFrame {
                 loadedFromWeb = true;
                 return markdown;
             }
-        } catch (IOException e) {
+        } catch (@NotNull final IOException e) {
             return (source == null) ? loadFallback() : null;
         }
     }
@@ -161,11 +166,13 @@ public final class Help extends JFrame {
     /*
      * Load local fallback option
      */
+    @Nullable
     private String loadFallback() {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(
-                Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(HELP_LOCAL)), ENCODING))) {
+                Objects.requireNonNull(
+                        getClass().getClassLoader().getResourceAsStream(HELP_LOCAL)), ENCODING))) {
             return reader.lines().collect(Collectors.joining("\n"));
-        } catch (IOException e) {
+        } catch (@NotNull final IOException e) {
             return null;
         }
     }
@@ -183,7 +190,7 @@ public final class Help extends JFrame {
             try {
                 Thread.sleep(RETRY_TIMEOUT);
                 attempts++;
-            } catch (final InterruptedException e) {
+            } catch (@NotNull final InterruptedException e) {
                 alive = false;
             }
         }

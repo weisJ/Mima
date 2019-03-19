@@ -1,8 +1,9 @@
 package edu.kit.mima.core.interpretation;
 
 /**
- * Used as return value in {@link Interpreter}
+ * Value that has a {@link ValueType} and holds value.
  *
+ * @param <T> Type of value.
  * @author Jannis Weis
  * @since 2018
  */
@@ -12,18 +13,18 @@ public class Value<T> {
     private final T value;
 
     /**
-     * create Value with given type and content
+     * create Value with given type and content.
      *
      * @param type  type of value
      * @param value value content
      */
-    public Value(ValueType type, T value) {
+    public Value(final ValueType type, final T value) {
         this.type = type;
         this.value = value;
     }
 
     /**
-     * Get the value content
+     * Get the value content.
      *
      * @return value
      */
@@ -32,7 +33,7 @@ public class Value<T> {
     }
 
     /**
-     * Get the value type
+     * Get the value type.
      *
      * @return value type
      */

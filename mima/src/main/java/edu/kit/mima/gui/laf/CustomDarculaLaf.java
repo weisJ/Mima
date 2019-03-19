@@ -7,21 +7,10 @@ import com.bulenkov.iconloader.util.ColorUtil;
 import com.bulenkov.iconloader.util.EmptyIcon;
 import com.bulenkov.iconloader.util.StringUtil;
 import com.bulenkov.iconloader.util.SystemInfo;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import sun.awt.AppContext;
 
-import javax.swing.Icon;
-import javax.swing.InputMap;
-import javax.swing.KeyStroke;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
-import javax.swing.plaf.ColorUIResource;
-import javax.swing.plaf.IconUIResource;
-import javax.swing.plaf.InsetsUIResource;
-import javax.swing.plaf.basic.BasicLookAndFeel;
-import javax.swing.plaf.metal.MetalLookAndFeel;
-import javax.swing.text.DefaultEditorKit;
-import javax.swing.text.html.HTMLEditorKit;
-import javax.swing.text.html.StyleSheet;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.InputEvent;
@@ -37,15 +26,31 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+import javax.swing.Icon;
+import javax.swing.InputMap;
+import javax.swing.KeyStroke;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
+import javax.swing.plaf.ColorUIResource;
+import javax.swing.plaf.IconUIResource;
+import javax.swing.plaf.InsetsUIResource;
+import javax.swing.plaf.basic.BasicLookAndFeel;
+import javax.swing.plaf.metal.MetalLookAndFeel;
+import javax.swing.text.DefaultEditorKit;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
 
 /**
- * @author Jannis Weis
- * @since 2018
+ * CustomDarcula Look and Feel to allow for better extension.
  */
+@SuppressWarnings({"CheckStyle", "deprecation"})
 public class CustomDarculaLaf extends BasicLookAndFeel {
     public static final String NAME = "Darcula";
     BasicLookAndFeel base;
 
+    /**
+     * Create Custom Darcula LaF.
+     */
     public CustomDarculaLaf() {
         try {
             if (SystemInfo.isWindows || SystemInfo.isLinux) {
@@ -55,18 +60,12 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
                 final String name = UIManager.getSystemLookAndFeelClassName();
                 base = (BasicLookAndFeel) Class.forName(name).newInstance();
             }
-        } catch (Exception ignore) {
-            log(ignore);
+        } catch (@NotNull final Exception ignored) {
         }
     }
 
-    @SuppressWarnings("UnusedParameters")
-    private static void log(Throwable e) {
-        //everything is gonna be alright
-        //e.printStackTrace();
-    }
-
-    private static void patchComboBox(UIDefaults metalDefaults, UIDefaults defaults) {
+    private static void patchComboBox(@NotNull final UIDefaults metalDefaults,
+                                      @NotNull final UIDefaults defaults) {
         defaults.remove("ComboBox.ancestorInputMap");
         defaults.remove("ComboBox.actionMap");
         defaults.put("ComboBox.ancestorInputMap", metalDefaults.get("ComboBox.ancestorInputMap"));
@@ -76,45 +75,47 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
     @SuppressWarnings("IOResourceOpenedButNotSafelyClosed")
     private static void patchStyledEditorKit() {
         try {
-            StyleSheet defaultStyles = new StyleSheet();
-            InputStream is = DarculaLaf.class.getResourceAsStream("darcula.css");
-            Reader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+            final StyleSheet defaultStyles = new StyleSheet();
+            final InputStream is = DarculaLaf.class.getResourceAsStream("darcula.css");
+            final Reader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             defaultStyles.loadRules(r, null);
             r.close();
             final Field keyField = HTMLEditorKit.class.getDeclaredField("DEFAULT_STYLES_KEY");
             keyField.setAccessible(true);
             final Object key = keyField.get(null);
             AppContext.getAppContext().put(key, defaultStyles);
-        } catch (Throwable e) {
-            log(e);
+        } catch (@NotNull final Throwable ignore) {
         }
     }
 
-    private static Object parseValue(String key, String value) {
+    @Nullable
+    private static Object parseValue(@NotNull final String key, @NotNull final String value) {
         if ("null".equals(value)) {
             return null;
         }
         if (key.endsWith("Insets")) {
             final List<String> numbers = StringUtil.split(value, ",");
             return new InsetsUIResource(Integer.parseInt(numbers.get(0)),
-                    Integer.parseInt(numbers.get(1)),
-                    Integer.parseInt(numbers.get(2)),
-                    Integer.parseInt(numbers.get(3)));
+                                        Integer.parseInt(numbers.get(1)),
+                                        Integer.parseInt(numbers.get(2)),
+                                        Integer.parseInt(numbers.get(3)));
         } else if (key.endsWith(".border")) {
             try {
                 return Class.forName(value).newInstance();
-            } catch (Exception e) {log(e);}
+            } catch (@NotNull final Exception ignored) {
+            }
         } else {
             final Color color = ColorUtil.fromHex(value, null);
             final Integer invVal = getInteger(value);
-            final Boolean boolVal = "true".equals(value) ? Boolean.TRUE : "false".equals(value) ? Boolean.FALSE : null;
-            Icon icon = key.toLowerCase().endsWith("icon") ? null : null; //TODO: copy image loading
+            final Boolean boolVal = "true".equals(value)
+                    ? Boolean.TRUE
+                    : "false".equals(value) ? Boolean.FALSE : null;
+            //TODO: copy image loading
+            final Icon icon = key.toLowerCase().endsWith("icon") ? null : null;
             if (color != null) {
                 return new ColorUIResource(color);
             } else if (invVal != null) {
                 return invVal;
-            } else if (icon != null) {
-                return new IconUIResource(icon);
             } else if (boolVal != null) {
                 return boolVal;
             }
@@ -122,68 +123,99 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
         return value;
     }
 
-    private static Integer getInteger(String value) {
+    @Nullable
+    private static Integer getInteger(@NotNull final String value) {
         try {
             return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
+        } catch (@NotNull final NumberFormatException e) {
             return null;
         }
     }
 
     @SuppressWarnings({"HardCodedStringLiteral"})
-    public static void initInputMapDefaults(UIDefaults defaults) {
+    public static void initInputMapDefaults(final UIDefaults defaults) {
         // Make ENTER work in JTrees
-        InputMap treeInputMap = (InputMap) defaults.get("Tree.focusInputMap");
-        if (treeInputMap != null) { // it's really possible. For example,  GTK+ doesn't have such map
+        final InputMap treeInputMap = (InputMap) defaults.get("Tree.focusInputMap");
+        if (treeInputMap != null) {
+            // it's really possible. For example,  GTK+ doesn't have such map
             treeInputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "toggle");
         }
         // Cut/Copy/Paste in JTextAreas
-        InputMap textAreaInputMap = (InputMap) defaults.get("TextArea.focusInputMap");
-        if (textAreaInputMap != null) { // It really can be null, for example when LAF isn't properly initialized (Alloy license problem)
+        final InputMap textAreaInputMap = (InputMap) defaults.get("TextArea.focusInputMap");
+        if (textAreaInputMap != null) {
+            // It really can be null, for example when LAF isn't properly initialized
+            // (Alloy license problem)
             installCutCopyPasteShortcuts(textAreaInputMap, false);
         }
         // Cut/Copy/Paste in JTextFields
-        InputMap textFieldInputMap = (InputMap) defaults.get("TextField.focusInputMap");
-        if (textFieldInputMap != null) { // It really can be null, for example when LAF isn't properly initialized (Alloy license problem)
+        final InputMap textFieldInputMap = (InputMap) defaults.get("TextField.focusInputMap");
+        if (textFieldInputMap != null) {
+            // It really can be null, for example when LAF isn't properly initialized
+            // (Alloy license problem)
             installCutCopyPasteShortcuts(textFieldInputMap, false);
         }
         // Cut/Copy/Paste in JPasswordField
-        InputMap passwordFieldInputMap = (InputMap) defaults.get("PasswordField.focusInputMap");
-        if (passwordFieldInputMap != null) { // It really can be null, for example when LAF isn't properly initialized (Alloy license problem)
+        final InputMap passwordFieldInputMap = (InputMap) defaults
+                .get("PasswordField.focusInputMap");
+        if (passwordFieldInputMap != null) {
+            // It really can be null, for example when LAF isn't properly initialized
+            // (Alloy license problem)
             installCutCopyPasteShortcuts(passwordFieldInputMap, false);
         }
         // Cut/Copy/Paste in JTables
-        InputMap tableInputMap = (InputMap) defaults.get("Table.ancestorInputMap");
-        if (tableInputMap != null) { // It really can be null, for example when LAF isn't properly initialized (Alloy license problem)
+        final InputMap tableInputMap = (InputMap) defaults.get("Table.ancestorInputMap");
+        if (tableInputMap != null) {
+            // It really can be null, for example when LAF isn't properly initialized
+            // (Alloy license problem)
             installCutCopyPasteShortcuts(tableInputMap, true);
         }
     }
 
-    private static void installCutCopyPasteShortcuts(InputMap inputMap, boolean useSimpleActionKeys) {
-        String copyActionKey = useSimpleActionKeys ? "copy" : DefaultEditorKit.copyAction;
-        String pasteActionKey = useSimpleActionKeys ? "paste" : DefaultEditorKit.pasteAction;
-        String cutActionKey = useSimpleActionKeys ? "cut" : DefaultEditorKit.cutAction;
+    private static void installCutCopyPasteShortcuts(@NotNull final InputMap inputMap,
+                                                     final boolean useSimpleActionKeys) {
+        final String copyActionKey = useSimpleActionKeys ? "copy" : DefaultEditorKit.copyAction;
+        final String pasteActionKey = useSimpleActionKeys ? "paste" : DefaultEditorKit.pasteAction;
+        final String cutActionKey = useSimpleActionKeys ? "cut" : DefaultEditorKit.cutAction;
         // Ctrl+Ins, Shift+Ins, Shift+Del
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, InputEvent.CTRL_MASK | InputEvent.CTRL_DOWN_MASK), copyActionKey);
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, InputEvent.SHIFT_MASK | InputEvent.SHIFT_DOWN_MASK), pasteActionKey);
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, InputEvent.SHIFT_MASK | InputEvent.SHIFT_DOWN_MASK), cutActionKey);
+        inputMap.put(
+                KeyStroke.getKeyStroke(KeyEvent.VK_INSERT,
+                                       InputEvent.CTRL_MASK | InputEvent.CTRL_DOWN_MASK),
+                copyActionKey);
+        inputMap.put(
+                KeyStroke.getKeyStroke(KeyEvent.VK_INSERT,
+                                       InputEvent.SHIFT_MASK | InputEvent.SHIFT_DOWN_MASK),
+                pasteActionKey);
+        inputMap.put(
+                KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,
+                                       InputEvent.SHIFT_MASK | InputEvent.SHIFT_DOWN_MASK),
+                cutActionKey);
         // Ctrl+C, Ctrl+V, Ctrl+X
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK | InputEvent.CTRL_DOWN_MASK), copyActionKey);
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK | InputEvent.CTRL_DOWN_MASK), pasteActionKey);
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_MASK | InputEvent.CTRL_DOWN_MASK), DefaultEditorKit.cutAction);
+        inputMap.put(
+                KeyStroke.getKeyStroke(KeyEvent.VK_C,
+                                       InputEvent.CTRL_MASK | InputEvent.CTRL_DOWN_MASK),
+                copyActionKey);
+        inputMap.put(
+                KeyStroke.getKeyStroke(KeyEvent.VK_V,
+                                       InputEvent.CTRL_MASK | InputEvent.CTRL_DOWN_MASK),
+                pasteActionKey);
+        inputMap.put(
+                KeyStroke.getKeyStroke(KeyEvent.VK_X,
+                                       InputEvent.CTRL_MASK | InputEvent.CTRL_DOWN_MASK),
+                DefaultEditorKit.cutAction);
     }
 
+    @NotNull
     protected String getPrefix() {
         return "darcula";
     }
 
-    private void callInit(String method, UIDefaults defaults) {
+    private void callInit(@NotNull final String method, final UIDefaults defaults) {
         try {
-            final Method superMethod = BasicLookAndFeel.class.getDeclaredMethod(method, UIDefaults.class);
+            final Method superMethod = BasicLookAndFeel.class
+                    .getDeclaredMethod(method, UIDefaults.class);
             superMethod.setAccessible(true);
             superMethod.invoke(base, defaults);
-        } catch (Exception ignore) {
-            log(ignore);
+        } catch (@NotNull final Exception ignore) {
         }
     }
 
@@ -216,28 +248,26 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
                 defaults.put("MenuUI", "javax.swing.plaf.basic.BasicMenuUI");
             }
             return defaults;
-        } catch (Exception ignore) {
-            log(ignore);
+        } catch (@NotNull final Exception ignore) {
         }
         return super.getDefaults();
     }
 
-    private void call(String method) {
+    private void call(@NotNull final String method) {
         try {
             final Method superMethod = BasicLookAndFeel.class.getDeclaredMethod(method);
             superMethod.setAccessible(true);
             superMethod.invoke(base);
-        } catch (Exception ignore) {
-            log(ignore);
+        } catch (@NotNull final Exception ignore) {
         }
     }
 
-    public void initComponentDefaults(UIDefaults defaults) {
+    public void initComponentDefaults(final UIDefaults defaults) {
         callInit("initComponentDefaults", defaults);
     }
 
     @SuppressWarnings({"HardCodedStringLiteral"})
-    void initIdeaDefaults(UIDefaults defaults) {
+    void initIdeaDefaults(@NotNull final UIDefaults defaults) {
         loadDefaults(defaults);
         defaults.put("Table.ancestorInputMap", new UIDefaults.LazyInputMap(new Object[]{
                 "ctrl C", "copy",
@@ -292,27 +322,32 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
         }));
     }
 
-    private void loadDefaults(UIDefaults defaults) {
+    private void loadDefaults(@NotNull final UIDefaults defaults) {
         final Properties properties = new Properties();
-        final String osSuffix = SystemInfo.isMac ? "mac" : SystemInfo.isWindows ? "windows" : "linux";
+        final String osSuffix = SystemInfo.isMac
+                ? "mac" : SystemInfo.isWindows ? "windows" : "linux";
         try {
-            InputStream stream = CustomDarculaLaf.class.getResourceAsStream(getPrefix() + ".properties");
+            InputStream stream = CustomDarculaLaf.class
+                    .getResourceAsStream(getPrefix() + ".properties");
             properties.load(stream);
             stream.close();
 
-            stream = CustomDarculaLaf.class.getResourceAsStream(getPrefix() + "_" + osSuffix + ".properties");
+            stream = CustomDarculaLaf.class
+                    .getResourceAsStream(getPrefix() + "_" + osSuffix + ".properties");
             properties.load(stream);
             stream.close();
 
-            HashMap<String, Object> darculaGlobalSettings = new HashMap<>();
+            final HashMap<String, Object> darculaGlobalSettings = new HashMap<>();
             final String prefix = "darcula.";
-            for (String key : properties.stringPropertyNames()) {
+            for (final String key : properties.stringPropertyNames()) {
                 if (key.startsWith(prefix)) {
-                    darculaGlobalSettings.put(key.substring(prefix.length()), parseValue(key, properties.getProperty(key)));
+                    darculaGlobalSettings
+                            .put(key.substring(prefix.length()),
+                                 parseValue(key, properties.getProperty(key)));
                 }
             }
 
-            for (Object key : defaults.keySet()) {
+            for (final Object key : defaults.keySet()) {
                 if (key instanceof String && ((String) key).contains(".")) {
                     final String s = (String) key;
                     final String darculaKey = s.substring(s.lastIndexOf('.') + 1);
@@ -322,23 +357,27 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
                 }
             }
 
-            for (String key : properties.stringPropertyNames()) {
+            for (final String key : properties.stringPropertyNames()) {
                 final String value = properties.getProperty(key);
                 defaults.put(key, parseValue(key, value));
             }
-        } catch (IOException e) {log(e);}
+        } catch (@NotNull final IOException ignored) {
+        }
     }
 
+    @NotNull
     @Override
     public String getName() {
         return NAME;
     }
 
+    @NotNull
     @Override
     public String getID() {
         return getName();
     }
 
+    @NotNull
     @Override
     public String getDescription() {
         return "IntelliJ Dark Look and Feel";
@@ -355,12 +394,12 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
     }
 
     @Override
-    protected void initSystemColorDefaults(UIDefaults defaults) {
+    protected void initSystemColorDefaults(final UIDefaults defaults) {
         callInit("initSystemColorDefaults", defaults);
     }
 
     @Override
-    protected void initClassDefaults(UIDefaults defaults) {
+    protected void initClassDefaults(final UIDefaults defaults) {
         callInit("initClassDefaults", defaults);
     }
 
@@ -375,16 +414,16 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
     }
 
     @Override
-    protected void loadSystemColors(UIDefaults defaults, String[] systemColors, boolean useNative) {
+    protected void loadSystemColors(final UIDefaults defaults, final String[] systemColors,
+                                    final boolean useNative) {
         try {
             final Method superMethod = BasicLookAndFeel.class.getDeclaredMethod("loadSystemColors",
-                    UIDefaults.class,
-                    String[].class,
-                    boolean.class);
+                                                                                UIDefaults.class,
+                                                                                String[].class,
+                                                                                boolean.class);
             superMethod.setAccessible(true);
             superMethod.invoke(base, defaults, systemColors, useNative);
-        } catch (Exception ignore) {
-            log(ignore);
+        } catch (@NotNull final Exception ignore) {
         }
     }
 

@@ -1,6 +1,11 @@
 package edu.kit.mima.gui.components;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+
 /**
+ * Alignment for GUI elements.
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -20,6 +25,8 @@ public enum Alignment {
      *
      * @return Alignment opposite on the compass.
      */
+    @Contract(pure = true)
+    @NotNull
     public Alignment opposite() {
         switch (this) {
             case NORTH:

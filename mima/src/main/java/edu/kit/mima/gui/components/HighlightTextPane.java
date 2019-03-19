@@ -1,13 +1,10 @@
 package edu.kit.mima.gui.components;
 
-import edu.kit.mima.gui.util.DocumentUtil;
-import edu.kit.mima.gui.util.HSLColor;
+import edu.kit.mima.util.DocumentUtil;
+import edu.kit.mima.util.HSLColor;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JTextPane;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.text.BadLocationException;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
@@ -16,8 +13,15 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.JTextPane;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.text.BadLocationException;
 
 /**
+ * Text Pane that supports line highlighting and visual hints.
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -25,26 +29,25 @@ public class HighlightTextPane extends JTextPane implements ChangeListener {
     private static final Color SELECTION_COLOR = new HSLColor(new JTextPane().getSelectionColor())
             .adjustShade(20).adjustSaturation(60).getRGB();
     private final Component container;
-    private final Map<Integer, Color> markings;
-    private int yOff;
-    private int xOff;
+    @NotNull private final Map<Integer, Color> markings;
+    private int yoff;
+    private int xoff;
     private boolean lineSelected;
-    private Point selectionStart;
-    private Point selectionEnd;
+    @Nullable private Point selectionStart;
+    @Nullable private Point selectionEnd;
     private int vertLine;
 
     /**
-     * TextPane that can implements better selection highlighting and
-     * allows for a vertical guiding line.
-     * Also lines can be individually coloured.
+     * TextPane that can implements better selection highlighting and allows for a vertical guiding
+     * line. Also lines can be individually coloured.
      *
      * @param container parent container.
      */
-    public HighlightTextPane(Component container) {
+    public HighlightTextPane(final Component container) {
         this.container = container;
         setBorder(new EmptyBorder(0, 7, 0, 7));
         setOpaque(false);
-        yOff = -1;
+        yoff = -1;
         vertLine = 0;
         selectionStart = null;
         selectionEnd = null;
@@ -59,7 +62,7 @@ public class HighlightTextPane extends JTextPane implements ChangeListener {
      * @return offset in pixels to start of line.
      */
     public int getYOff() {
-        return yOff;
+        return yoff;
     }
 
     /**
@@ -68,32 +71,32 @@ public class HighlightTextPane extends JTextPane implements ChangeListener {
      * @return offset in pixels.
      */
     public int getXOff() {
-        return xOff;
+        return xoff;
     }
 
     /**
-     * Set the number of characters to draw the vertical line at
+     * Set the number of characters to draw the vertical line at.
      *
      * @param characters number of characters
      */
-    public void setVertLine(int characters) {
+    public void setVertLine(final int characters) {
         if (characters <= 0) {
             vertLine = 0;
             return;
         }
-        var metrics = new FontMetrics(getFont()) {
+        final var metrics = new FontMetrics(getFont()) {
         };
-        var bounds = metrics.getStringBounds("0".repeat(characters), getGraphics());
+        final var bounds = metrics.getStringBounds("0".repeat(characters), getGraphics());
         vertLine = (int) bounds.getWidth();
     }
 
     @Override
-    public void paintComponent(final Graphics g) {
+    public void paintComponent(@NotNull final Graphics g) {
         g.setColor(getBackground());
         g.fillRect(0, 0, this.getWidth(), this.getHeight());
-        int height = g.getFontMetrics(getFont()).getHeight();
+        final int height = g.getFontMetrics(getFont()).getHeight();
         drawLineHighlight(g, height);
-        for (var entry : markings.entrySet()) {
+        for (final var entry : markings.entrySet()) {
             drawMarking(g, entry.getValue(), entry.getKey(), height);
         }
         drawSelection(g, height);
@@ -104,34 +107,34 @@ public class HighlightTextPane extends JTextPane implements ChangeListener {
     /*
      * Highlight background of current line
      */
-    private void drawLineHighlight(Graphics g, int height) {
-        if (yOff >= 0) {
+    private void drawLineHighlight(@NotNull final Graphics g, final int height) {
+        if (yoff >= 0) {
             g.setColor(new HSLColor(getBackground()).adjustTone(20).getRGB());
-            g.fillRect(0, yOff, getWidth(), height);
+            g.fillRect(0, yoff, getWidth(), height);
         }
     }
 
     /*
      * Paint background of selection
      */
-    private void drawSelection(Graphics g, int height) {
+    private void drawSelection(@NotNull final Graphics g, final int height) {
         if (selectionStart != null && (!selectionStart.equals(selectionEnd) || lineSelected)) {
             if (selectionStart.y > selectionEnd.y) {
-                var tmp = selectionEnd;
+                final var tmp = selectionEnd;
                 selectionEnd = selectionStart;
                 selectionStart = tmp;
             }
             g.setColor(SELECTION_COLOR);
             if (selectionStart.y == selectionEnd.y) {
-                int w = lineSelected ? getWidth() : selectionEnd.x - selectionStart.x;
+                final int w = lineSelected ? getWidth() : selectionEnd.x - selectionStart.x;
                 g.fillRect(selectionStart.x, selectionStart.y, w, height);
             } else {
                 g.fillRect(selectionStart.x, selectionStart.y,
-                        getWidth() - selectionStart.x, height);
+                           getWidth() - selectionStart.x, height);
                 for (int y = selectionStart.y + height; y < selectionEnd.y; y += height) {
-                    g.fillRect(xOff, y, getWidth(), height);
+                    g.fillRect(xoff, y, getWidth(), height);
                 }
-                g.fillRect(xOff, selectionEnd.y, selectionEnd.x, height);
+                g.fillRect(xoff, selectionEnd.y, selectionEnd.x, height);
             }
         }
     }
@@ -139,18 +142,20 @@ public class HighlightTextPane extends JTextPane implements ChangeListener {
     /*
      * Highlight the background of line in given colour.
      */
-    private void drawMarking(Graphics g, Color c, int index, int height) {
+    private void drawMarking(@NotNull final Graphics g, final Color c,
+                             final int index, final int height) {
         try {
-            var view = modelToView2D(DocumentUtil.getLineStartOffset(this, index));
+            final var view = modelToView2D(DocumentUtil.getLineStartOffset(this, index));
             g.setColor(c);
             g.fillRect(0, (int) view.getY(), getWidth(), height);
-        } catch (NullPointerException | BadLocationException ignored) { }
+        } catch (@NotNull final NullPointerException | BadLocationException ignored) {
+        }
     }
 
     /*
      * Draw the vertical character limit line
      */
-    private void drawVertLine(Graphics g) {
+    private void drawVertLine(@NotNull final Graphics g) {
         if (vertLine > 0) {
             g.setColor(new HSLColor(getBackground()).adjustTone(30).getRGB());
             g.drawLine(vertLine, 0, vertLine, getHeight());
@@ -162,32 +167,36 @@ public class HighlightTextPane extends JTextPane implements ChangeListener {
      */
     private void updateSelectionView() {
         try {
-            var firstView = modelToView2D(0);
-            xOff = firstView == null ? 0 : (int) firstView.getX();
-            var view = modelToView2D(getSelectionStart());
-            var endView = modelToView2D(getSelectionEnd());
-            selectionStart = view == null ? null : new Point((int) view.getX(), (int) view.getY());
-            selectionEnd = endView == null ? null : new Point((int) endView.getX(), (int) endView.getY());
-            yOff = endView == null ? -1 : (int) endView.getY();
-        } catch (NullPointerException | BadLocationException ignored) {
-            yOff = -1;
-            xOff = 0;
+            final var firstView = modelToView2D(0);
+            xoff = firstView == null ? 0 : (int) firstView.getX();
+            final var view = modelToView2D(getSelectionStart());
+            final var endView = modelToView2D(getSelectionEnd());
+            selectionStart = view == null ? null
+                    : new Point((int) view.getX(), (int) view.getY());
+            selectionEnd = endView == null ? null
+                    : new Point((int) endView.getX(), (int) endView.getY());
+            yoff = endView == null ? -1 : (int) endView.getY();
+        } catch (@NotNull final NullPointerException | BadLocationException ignored) {
+            yoff = -1;
+            xoff = 0;
         }
         lineSelected = false;
     }
 
+    @Nullable
     @Override
     public Color getSelectedTextColor() {
         return null;
     }
 
+    @NotNull
     @Override
     public Color getSelectionColor() {
         return new Color(0, 0, 0, 0);
     }
 
     @Override
-    public void stateChanged(ChangeEvent e) {
+    public void stateChanged(@NotNull final ChangeEvent e) {
         if (e.getSource() == getCaret()) {
             updateSelectionView();
             container.repaint();
@@ -195,7 +204,7 @@ public class HighlightTextPane extends JTextPane implements ChangeListener {
     }
 
     @Override
-    public void setFont(Font font) {
+    public void setFont(final Font font) {
         super.setFont(font);
         repaint();
         updateSelectionView();
@@ -207,16 +216,16 @@ public class HighlightTextPane extends JTextPane implements ChangeListener {
      * @param lineIndex index of line to mark
      * @param color     marking colour.
      */
-    public void markLine(int lineIndex, Color color) {
+    public void markLine(final int lineIndex, final Color color) {
         markings.put(lineIndex, color);
     }
 
     /**
-     * Remove Marking from line
+     * Remove Marking from line.
      *
      * @param lineIndex index of line to remove marking from
      */
-    public void unmarkLine(int lineIndex) {
+    public void unmarkLine(final int lineIndex) {
         markings.remove(lineIndex);
     }
 
@@ -225,7 +234,7 @@ public class HighlightTextPane extends JTextPane implements ChangeListener {
      *
      * @param lineIndex index of line to select.
      */
-    public void selectLine(int lineIndex) {
+    public void selectLine(final int lineIndex) {
         if (lineIndex < 0) {
             setCaretPosition(getCaretPosition());
             moveCaretPosition(getCaretPosition());
@@ -233,13 +242,13 @@ public class HighlightTextPane extends JTextPane implements ChangeListener {
         try {
             try {
                 setCaretPosition(DocumentUtil.getLineStartOffset(this, lineIndex + 1) - 1);
-            } catch (BadLocationException e) {
+            } catch (@NotNull final BadLocationException e) {
                 setCaretPosition(getDocument().getLength());
             }
             moveCaretPosition(DocumentUtil.getLineStartOffset(this, lineIndex));
             lineSelected = true;
             container.repaint();
-        } catch (IllegalArgumentException | BadLocationException ignored) { }
-
+        } catch (@NotNull final IllegalArgumentException | BadLocationException ignored) {
+        }
     }
 }

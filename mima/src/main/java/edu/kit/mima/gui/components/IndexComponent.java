@@ -1,16 +1,18 @@
 package edu.kit.mima.gui.components;
 
-import javax.swing.JComponent;
 import java.awt.Graphics;
+import javax.swing.JComponent;
 
 /**
+ * Component to draw at line index.
+ *
  * @author Jannis Weis
  * @since 2018
  */
 public class IndexComponent extends JComponent {
 
     /**
-     * Create new IndexComponent
+     * Create new IndexComponent.
      */
     public IndexComponent() {
         setOpaque(false);
@@ -22,12 +24,10 @@ public class IndexComponent extends JComponent {
     }
 
     @Override
-    protected void paintComponent(Graphics g) {
-        for (var c : getComponents()) {
+    protected void paintComponent(final Graphics g) {
+        for (final var c : getComponents()) {
             c.paint(g);
         }
         this.paint(g);
-//        g.setColor(Color.RED);
-//        g.drawRect(0,0, getPreferredSize().width, getPreferredSize().height);
     }
 }

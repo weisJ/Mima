@@ -5,11 +5,14 @@ import edu.kit.mima.core.data.Memory;
 import edu.kit.mima.core.data.MemoryMap;
 import edu.kit.mima.core.interpretation.environment.Environment;
 import javafx.util.Pair;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Stack;
 
 
 /**
+ * Implementation of a Mima handling the memory states.
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -17,20 +20,24 @@ public class Mima {
     private final int wordLength;
     private final int constWordLength;
 
+    @NotNull
     private final MemoryMap memoryMap;
+    @NotNull
     private final MachineWord accumulator;
+    @NotNull
     private final MachineWord stackPointer;
 
+    @NotNull
     private final Stack<Pair<Integer, Environment>> returnStack;
 
     /**
-     * Construct new Mima object with the given number of bits for
-     * memory and argument {@link MachineWord}s
+     * Construct new Mima object with the given number of bits for memory and argument {@link
+     * MachineWord}s.
      *
      * @param wordLength      number of bits in memory
      * @param constWordLength number of bits in argument values
      */
-    public Mima(int wordLength, int constWordLength) {
+    public Mima(final int wordLength, final int constWordLength) {
         this.wordLength = wordLength;
         this.constWordLength = constWordLength;
         memoryMap = new MemoryMap(wordLength, 100);
@@ -44,12 +51,13 @@ public class Mima {
      *
      * @return memory
      */
+    @NotNull
     public Memory<MachineWord> getMemory() {
         return memoryMap;
     }
 
     /**
-     * Get the number of bits used in memory
+     * Get the number of bits used in memory.
      *
      * @return number of bits one {@link MachineWord} has in memory
      */
@@ -58,7 +66,7 @@ public class Mima {
     }
 
     /**
-     * Get the number of bits used in arguments
+     * Get the number of bits used in arguments.
      *
      * @return number of bits one {@link MachineWord} has as an function argument
      */
@@ -67,55 +75,57 @@ public class Mima {
     }
 
     /**
-     * Load an value from memory
+     * Load an value from memory.
      *
      * @param address memory address
      * @return value in memory
      */
-    public MachineWord loadValue(int address) {
+    @NotNull
+    public MachineWord loadValue(final int address) {
         return memoryMap.loadValue(address);
     }
 
     /**
-     * Store value in memory
+     * Store value in memory.
      *
      * @param address memory address
      * @param value   value to store
      */
-    public void storeValue(int address, MachineWord value) {
+    public void storeValue(final int address, @NotNull final MachineWord value) {
         memoryMap.storeValue(address, value);
     }
 
     /**
-     * Get the accumulator
+     * Get the accumulator.
      *
      * @return accumulator
      */
+    @NotNull
     public MachineWord getAccumulator() {
         return accumulator;
     }
 
     /**
-     * Set the accumulator
+     * Set the accumulator.
      *
      * @param value value to set to
      */
-    public void setAccumulator(MachineWord value) {
+    public void setAccumulator(@NotNull final MachineWord value) {
         accumulator.setValue(value.intValue());
     }
 
     /**
-     * Push a routine to the return stack
+     * Push a routine to the return stack.
      *
      * @param address     address to return to after routine is done
      * @param environment environment in which the routine has been called
      */
-    public void pushRoutine(int address, Environment environment) {
+    public void pushRoutine(final int address, final Environment environment) {
         returnStack.push(new Pair<>(address, environment));
     }
 
     /**
-     * Returns whether the return stack is empty
+     * Returns whether the return stack is empty.
      *
      * @return true if return stack is empty
      */
@@ -124,35 +134,36 @@ public class Mima {
     }
 
     /**
-     * Return from routine
+     * Return from routine.
      *
-     * @return Pair of instruction address and environment from which the routine
-     * has been called see {@link #pushRoutine(int, Environment)}
+     * @return Pair of instruction address and environment from which the routine has been called
+     *         see {@link #pushRoutine(int, Environment)}
      */
     public Pair<Integer, Environment> returnRoutine() {
         return returnStack.pop();
     }
 
     /**
-     * Get the stackPointer
+     * Get the stackPointer.
      *
      * @return stack pointer
      */
+    @NotNull
     public MachineWord getStackPointer() {
         return stackPointer;
     }
 
     /**
-     * Set the stack pointer value
+     * Set the stack pointer value.
      *
      * @param address address to set stack pointer to
      */
-    public void setStackPointer(int address) {
+    public void setStackPointer(final int address) {
         stackPointer.setValue(address);
     }
 
     /**
-     * Reset the memory
+     * Reset the memory.
      */
     public void reset() {
         memoryMap.empty();

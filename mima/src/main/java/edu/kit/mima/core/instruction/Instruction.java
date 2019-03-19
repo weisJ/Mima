@@ -7,13 +7,15 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
+ * Instruction interface for Mima.
+ *
  * @author Jannis Weis
  * @since 2018
  */
 public interface Instruction {
 
     /**
-     * Apply the function
+     * Apply the function.
      *
      * @param arguments   function arguments array
      * @param environment runtime environment

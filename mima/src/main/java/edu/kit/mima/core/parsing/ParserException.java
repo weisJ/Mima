@@ -1,10 +1,10 @@
 package edu.kit.mima.core.parsing;
 
-import edu.kit.mima.core.parsing.inputStream.CharInputStream;
-import edu.kit.mima.core.parsing.inputStream.TokenStream;
+import edu.kit.mima.core.parsing.inputstream.CharInputStream;
+import edu.kit.mima.core.parsing.inputstream.TokenStream;
 
 /**
- * Gets thrown by {@link CharInputStream}, {@link TokenStream} or {@link Parser}
+ * Gets thrown by {@link CharInputStream}, {@link TokenStream} or {@link Parser}.
  *
  * @author Jannis Weis
  * @since 2018
@@ -17,13 +17,16 @@ public class ParserException extends RuntimeException {
     private final int position;
 
     /**
-     * ParsingExpression
+     * Create new ParsingExpression.
      *
-     * @param message exception message
-     * @param line    line in which the exception happened
-     * @param column  column in which the exception happened
+     * @param message  exception message
+     * @param line     line in which the exception happened
+     * @param column   column in which the exception happened
+     * @param position absolute position in file
      */
-    public ParserException(String message, int line, int column, int position) {
+    public ParserException(final String message,
+                           final int line, final int column,
+                           final int position) {
         this.line = line;
         this.column = column;
         this.message = message;

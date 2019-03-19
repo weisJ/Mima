@@ -2,11 +2,12 @@ package edu.kit.mima.core.logic;
 
 import edu.kit.mima.core.Mima;
 import edu.kit.mima.core.data.MachineWord;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BinaryOperator;
 
 /**
- * The ALU in {@link Mima}
+ * The ALU in {@link Mima}.
  *
  * @author Jannis Weis
  * @since 2018
@@ -16,8 +17,7 @@ public class ArithmeticLogicUnit {
     private final int machineWordLength;
 
     /**
-     * create new arithmetic logic unit that uses the given number of bits for
-     * calculations
+     * Create new arithmetic logic unit that uses the given number of bits for calculations.
      *
      * @param machineWordLength number of bits in one machineWord
      */
@@ -26,23 +26,24 @@ public class ArithmeticLogicUnit {
     }
 
     /**
-     * Add two values. Is commutative
+     * Add two values. Is commutative.
      *
      * @param x first value
      * @param y second value
      * @return x + y
      */
-    public MachineWord add(final MachineWord x, final MachineWord y) {
+    @NotNull
+    public MachineWord add(@NotNull final MachineWord x, @NotNull final MachineWord y) {
         checkWord(x, y);
-        boolean[] bits = new boolean[machineWordLength];
-        boolean[] xBits = x.getBits();
-        boolean[] yBits = y.getBits();
+        final boolean[] bits = new boolean[machineWordLength];
+        final boolean[] bitsX = x.getBits();
+        final boolean[] bitsY = y.getBits();
         boolean carry = false;
         for (int i = 0; i < machineWordLength; i++) {
-            if (xBits[i] && yBits[i]) {
+            if (bitsX[i] && bitsY[i]) {
                 bits[i] = carry;
                 carry = true;
-            } else if (xBits[i] || yBits[i]) {
+            } else if (bitsX[i] || bitsY[i]) {
                 bits[i] = !carry;
             } else {
                 bits[i] = carry;
@@ -53,61 +54,68 @@ public class ArithmeticLogicUnit {
     }
 
     /**
-     * Perform xor on two values. Is commutative
+     * Perform xor on two values. Is commutative.
      *
      * @param x first value
      * @param y second value
      * @return x xor y
      */
-    public MachineWord xor(final MachineWord x, final MachineWord y) {
+    @NotNull
+    public MachineWord xor(@NotNull final MachineWord x, @NotNull final MachineWord y) {
         checkWord(x, y);
         return new MachineWord(bitwise(x, y, (v, w) -> v ^ w), machineWordLength);
     }
 
     /**
-     * Perform and on two values. Is commutative
+     * Perform and on two values. Is commutative.
      *
      * @param x first value
      * @param y second value
      * @return x & y
      */
-    public MachineWord and(final MachineWord x, final MachineWord y) {
+    @NotNull
+    public MachineWord and(@NotNull final MachineWord x, @NotNull final MachineWord y) {
         checkWord(x, y);
         return new MachineWord(bitwise(x, y, (v, w) -> v & w), machineWordLength);
     }
 
     /**
-     * Perform or on two values. Is commutative
+     * Perform or on two values. Is commutative.
      *
      * @param x first value
      * @param y second value
      * @return x | y
      */
-    public MachineWord or(final MachineWord x, final MachineWord y) {
+    @NotNull
+    public MachineWord or(@NotNull final MachineWord x, @NotNull final MachineWord y) {
         checkWord(x, y);
         return new MachineWord(bitwise(x, y, (v, w) -> v | w), machineWordLength);
     }
 
     /**
-     * Checks of two values are equal. Is symmetric
+     * Checks of two values are equal. Is symmetric.
      *
      * @param x first value
      * @param y second value
      * @return -1 if x == y else 0
      */
-    public MachineWord negativeIfEquals(final MachineWord x, final MachineWord y) {
+    @NotNull
+    public MachineWord negativeIfEquals(@NotNull final MachineWord x,
+                                        @NotNull final MachineWord y) {
         checkWord(x, y);
-        final MachineWord comp = new MachineWord(bitwise(x, y, (v, w) -> v ? w : !w), machineWordLength);
+        final MachineWord comp = new MachineWord(bitwise(x, y, (v, w) -> v ? w : !w),
+                                                 machineWordLength);
         return comp.intValue() == -1 ? comp : new MachineWord(0, machineWordLength);
     }
 
     /**
-     * Rotate the bits in the value one place to the right
+     * Rotate the bits in the value one place to the right.
      *
      * @param a value
      * @return rotate value
      */
-    public MachineWord rar(final MachineWord a) {
+    @NotNull
+    public MachineWord rar(@NotNull final MachineWord a) {
         checkWord(a);
         final boolean[] bits = a.getBits();
         final boolean tmp = bits[0];
@@ -119,7 +127,10 @@ public class ArithmeticLogicUnit {
     /*
      * Perform an bitwise operator on two machine words
      */
-    private boolean[] bitwise(final MachineWord x, final MachineWord y, final BinaryOperator<Boolean> operator) {
+    @NotNull
+    private boolean[] bitwise(@NotNull final MachineWord x,
+                              @NotNull final MachineWord y,
+                              @NotNull final BinaryOperator<Boolean> operator) {
         final boolean[] bits = new boolean[machineWordLength];
         final boolean[] aBits = x.getBits();
         final boolean[] bBits = y.getBits();

@@ -1,58 +1,65 @@
 package edu.kit.mima.core.running;
 
+import edu.kit.mima.api.observing.AbstractObservable;
 import edu.kit.mima.core.Mima;
 import edu.kit.mima.core.controller.ThreadDebugController;
 import edu.kit.mima.core.instruction.InstructionSet;
 import edu.kit.mima.core.instruction.MimaInstruction;
 import edu.kit.mima.core.instruction.MimaXInstruction;
-import edu.kit.mima.core.interpretation.ExceptionListener;
+import edu.kit.mima.core.interpretation.ExceptionHandler;
 import edu.kit.mima.core.interpretation.Interpreter;
 import edu.kit.mima.core.interpretation.Value;
-import edu.kit.mima.core.interpretation.ValueType;
 import edu.kit.mima.core.interpretation.environment.Environment;
 import edu.kit.mima.core.interpretation.environment.GlobalEnvironment;
-import edu.kit.mima.core.parsing.token.ProgramToken;
 import edu.kit.mima.core.parsing.token.Token;
 import edu.kit.mima.gui.components.Breakpoint;
-import edu.kit.mima.gui.logging.Logger;
-import edu.kit.mima.gui.observing.AbstractObservable;
+import edu.kit.mima.logging.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
+ * Runner to start/stop execution of Mima Code.
+ *
  * @author Jannis Weis
  * @since 2018
  */
-public class MimaRunner extends AbstractObservable implements ExceptionListener {
+public class MimaRunner extends AbstractObservable implements ExceptionHandler {
 
     public static final String RUNNING_PROPERTY = "running";
-    private final static Environment EMPTY_ENV = new Environment(null, new ProgramToken(new Token[0], -1));
-    private final AtomicReference<Exception> sharedException;
-    private final ThreadDebugController threadDebugController;
-    private final MimaDebugger debugger;
+    @NotNull private final AtomicReference<Exception> sharedException;
+    @NotNull private final ThreadDebugController threadDebugController;
+    @NotNull private final MimaDebugger debugger;
 
-    private Interpreter interpreter;
+    @Nullable private Interpreter interpreter;
     private Mima mima;
     private Program program;
-    private GlobalEnvironment globalEnvironment;
+    @Nullable private GlobalEnvironment globalEnvironment;
 
-
+    /**
+     * Create new MimaRunner.
+     */
     public MimaRunner() {
         debugger = new MimaDebugger();
         interpreter = new Interpreter(0, null, null);
         sharedException = new AtomicReference<>();
         threadDebugController = new ThreadDebugController();
-        mima = new Mima(InstructionSet.MIMA_X.getWordLength(), InstructionSet.MIMA_X.getConstCordLength());
+        mima = new Mima(InstructionSet.MIMA_X.getWordLength(),
+                        InstructionSet.MIMA_X.getConstCordLength());
     }
 
-    public void start(Consumer<Value> callback) {
+    /**
+     * Start the Execution.
+     *
+     * @param callback callback to execute with accumulator after program execution.
+     */
+    public void start(final Consumer<Value> callback) {
         threadDebugController.setBreaks(Collections.emptyList());
         mima.reset();
         startInterpreter(callback);
@@ -64,20 +71,22 @@ public class MimaRunner extends AbstractObservable implements ExceptionListener 
     }
 
     /**
-     * Start the interpreter
+     * Start the interpreter.
+     *
+     * @param callback callback to execute with accumulator after program execution.
      */
-    private void startInterpreter(Consumer<Value> callback) {
+    private void startInterpreter(final Consumer<Value> callback) {
         if (program == null) {
             throw new IllegalStateException("must parse program before starting");
         }
-        interpreter = new Interpreter(program.getInstructionSet().getConstCordLength(), threadDebugController, this);
-        createGlobalEnvironment();
+        interpreter = new Interpreter(program.getInstructionSet().getConstCordLength(),
+                                      threadDebugController,
+                                      this);
+        createGlobalEnvironment(callback);
         sharedException.set(null);
-        Thread workingThread = new Thread(
-                () -> {
-                    interpreter.evaluateTopLevel(program.getProgramToken(), globalEnvironment, v -> {});
-                    callback.accept(new Value<>(ValueType.NUMBER, mima.getAccumulator()));
-                }
+        final Thread workingThread = new Thread(
+                () -> interpreter.evaluateTopLevel(program.getProgramToken(),
+                                                   globalEnvironment)
         );
         threadDebugController.setWorkingThread(workingThread);
         threadDebugController.start();
@@ -86,12 +95,15 @@ public class MimaRunner extends AbstractObservable implements ExceptionListener 
     }
 
     /**
-     * Create the global environment
+     * Create the global environment.
+     *
+     * @param callback callback to execute with accumulator after program execution.
      */
-    private void createGlobalEnvironment() {
-        InstructionSet instructionSet = program.getInstructionSet();
+    private void createGlobalEnvironment(final Consumer<Value> callback) {
+        final InstructionSet instructionSet = program.getInstructionSet();
         mima = new Mima(instructionSet.getWordLength(), instructionSet.getConstCordLength());
-        globalEnvironment = new GlobalEnvironment(program.getProgramToken(), mima, interpreter);
+        globalEnvironment = new GlobalEnvironment(program.getProgramToken(), mima,
+                                                  interpreter, callback);
         globalEnvironment.setupGlobalFunctions(MimaInstruction.values());
         if (instructionSet == InstructionSet.MIMA_X) {
             globalEnvironment.setupExtendedInstructionSet();
@@ -100,15 +112,18 @@ public class MimaRunner extends AbstractObservable implements ExceptionListener 
     }
 
     /**
-     * Stop the interpreter
+     * Stop the execution.
      */
     public void stop() {
-        boolean running = isRunning();
+        final boolean running = isRunning();
         debugger.active = false;
         threadDebugController.stop();
         getPropertyChangeSupport().firePropertyChange(RUNNING_PROPERTY, running, false);
     }
 
+    /**
+     * Check if exception has occurred during execution.
+     */
     private void checkForException() {
         while (interpreter.isRunning() && threadDebugController.isActive()) {
             Thread.onSpinWait();
@@ -120,7 +135,7 @@ public class MimaRunner extends AbstractObservable implements ExceptionListener 
     }
 
     @Override
-    public void notifyException(Exception e) {
+    public void notifyException(final Exception e) {
         sharedException.set(e);
         threadDebugController.stop();
     }
@@ -130,7 +145,7 @@ public class MimaRunner extends AbstractObservable implements ExceptionListener 
      *
      * @param program program to evaluate.
      */
-    public void setProgram(Program program) {
+    public void setProgram(final Program program) {
         if (isRunning()) {
             throw new MimaRuntimeException("Can't change program during execution");
         }
@@ -139,19 +154,26 @@ public class MimaRunner extends AbstractObservable implements ExceptionListener 
     }
 
     /**
-     * Get the current instruction token
+     * Get the current instruction token.
      *
      * @return current token
      */
+    @Nullable
     public Token getCurrentStatement() {
         return interpreter.getCurrentToken();
     }
 
+    /**
+     * Get the current environment of execution.
+     *
+     * @return current environment if running (see {@link #isRunning}), global environment else.
+     */
+    @Nullable
     public Environment getCurrentEnvironment() {
         if (!isRunning()) {
             return globalEnvironment;
         }
-        var scope = interpreter.getCurrentScope();
+        final var scope = interpreter.getCurrentScope();
         return scope == null ? globalEnvironment : scope;
     }
 
@@ -160,7 +182,7 @@ public class MimaRunner extends AbstractObservable implements ExceptionListener 
     }
 
     /**
-     * Returns whether the underlying interpreter is running
+     * Returns whether the underlying interpreter is running.
      *
      * @return true if running
      */
@@ -168,12 +190,17 @@ public class MimaRunner extends AbstractObservable implements ExceptionListener 
         return interpreter.isRunning();
     }
 
+    /**
+     * Get the debugger for this MimaRunner.
+     *
+     * @return Debugger instance
+     */
+    @NotNull
     public Debugger debugger() {
         return debugger;
     }
 
     private class MimaDebugger implements Debugger {
-        private final List<PauseListener> listenerList = new ArrayList<>();
         private boolean active = false;
         private boolean paused = false;
 
@@ -184,7 +211,6 @@ public class MimaRunner extends AbstractObservable implements ExceptionListener 
             } while (threadDebugController.isActive() && isRunning());
             if (!threadDebugController.isActive()) {
                 paused = true;
-                notifyListeners(getCurrentStatement());
                 getPropertyChangeSupport().firePropertyChange(Debugger.PAUSE_PROPERTY, false, true);
             }
             if (!isRunning()) {
@@ -194,7 +220,7 @@ public class MimaRunner extends AbstractObservable implements ExceptionListener 
         }
 
         @Override
-        public void start(Consumer<Value> callback) {
+        public void start(final Consumer<Value> callback) {
             active = true;
             paused = false;
             getPropertyChangeSupport().firePropertyChange(Debugger.PAUSE_PROPERTY, false, true);
@@ -207,16 +233,7 @@ public class MimaRunner extends AbstractObservable implements ExceptionListener 
         public void pause() {
             paused = true;
             threadDebugController.pause();
-            notifyListeners(getCurrentStatement());
             getPropertyChangeSupport().firePropertyChange(Debugger.PAUSE_PROPERTY, false, true);
-        }
-
-        private void notifyListeners(Token currentStatement) {
-            for (var listener : listenerList) {
-                if (listener != null) {
-                    listener.paused(currentStatement);
-                }
-            }
         }
 
         @Override
@@ -231,7 +248,7 @@ public class MimaRunner extends AbstractObservable implements ExceptionListener 
             paused = false;
             threadDebugController.setAutoPause(true);
             threadDebugController.resume();
-            notifyListeners(getCurrentStatement());
+            getPropertyChangeSupport().firePropertyChange(Debugger.PAUSE_PROPERTY, true, false);
             checkForException();
         }
 
@@ -246,38 +263,31 @@ public class MimaRunner extends AbstractObservable implements ExceptionListener 
         }
 
         @Override
-        public void setBreakpoints(Breakpoint[] breakpoints) {
+        public void setBreakpoints(@NotNull final Breakpoint[] breakpoints) {
             threadDebugController.setBreaks(Arrays.stream(breakpoints)
-                    .map(Breakpoint::getLineIndex).collect(Collectors.toList()));
+                                                    .map(Breakpoint::getLineIndex)
+                                                    .collect(Collectors.toList()));
         }
 
         @Override
-        public void addPauseListener(PauseListener listener) {
-            listenerList.add(listener);
-        }
-
-        @Override
-        public void removePauseListener(PauseListener listener) {
-            listenerList.remove(listener);
-        }
-
-        @Override
-        public void addPropertyChangeListener(String property, PropertyChangeListener listener) {
+        public void addPropertyChangeListener(final String property,
+                                              final PropertyChangeListener listener) {
             MimaRunner.this.addPropertyChangeListener(property, listener);
         }
 
         @Override
-        public void addPropertyChangeListener(PropertyChangeListener listener) {
+        public void addPropertyChangeListener(final PropertyChangeListener listener) {
             MimaRunner.this.addPropertyChangeListener(listener);
         }
 
         @Override
-        public void removePropertyChangeListener(String property, PropertyChangeListener listener) {
+        public void removePropertyChangeListener(final String property,
+                                                 final PropertyChangeListener listener) {
             MimaRunner.this.removePropertyChangeListener(property, listener);
         }
 
         @Override
-        public void removePropertyChangeListener(PropertyChangeListener listener) {
+        public void removePropertyChangeListener(final PropertyChangeListener listener) {
             MimaRunner.this.removePropertyChangeListener(listener);
         }
     }

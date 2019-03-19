@@ -1,19 +1,23 @@
 package edu.kit.mima.gui;
 
 import edu.kit.mima.core.parsing.lang.Punctuation;
+import edu.kit.mima.formatter.Formatter;
 import edu.kit.mima.gui.components.editor.Editor;
-import edu.kit.mima.gui.formatter.Formatter;
-import edu.kit.mima.gui.logging.Logger;
+import edu.kit.mima.logging.Logger;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.swing.Action;
-import javax.swing.text.BadLocationException;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeListener;
+import javax.swing.Action;
+import javax.swing.text.BadLocationException;
 
 /**
+ * Hot keys for {@link Editor}.
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -21,9 +25,9 @@ public enum EditorHotKeys implements Action {
 
     COMMENT_TOGGLE("control 7") {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(final ActionEvent e) {
             editor.transformLine(s -> {
-                String comment = String.valueOf(Punctuation.COMMENT);
+                final String comment = String.valueOf(Punctuation.COMMENT);
                 if (s.trim().startsWith(comment)) {
                     return s.replaceFirst(comment, "");
                 } else {
@@ -34,60 +38,54 @@ public enum EditorHotKeys implements Action {
     },
     STRING_CREATE("shift NUMBER_SIGN") {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(final ActionEvent e) {
             try {
                 editor.insert(String.valueOf(Punctuation.STRING), editor.getCaretPosition());
                 editor.setCaretPosition(editor.getCaretPosition() - 1);
-            } catch (BadLocationException e1) {
+            } catch (@NotNull final BadLocationException e1) {
                 Logger.error(e1.getMessage());
             }
         }
     },
-    STRING_DELETE("BACK_SPACE") {//Todo
-
+    STRING_DELETE("BACK_SPACE") {
         @Override
-        public void actionPerformed(ActionEvent e) {
-//            try {
-//                String test = editor.getText(editor.getCaretPosition() - 1, 1);
-//                System.out.println(test);
-//            } catch (BadLocationException e1) {
-//                Logger.error(e1.getMessage());
-//            }
+        public void actionPerformed(final ActionEvent e) {
+            //Todo
         }
     },
     FORMAT("control alt F") {
         private final Formatter formatter = new Formatter();
 
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(final ActionEvent e) {
             editor.setText(formatter.format(editor.getText()));
         }
     },
     REDO("control shift Z") {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(final ActionEvent e) {
             editor.redo();
         }
     },
     UNDO("control Z") {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(final ActionEvent e) {
             editor.undo();
         }
     },
     ZOOM_IN("control PLUS") {
         @Override
-        public void actionPerformed(ActionEvent e) {
-            Font font = pref.readFont(PropertyKey.EDITOR_FONT);
-            Font newFont = font.deriveFont((float) font.getSize() + 1);
+        public void actionPerformed(final ActionEvent e) {
+            final Font font = pref.readFont(PropertyKey.EDITOR_FONT);
+            final Font newFont = font.deriveFont((float) font.getSize() + 1);
             pref.saveFont(PropertyKey.EDITOR_FONT, newFont);
         }
     },
     ZOOM_OUT("control MINUS") {
         @Override
-        public void actionPerformed(ActionEvent e) {
-            Font font = pref.readFont(PropertyKey.EDITOR_FONT);
-            Font newFont = font.deriveFont((float) font.getSize() - 1);
+        public void actionPerformed(final ActionEvent e) {
+            final Font font = pref.readFont(PropertyKey.EDITOR_FONT);
+            final Font newFont = font.deriveFont((float) font.getSize() - 1);
             pref.saveFont(PropertyKey.EDITOR_FONT, newFont);
         }
     };
@@ -97,11 +95,11 @@ public enum EditorHotKeys implements Action {
     private static Editor editor;
     private final String accelerator;
 
-    EditorHotKeys(String accelerator) {
+    EditorHotKeys(final String accelerator) {
         this.accelerator = accelerator;
     }
 
-    public static void setEditor(Editor editor) {
+    public static void setEditor(final Editor editor) {
         EditorHotKeys.editor = editor;
     }
 
@@ -112,22 +110,27 @@ public enum EditorHotKeys implements Action {
     @Override
     public abstract void actionPerformed(ActionEvent e);
 
+    @Nullable
     @Override
-    public Object getValue(String key) { return null; }
+    public Object getValue(final String key) {
+        return null;
+    }
 
     @Override
-    public void putValue(String key, Object value) { }
+    public void putValue(final String key, final Object value) { }
 
     @Override
-    public boolean isEnabled() { return true; }
+    public boolean isEnabled() {
+        return true;
+    }
 
     @Override
-    public void setEnabled(boolean b) { }
+    public void setEnabled(final boolean b) { }
 
     @Override
-    public void addPropertyChangeListener(PropertyChangeListener listener) { }
+    public void addPropertyChangeListener(final PropertyChangeListener listener) { }
 
     @Override
-    public void removePropertyChangeListener(PropertyChangeListener listener) { }
+    public void removePropertyChangeListener(final PropertyChangeListener listener) { }
 
 }

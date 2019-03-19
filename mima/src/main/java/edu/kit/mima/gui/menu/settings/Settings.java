@@ -10,15 +10,10 @@ import edu.kit.mima.gui.laf.LightLafInfo;
 import edu.kit.mima.gui.menu.CardPanelBuilder;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.swing.BorderFactory;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.UIManager;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -29,8 +24,18 @@ import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import javax.swing.BorderFactory;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.UIManager;
 
 /**
+ * Setting Dialog for Mima App.
+ *
  * @author Jannis Weis
  * @since 2018
  */
@@ -41,11 +46,12 @@ public final class Settings extends JDialog {
     private static Component parent;
 
     private Settings() {
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("images/mima.png")));
+        setIconImage(Toolkit.getDefaultToolkit().getImage(
+                getClass().getClassLoader().getResource("images/mima.png")));
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             @Override
-            public void windowClosing(WindowEvent e) {
+            public void windowClosing(final WindowEvent e) {
                 hideWindow();
             }
         });
@@ -56,6 +62,11 @@ public final class Settings extends JDialog {
         initializeComponents();
     }
 
+    /**
+     * Get the settings instance.
+     *
+     * @return Settings instance.
+     */
     public static Settings getInstance() {
         if (instance == null) {
             instance = new Settings();
@@ -63,14 +74,22 @@ public final class Settings extends JDialog {
         return instance;
     }
 
-    public static void showWindow(Component parent) {
-        Settings s = getInstance();
+    /**
+     * Show the settings dialog.
+     *
+     * @param parent parent component.
+     */
+    public static void showWindow(@NotNull final Component parent) {
+        final Settings s = getInstance();
         s.setLocationRelativeTo(parent);
         s.setVisible(true);
         parent.setEnabled(false);
         Settings.parent = parent;
     }
 
+    /**
+     * Hide the settings dialog.
+     */
     public static void hideWindow() {
         getInstance().setVisible(false);
         parent.setFocusable(true);
@@ -80,12 +99,17 @@ public final class Settings extends JDialog {
         parent.repaint();
     }
 
+    /**
+     * Returns whether the settings dialog is open.
+     *
+     * @return true if open
+     */
     public static boolean isOpen() {
         return instance != null && instance.isVisible();
     }
 
     /**
-     * Close the Help Window
+     * Close the Help Window.
      */
     public static void close() {
         if (instance != null) {
@@ -97,7 +121,6 @@ public final class Settings extends JDialog {
         new CardPanelBuilder()
                 .addItem("General")
                 .addItem("Theme")
-//                .addSetting("IDE-Theme:", createThemeChooser())
                 .addSetting("Editor:", new JComboBox<>(new String[]{"Light", "Dark"}))
                 .addItem("Editor")
                 .addSetting(createFontChooserPanel(PropertyKey.EDITOR_FONT, new EditorPreview()))
@@ -108,37 +131,42 @@ public final class Settings extends JDialog {
                 .addToComponent(this);
     }
 
-    private JPanel createFontChooserPanel(PropertyKey key, AbstractPreviewPane previewPane) {
-        JPanel panel = new JPanel(new BorderLayout());
-        FontChooser fontChooser = new FontChooser(Preferences.getInstance().readFont(key), previewPane);
+    @NotNull
+    private JPanel createFontChooserPanel(@NotNull final PropertyKey key,
+                                          @NotNull final AbstractPreviewPane previewPane) {
+        final JPanel panel = new JPanel(new BorderLayout());
+        final FontChooser fontChooser
+                = new FontChooser(Preferences.getInstance().readFont(key), previewPane);
         fontChooser.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         fontChooser.addChangeListener(event -> {
-            FontSelectionModel model = (FontSelectionModel) event.getSource();
+            final FontSelectionModel model = (FontSelectionModel) event.getSource();
             Preferences.getInstance().saveFont(key, model.getSelectedFont());
         });
         panel.add(fontChooser);
         return panel;
     }
 
+    @NotNull
     private JComponent createThemeChooser() {
-        UIManager.LookAndFeelInfo[] plaf = UIManager.getInstalledLookAndFeels();
-        List<UIManager.LookAndFeelInfo> loafs = new ArrayList<>();
+        final UIManager.LookAndFeelInfo[] plaf = UIManager.getInstalledLookAndFeels();
+        final List<UIManager.LookAndFeelInfo> loafs = new ArrayList<>();
         loafs.add(new LightLafInfo());
         loafs.add(new DarkLafInfo());
         loafs.addAll(Arrays.asList(plaf));
-        JComboBox<UIManager.LookAndFeelInfo> comboBox = new JComboBox<>(loafs.toArray(UIManager.LookAndFeelInfo[]::new));
+        final JComboBox<UIManager.LookAndFeelInfo> comboBox =
+                new JComboBox<>(loafs.toArray(UIManager.LookAndFeelInfo[]::new));
         comboBox.setEditable(false);
         comboBox.setRenderer(new LookAndFeelInfoCellRenderer());
         comboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
-                UIManager.LookAndFeelInfo info = (UIManager.LookAndFeelInfo) e.getItem();
-                var pref = Preferences.getInstance();
+                final UIManager.LookAndFeelInfo info = (UIManager.LookAndFeelInfo) e.getItem();
+                final var pref = Preferences.getInstance();
                 pref.saveString(PropertyKey.THEME, info.getName());
                 pref.saveString(PropertyKey.THEME_PATH, info.getClassName());
             }
         });
         int index = 0;
-        for (UIManager.LookAndFeelInfo info : loafs) {
+        for (final UIManager.LookAndFeelInfo info : loafs) {
             if (info.getName().equals(LafManager.getCurrentLaf())) {
                 break;
             }
@@ -148,7 +176,9 @@ public final class Settings extends JDialog {
         return comboBox;
     }
 
+    @Nullable
+    @Contract(pure = true)
     private JComponent createSyntaxChooser() {
-        return null;
+        return null; //Todo
     }
 }

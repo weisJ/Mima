@@ -1,6 +1,8 @@
 package edu.kit.mima.preferences;
 
 /**
+ * Value types of {@link PropertyKey}.
+ *
  * @author Jannis Weis
  * @since 2018
  */

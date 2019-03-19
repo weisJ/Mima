@@ -1,7 +1,10 @@
 package edu.kit.mima.core.parsing.token;
 
-import edu.kit.mima.core.query.programQuery.ProgramQuery;
-import edu.kit.mima.core.query.programQuery.ProgramQueryResult;
+import edu.kit.mima.core.query.programquery.ProgramQuery;
+import edu.kit.mima.core.query.programquery.ProgramQueryResult;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,8 +14,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * Implementation of {@link Token} that holds an array of {@link Token}s representing a
- * program
+ * Implementation of {@link Token} that holds an array of {@link Token}s representing a program.
  *
  * @author Jannis Weis
  * @since 2018
@@ -26,11 +28,12 @@ public class ProgramToken implements Token<Token[]> {
     private Map<Token, Integer> jumpMap;
 
     /**
-     * Program token that holds an array of Tokens
+     * Program token that holds an array of Tokens.
      *
      * @param program token array
+     * @param filePos position in file
      */
-    public ProgramToken(Token[] program, int filePos) {
+    public ProgramToken(@NotNull final Token[] program, final int filePos) {
         this.program = program;
         this.filePos = filePos;
         jumpMap = new HashMap<>();
@@ -41,9 +44,9 @@ public class ProgramToken implements Token<Token[]> {
      * Create jump map for program token
      */
     private void resolveJumps() {
-        List<Token> tokens = ((ProgramQueryResult) new ProgramQuery(this)
+        final List<Token> tokens = ((ProgramQueryResult) new ProgramQuery(this)
                 .whereEqual(Token::getType, TokenType.JUMP_POINT)).get(false);
-        for (var token : tokens) {
+        for (final var token : tokens) {
             jumpMap.put((Token) token.getValue(), token.getIndex());
         }
     }
@@ -57,16 +60,18 @@ public class ProgramToken implements Token<Token[]> {
         return jumpMap;
     }
 
+    @NotNull
     @Override
     public Token[] getValue() {
         return program;
     }
 
     @Override
-    public void setValue(Token[] value) {
+    public void setValue(final Token[] value) {
         program = value;
     }
 
+    @NotNull
     @Override
     public TokenType getType() {
         return TokenType.PROGRAM;
@@ -78,12 +83,12 @@ public class ProgramToken implements Token<Token[]> {
     }
 
     @Override
+    public void setIndex(final int index) { }
+
+    @Override
     public int getFilePos() {
         return filePos;
     }
-
-    @Override
-    public void setIndex(int index) { }
 
     @Override
     public String toString() {
@@ -92,20 +97,22 @@ public class ProgramToken implements Token<Token[]> {
                 .collect(Collectors.joining("", "[prog]{\n", "}"));
     }
 
+    @NotNull
     @Override
     public String simpleName() {
         return "...";
     }
 
+    @Contract(value = "null -> false", pure = true)
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable final Object obj) {
         if (this == obj) {
             return true;
         }
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        ProgramToken that = (ProgramToken) obj;
+        final ProgramToken that = (ProgramToken) obj;
         return Arrays.equals(program, that.program);
     }
 

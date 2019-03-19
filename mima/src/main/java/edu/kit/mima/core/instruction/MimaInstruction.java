@@ -6,25 +6,29 @@ import edu.kit.mima.core.interpretation.Value;
 import edu.kit.mima.core.interpretation.ValueType;
 import edu.kit.mima.core.interpretation.environment.Environment;
 import edu.kit.mima.core.logic.ArithmeticLogicUnit;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Consumer;
 
 /**
+ * Instructions for Mima.
+ *
  * @author Jannis Weis
  * @since 2018
  */
 public enum MimaInstruction implements Instruction {
 
     /**
-     * Load Constant to accumulator
+     * Load Constant to accumulator.
      */
     LDC("LDC", 1) {
         @Override
-        protected MachineWord applyInternal(List<Value> arguments, Environment environment) {
-            var argument = InstructionTools.getReferenceValue(arguments, 0);
-            MachineWord value = (MachineWord) argument.getValue();
+        protected MachineWord applyInternal(@NotNull final List<Value> arguments,
+                                            final Environment environment) {
+            final var argument = InstructionTools.getReferenceValue(arguments, 0);
+            final MachineWord value = (MachineWord) argument.getValue();
             if (!(mima.getWordLength() == mima.getConstWordLength()) && (value.intValue() < 0)) {
                 InstructionTools.fail("can't pass negative values");
             }
@@ -33,79 +37,87 @@ public enum MimaInstruction implements Instruction {
         }
     },
     /**
-     * Load value from memory
+     * Load value from memory.
      */
     LDV("LDV", 1) {
         @Override
-        protected MachineWord applyInternal(List<Value> arguments, Environment environment) {
-            var argument = InstructionTools.getMemoryReference(arguments, 0);
+        protected MachineWord applyInternal(@NotNull final List<Value> arguments,
+                                            final Environment environment) {
+            final var argument = InstructionTools.getMemoryReference(arguments, 0);
             mima.setAccumulator(mima.loadValue(((MachineWord) argument.getValue()).intValue()));
             return null;
         }
     },
     /**
-     * Store value to memory
+     * Store value to memory.
      */
     STV("STV", 1) {
         @Override
-        protected MachineWord applyInternal(List<Value> arguments, Environment environment) {
-            var argument = InstructionTools.getMemoryReference(arguments, 0);
+        protected MachineWord applyInternal(@NotNull final List<Value> arguments,
+                                            final Environment environment) {
+            final var argument = InstructionTools.getMemoryReference(arguments, 0);
             mima.storeValue(((MachineWord) argument.getValue()).intValue(), mima.getAccumulator());
             return null;
         }
     },
     /**
-     * Load value indirect from memory
+     * Load value indirect from memory.
      */
     LDIV("LDIV", 1) {
         @Override
-        protected MachineWord applyInternal(List<Value> arguments, Environment environment) {
-            var argument = InstructionTools.getMemoryReference(arguments, 0);
+        protected MachineWord applyInternal(@NotNull final List<Value> arguments,
+                                            final Environment environment) {
+            final var argument = InstructionTools.getMemoryReference(arguments, 0);
             mima.setAccumulator(
-                    mima.loadValue(
-                            mima.loadValue(((MachineWord) argument.getValue()).intValue()).intValue()));
+                    mima.loadValue(mima.loadValue(
+                            ((MachineWord) argument.getValue()).intValue()).intValue()));
             return null;
         }
     },
     /**
-     * Store value indirect to memory
+     * Store value indirect to memory.
      */
     STIV("STIV", 1) {
         @Override
-        protected MachineWord applyInternal(List<Value> arguments, Environment environment) {
-            var argument = InstructionTools.getMemoryReference(arguments, 0);
-            mima.storeValue(mima.loadValue(
-                    ((MachineWord) argument.getValue()).intValue()).intValue(), mima.getAccumulator());
+        protected MachineWord applyInternal(@NotNull final List<Value> arguments,
+                                            final Environment environment) {
+            final var argument = InstructionTools.getMemoryReference(arguments, 0);
+            mima.storeValue(
+                    mima.loadValue(((MachineWord) argument.getValue()).intValue()).intValue(),
+                    mima.getAccumulator());
             return null;
         }
     },
     /**
-     * Rotate accumulator right by one bit
+     * Rotate accumulator right by one bit.
      */
     RAR("RAR", 0) {
         @Override
-        protected MachineWord applyInternal(List<Value> arguments, Environment environment) {
+        protected MachineWord applyInternal(final List<Value> arguments,
+                                            final Environment environment) {
             mima.setAccumulator(arithmeticLogicUnit.rar(mima.getAccumulator()));
             return null;
         }
     },
     /**
-     * Invert bits in accumulator
+     * Invert bits in accumulator.
      */
     NOT("NOT", 0) {
         @Override
-        protected MachineWord applyInternal(List<Value> arguments, Environment environment) {
+        protected MachineWord applyInternal(final List<Value> arguments,
+                                            final Environment environment) {
             mima.setAccumulator(mima.getAccumulator().invert());
             return null;
         }
     },
     /**
-     * Add with accumulator
+     * Add with accumulator.
      */
     ADD("ADD", 1) {
         @Override
-        protected MachineWord applyInternal(List<Value> arguments, Environment environment) {
-            var argument = InstructionTools.getMemoryReference(arguments, 0);
+        protected MachineWord applyInternal(@NotNull final List<Value> arguments,
+                                            final Environment environment) {
+            final var argument = InstructionTools.getMemoryReference(arguments, 0);
             mima.setAccumulator(arithmeticLogicUnit.add(
                     MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
                     mima.loadValue(((MachineWord) argument.getValue()).intValue())));
@@ -113,12 +125,13 @@ public enum MimaInstruction implements Instruction {
         }
     },
     /**
-     * And bitwise with accumulator
+     * And bitwise with accumulator.
      */
     AND("AND", 1) {
         @Override
-        protected MachineWord applyInternal(List<Value> arguments, Environment environment) {
-            var argument = InstructionTools.getMemoryReference(arguments, 0);
+        protected MachineWord applyInternal(@NotNull final List<Value> arguments,
+                                            final Environment environment) {
+            final var argument = InstructionTools.getMemoryReference(arguments, 0);
             mima.setAccumulator(arithmeticLogicUnit.and(
                     MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
                     mima.loadValue(((MachineWord) argument.getValue()).intValue())));
@@ -126,12 +139,13 @@ public enum MimaInstruction implements Instruction {
         }
     },
     /**
-     * or bitwise with accumulator
+     * or bitwise with accumulator.
      */
     OR("OR", 1) {
         @Override
-        protected MachineWord applyInternal(List<Value> arguments, Environment environment) {
-            var argument = InstructionTools.getMemoryReference(arguments, 0);
+        protected MachineWord applyInternal(@NotNull final List<Value> arguments,
+                                            final Environment environment) {
+            final var argument = InstructionTools.getMemoryReference(arguments, 0);
             mima.setAccumulator(arithmeticLogicUnit.or(
                     MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
                     mima.loadValue(((MachineWord) argument.getValue()).intValue())));
@@ -139,12 +153,13 @@ public enum MimaInstruction implements Instruction {
         }
     },
     /**
-     * xor bitwise with accumulator
+     * xor bitwise with accumulator.
      */
     XOR("XOR", 1) {
         @Override
-        protected MachineWord applyInternal(List<Value> arguments, Environment environment) {
-            var argument = InstructionTools.getMemoryReference(arguments, 0);
+        protected MachineWord applyInternal(@NotNull final List<Value> arguments,
+                                            final Environment environment) {
+            final var argument = InstructionTools.getMemoryReference(arguments, 0);
             mima.setAccumulator(arithmeticLogicUnit.xor(
                     MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
                     mima.loadValue(((MachineWord) argument.getValue()).intValue())));
@@ -152,12 +167,13 @@ public enum MimaInstruction implements Instruction {
         }
     },
     /**
-     * Store -1 to accumulator if negativeIfEquals, else load 0
+     * Store -1 to accumulator if negativeIfEquals, else load 0.
      */
     EQL("EQL", 1) {
         @Override
-        protected MachineWord applyInternal(List<Value> arguments, Environment environment) {
-            var argument = InstructionTools.getMemoryReference(arguments, 0);
+        protected MachineWord applyInternal(@NotNull final List<Value> arguments,
+                                            final Environment environment) {
+            final var argument = InstructionTools.getMemoryReference(arguments, 0);
             mima.setAccumulator(arithmeticLogicUnit.negativeIfEquals(
                     MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
                     mima.loadValue(((MachineWord) argument.getValue()).intValue())));
@@ -166,30 +182,28 @@ public enum MimaInstruction implements Instruction {
     };
 
 
-    @SuppressWarnings("NonFinalFieldInEnum")
     private static Mima mima;
-    @SuppressWarnings("NonFinalFieldInEnum")
     private static ArithmeticLogicUnit arithmeticLogicUnit;
 
     private final String instruction;
     private final int argNum;
 
     /**
-     * Mima Instructions
+     * Mima Instructions.
      *
      * @param instruction instruction keyword
      */
-    MimaInstruction(String instruction, int argNum) {
+    MimaInstruction(final String instruction, final int argNum) {
         this.instruction = instruction;
         this.argNum = argNum;
     }
 
     /**
-     * Set the mima controlled by the instructions
+     * Set the mima controlled by the instructions.
      *
      * @param mima Mima
      */
-    public static void setMima(Mima mima) {
+    public static void setMima(@NotNull final Mima mima) {
         MimaInstruction.mima = mima;
         arithmeticLogicUnit = new ArithmeticLogicUnit(mima.getWordLength());
     }
@@ -200,19 +214,21 @@ public enum MimaInstruction implements Instruction {
     }
 
     @Override
-    public void apply(List<Value> arguments, Environment environment,
-                      Consumer<Value> callback) {
+    public void apply(@NotNull final List<Value> arguments,
+                      final Environment environment,
+                      @NotNull final Consumer<Value> callback) {
         InstructionTools.checkArgNumber(arguments, this.argNum);
         callback.accept(new Value<>(ValueType.NUMBER, this.applyInternal(arguments, environment)));
     }
 
     /**
-     * Internal apply function
+     * Internal apply function.
      *
      * @param arguments   argument list
      * @param environment execution environment
      * @return return value of instruction
      */
-    protected abstract @Nullable MachineWord applyInternal(List<Value> arguments, Environment environment);
+    protected abstract @Nullable MachineWord applyInternal(List<Value> arguments,
+                                                           Environment environment);
 
 }

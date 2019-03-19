@@ -1,10 +1,12 @@
 package edu.kit.mima.core.parsing.lang;
 
 import edu.kit.mima.core.parsing.Parser;
-import edu.kit.mima.core.parsing.inputStream.TokenStream;
+import edu.kit.mima.core.parsing.inputstream.TokenStream;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 /**
- * Punctuation used in {@link Parser} and {@link TokenStream}
+ * Punctuation used in {@link Parser} and {@link TokenStream}.
  *
  * @author Jannis Weis
  * @since 2018
@@ -16,59 +18,61 @@ public interface Punctuation {
      */
     char PRE_PROC = '!';
     /**
-     * Begin of definition statement
+     * Begin of definition statement.
      */
     char DEFINITION_BEGIN = '§';
     /**
-     * definition separator/delimiter
+     * definition separator/delimiter.
      */
     char DEFINITION_DELIMITER = '=';
     /**
-     * Jump definition delimiter
+     * Jump definition delimiter.
      */
     char JUMP_DELIMITER = ':';
     /**
-     * Open bracket
+     * Open bracket.
      */
     char OPEN_BRACKET = '(';
     /**
-     * Closed bracket
+     * Closed bracket.
      */
     char CLOSED_BRACKET = ')';
     /**
-     * End of line/instruction
+     * End of line/instruction.
      */
     char INSTRUCTION_END = ';';
     /**
-     * Prefix for binary numbers
+     * Prefix for binary numbers.
      */
     char BINARY_PREFIX = '~';
     /**
-     * prefix for comments
+     * prefix for comments.
      */
     char COMMENT = '#';
     /**
-     * comma for arguments separation
+     * comma for arguments separation.
      */
     char COMMA = ',';
     /**
-     * open scope bracket
+     * open scope bracket.
      */
     char SCOPE_OPEN = '{';
     /**
-     * open scope bracket
+     * open scope bracket.
      */
     char SCOPE_CLOSED = '}';
     /**
-     * String begin and end
+     * String begin and end.
      */
     char STRING = '\'';
 
     /**
-     * Get the punctuation
+     * Get the punctuation.
      *
      * @return array of punctuation in definition order
      */
+    @NotNull
+    @Contract(value = " -> new", pure = true)
     static char[] getPunctuation() {
         return new char[]{
                 PRE_PROC,

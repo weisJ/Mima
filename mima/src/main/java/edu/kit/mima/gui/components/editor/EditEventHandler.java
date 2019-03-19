@@ -1,6 +1,8 @@
 package edu.kit.mima.gui.components.editor;
 
 /**
+ * Event handler for edit events.
+ *
  * @author Jannis Weis
  * @since 2018
  */

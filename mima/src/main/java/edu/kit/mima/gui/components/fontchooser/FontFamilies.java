@@ -1,5 +1,6 @@
 package edu.kit.mima.gui.components.fontchooser;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.Font;
@@ -12,17 +13,25 @@ public class FontFamilies implements Iterable<FontFamily> {
     private static final FontFamilies INSTANCE = createFontFamilies();
     private final Map<String, FontFamily> families = new TreeMap<>();
 
+    @NotNull
     private static FontFamilies createFontFamilies() {
         return FontFamiliesFactory.create();
     }
 
+    @Contract(pure = true)
+    @NotNull
     public static FontFamilies getInstance() {
         return INSTANCE;
     }
 
-    public void add(Font font) {
-        String family = font.getFamily();
-        FontFamily fontFamily = families.computeIfAbsent(family, FontFamily::new);
+    /**
+     * Add a font.
+     *
+     * @param font font to add.
+     */
+    public void add(@NotNull final Font font) {
+        final String family = font.getFamily();
+        final FontFamily fontFamily = families.computeIfAbsent(family, FontFamily::new);
         fontFamily.add(font);
     }
 
@@ -32,7 +41,13 @@ public class FontFamilies implements Iterable<FontFamily> {
         return families.values().iterator();
     }
 
-    public FontFamily get(String name) {
+    /**
+     * Get font family from name.
+     *
+     * @param name name of font family.
+     * @return font family with given name.
+     */
+    public FontFamily get(final String name) {
         return families.get(name);
     }
 }
