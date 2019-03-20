@@ -67,7 +67,8 @@ public class CardPanelBuilder {
     @NotNull CardPanelItem nextItem(final String title,
                                     @NotNull final CardPanelItem item,
                                     final boolean alignRight) {
-        this.panelMap.put(count++, new ValueTuple<>(item.getTitle(), item.getPanel()));
+        this.panelMap.put(count, new ValueTuple<>(item.getTitle(), item.getPanel()));
+        count++;
         return new CardPanelItem(title, this, alignRight);
     }
 

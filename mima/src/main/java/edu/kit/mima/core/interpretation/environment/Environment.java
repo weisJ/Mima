@@ -18,17 +18,14 @@ import java.util.Map;
  * @since 2018
  */
 public class Environment {
+    public static final Environment EMPTY_ENV = new Environment(null, null);
 
-    private final @Nullable Environment parent;
+    @Nullable private final Environment parent;
     private final ProgramToken programToken;
-    @NotNull
-    private final HashMap<String, MachineWord> variables;
-    @NotNull
-    private final HashMap<String, MachineWord> constants;
-    @NotNull
-    private final HashMap<String, Instruction> functions;
-    @NotNull
-    private final HashMap<String, Integer> jumps;
+    @NotNull private final HashMap<String, MachineWord> variables;
+    @NotNull private final HashMap<String, MachineWord> constants;
+    @NotNull private final HashMap<String, Instruction> functions;
+    @NotNull private final HashMap<String, Integer> jumps;
 
     /**
      * Index of current expression.
@@ -93,7 +90,8 @@ public class Environment {
      * @param name name of variable
      * @return Environment with "name" defined. Null if name is not defined
      */
-    public @Nullable Environment lookupVariable(final String name) {
+    @NotNull
+    public Environment lookupVariable(final String name) {
         Environment scope = this;
         while (scope != null) {
             if (scope.variables.containsKey(name)) {
@@ -101,7 +99,7 @@ public class Environment {
             }
             scope = scope.parent;
         }
-        return null;
+        return EMPTY_ENV;
     }
 
     /**
@@ -110,7 +108,8 @@ public class Environment {
      * @param name name of constant
      * @return Environment with "name" defined. Null if name is not defined
      */
-    public @Nullable Environment lookupConstant(final String name) {
+    @NotNull
+    public Environment lookupConstant(final String name) {
         Environment scope = this;
         while (scope != null) {
             if (scope.constants.containsKey(name)) {
@@ -118,7 +117,7 @@ public class Environment {
             }
             scope = scope.parent;
         }
-        return null;
+        return EMPTY_ENV;
     }
 
     /**
@@ -127,7 +126,8 @@ public class Environment {
      * @param name name of function
      * @return Environment with "name" defined. Null if name is not defined
      */
-    public @Nullable Environment lookupFunction(final String name) {
+    @NotNull
+    public Environment lookupFunction(final String name) {
         Environment scope = this;
         while (scope != null) {
             if (scope.functions.containsKey(name)) {
@@ -135,7 +135,7 @@ public class Environment {
             }
             scope = scope.parent;
         }
-        return null;
+        return EMPTY_ENV;
     }
 
     /**
@@ -144,7 +144,7 @@ public class Environment {
      * @param name name of jump
      * @return Environment with "name" defined. Null if name is not defined
      */
-    @Nullable
+    @NotNull
     public Environment lookupJump(final String name) {
         Environment scope = this;
         while (scope != null) {
@@ -153,7 +153,7 @@ public class Environment {
             }
             scope = scope.parent;
         }
-        return new Environment(null, null);
+        return EMPTY_ENV;
     }
 
     /**
@@ -186,7 +186,7 @@ public class Environment {
             return variables.get(name);
         }
         final Environment scope = lookupVariable(name);
-        if (scope == null) {
+        if (scope == EMPTY_ENV) {
             throw new IllegalArgumentException("Undefined variable: " + name);
         }
         return scope.getVariable(name);
@@ -203,7 +203,7 @@ public class Environment {
             return constants.get(name);
         }
         final Environment scope = lookupConstant(name);
-        if (scope == null) {
+        if (scope == EMPTY_ENV) {
             throw new IllegalArgumentException("Undefined variable: " + name);
         }
         return scope.getConstant(name);
@@ -220,7 +220,7 @@ public class Environment {
             return functions.get(name);
         }
         final Environment scope = lookupFunction(name);
-        if (scope == null) {
+        if (scope == EMPTY_ENV) {
             throw new IllegalArgumentException("Undefined variable: " + name);
         }
         return scope.getFunction(name);
@@ -238,7 +238,7 @@ public class Environment {
             return jumps.get(name);
         }
         final Environment scope = lookupJump(name);
-        if (scope == null) {
+        if (scope == EMPTY_ENV) {
             throw new IllegalArgumentException("Undefined variable: " + name);
         }
         return scope.getJump(name);

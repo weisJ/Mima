@@ -11,13 +11,13 @@ import edu.kit.mima.core.parsing.token.Token;
 import edu.kit.mima.core.parsing.token.TokenType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -94,7 +94,8 @@ public class SyntaxParser {
         }
     }
 
-    private SyntaxToken maybeJumpAssociation(final Supplier<SyntaxToken> supplier) {
+    @NotNull
+    private SyntaxToken maybeJumpAssociation(@NotNull final Supplier<SyntaxToken> supplier) {
         final SyntaxToken expression = supplier.get();
         if (isPunctuation(Punctuation.JUMP_DELIMITER)) {
             SyntaxToken token = new AtomSyntaxToken<>(TokenType.JUMP_POINT,
@@ -105,15 +106,17 @@ public class SyntaxParser {
             jumps.add(token);
             return token;
         } else {
-            return expression;
+            return Objects.requireNonNullElseGet(expression, EmptySyntaxToken::new);
         }
     }
 
+    @NotNull
     private SyntaxToken parseExpression() {
         return maybeCall(this::parseAtomic);
     }
 
-    private SyntaxToken maybeCall(final Supplier<SyntaxToken> supplier) {
+    @NotNull
+    private SyntaxToken maybeCall(@NotNull final Supplier<SyntaxToken> supplier) {
         final SyntaxToken expression = supplier.get();
         if (isPunctuation(Punctuation.OPEN_BRACKET)) {
             final SyntaxToken token = instructions.contains(expression.getValue().toString())
@@ -134,7 +137,7 @@ public class SyntaxParser {
             tokens.addAll(Arrays.asList(tokenA));
             return token;
         } else {
-            return expression;
+            return Objects.requireNonNullElseGet(expression, EmptySyntaxToken::new);
         }
     }
 
@@ -205,7 +208,7 @@ public class SyntaxParser {
         return new EmptySyntaxToken();
     }
 
-    @Nullable
+    @NotNull
     private SyntaxToken parseDefinition(@NotNull final List<SyntaxToken> referenceList,
                                         final Color color) {
         final SyntaxToken reference = next();

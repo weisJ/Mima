@@ -234,7 +234,7 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
      */
     public void markLine(final int index) {
         numberedTextPane.getPane().unmarkLine(currentMark);
-        numberedTextPane.getPane().markLine(index, new Color(0x2D71D2));
+        numberedTextPane.getPane().markLine(index, new Color(0x2D71D2)); //Todo decouple colour
         currentMark = index;
     }
 

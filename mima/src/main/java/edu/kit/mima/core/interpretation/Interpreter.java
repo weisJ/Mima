@@ -33,20 +33,17 @@ import java.util.function.Consumer;
  */
 public class Interpreter {
 
-    @Nullable
     private static final Value<MachineWord> VOID = new Value<>(ValueType.VOID,
                                                                new MachineWord(0, 0));
 
     private final int wordLength;
-    @NotNull
-    private final StackGuard stackGuard;
+    @NotNull private final StackGuard stackGuard;
 
     private final DebugController debugController;
     private final ExceptionHandler exceptionHandler;
 
     private boolean running;
-    @Nullable
-    private Token currentToken;
+    @Nullable private Token currentToken;
     private Environment currentScope;
 
     /**
@@ -307,13 +304,13 @@ public class Interpreter {
         final MachineWord value;
         final ValueType type;
         final String name = token.getValue().toString();
-        if (environment.lookupVariable(name) != null) {
+        if (environment.lookupVariable(name) != Environment.EMPTY_ENV) {
             value = environment.getVariable(name);
             type = ValueType.MEMORY_REFERENCE;
-        } else if (environment.lookupConstant(name) != null) {
+        } else if (environment.lookupConstant(name) != Environment.EMPTY_ENV) {
             value = environment.getConstant(name);
             type = ValueType.CONSTANT;
-        } else if (environment.lookupJump(name) != null) {
+        } else if (environment.lookupJump(name) != Environment.EMPTY_ENV) {
             return new Value<>(ValueType.JUMP_REFERENCE, name);
         } else {
             return fail("Undefined Identification: " + token.getValue());

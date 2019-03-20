@@ -3,6 +3,7 @@ package edu.kit.mima;
 import edu.kit.mima.api.history.History;
 import edu.kit.mima.core.instruction.InstructionSet;
 import edu.kit.mima.core.interpretation.InterpreterException;
+import edu.kit.mima.core.parsing.token.Token;
 import edu.kit.mima.core.running.Debugger;
 import edu.kit.mima.core.running.MimaCompiler;
 import edu.kit.mima.core.running.MimaRunner;
@@ -47,6 +48,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -103,7 +105,9 @@ public final class MimaUserInterface extends JFrame implements UserPreferenceCha
         memoryView = new MemoryTableView(mimaRunner, memoryTable);
         fileDisplay = new FileDisplay();
         BindingUtil.bind(debugger, () -> {
-            currentEditor().markLine(mimaRunner.getCurrentStatement().getFilePos());
+            currentEditor().markLine(
+                    Optional.ofNullable(mimaRunner.getCurrentStatement()).map(Token::getFilePos)
+                            .orElse(-1));
             memoryView.updateView();
         }, Debugger.PAUSE_PROPERTY);
 

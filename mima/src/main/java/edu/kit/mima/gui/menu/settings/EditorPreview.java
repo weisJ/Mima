@@ -15,7 +15,7 @@ import java.awt.Font;
  */
 public class EditorPreview extends AbstractPreviewPane {
 
-    private Editor editor;
+    private final Editor editor;
 
     /**
      * Create new Editor Preview.

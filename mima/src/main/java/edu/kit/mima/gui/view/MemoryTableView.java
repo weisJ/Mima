@@ -37,7 +37,8 @@ public class MemoryTableView implements MemoryView {
         this.table = table;
     }
 
-    private static String getAssociation(final Map<String, Integer> associations, final int value) {
+    private static String getAssociation(@NotNull final Map<String, Integer> associations,
+                                         final int value) {
         return associations.entrySet().stream()
                 .filter(entry -> entry.getValue() == value).findFirst()
                 .map(Map.Entry::getKey).orElse(null);
@@ -87,6 +88,7 @@ public class MemoryTableView implements MemoryView {
      * @param associations memory associations to use
      * @return MemoryTable formatted for an n(rows) x 2(columns) {@link JTable}
      */
+    @NotNull
     private Object[][] createMemoryTable(@NotNull final Map<String, Integer> associations) {
         final Mima mima = mimaRunner.getMima();
         final var memoryM = mima.getMemory();

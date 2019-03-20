@@ -24,8 +24,7 @@ public class GlobalEnvironment extends Environment {
 
     private final Consumer<Value> callback;
     private final Interpreter interpreter;
-    @NotNull
-    private final Mima mima;
+    @NotNull private final Mima mima;
 
     /**
      * Create global environment.

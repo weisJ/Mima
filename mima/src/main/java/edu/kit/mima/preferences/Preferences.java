@@ -29,7 +29,7 @@ public class Preferences {
     private static final List<UserPreferenceChangedListener> listenerList = new ArrayList<>();
     @NotNull private final Properties options;
     @NotNull private final Properties colorStyle;
-    private boolean notify;
+    private final boolean notify;
 
     private Preferences() {
         options = new Properties();

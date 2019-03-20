@@ -118,7 +118,8 @@ public class HighlightTextPane extends JTextPane implements ChangeListener {
      * Paint background of selection
      */
     private void drawSelection(@NotNull final Graphics g, final int height) {
-        if (selectionStart != null && (!selectionStart.equals(selectionEnd) || lineSelected)) {
+        if (selectionStart != null && selectionEnd != null
+                && (!selectionStart.equals(selectionEnd) || lineSelected)) {
             if (selectionStart.y > selectionEnd.y) {
                 final var tmp = selectionEnd;
                 selectionEnd = selectionStart;

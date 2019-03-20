@@ -14,10 +14,8 @@ import javax.swing.table.DefaultTableModel;
  */
 public class FixedScrollTable extends JScrollPane {
 
-    @NotNull
-    private final String[] tableHeader;
-    @NotNull
-    private final JTable table;
+    @NotNull private final String[] tableHeader;
+    @NotNull private final JTable table;
 
     /**
      * Table that can be scrolled down. The fields of this table can not be edited by the user.

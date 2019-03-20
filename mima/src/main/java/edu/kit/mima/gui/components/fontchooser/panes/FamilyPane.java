@@ -26,8 +26,7 @@ public class FamilyPane extends JPanel {
 
     private final JList<String> familyList = new JList<>();
 
-    @NotNull
-    private final SearchListener searchListener;
+    @NotNull private final SearchListener searchListener;
 
     /**
      * Create Font Family Chooser Pane.

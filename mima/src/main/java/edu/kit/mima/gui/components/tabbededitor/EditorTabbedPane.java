@@ -32,12 +32,12 @@ import javax.swing.SwingUtilities;
  */
 @SuppressWarnings("IntegerDivisionInFloatingPointContext")
 public class EditorTabbedPane extends JTabbedPane {
+    @NotNull public static final String SELECTED_TAB_PROPERTY = "selectedTab";
     /*default*/ static final String NAME = "TabTransferData";
     /*default*/ static final DataFlavor FLAVOR = new DataFlavor(
             DataFlavor.javaJVMLocalObjectMimeType, NAME);
-    @NotNull public static String SELECTED_TAB_PROPERTY = "selectedTab";
     /*default*/
-    @NotNull static GhostGlassPane glassPane = new GhostGlassPane();
+    @NotNull static final GhostGlassPane glassPane = new GhostGlassPane();
     @NotNull private final List<TabClosedEventHandler> handlerList;
     /*default*/ int dropTargetIndex = -1;
     /*default*/ int dropSourceIndex = -1;

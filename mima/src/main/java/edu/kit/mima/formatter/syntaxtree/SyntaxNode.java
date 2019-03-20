@@ -46,7 +46,7 @@ public interface SyntaxNode extends Comparable<SyntaxNode> {
      *
      * @return list of children nodes
      */
-    @NotNull List<SyntaxNode> children();
+    List<SyntaxNode> children();
 
     /**
      * Get the parent node.

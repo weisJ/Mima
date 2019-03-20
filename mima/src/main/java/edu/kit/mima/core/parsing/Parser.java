@@ -13,7 +13,6 @@ import edu.kit.mima.core.parsing.token.Tuple;
 import edu.kit.mima.core.parsing.token.ValueTuple;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -29,8 +28,7 @@ import java.util.function.Supplier;
  */
 public final class Parser extends Processor {
 
-    @NotNull
-    private final Set<ParserException> errors;
+    @NotNull private final Set<ParserException> errors;
     private boolean skipEndOfInstruction;
     private int scopeIndex;
 
@@ -227,7 +225,7 @@ public final class Parser extends Processor {
     /*
      * Parse a definition. May have a value
      */
-    @Nullable
+    @NotNull
     private BinaryToken parseDefinition() {
         final Token reference = input.next();
         final int line = input.getLine();

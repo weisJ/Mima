@@ -14,7 +14,7 @@ import java.awt.Font;
  */
 public class ConsolePreview extends AbstractPreviewPane {
 
-    private Console console;
+    private final Console console;
 
     /**
      * Create new Console Preview.

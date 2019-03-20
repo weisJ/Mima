@@ -36,7 +36,7 @@ public class GhostGlassPane extends JPanel {
     private static final MouseWheelListener mwl = l -> {};
     private final AlphaComposite alphaComposite;
     @NotNull private final Timer timer;
-    @NotNull private Point location = new Point(0, 0);
+    @NotNull private final Point location = new Point(0, 0);
     @Nullable private BufferedImage draggingGhost = null;
     private Point mouseLocation;
     private boolean paintDrag;

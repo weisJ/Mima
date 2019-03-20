@@ -46,12 +46,11 @@ public final class Help extends JFrame {
 
     private static Help instance;
 
-    private static @Nullable Thread loadSource;
+    @Nullable private static Thread loadSource;
     private static boolean loadedFromWeb;
 
     private static JFXPanel jfxPanel;
-    @Nullable
-    private static String source;
+    @Nullable private static String source;
 
     /*
      * Construct the Help Screen

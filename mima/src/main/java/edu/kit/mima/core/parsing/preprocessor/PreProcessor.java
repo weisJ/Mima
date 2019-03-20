@@ -37,10 +37,8 @@ import java.util.stream.Collectors;
  */
 public final class PreProcessor extends Processor {
 
-    @NotNull
-    private final StringBuilder processedInput;
-    @NotNull
-    private final CharsetDetector charsetDetector;
+    @NotNull private final StringBuilder processedInput;
+    @NotNull private final CharsetDetector charsetDetector;
     @NotNull private final Set<String> processedFiles;
     private List<ParserException> errors;
     private boolean recursive;

@@ -37,10 +37,10 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler {
     @NotNull private final ThreadDebugController threadDebugController;
     @NotNull private final MimaDebugger debugger;
 
-    @Nullable private Interpreter interpreter;
-    private Mima mima;
+    @NotNull private Interpreter interpreter;
+    @NotNull private Mima mima;
     private Program program;
-    @Nullable private GlobalEnvironment globalEnvironment;
+    private GlobalEnvironment globalEnvironment;
 
     /**
      * Create new MimaRunner.
