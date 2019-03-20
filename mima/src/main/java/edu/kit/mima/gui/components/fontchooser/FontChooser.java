@@ -74,7 +74,7 @@ public class FontChooser extends JPanel implements FontContainer {
             new StyleListSelectionListener(this);
     private final SizeListSelectionListener sizePaneListener =
             new SizeListSelectionListener(this);
-    @Nullable private FontSelectionModel selectionModel;
+    @NotNull private FontSelectionModel selectionModel;
 
     /**
      * Creates a FontChooser pane with an initial default Font (Sans Serif, Plain, 12).
@@ -92,7 +92,8 @@ public class FontChooser extends JPanel implements FontContainer {
         this(initialFont, new PreviewPane());
     }
 
-    public FontChooser(@NotNull final Font initialFont, @NotNull final AbstractPreviewPane previewPane) {
+    public FontChooser(@NotNull final Font initialFont,
+                       @NotNull final AbstractPreviewPane previewPane) {
         this(new DefaultFontSelectionModel(initialFont), previewPane);
     }
 
@@ -102,10 +103,11 @@ public class FontChooser extends JPanel implements FontContainer {
      * @param model       the {@code FontSelectionModel} to be used
      * @param previewPane the preview pane
      */
-    public FontChooser(final FontSelectionModel model,
+    public FontChooser(@NotNull final FontSelectionModel model,
                        @NotNull final AbstractPreviewPane previewPane) {
         this.previewPane = previewPane;
         resourceBundle = ResourceBundle.getBundle("FontChooser");
+        selectionModel = model;
         setSelectionModel(model);
         setLayout(new BorderLayout());
         addComponents();
@@ -133,7 +135,7 @@ public class FontChooser extends JPanel implements FontContainer {
      * @see JComponent#addPropertyChangeListener
      */
     @Override
-    public void setSelectedFont(final Font font) {
+    public void setSelectedFont(@NotNull final Font font) {
         familyPane.removeListSelectionListener(familyPaneListener);
         stylePane.removeListSelectionListener(stylePaneListener);
         sizePane.removeListSelectionListener(sizePaneListener);
@@ -148,7 +150,7 @@ public class FontChooser extends JPanel implements FontContainer {
      *
      * @return a {@code FontSelectionModel} object
      */
-    @Nullable
+    @NotNull
     public FontSelectionModel getSelectionModel() {
         return selectionModel;
     }

@@ -21,7 +21,7 @@ import javax.swing.Icon;
  * @since 2018
  */
 public class CDropTargetListener implements DropTargetListener {
-    private EditorTabbedPane tabbedPane;
+    private final EditorTabbedPane tabbedPane;
 
     /*default*/ CDropTargetListener(final EditorTabbedPane tabbedPane) {
         this.tabbedPane = tabbedPane;
@@ -67,7 +67,7 @@ public class CDropTargetListener implements DropTargetListener {
         tabbedPane.repaint();
     }
 
-    private void convertTab(final TabTransferData transferData, int targetIndex) {
+    private void convertTab(@NotNull final TabTransferData transferData, int targetIndex) {
         final EditorTabbedPane source = transferData.getTabbedPane();
         final int sourceIndex = transferData.getTabIndex();
         if (sourceIndex < 0) {

@@ -25,8 +25,7 @@ import javax.swing.plaf.basic.BasicTabbedPaneUI;
  */
 public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
 
-    @NotNull
-    private final EditorTabbedPane tabbedPane;
+    @NotNull private final EditorTabbedPane tabbedPane;
 
     private final Color dropColor;
     private final Color selectedColor;

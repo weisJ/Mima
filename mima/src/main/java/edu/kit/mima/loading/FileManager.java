@@ -133,6 +133,9 @@ public class FileManager implements AutoCloseable {
      * @throws IOException mey throw IOException
      */
     public void save() throws IOException {
+        if (text == null) {
+            return;
+        }
         IoTools.saveFile(text, lastFile);
         fileHash = text.hashCode();
         notifyHandlers(e -> e.saveEvent(lastFile));
@@ -142,6 +145,9 @@ public class FileManager implements AutoCloseable {
      * Save file to location of users choice.
      */
     public void saveAs() {
+        if (text == null) {
+            return;
+        }
         fileRequester.requestSave(text, directory, lastExtension, () -> {
             throw new IllegalArgumentException("aborted save");
         });
@@ -199,7 +205,7 @@ public class FileManager implements AutoCloseable {
      *
      * @param text text
      */
-    public void setText(final String text) {
+    public void setText(@Nullable final String text) {
         this.text = text;
     }
 
@@ -295,7 +301,7 @@ public class FileManager implements AutoCloseable {
 
     @Override
     public void close() throws IOException {
-        if (isNewFile) {
+        if (isNewFile && text != null) {
             final var pref = Preferences.getInstance();
             final String path = pref.readString(PropertyKey.DIRECTORY_MIMA) + "\\" + lastFile;
             pref.saveString(PropertyKey.LAST_FILE, lastFile);

@@ -29,6 +29,11 @@ import javax.swing.SwingUtilities;
 public class TooltipComponent<T extends JComponent & ITooltip> implements MouseListener,
                                                                           TooltipConstants {
 
+    private final int delay;
+    private final int vanishingDelay;
+    private final JComponent container;
+    private final T content;
+    private final int centerAt;
     private boolean installed;
     private boolean overContainer;
     private boolean inside;
@@ -37,13 +42,6 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
     private boolean showOnce;
     private Thread thread;
     private Point mousePos;
-
-    private int delay;
-    private int vanishingDelay;
-
-    private JComponent container;
-    private T content;
-    private int centerAt;
     private boolean active;
 
     /**

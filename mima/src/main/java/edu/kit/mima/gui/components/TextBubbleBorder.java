@@ -23,13 +23,13 @@ import javax.swing.border.AbstractBorder;
 public class TextBubbleBorder extends AbstractBorder {
 
     private static final long serialVersionUID = 1L;
+    private final RenderingHints hints;
+    private final Insets insets;
     private Alignment pointerSide = Alignment.NORTH;
-    private RenderingHints hints;
     private Color color;
     private int thickness;
     private int radius;
     private int pointerSize;
-    private Insets insets;
     private BasicStroke stroke;
     private int strokePad;
     private double pointerPadPercent = 0.5;

@@ -23,14 +23,12 @@ import javax.swing.JPanel;
  */
 public class IconButton extends JButton {
     protected final int border = 3;
+    private final Color highlight;
+    private final Color highlightClick;
     protected Icon inactive;
     protected Icon active;
-    private Color highlight;
-    private Color highlightClick;
-
     private boolean hover;
     private boolean clicking;
-    private boolean visible;
     private boolean locked;
     private boolean nextStatus;
 
@@ -53,7 +51,6 @@ public class IconButton extends JButton {
         super();
         this.inactive = inactive;
         this.active = active;
-        visible = true;
         highlight = new HSLColor(new JPanel().getBackground()).adjustTone(30).getRGB();
         highlightClick = new HSLColor(highlight).adjustTone(20).getRGB();
         setOpaque(false);
@@ -91,9 +88,6 @@ public class IconButton extends JButton {
 
             @Override
             public void mouseClicked(final MouseEvent e) {
-                if (!visible) {
-                    return;
-                }
                 for (final var l : getActionListeners()) {
                     l.actionPerformed(new ActionEvent(IconButton.this, 0, ""));
                 }
@@ -107,9 +101,6 @@ public class IconButton extends JButton {
 
     @Override
     protected void paintComponent(@NotNull final Graphics g) {
-        if (!visible) {
-            return;
-        }
         final Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         if (isEnabled() && hover) {

@@ -36,7 +36,7 @@ public class NumberedTextPane extends JPanel {
     @NotNull private final JScrollPane scrollPane;
     @NotNull private final TreeMap<Integer, IndexComponent> componentMap;
     @NotNull private final List<IndexListener> listenerList;
-    private int offsetMultiplier = 5;
+    private final int offsetMultiplier = 5;
     private Font font;
     private Color color;
     private int actionThresholdX;

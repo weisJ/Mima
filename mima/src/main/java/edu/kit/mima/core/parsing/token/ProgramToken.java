@@ -24,8 +24,8 @@ public class ProgramToken implements Token<Token[]> {
     private static final Pattern INDENT = Pattern.compile("\n");
     private static final String INDENT_REPLACEMENT = "\n\t";
     private final int filePos;
+    private final Map<Token, Integer> jumpMap;
     private Token[] program;
-    private Map<Token, Integer> jumpMap;
 
     /**
      * Program token that holds an array of Tokens.

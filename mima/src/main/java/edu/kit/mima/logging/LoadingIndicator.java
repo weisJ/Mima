@@ -1,5 +1,6 @@
 package edu.kit.mima.logging;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Timer;
@@ -29,6 +30,7 @@ public final class LoadingIndicator {
     /**
      * {@link LoadingIndicator} should not be instantiated.
      */
+    @Contract(" -> fail")
     private LoadingIndicator() {
         assert false : "utility class constructor";
     }

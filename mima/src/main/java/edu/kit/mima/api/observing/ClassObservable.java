@@ -21,7 +21,7 @@ public abstract class ClassObservable extends AbstractObservable
      * Collection that keeps track of all instances.
      */
     @NotNull
-    protected static Collection<Observable> instances = new ArrayList<>();
+    protected static final Collection<Observable> instances = new ArrayList<>();
 
     public ClassObservable() {
         instances.add(this);

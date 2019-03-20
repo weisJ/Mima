@@ -28,8 +28,7 @@ import javax.swing.text.StyledDocument;
  */
 public class Console extends JScrollPane implements UserPreferenceChangedListener {
 
-    @NotNull
-    private final JTextPane textPane;
+    @NotNull private final JTextPane textPane;
     private final StyledDocument document;
     private final Style style;
 
@@ -180,7 +179,7 @@ public class Console extends JScrollPane implements UserPreferenceChangedListene
         final JScrollBar verticalBar = getVerticalScrollBar();
         final AdjustmentListener downScroller = new AdjustmentListener() {
             @Override
-            public void adjustmentValueChanged(final AdjustmentEvent e) {
+            public void adjustmentValueChanged(@NotNull final AdjustmentEvent e) {
                 final Adjustable adjustable = e.getAdjustable();
                 adjustable.setValue(adjustable.getMinimum());
                 verticalBar.removeAdjustmentListener(this);

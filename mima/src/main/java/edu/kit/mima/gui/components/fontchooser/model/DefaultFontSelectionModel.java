@@ -51,7 +51,7 @@ public class DefaultFontSelectionModel implements FontSelectionModel {
      */
     private transient ChangeEvent changeEvent;
 
-    @Nullable private Font selectedFont;
+    private Font selectedFont;
 
     /**
      * Creates a {@code DefaultFontSelectionModel} with the current font set to {@code font}, which
@@ -69,7 +69,6 @@ public class DefaultFontSelectionModel implements FontSelectionModel {
      *
      * @return the selected {@code Font}
      */
-    @Nullable
     @Override
     public Font getSelectedFont() {
         return selectedFont;

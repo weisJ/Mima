@@ -20,10 +20,8 @@ import java.util.stream.IntStream;
  */
 public class SyntaxTree {
 
-    @NotNull
-    public final SyntaxToken[] tokens;
-    @NotNull
-    private final SyntaxNode root;
+    @NotNull public final SyntaxToken[] tokens;
+    @NotNull private final SyntaxNode root;
 
     /**
      * Create syntax tree.

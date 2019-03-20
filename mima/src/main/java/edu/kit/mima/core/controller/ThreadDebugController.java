@@ -18,7 +18,7 @@ import java.util.Set;
 public class ThreadDebugController implements DebugController {
 
     private final Object lock = new Object();
-    private Set<Integer> breaks;
+    private final Set<Integer> breaks;
     private Thread workingThread;
     private boolean isActive;
     private boolean autoPause;

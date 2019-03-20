@@ -17,7 +17,7 @@ public interface Token<T> {
      *
      * @return value
      */
-    @NotNull T getValue();
+    T getValue();
 
     /**
      * Set the value of the Token.

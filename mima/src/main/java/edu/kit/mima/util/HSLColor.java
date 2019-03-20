@@ -13,19 +13,18 @@ import java.awt.Color;
  * Luminance is the brightness of the color (with respect to black and white)
  *
  * <p>The Hue is specified as an angel between 0 - 360 degrees where red is 0, green is 120 and
- * blue
- * is 240. In between you have the colors of the rainbow. Saturation is specified as a percentage
- * between 0 - 100 where 100 is fully saturated and 0 approaches gray. Luminance is specified as a
- * percentage between 0 - 100 where 0 is black and 100 is white.
+ * blue is 240. In between you have the colors of the rainbow. Saturation is specified as a
+ * percentage between 0 - 100 where 100 is fully saturated and 0 approaches gray. Luminance is
+ * specified as a percentage between 0 - 100 where 0 is black and 100 is white.
  *
  * <p>In particular the HSL color space makes it easier change the Tone or Shade of a color by
  * adjusting the luminance value.
  */
 @SuppressWarnings("CheckStyle")
 public class HSLColor {
-    private Color rgb;
-    private float[] hsl;
-    private float alpha;
+    private final Color rgb;
+    private final float[] hsl;
+    private final float alpha;
 
     /**
      * Create a HSLColor object using an RGB Color object.
@@ -207,7 +206,7 @@ public class HSLColor {
 
         //  Formula needs all values between 0 - 1.
 
-        h = h % 360.0f;
+        h %= 360.0f;
         h /= 360f;
         s /= 100f;
         l /= 100f;

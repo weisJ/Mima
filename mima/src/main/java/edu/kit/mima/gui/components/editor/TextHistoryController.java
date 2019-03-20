@@ -19,8 +19,7 @@ public class TextHistoryController {
 
     private static final int MAXIMUM_AMEND_LENGTH = 10;
     private final JTextPane editorPane;
-    @NotNull
-    private final History<FileHistoryObject> history;
+    @NotNull private final History<FileHistoryObject> history;
     private boolean active;
 
     /**

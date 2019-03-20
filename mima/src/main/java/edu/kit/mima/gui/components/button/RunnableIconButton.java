@@ -2,8 +2,6 @@ package edu.kit.mima.gui.components.button;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import javax.swing.Icon;
 
 /**
@@ -12,10 +10,9 @@ import javax.swing.Icon;
  * @author Jannis Weis
  * @since 2018
  */
-public class RunnableIconButton extends IconButton implements ActionListener {
+public class RunnableIconButton extends IconButton {
 
-    private boolean toggled;
-    private Icon running;
+    private final Icon running;
     private boolean isRunning;
 
     /**
@@ -32,7 +29,6 @@ public class RunnableIconButton extends IconButton implements ActionListener {
         this.running = running;
         this.inactive = inactive;
         this.active = active;
-        addActionListener(this);
     }
 
     @Override
@@ -42,19 +38,5 @@ public class RunnableIconButton extends IconButton implements ActionListener {
 
     public void setRunning(final boolean running) {
         isRunning = running;
-    }
-
-    @Override
-    public void actionPerformed(final ActionEvent e) {
-        toggled = !toggled;
-    }
-
-    /**
-     * Toggle the icon.
-     *
-     * @param activeIcon whether to use the active icon
-     */
-    public void toggle(final boolean activeIcon) {
-        toggled = activeIcon;
     }
 }

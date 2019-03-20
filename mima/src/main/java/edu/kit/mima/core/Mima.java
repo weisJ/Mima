@@ -20,15 +20,11 @@ public class Mima {
     private final int wordLength;
     private final int constWordLength;
 
-    @NotNull
-    private final MemoryMap memoryMap;
-    @NotNull
-    private final MachineWord accumulator;
-    @NotNull
-    private final MachineWord stackPointer;
+    @NotNull private final MemoryMap memoryMap;
+    @NotNull private final MachineWord accumulator;
+    @NotNull private final MachineWord stackPointer;
 
-    @NotNull
-    private final Stack<Pair<Integer, Environment>> returnStack;
+    @NotNull private final Stack<Pair<Integer, Environment>> returnStack;
 
     /**
      * Construct new Mima object with the given number of bits for memory and argument {@link

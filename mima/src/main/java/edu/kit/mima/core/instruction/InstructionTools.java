@@ -3,6 +3,8 @@ package edu.kit.mima.core.instruction;
 import edu.kit.mima.core.data.MachineWord;
 import edu.kit.mima.core.interpretation.Value;
 import edu.kit.mima.core.interpretation.ValueType;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -14,6 +16,7 @@ import java.util.List;
  */
 public class InstructionTools {
 
+    @Contract(" -> fail")
     private InstructionTools() {
         assert false : "utility class constructor";
     }
@@ -24,7 +27,8 @@ public class InstructionTools {
      * @param args                   arguments list
      * @param expectedArgumentNumber expected number of arguments
      */
-    public static void checkArgNumber(final List<Value> args, final int expectedArgumentNumber) {
+    public static void checkArgNumber(@NotNull final List<Value> args,
+                                      final int expectedArgumentNumber) {
         if (args.size() != expectedArgumentNumber) {
             fail("invalid number of arguments");
         }
@@ -37,7 +41,7 @@ public class InstructionTools {
      * @param index     index of argument
      * @return reference argument value
      */
-    public static Value getReferenceValue(final List<Value> arguments, final int index) {
+    public static Value getReferenceValue(@NotNull final List<Value> arguments, final int index) {
         final var argument = arguments.get(index);
         if (argument.getType() != ValueType.CONSTANT && argument.getType() != ValueType.NUMBER) {
             fail("can't pass a reference");
@@ -53,7 +57,7 @@ public class InstructionTools {
      * @param index     index of argument in list
      * @return Value with memory reference
      */
-    public static Value getMemoryReference(final List<Value> arguments, final int index) {
+    public static Value getMemoryReference(@NotNull final List<Value> arguments, final int index) {
         final var argument = arguments.get(index);
         if (argument == null
                 || !(argument.getType() == ValueType.NUMBER
@@ -75,7 +79,7 @@ public class InstructionTools {
      * @param index     index of argument in argument list
      * @return jump reference
      */
-    public static Value getJumpReference(final List<Value> arguments, final int index) {
+    public static Value getJumpReference(@NotNull final List<Value> arguments, final int index) {
         final var argument = arguments.get(index);
         if (argument.getType() != ValueType.JUMP_REFERENCE) {
             throw new IllegalArgumentException("must pass jump reference");
@@ -89,6 +93,7 @@ public class InstructionTools {
      *
      * @param message fail message
      */
+    @Contract("_ -> fail")
     public static void fail(final String message) {
         throw new IllegalArgumentException(message);
     }

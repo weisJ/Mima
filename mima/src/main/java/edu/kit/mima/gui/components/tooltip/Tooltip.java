@@ -26,8 +26,8 @@ import javax.swing.border.EmptyBorder;
  * @since 2018
  */
 public class Tooltip extends ShadowPane implements ITooltip {
-    private TextBubbleBorder bubbleBorder;
-    private JLabel textLabel;
+    private final TextBubbleBorder bubbleBorder;
+    private final JLabel textLabel;
     private Alignment alignment;
     private float alpha = 0;
 

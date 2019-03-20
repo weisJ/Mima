@@ -1,6 +1,7 @@
 package edu.kit.mima.core.data;
 
 import edu.kit.mima.core.Mima;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -23,7 +24,7 @@ public class MachineWord {
      * @param bits       bits
      * @param wordLength number of bits
      */
-    public MachineWord(final boolean[] bits, final int wordLength) {
+    public MachineWord(@NotNull final boolean[] bits, final int wordLength) {
         assert wordLength > 0;
         if (wordLength > bits.length) {
             throw new IllegalArgumentException("too many bits");
@@ -39,7 +40,7 @@ public class MachineWord {
      * @param bits       bits
      * @param wordLength number of bits
      */
-    public MachineWord(final Boolean[] bits, final int wordLength) {
+    public MachineWord(@NotNull final Boolean[] bits, final int wordLength) {
         if (wordLength < bits.length) {
             throw new IllegalArgumentException("too many bits");
         }
@@ -68,7 +69,9 @@ public class MachineWord {
      * @param wordLength length to cast to
      * @return machineWord with wordLength bits
      */
-    public static MachineWord cast(final MachineWord word, final int wordLength) {
+    @NotNull
+    @Contract("_, _ -> new")
+    public static MachineWord cast(@NotNull final MachineWord word, final int wordLength) {
         return new MachineWord(word.intValue(), wordLength);
     }
 
@@ -131,6 +134,7 @@ public class MachineWord {
      *
      * @return this
      */
+    @Contract(" -> this")
     @NotNull
     public final MachineWord invert() {
         for (int i = 0; i < wordLength; i++) {

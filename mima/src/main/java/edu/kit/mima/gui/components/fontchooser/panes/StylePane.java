@@ -21,8 +21,7 @@ public class StylePane extends JScrollPane implements ChangeListener {
 
     private final JList<String> styleList = new JList<>();
 
-    @NotNull
-    private final DefaultListModel<String> styleListModel;
+    @NotNull private final DefaultListModel<String> styleListModel;
 
     private String family;
 
@@ -94,7 +93,7 @@ public class StylePane extends JScrollPane implements ChangeListener {
 
     }
 
-    private void updateListModel(final Iterable<Font> fonts) {
+    private void updateListModel(@NotNull final Iterable<Font> fonts) {
         styleListModel.clear();
 
         for (final Font font : fonts) {
@@ -102,13 +101,15 @@ public class StylePane extends JScrollPane implements ChangeListener {
         }
     }
 
-    private void addSelectionListeners(final ListSelectionListener[] selectionListeners) {
+    private void addSelectionListeners(
+            @NotNull final ListSelectionListener[] selectionListeners) {
         for (final ListSelectionListener listener : selectionListeners) {
             styleList.addListSelectionListener(listener);
         }
     }
 
-    private void removeSelectionListeners(final ListSelectionListener[] selectionListeners) {
+    private void removeSelectionListeners(
+            @NotNull final ListSelectionListener[] selectionListeners) {
         for (final ListSelectionListener listener : selectionListeners) {
             styleList.removeListSelectionListener(listener);
         }

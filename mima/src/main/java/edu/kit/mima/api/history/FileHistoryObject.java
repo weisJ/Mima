@@ -2,7 +2,6 @@ package edu.kit.mima.api.history;
 
 import edu.kit.mima.logging.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
@@ -60,7 +59,7 @@ public class FileHistoryObject {
      */
     @NotNull
     public String getText() {
-        return text == null ? "" : text;
+        return text;
     }
 
     /**
@@ -70,7 +69,7 @@ public class FileHistoryObject {
      */
     @NotNull
     public String getOldText() {
-        return old == null ? "" : old;
+        return old;
     }
 
     /**
@@ -78,7 +77,7 @@ public class FileHistoryObject {
      *
      * @return the ChangeType
      */
-    @Nullable
+    @NotNull
     public ChangeType getType() {
         return type;
     }

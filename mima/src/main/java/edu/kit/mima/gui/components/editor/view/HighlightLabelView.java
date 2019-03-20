@@ -41,7 +41,7 @@ public class HighlightLabelView extends LabelView {
             int y = a.getBounds().y + a.getBounds().height
                     - (int) getGlyphPainter().getDescent(this);
 
-            y = y - (int) (getGlyphPainter().getAscent(this) * 0.3f);
+            y -= (int) (getGlyphPainter().getAscent(this) * 0.3f);
             final int x1 = (int) a.getBounds().getX();
             final int x2 = (int) (a.getBounds().getX() + a.getBounds().getWidth());
 

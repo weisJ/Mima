@@ -15,8 +15,7 @@ import javax.swing.border.EmptyBorder;
  * @since 2018
  */
 public class IconPanel extends JPanel {
-    @NotNull
-    private final Icon icon;
+    @NotNull private final Icon icon;
     private int xoff;
     private int yoff;
 
