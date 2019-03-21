@@ -1,5 +1,6 @@
 package edu.kit.mima.core.token;
 
+import edu.kit.mima.core.file.FileObjectAdapter;
 import edu.kit.mima.core.query.programquery.ProgramQuery;
 import edu.kit.mima.core.query.programquery.ProgramQueryResult;
 import org.jetbrains.annotations.Contract;
@@ -19,13 +20,13 @@ import java.util.stream.Collectors;
  * @author Jannis Weis
  * @since 2018
  */
-public class ProgramToken implements Token<Token[]> {
+public class ProgramToken extends FileObjectAdapter implements Token<Token[]> {
 
     private static final Pattern INDENT = Pattern.compile("\n");
     private static final String INDENT_REPLACEMENT = "\n\t";
     private final int filePos;
     private final Map<Token, Integer> jumpMap;
-    private Token[] program;
+    private final Token[] program;
 
     /**
      * Program token that holds an array of Tokens.
@@ -47,7 +48,7 @@ public class ProgramToken implements Token<Token[]> {
         final List<Token> tokens = ((ProgramQueryResult) new ProgramQuery(this)
                 .whereEqual(Token::getType, TokenType.JUMP_POINT)).get(false);
         for (final var token : tokens) {
-            jumpMap.put((Token) token.getValue(), token.getIndex());
+            jumpMap.put((Token) token.getValue(), token.getLineIndex());
         }
     }
 
@@ -66,11 +67,6 @@ public class ProgramToken implements Token<Token[]> {
         return program;
     }
 
-    @Override
-    public void setValue(final Token[] value) {
-        program = value;
-    }
-
     @NotNull
     @Override
     public TokenType getType() {
@@ -78,15 +74,12 @@ public class ProgramToken implements Token<Token[]> {
     }
 
     @Override
-    public int getIndex() {
+    public int getLineIndex() {
         return 0;
     }
 
     @Override
-    public void setIndex(final int index) { }
-
-    @Override
-    public int getFilePos() {
+    public int getOffset() {
         return filePos;
     }
 

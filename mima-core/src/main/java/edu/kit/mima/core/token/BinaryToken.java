@@ -1,6 +1,7 @@
 package edu.kit.mima.core.token;
 
-import edu.kit.mima.api.util.Tuple;
+import edu.kit.mima.api.util.ImmutableTuple;
+import edu.kit.mima.core.file.FileObjectAdapter;
 import edu.kit.mima.core.parsing.lang.Punctuation;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -15,15 +16,15 @@ import java.util.regex.Pattern;
  * @author Jannis Weis
  * @since 2018
  */
-public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
+public class BinaryToken<T, K> extends FileObjectAdapter implements Token<T>, ImmutableTuple<T, K> {
 
     private static final Pattern INDENT = Pattern.compile("\n");
     private static final String INDENT_REPLACEMENT = "\n\t";
     @NotNull private final TokenType type;
     private final int filePos;
-    private int index;
-    private T first;
-    private K second;
+    private final int index;
+    private final T first;
+    private final K second;
 
     /**
      * Token that holds two values independent of each others type.
@@ -71,29 +72,14 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
     }
 
     @Override
-    public void setFirst(@NotNull final T first) {
-        this.first = first;
-    }
-
-    @Override
     public K getSecond() {
         return second;
-    }
-
-    @Override
-    public void setSecond(@NotNull final K second) {
-        this.second = second;
     }
 
     @NotNull
     @Override
     public T getValue() {
         return first;
-    }
-
-    @Override
-    public void setValue(@NotNull final T value) {
-        first = value;
     }
 
     @NotNull
@@ -103,17 +89,12 @@ public class BinaryToken<T, K> implements Token<T>, Tuple<T, K> {
     }
 
     @Override
-    public int getIndex() {
+    public int getLineIndex() {
         return index;
     }
 
     @Override
-    public void setIndex(final int index) {
-        this.index = index;
-    }
-
-    @Override
-    public int getFilePos() {
+    public int getOffset() {
         return filePos;
     }
 

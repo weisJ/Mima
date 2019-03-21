@@ -175,6 +175,7 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler {
         return scope == null ? globalEnvironment : scope;
     }
 
+    @NotNull
     public Mima getMima() {
         return mima;
     }

@@ -49,13 +49,14 @@ public class MimaCompiler {
                                 final boolean preProcess,
                                 final boolean performCheck) {
         final List<Exception> errors = new ArrayList<>();
+        String text = input;
         if (preProcess) {
             final var processed = new PreProcessor(input, workingDirectory,
                                                    mimaDirectory, true).process();
             errors.addAll(processed.getSecond());
-            input = processed.getFirst();
+            text = processed.getFirst();
         }
-        final var parsed = new Parser(input).parse();
+        final var parsed = new Parser(text).parse();
         final var programToken = parsed.getFirst();
         errors.addAll(parsed.getSecond());
         if (!errors.isEmpty() && throwErrors) {

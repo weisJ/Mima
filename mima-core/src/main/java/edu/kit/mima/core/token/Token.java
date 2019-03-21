@@ -1,5 +1,6 @@
 package edu.kit.mima.core.token;
 
+import edu.kit.mima.core.file.FileObject;
 import edu.kit.mima.core.parsing.Parser;
 import edu.kit.mima.core.parsing.inputstream.TokenStream;
 import org.jetbrains.annotations.NotNull;
@@ -10,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
  * @author Jannis Weis
  * @since 2018
  */
-public interface Token<T> {
+public interface Token<T> extends FileObject {
 
     /**
      * Get the value of the token.
@@ -20,39 +21,11 @@ public interface Token<T> {
     T getValue();
 
     /**
-     * Set the value of the Token.
-     *
-     * @param value new value
-     */
-    void setValue(T value);
-
-    /**
      * Get the type of the token. Types are defined in {@link TokenType}.
      *
      * @return type of token
      */
     TokenType getType();
-
-    /**
-     * Index of token in program.
-     *
-     * @return index attribute
-     */
-    int getIndex();
-
-    /**
-     * Set index of token.
-     *
-     * @param index index
-     */
-    void setIndex(int index);
-
-    /**
-     * Get position of token in file.
-     *
-     * @return position in file.
-     */
-    int getFilePos();
 
     /**
      * Get a string representation of the token.

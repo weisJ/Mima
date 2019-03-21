@@ -1,5 +1,6 @@
 package edu.kit.mima.core.token;
 
+import edu.kit.mima.core.file.FileObjectAdapter;
 import edu.kit.mima.core.parsing.lang.Keyword;
 import edu.kit.mima.core.parsing.lang.Punctuation;
 import org.jetbrains.annotations.Contract;
@@ -14,12 +15,12 @@ import java.util.Objects;
  * @author Jannis Weis
  * @since 2018
  */
-public class AtomToken<T> implements Token<T> {
+public class AtomToken<T> extends FileObjectAdapter implements Token<T> {
 
     @NotNull private final TokenType type;
     private final int filePos;
-    private int index;
-    private T value;
+    private final int index;
+    private final T value;
 
     /**
      * Plain Token that holds any value type.
@@ -56,17 +57,12 @@ public class AtomToken<T> implements Token<T> {
     }
 
     @Override
-    public int getIndex() {
+    public int getLineIndex() {
         return index;
     }
 
     @Override
-    public void setIndex(final int index) {
-        this.index = index;
-    }
-
-    @Override
-    public int getFilePos() {
+    public int getOffset() {
         return filePos;
     }
 
@@ -74,11 +70,6 @@ public class AtomToken<T> implements Token<T> {
     @Override
     public T getValue() {
         return value;
-    }
-
-    @Override
-    public void setValue(@NotNull final T value) {
-        this.value = value;
     }
 
     @NotNull

@@ -31,6 +31,7 @@ public final class Parser extends Processor {
     @NotNull private final Set<ParserException> errors;
     private boolean skipEndOfInstruction;
     private int scopeIndex;
+    private int instructionIndex;
 
     /**
      * Create parser from string input.
@@ -65,7 +66,7 @@ public final class Parser extends Processor {
         final List<Token> program = new ArrayList<>();
         boolean finishedScope = false;
         scopeIndex++;
-        int tokenIndex = 0;
+        instructionIndex = 0;
         errors.addAll(skipError());
         final int line = input.getLine();
         while (!input.isEmpty() && !finishedScope) {
@@ -78,9 +79,8 @@ public final class Parser extends Processor {
                         skipEndOfInstruction = false;
                         input.next();
                     } else {
-                        token.setIndex(tokenIndex);
                         program.add(token);
-                        tokenIndex++;
+                        instructionIndex++;
                     }
                 }
                 if (skipEndOfInstruction) {
@@ -121,7 +121,8 @@ public final class Parser extends Processor {
                 return program;
             }
             if (isPunctuation(Punctuation.SCOPE_CLOSED)) {
-                return new AtomToken<>(TokenType.SCOPE_END, scopeIndex, -1, input.getLine());
+                return new AtomToken<>(TokenType.SCOPE_END, scopeIndex,
+                                       instructionIndex, input.getLine());
             }
             if (isPunctuation(Punctuation.OPEN_BRACKET)) {
                 input.next();
@@ -155,7 +156,7 @@ public final class Parser extends Processor {
             input.next();
             return new BinaryToken<>(TokenType.JUMP_POINT,
                                      expression,
-                                     maybeJumpAssociation(supplier), -1, line);
+                                     maybeJumpAssociation(supplier), instructionIndex, line);
         }
         return expression;
     }
@@ -180,7 +181,7 @@ public final class Parser extends Processor {
                 Punctuation.CLOSED_BRACKET,
                 Punctuation.COMMA,
                 this::parseExpression,
-                true), -1, line);
+                true), instructionIndex, line);
     }
 
     /*
@@ -198,14 +199,14 @@ public final class Parser extends Processor {
                     Punctuation.INSTRUCTION_END,
                     Punctuation.COMMA,
                     this::parseConstant,
-                    false), -1, input.getLine());
+                    false), instructionIndex, input.getLine());
         }
         return new AtomToken<>(TokenType.DEFINITION, delimited(
                 CharInputStream.EMPTY_CHAR,
                 Punctuation.INSTRUCTION_END,
                 Punctuation.COMMA,
                 this::parseDefinition,
-                false), -1, line);
+                false), instructionIndex, line);
     }
 
     /*
@@ -219,7 +220,7 @@ public final class Parser extends Processor {
         skipPunctuation(Punctuation.DEFINITION_DELIMITER);
         final Token value = parseExpression();
         assert reference != null;
-        return new BinaryToken<>(TokenType.CONSTANT, reference, value, -1, line);
+        return new BinaryToken<>(TokenType.CONSTANT, reference, value, instructionIndex, line);
     }
 
     /*
@@ -233,9 +234,11 @@ public final class Parser extends Processor {
             if (isPunctuation(Punctuation.DEFINITION_DELIMITER)) {
                 input.next();
                 final Token value = parseExpression();
-                return new BinaryToken<>(TokenType.DEFINITION, reference, value, -1, line);
+                return new BinaryToken<>(TokenType.DEFINITION, reference, value,
+                                         instructionIndex, line);
             }
-            return new BinaryToken<>(TokenType.DEFINITION, reference, new EmptyToken(), -1, line);
+            return new BinaryToken<>(TokenType.DEFINITION, reference, new EmptyToken(),
+                                     instructionIndex, line);
         }
         return input.error("expected identifier");
     }

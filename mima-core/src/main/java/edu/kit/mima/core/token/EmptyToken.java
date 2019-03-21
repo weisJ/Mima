@@ -1,6 +1,6 @@
 package edu.kit.mima.core.token;
 
-import org.jetbrains.annotations.Contract;
+import edu.kit.mima.core.file.FileObjectAdapter;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
  * @author Jannis Weis
  * @since 2018
  */
-public class EmptyToken implements Token {
+public class EmptyToken extends FileObjectAdapter implements Token {
 
     @NotNull
     @Override
@@ -17,29 +17,10 @@ public class EmptyToken implements Token {
         return "";
     }
 
-    @Contract("_ -> fail")
-    @Override
-    public void setValue(final Object value) {
-        throw new UnsupportedOperationException("cant set value for empty token");
-    }
-
     @NotNull
     @Override
     public TokenType getType() {
         return TokenType.EMPTY;
-    }
-
-    @Override
-    public int getIndex() {
-        return -1;
-    }
-
-    @Override
-    public void setIndex(final int index) { }
-
-    @Override
-    public int getFilePos() {
-        return 0;
     }
 
     @NotNull
