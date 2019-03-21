@@ -1,5 +1,7 @@
 package edu.kit.mima.core.interpretation.environment;
 
+import edu.kit.mima.api.util.Tuple;
+import edu.kit.mima.api.util.ValueTuple;
 import edu.kit.mima.core.Mima;
 import edu.kit.mima.core.instruction.Instruction;
 import edu.kit.mima.core.instruction.InstructionTools;
@@ -11,6 +13,7 @@ import edu.kit.mima.core.interpretation.ValueType;
 import edu.kit.mima.core.token.ProgramToken;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -70,22 +73,27 @@ public class GlobalEnvironment extends Environment {
         });
         //Jump Instruction
         defineNewFunction("JMP", 1, (args, env, callback) -> {
-            final var argument = InstructionTools.getJumpReference(args, 0);
-            final Environment jumpEnv = env.lookupJump(argument.getValue().toString());
-            final int jumpIndex = env.getJump(argument.getValue().toString());
-            interpreter.jump(jumpEnv, jumpIndex, callback);
+            var info = getJumpInformation(args, env);
+            interpreter.jump(info.getFirst(), info.getSecond(), callback);
         });
         //Jump if negative Instruction
         defineNewFunction("JMN", 1, (args, env, callback) -> {
-            final var argument = InstructionTools.getJumpReference(args, 0);
-            final Environment jumpEnv = env.lookupJump(argument.getValue().toString());
-            final int jumpIndex = env.getJump(argument.getValue().toString());
+            var info = getJumpInformation(args, env);
             if (mima.getAccumulator().msb() == 1) {
-                interpreter.jump(jumpEnv, jumpIndex, callback);
+                interpreter.jump(info.getFirst(), info.getSecond(), callback);
             } else {
                 callback.accept(new Value<>(ValueType.NUMBER, 0));
             }
         });
+    }
+
+    @NotNull
+    private Tuple<Environment, Integer> getJumpInformation(List<Value> args,
+                                                           @NotNull Environment env) {
+        final var argument = InstructionTools.getJumpReference(args, 0);
+        final Environment jumpEnv = env.lookupJump(argument.getValue().toString());
+        final int jumpIndex = env.getJump(argument.getValue().toString());
+        return new ValueTuple<>(jumpEnv, jumpIndex);
     }
 
     /**

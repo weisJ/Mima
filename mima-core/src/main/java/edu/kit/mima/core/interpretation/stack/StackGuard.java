@@ -34,7 +34,8 @@ public class StackGuard {
      * @throws Continuation Continuation with function to invoke.
      */
     public void guard(final Runnable callback) throws Continuation {
-        if (--stackLength < 0) {
+        stackLength--;
+        if (stackLength < 0) {
             throw new Continuation(callback);
         }
     }

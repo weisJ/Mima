@@ -318,7 +318,7 @@ public class Interpreter {
         return new Value<>(type, value);
     }
 
-    @Nullable
+    @NotNull
     private Value<MachineWord> fail(final String message) {
         exceptionHandler.notifyException(new InterpreterException(message));
         debugController.stop();

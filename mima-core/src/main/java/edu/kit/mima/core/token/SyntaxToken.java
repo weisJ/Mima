@@ -11,20 +11,6 @@ import java.awt.Color;
 public interface SyntaxToken<T> extends Token<T> {
 
     /**
-     * Offset in input file.
-     *
-     * @return offset from beginning of file
-     */
-    int getOffset();
-
-    /**
-     * Length of token.
-     *
-     * @return length
-     */
-    int getLength();
-
-    /**
      * Get syntax color of token.
      *
      * @return color of token

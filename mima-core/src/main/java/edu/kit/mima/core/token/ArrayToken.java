@@ -1,5 +1,6 @@
 package edu.kit.mima.core.token;
 
+import edu.kit.mima.core.file.FileObjectAdapter;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,14 +16,14 @@ import java.util.stream.Collectors;
  * @author Jannis Weis
  * @since 2018
  */
-public class ArrayToken<T> implements Token<T[]> {
+public class ArrayToken<T> extends FileObjectAdapter implements Token<T[]> {
 
     private static final Pattern INDENT = Pattern.compile("\n");
     private static final String INDENT_REPLACEMENT = "\n\t";
     @NotNull private final String className;
     private final int filePos;
-    private int index;
-    private T[] values;
+    private final int index;
+    private final T[] values;
 
     /**
      * Token that holds an array of values.
@@ -55,11 +56,6 @@ public class ArrayToken<T> implements Token<T[]> {
         return values;
     }
 
-    @Override
-    public void setValue(final T[] value) {
-        values = value;
-    }
-
     @NotNull
     @Override
     public TokenType getType() {
@@ -67,17 +63,12 @@ public class ArrayToken<T> implements Token<T[]> {
     }
 
     @Override
-    public int getIndex() {
+    public int getLineIndex() {
         return index;
     }
 
     @Override
-    public void setIndex(final int index) {
-        this.index = index;
-    }
-
-    @Override
-    public int getFilePos() {
+    public int getOffset() {
         return filePos;
     }
 

@@ -32,9 +32,4 @@ public class EmptySyntaxToken extends EmptyToken implements SyntaxToken {
     @Override
     public void setColor(@Nullable final Color color) {
     }
-
-    @Override
-    public int getFilePos() {
-        return 0;
-    }
 }
