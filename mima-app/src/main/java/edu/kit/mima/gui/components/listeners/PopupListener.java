@@ -1,7 +1,10 @@
 package edu.kit.mima.gui.components.listeners;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.Component;
+import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JPopupMenu;
@@ -41,7 +44,7 @@ public class PopupListener extends MouseAdapter {
 
 
     public PopupListener(final JPopupMenu popupMenu) {
-        this(popupMenu, -1, false);
+        this(popupMenu, MouseEvent.BUTTON2, false);
     }
 
     /**
@@ -67,13 +70,25 @@ public class PopupListener extends MouseAdapter {
         if (popupMenu == null) {
             return;
         }
-        final var c = e.getComponent();
-        int xpos = attachToComponent
-                ? rightAlign ? c.getWidth() - popupMenu.getPreferredSize().width : 0
-                : e.getX();
-        int ypos = attachToComponent ? c.getHeight() : e.getY();
-        if ((mouseButton == -1 && e.isPopupTrigger()) || (e.getButton() == mouseButton)) {
-            popupMenu.show(c, xpos, ypos);
+        if (e.getButton() == mouseButton) {
+            var p = calculatePos(e.getPoint(), e.getComponent());
+            popupMenu.show(e.getComponent(), p.x, p.y);
         }
+    }
+
+    @NotNull
+    @Contract("_, _ -> new")
+    private Point calculatePos(final Point p, final Component c) {
+        var x = 0;
+        var y = 0;
+        if (attachToComponent && rightAlign) {
+            x = c.getWidth() - popupMenu.getPreferredSize().width;
+        } else {
+            x = p.x;
+        }
+        if (attachToComponent) {
+            y = c.getHeight();
+        }
+        return new Point(x, y);
     }
 }

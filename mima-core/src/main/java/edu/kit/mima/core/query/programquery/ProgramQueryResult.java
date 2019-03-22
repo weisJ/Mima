@@ -159,27 +159,32 @@ public class ProgramQueryResult implements QueryResult<Token> {
 
     @SuppressWarnings("unchecked") /*Construction of tokens guarantees these types*/
     private Stream<Token> mapToken(@NotNull final Token token, final boolean recursive) {
+        Stream<Token> stream = Stream.empty();
         switch (token.getType()) {
             case PROGRAM:
                 if (recursive) {
-                    return createTokenStream((ProgramToken) token, true);
+                    stream = createTokenStream((ProgramToken) token, true);
                 } else {
-                    return Stream.empty();
+                    stream = Stream.empty();
                 }
+                break;
             case JUMP_POINT:
                 final BinaryToken<Token, Token> binaryToken = (BinaryToken<Token, Token>) token;
-                return Stream.concat(Stream.of(binaryToken),
-                                     mapToken(binaryToken.getSecond(), recursive));
+                stream = Stream.concat(Stream.of(binaryToken),
+                                       mapToken(binaryToken.getSecond(), recursive));
+                break;
             case ARRAY:
-                return Arrays.stream(((ArrayToken<Token>) token).getValue());
+                stream = Arrays.stream(((ArrayToken<Token>) token).getValue());
+                break;
             case DEFINITION: /*fall through*/
             case CONSTANT:
                 final Token value = ((Token<Token>) token).getValue();
                 if (value.getType() == TokenType.ARRAY) {
-                    return mapToken(value, recursive);
+                    stream = mapToken(value, recursive);
                 } else {
-                    return Stream.of(token);
+                    stream = Stream.of(token);
                 }
+                break;
             case IDENTIFICATION:
             case KEYWORD:
             case PUNCTUATION:
@@ -189,10 +194,12 @@ public class ProgramQueryResult implements QueryResult<Token> {
             case ERROR:
             case CALL:
                 /*fall through*/
-                return Stream.of(token);
+                stream = Stream.of(token);
+                break;
             default:
-                return Stream.empty();
+                break;
         }
+        return stream;
     }
 
     /**

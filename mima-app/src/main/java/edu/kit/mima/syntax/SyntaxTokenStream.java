@@ -43,36 +43,35 @@ public class SyntaxTokenStream extends TokenStream {
             return null;
         }
         final char c = input.peek();
+        SyntaxToken token = null;
         if (c == NEW_LINE) {
             input.next();
-            return new AtomSyntaxToken<>(TokenType.NEW_LINE, NEW_LINE,
-                                         SyntaxColor.TEXT, getPosition(), 1);
-        }
-        if (c == Punctuation.COMMENT) {
-            return readComment();
-        }
-        if (isDigitStart(c)) {
-            return readNumber();
-        }
-        if (isIdentificationStart(c)) {
-            return readIdentification();
-        }
-        if (c == Punctuation.BINARY_PREFIX) {
-            return readBinary();
-        }
-        if (c == Punctuation.STRING) {
-            return readString();
-        }
-        if (isPunctuationChar(c)) {
+            token = new AtomSyntaxToken<>(TokenType.NEW_LINE, NEW_LINE,
+                                          SyntaxColor.TEXT, getPosition(), 1);
+        } else if (c == Punctuation.COMMENT) {
+            token = readComment();
+        } else if (isDigitStart(c)) {
+            token = readNumber();
+        } else if (isIdentificationStart(c)) {
+            token = readIdentification();
+        } else if (c == Punctuation.BINARY_PREFIX) {
+            token = readBinary();
+        } else if (c == Punctuation.STRING) {
+            token = readString();
+        } else if (isPunctuationChar(c)) {
             final int index = getPosition();
             input.next();
             //Needs further processing to determine Color
-            return new AtomSyntaxToken<>(TokenType.PUNCTUATION, String.valueOf(c), SyntaxColor.TEXT,
-                                         index, 1);
+            token = new AtomSyntaxToken<>(TokenType.PUNCTUATION, String.valueOf(c),
+                                          SyntaxColor.TEXT, index, 1);
         }
-        input.next();
-        return new AtomSyntaxToken<>(TokenType.ERROR, String.valueOf(c),
-                                     SyntaxColor.TEXT, getPosition(), 1);
+        if (token == null) {
+            input.next();
+            return new AtomSyntaxToken<>(TokenType.ERROR, String.valueOf(c),
+                                         SyntaxColor.TEXT, getPosition(), 1);
+        } else {
+            return token;
+        }
     }
 
     @NotNull

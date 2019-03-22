@@ -82,20 +82,23 @@ public class AtomToken<T> extends FileObjectAdapter implements Token<T> {
     @Override
     public String simpleName() {
         final StringBuilder prefix = new StringBuilder();
-        if (type == TokenType.DEFINITION) {
-            prefix.append(Punctuation.DEFINITION_BEGIN)
-                    .append(Keyword.DEFINITION).append(' ');
-        } else if (type == TokenType.CONSTANT) {
-            prefix.append(Punctuation.DEFINITION_BEGIN)
-                    .append(Keyword.DEFINITION).append(' ')
-                    .append(Keyword.CONSTANT).append(' ');
-        } else if (type == TokenType.BINARY) {
-            prefix.append('~');
+        switch (type) {
+            case BINARY:
+                prefix.append('~');
+                break;
+            case DEFINITION:
+                prefix.append(Punctuation.DEFINITION_BEGIN)
+                        .append(Keyword.DEFINITION).append(' ');
+                break;
+            case CONSTANT:
+                prefix.append(Punctuation.DEFINITION_BEGIN)
+                        .append(Keyword.DEFINITION).append(' ')
+                        .append(Keyword.CONSTANT).append(' ');
+                break;
+            default:
+                break;
         }
-        if (value instanceof ArrayToken && !(prefix.length() == 0)) {
-            final String name = ((ArrayToken) value).simpleName();
-            return prefix + name.substring(1, name.length() - 1);
-        } else if (value instanceof Token) {
+        if (value instanceof Token) {
             return prefix + ((Token) value).simpleName();
         } else {
             return prefix + value.toString();
