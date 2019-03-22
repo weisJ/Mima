@@ -35,4 +35,9 @@ public interface Logger {
      * @param message message to log
      */
     void error(final String message);
+
+    /**
+     * Clear the logger.
+     */
+    void clear();
 }

@@ -64,11 +64,11 @@ public final class Parser extends Processor {
     @Contract(" -> new")
     private Tuple<ProgramToken, List<ParserException>> parseTopLevel() {
         final List<Token> program = new ArrayList<>();
-        boolean finishedScope = false;
         scopeIndex++;
         instructionIndex = 0;
         errors.addAll(skipError());
         final int line = input.getLine();
+        boolean finishedScope = false;
         while (!input.isEmpty() && !finishedScope) {
             try {
                 skipEndOfInstruction = true;

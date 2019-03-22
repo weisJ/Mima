@@ -23,12 +23,12 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
- * Runner to start/stop execution of Mima Code.
+ * CodeRunner to start/stop execution of Mima Code.
  *
  * @author Jannis Weis
  * @since 2018
  */
-public class MimaRunner extends AbstractObservable implements ExceptionHandler {
+public class MimaRunner extends AbstractObservable implements ExceptionHandler, CodeRunner {
 
     public static final String RUNNING_PROPERTY = "running";
     @NotNull private final AtomicReference<Exception> sharedException;
