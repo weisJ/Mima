@@ -12,6 +12,7 @@ import edu.kit.mima.loading.FileManager;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ public class MimaEditorManager implements AutoCloseable {
     @NotNull private final Map<Editor, FileManager> fileManagers;
     @NotNull private final EditorTabbedPane tabbedEditor;
     private final MimaUserInterface parent;
+    private Tuple<Editor, FileManager> cashed;
 
     /**
      * Cretae new Editor Manager for Mima App.
@@ -103,7 +105,8 @@ public class MimaEditorManager implements AutoCloseable {
         editor.setText(fm.getText());
         editor.setRepaint(false);
         setupHotKeys(editor);
-        return new ValueTuple<>(editor, fm);
+        cashed = new ValueTuple<>(editor, fm);
+        return cashed;
     }
 
     /**
@@ -170,17 +173,34 @@ public class MimaEditorManager implements AutoCloseable {
         }
     }
 
+    /**
+     * Get file manager for editor.
+     *
+     * @param editor editor
+     * @return the file manger for the editor.
+     */
+    @Nullable
+    public FileManager managerForEditor(final Editor editor) {
+        if (fileManagers.containsKey(editor)) {
+            return fileManagers.get(editor);
+        } else if (cashed.getFirst().equals(editor)) {
+            return cashed.getSecond();
+        } else {
+            return null;
+        }
+    }
+
 
     @Override
-    public void close() throws Exception {
-        final StringBuilder openFiles = new StringBuilder("\"");
+    public void close() throws IOException {
+        final StringBuilder openFiles = new StringBuilder();
         for (final var fm : fileManagers.values()) {
             if (fm.unsaved()) {
                 fm.savePopUp(() -> {
                     throw new IllegalArgumentException("aborted");
                 });
             }
-            openFiles.append(fm.getLastFile()).append("\"");
+            openFiles.append(fm.getLastFile()).append("/");
             fm.close();
         }
         final var pref = Preferences.getInstance();
