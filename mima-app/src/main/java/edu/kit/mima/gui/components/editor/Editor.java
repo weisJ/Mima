@@ -1,6 +1,5 @@
 package edu.kit.mima.gui.components.editor;
 
-import edu.kit.mima.api.history.History;
 import edu.kit.mima.gui.components.BreakpointComponent;
 import edu.kit.mima.gui.components.NumberedTextPane;
 import edu.kit.mima.gui.components.editor.highlighter.Highlighter;
@@ -48,7 +47,6 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
     @NotNull private final List<EditEventHandler> editEventHandlers;
 
     private Highlighter highlighter;
-    private boolean stylize;
     private boolean changeLock;
     private boolean repaint;
     private int currentMark = -1;
@@ -63,7 +61,8 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
         final Color breakpointColor = new HSLColor(getBackground())
                 .adjustHue(5).adjustShade(30).adjustSaturation(30).getRGB();
 
-        numberedTextPane = new NumberedTextPane(this, new Font("Monospaced", Font.PLAIN, 12),
+        numberedTextPane = new NumberedTextPane(this,
+                                                new Font("Monospaced", Font.PLAIN, 12),
                                                 pref.readColor(ColorKey.EDITOR_TEXT_SECONDARY));
         final var editorPane = numberedTextPane.getPane();
         numberedTextPane.addIndexListener(index -> {
@@ -97,7 +96,8 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
         repaint = true;
 
         final StyledDocument document = editorPane.getStyledDocument();
-        ((AbstractDocument) document).setDocumentFilter(new EditorDocumentFilter(this));
+        ((AbstractDocument) document)
+                .setDocumentFilter(new EditorDocumentFilter(this, historyController));
         editorPane.setBackground(pref.readColor(ColorKey.EDITOR_BACKGROUND));
         editorPane.setCaretColor(pref.readColor(ColorKey.EDITOR_TEXT));
     }
@@ -129,7 +129,7 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
     /**
      * Update the document.
      */
-    public void update() {
+    private void update() {
         if (!repaint) {
             return;
         }
@@ -137,22 +137,12 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
         final boolean historyLock = historyController.isActive();
         historyController.setActive(false);
         final int caret = numberedTextPane.getPane().getCaretPosition();
-        if (stylize && highlighter != null) {
+        if (highlighter != null) {
             highlighter.updateHighlighting(numberedTextPane.getPane());
         }
         setCaretPosition(caret);
         changeLock = false;
         historyController.setActive(historyLock);
-    }
-
-    /**
-     * Get the history.
-     *
-     * @return the history
-     */
-    @NotNull
-    public History getHistory() {
-        return historyController.getHistory();
     }
 
     /**
@@ -265,15 +255,6 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
     }
 
     /**
-     * Set whether the text should be stylized.
-     *
-     * @param stylize whether to stylize the text
-     */
-    public void useStyle(final boolean stylize) {
-        this.stylize = stylize;
-    }
-
-    /**
      * Set Highlighter to use for syntax highlighting.
      *
      * @param highlighter highlighter
@@ -315,18 +296,6 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
     }
 
     /**
-     * Get specific part of text.
-     *
-     * @param startIndex start index
-     * @param length     length of tex tto get
-     * @return Text from startIndex to startIndex + length
-     * @throws BadLocationException if location is out of bounds
-     */
-    public String getText(final int startIndex, final int length) throws BadLocationException {
-        return numberedTextPane.getPane().getText(startIndex, length);
-    }
-
-    /**
      * Get the text contained in the editor.
      *
      * @return text in editor
@@ -352,6 +321,7 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
         numberedTextPane.getPane().setText(text);
         historyController.setActive(true);
         setCaretPosition(Math.max(Math.min(pos, text.length() - 1), 0));
+        update();
     }
 
     /**
@@ -383,16 +353,6 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
     }
 
     /**
-     * Get the history controller. Should only be called from EditorDocumentFilter.
-     *
-     * @return the history controller
-     */
-    @NotNull
-    /*default*/ TextHistoryController getHistoryController() {
-        return historyController;
-    }
-
-    /**
      * Use change history. If yes undo/redo will be supported.
      *
      * @param useHistory whether to use history
@@ -402,13 +362,6 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
         historyController.reset();
         historyController.setActive(useHistory);
         historyController.setCapacity(capacity);
-    }
-
-    /**
-     * Reset the history.
-     */
-    public void resetHistory() {
-        historyController.reset();
     }
 
     /**
@@ -440,7 +393,7 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
 
     @Override
     public void close() {
-        getHistory().close();
+        historyController.getHistory().close();
     }
 
     /**
@@ -448,7 +401,7 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
      *
      * @return preview image.
      */
-    public BufferedImage getPreviewImage() {
+    public BufferedImage createPreviewImage() {
         var b = numberedTextPane.getPane().getBounds();
         BufferedImage image = new BufferedImage(b.width / 2,
                                                 Math.min(b.height / 4, b.width),

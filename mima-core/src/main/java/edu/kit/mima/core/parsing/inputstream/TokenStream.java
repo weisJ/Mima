@@ -203,31 +203,31 @@ public class TokenStream {
             return null;
         }
         final char c = input.peek();
+        Token token = null;
         if (c == Punctuation.COMMENT) {
             input.next();
             skipComment();
-            return readNext();
-        }
-        if (isDigitStart(c)) {
-            return readNumber();
-        }
-        if (isIdentificationStart(c)) {
+            token = readNext();
+        } else if (isDigitStart(c)) {
+            token = readNumber();
+        } else if (isIdentificationStart(c)) {
             return readIdentification();
-        }
-        if (c == Punctuation.BINARY_PREFIX) {
+        } else if (c == Punctuation.BINARY_PREFIX) {
             input.next();
-            return readBinary();
-        }
-        if (c == Punctuation.STRING) {
+            token = readBinary();
+        } else if (c == Punctuation.STRING) {
             input.next();
-            return readString();
-        }
-        if (isPunctuationChar(c)) {
+            token = readString();
+        } else if (isPunctuationChar(c)) {
             input.next();
-            return new AtomToken<>(TokenType.PUNCTUATION, String.valueOf(c));
+            token = new AtomToken<>(TokenType.PUNCTUATION, String.valueOf(c));
         }
-        input.next();
-        return error("Can't handle character: " + c);
+        if (token == null) {
+            input.next();
+            return error("Can't handle character: " + c);
+        } else {
+            return token;
+        }
     }
 
     /*

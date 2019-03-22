@@ -126,7 +126,7 @@ public final class Parser extends Processor {
             }
             if (isPunctuation(Punctuation.SCOPE_CLOSED)) {
                 return new AtomToken<>(TokenType.SCOPE_END, scopeIndex,
-                                       tokenIndexStack.peek().intValue(), input.getLine());
+                                       tokenIndexStack.peek(), input.getLine());
             }
             if (isPunctuation(Punctuation.OPEN_BRACKET)) {
                 input.next();
@@ -225,7 +225,8 @@ public final class Parser extends Processor {
         skipPunctuation(Punctuation.DEFINITION_DELIMITER);
         final Token value = parseExpression();
         assert reference != null;
-        return new BinaryToken<>(TokenType.CONSTANT, reference, value, tokenIndexStack.peek(), line);
+        return new BinaryToken<>(TokenType.CONSTANT, reference, value,
+                                 tokenIndexStack.peek(), line);
     }
 
     /*

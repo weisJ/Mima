@@ -44,47 +44,58 @@ public class MimaFormatter implements Formatter {
      */
     private String printNode(@NotNull final SyntaxNode node) {
         final StringBuilder sb = new StringBuilder();
+        String s = "";
         switch (node.getType()) {
             case ROOT:
                 for (final var n : node.children()) {
                     sb.append(printNode(n));
                 }
-                return sb.toString();
+                s = sb.toString();
+                break;
             case SCOPE:
                 for (final var n : node.children()) {
                     sb.append(printNode(n).replaceAll("\n", "\n" + TAB));
                 }
-                return '\t' + sb.toString().trim() + '\n';
+                s = '\t' + sb.toString().trim() + '\n';
+                break;
             case LINE:
-                return printLine(node);
+                s = printLine(node);
+                break;
             case BLOCK:
                 for (final var n : node.children()) {
                     sb.append(printNode(n));
                 }
-                return sb.toString().trim().replaceAll("\n\n+", "\n\n") + "\n\n";
+                s = sb.toString().trim().replaceAll("\n\n+", "\n\n") + "\n\n";
+                break;
             case LEAF:
-                return printLeaf(node);
+                s = printLeaf(node);
+                break;
             case COMMENT:
             case INSTRUCTION_END:
-                return tokens[node.getBegin()].getValue().toString() + ' ';
+                s = tokens[node.getBegin()].getValue().toString() + ' ';
+                break;
             case INSTRUCTION:
-                return printInstruction(node);
+                s = printInstruction(node);
+                break;
             case JUMP_DEL:
-                return sb.append(tokens[node.getBegin()].getValue().toString()).toString();
+                s = sb.append(tokens[node.getBegin()].getValue().toString()).toString();
+                break;
             case JUMP:
                 for (final var n : node.children()) {
                     sb.append(printNode(n));
                 }
-                return sb.toString();
+                s = sb.toString();
+                break;
             case SCOPE_CLOSED:
             case SCOPE_OPEN:
-                return tokens[node.getBegin()].getValue().toString() + '\n';
+                s = tokens[node.getBegin()].getValue().toString() + '\n';
+                break;
             case NEW_LINE:
                 break;
             default:
                 break;
         }
-        return "";
+        return s;
     }
 
     /**

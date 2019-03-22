@@ -4,6 +4,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DragSourceDragEvent;
 import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
@@ -28,13 +29,7 @@ public final class DnDUtil {
      */
     @Nullable
     public static TabTransferData getTabTransferData(@NotNull final DropTargetDropEvent event) {
-        try {
-            return (TabTransferData) event.getTransferable()
-                    .getTransferData(EditorTabbedPane.FLAVOR);
-        } catch (@NotNull final Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        return getData(event.getTransferable());
     }
 
     /**
@@ -45,8 +40,16 @@ public final class DnDUtil {
      */
     @Nullable
     public static TabTransferData getTabTransferData(@NotNull final DropTargetDragEvent event) {
+        return getData(event.getTransferable());
+    }
+
+    /*
+     * Fetch data from Transferable.
+     */
+    @Nullable
+    private static TabTransferData getData(final Transferable transferable) {
         try {
-            return (TabTransferData) event.getTransferable()
+            return (TabTransferData) transferable
                     .getTransferData(EditorTabbedPane.FLAVOR);
         } catch (@NotNull final Exception e) {
             e.printStackTrace();
@@ -62,13 +65,7 @@ public final class DnDUtil {
      */
     @Nullable
     public static TabTransferData getTabTransferData(@NotNull final DragSourceDragEvent event) {
-        try {
-            return (TabTransferData) event.getDragSourceContext().getTransferable()
-                    .getTransferData(EditorTabbedPane.FLAVOR);
-        } catch (@NotNull final Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        return getData(event.getDragSourceContext().getTransferable());
     }
 
 }

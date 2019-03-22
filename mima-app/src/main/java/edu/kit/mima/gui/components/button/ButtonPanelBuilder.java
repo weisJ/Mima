@@ -50,46 +50,6 @@ public final class ButtonPanelBuilder {
     }
 
     /**
-     * Create {@link ButtonPanelBuilder} with given {@link LayoutManager}.
-     *
-     * @param layoutManager Layout manager for arranging the buttons.
-     */
-    public ButtonPanelBuilder(final LayoutManager layoutManager) {
-        panel = new JPanel();
-        buttons = new LinkedList<>();
-        this.layoutManager = layoutManager;
-    }
-
-    /**
-     * Add Button to the ButtonPanel.
-     *
-     * @param label       Label
-     * @param action      Action to perform when clicked
-     * @param accelerator Key combination to trigger button event
-     * @return ButtonBuilder
-     */
-    @NotNull
-    @Contract("_, _, _ -> new")
-    public ButtonBuilder addButton(final String label,
-                                   @NotNull final Runnable action,
-                                   final String accelerator) {
-        return new ButtonBuilder(label, action, accelerator, this);
-    }
-
-    /**
-     * Add Button to the ButtonPanel.
-     *
-     * @param label  Label
-     * @param action Action to perform when clicked
-     * @return ButtonBuilder
-     */
-    @NotNull
-    @Contract("_, _ -> new")
-    public ButtonBuilder addButton(final String label, @NotNull final Runnable action) {
-        return new ButtonBuilder(label, action, this);
-    }
-
-    /**
      * Add Button to the ButtonPanel.
      *
      * @param label Label
@@ -117,24 +77,6 @@ public final class ButtonPanelBuilder {
 
         private final JButton button;
         private final ButtonPanelBuilder parent;
-
-        private ButtonBuilder(final String label,
-                              @NotNull final Runnable action,
-                              final String accelerator,
-                              @NotNull final ButtonPanelBuilder parent) {
-            button = new JButton(label);
-            this.parent = parent;
-            setAction(action);
-            setAccelerator(accelerator);
-        }
-
-        private ButtonBuilder(final String label,
-                              @NotNull final Runnable action,
-                              @NotNull final ButtonPanelBuilder parent) {
-            button = new JButton(label);
-            this.parent = parent;
-            setAction(action);
-        }
 
         private ButtonBuilder(final String label, final ButtonPanelBuilder parent) {
             button = new JButton(label);
@@ -394,37 +336,6 @@ public final class ButtonPanelBuilder {
         @NotNull
         public ButtonBuilder setTooltip(@NotNull final String text) {
             return setTooltip(new Tooltip(text));
-        }
-
-        /**
-         * Add next Button.
-         *
-         * @param label       Label
-         * @param action      action to perform at button press
-         * @param accelerator key combination to trigger button action
-         * @return ButtonBuilder
-         */
-        @NotNull
-        @Contract("_, _, _ -> new")
-        public ButtonBuilder addButton(final String label,
-                                       @NotNull final Runnable action,
-                                       final String accelerator) {
-            parent.buttons.offer(button);
-            return new ButtonBuilder(label, action, accelerator, parent);
-        }
-
-        /**
-         * Add next Button.
-         *
-         * @param label  Label
-         * @param action action to perform at button press
-         * @return ButtonBuilder
-         */
-        @NotNull
-        @Contract("_, _ -> new")
-        public ButtonBuilder addButton(final String label, @NotNull final Runnable action) {
-            parent.buttons.offer(button);
-            return new ButtonBuilder(label, action, parent);
         }
 
         /**

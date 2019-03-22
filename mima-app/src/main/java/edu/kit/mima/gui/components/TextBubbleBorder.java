@@ -176,11 +176,10 @@ public class TextBubbleBorder extends AbstractBorder {
         pointerSize = size < 0 ? 0 : size;
         final int pad = radius / 2 + strokePad;
         final int pointerSidePad = pad + pointerSize + strokePad;
-        int left;
-        int right;
-        int bottom;
-        int top;
-        left = right = bottom = top = pad;
+        int left = pad;
+        int right = pad;
+        int bottom = pad;
+        int top = pad;
         switch (pointerSide) {
             case NORTH:
             case NORTH_WEST:

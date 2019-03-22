@@ -21,7 +21,6 @@ import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -218,8 +217,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
 
         //  Build of Map of items and a Map of attributes for each item
 
-        for (Iterator iterator = defaults.keySet().iterator(); iterator.hasNext(); ) {
-            final Object key = iterator.next();
+        for (final Object key : defaults.keySet()) {
             final Object value = defaults.get(key);
 
             final String itemName = getItemName(key.toString(), value);
