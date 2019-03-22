@@ -1,6 +1,6 @@
 package edu.kit.mima.gui.menu;
 
-import edu.kit.mima.MimaUserInterface;
+import edu.kit.mima.app.MimaUserInterface;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;

@@ -50,6 +50,13 @@ public enum InstructionSet {
             instructions.add("RET");
             return instructions.toArray(new String[0]);
         }
+    },
+    EMPTY(0, 0) {
+        @NotNull
+        @Override
+        public String[] getInstructions() {
+            return new String[0];
+        }
     };
 
     private final int wordLength;

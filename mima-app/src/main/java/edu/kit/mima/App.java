@@ -1,6 +1,7 @@
 package edu.kit.mima;
 
 import edu.kit.mima.api.logging.LogLevel;
+import edu.kit.mima.app.MimaUserInterface;
 import edu.kit.mima.core.MimaCoreDefaults;
 import edu.kit.mima.gui.laf.LafManager;
 import edu.kit.mima.gui.laf.icons.Icons;

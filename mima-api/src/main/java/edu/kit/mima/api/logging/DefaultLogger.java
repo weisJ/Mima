@@ -32,4 +32,8 @@ public class DefaultLogger implements Logger {
     public void error(final String message) {
         System.err.println("[ERROR]" + message);
     }
+
+    @Override
+    public void clear() {
+    }
 }

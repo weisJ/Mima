@@ -144,6 +144,14 @@ public final class ConsoleLogger implements Logger {
         }
     }
 
+    @Override
+    public void clear() {
+        if (console == null) {
+            return;
+        }
+        console.clear();
+    }
+
     private enum LogColor implements UserPreferenceChangedListener {
         /**
          * Log everything.
