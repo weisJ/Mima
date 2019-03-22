@@ -89,9 +89,9 @@ public final class MimaUserInterface extends JFrame {
 
     private void createBinding() {
         BindingUtil.bind(debugger, () -> {
-            editorManager.currentEditor().markLine(
-                    Optional.ofNullable(mimaRunner.getCurrentStatement()).map(Token::getOffset)
-                            .orElse(-1));
+            int index = Optional.ofNullable(mimaRunner.getCurrentStatement()).map(Token::getOffset)
+                    .orElse(-1);
+            editorManager.currentEditor().markLine(index);
             memoryView.updateView();
         }, Debugger.PAUSE_PROPERTY);
         BindingUtil.bind(mimaRunner, memoryView::updateView,

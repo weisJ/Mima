@@ -88,7 +88,6 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
         );
         threadDebugController.setWorkingThread(workingThread);
         threadDebugController.start();
-        interpreter.setRunning(true);
         getPropertyChangeSupport().firePropertyChange(RUNNING_PROPERTY, false, true);
     }
 
@@ -244,11 +243,10 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
 
         @Override
         public void step() {
-            paused = false;
+            paused = true;
             threadDebugController.setAutoPause(true);
-            threadDebugController.resume();
             getPropertyChangeSupport().firePropertyChange(Debugger.PAUSE_PROPERTY, true, false);
-            checkForException();
+            continueExecution();
         }
 
         @Override

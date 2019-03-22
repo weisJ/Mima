@@ -173,12 +173,10 @@ public class Interpreter {
             }
             if (i < tokens.length) {
                 currentToken = tokens[i];
-            }
-            if (i < tokens.length
-                    && (i != startIndex || !(environment instanceof GlobalEnvironment))) {
-                debugController.afterInstruction(tokens[i]);
-            }
-            if (i < tokens.length) {
+                System.out.println(currentToken);
+                if (i != startIndex || !(environment instanceof GlobalEnvironment)) {
+                    debugController.afterInstruction(currentToken);
+                }
                 environment.setExpressionIndex(i);
                 currentToken = tokens[i];
                 evaluate(currentToken, environment, v -> func.accept(v, i + 1));

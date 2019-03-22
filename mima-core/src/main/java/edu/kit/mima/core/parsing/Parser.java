@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 import java.util.function.Supplier;
 
 /**
@@ -31,7 +32,7 @@ public final class Parser extends Processor {
     @NotNull private final Set<ParserException> errors;
     private boolean skipEndOfInstruction;
     private int scopeIndex;
-    private int instructionIndex;
+    private Stack<Integer> tokenIndexStack;
 
     /**
      * Create parser from string input.
@@ -43,6 +44,7 @@ public final class Parser extends Processor {
         skipEndOfInstruction = true;
         errors = new HashSet<>();
         scopeIndex = -1;
+        tokenIndexStack = new Stack<>();
     }
 
 
@@ -54,6 +56,7 @@ public final class Parser extends Processor {
     @NotNull
     public Tuple<ProgramToken, List<ParserException>> parse() {
         errors.clear();
+        tokenIndexStack.clear();
         return parseTopLevel();
     }
 
@@ -65,7 +68,7 @@ public final class Parser extends Processor {
     private Tuple<ProgramToken, List<ParserException>> parseTopLevel() {
         final List<Token> program = new ArrayList<>();
         scopeIndex++;
-        instructionIndex = 0;
+        tokenIndexStack.push(0);
         errors.addAll(skipError());
         final int line = input.getLine();
         boolean finishedScope = false;
@@ -80,7 +83,7 @@ public final class Parser extends Processor {
                         input.next();
                     } else {
                         program.add(token);
-                        instructionIndex++;
+                        tokenIndexStack.push(tokenIndexStack.pop() + 1);
                     }
                 }
                 if (skipEndOfInstruction) {
@@ -91,6 +94,7 @@ public final class Parser extends Processor {
                 input.next();
             }
         }
+        tokenIndexStack.pop();
         return new ValueTuple<>(new ProgramToken(program.toArray(new Token[0]), line),
                                 new ArrayList<>(errors));
     }
@@ -122,7 +126,7 @@ public final class Parser extends Processor {
             }
             if (isPunctuation(Punctuation.SCOPE_CLOSED)) {
                 return new AtomToken<>(TokenType.SCOPE_END, scopeIndex,
-                                       instructionIndex, input.getLine());
+                                       tokenIndexStack.peek().intValue(), input.getLine());
             }
             if (isPunctuation(Punctuation.OPEN_BRACKET)) {
                 input.next();
@@ -156,7 +160,8 @@ public final class Parser extends Processor {
             input.next();
             return new BinaryToken<>(TokenType.JUMP_POINT,
                                      expression,
-                                     maybeJumpAssociation(supplier), instructionIndex, line);
+                                     maybeJumpAssociation(supplier),
+                                     tokenIndexStack.peek(), line);
         }
         return expression;
     }
@@ -181,7 +186,7 @@ public final class Parser extends Processor {
                 Punctuation.CLOSED_BRACKET,
                 Punctuation.COMMA,
                 this::parseExpression,
-                true), instructionIndex, line);
+                true), tokenIndexStack.peek(), line);
     }
 
     /*
@@ -199,14 +204,14 @@ public final class Parser extends Processor {
                     Punctuation.INSTRUCTION_END,
                     Punctuation.COMMA,
                     this::parseConstant,
-                    false), instructionIndex, input.getLine());
+                    false), tokenIndexStack.peek(), input.getLine());
         }
         return new AtomToken<>(TokenType.DEFINITION, delimited(
                 CharInputStream.EMPTY_CHAR,
                 Punctuation.INSTRUCTION_END,
                 Punctuation.COMMA,
                 this::parseDefinition,
-                false), instructionIndex, line);
+                false), tokenIndexStack.peek(), line);
     }
 
     /*
@@ -220,7 +225,7 @@ public final class Parser extends Processor {
         skipPunctuation(Punctuation.DEFINITION_DELIMITER);
         final Token value = parseExpression();
         assert reference != null;
-        return new BinaryToken<>(TokenType.CONSTANT, reference, value, instructionIndex, line);
+        return new BinaryToken<>(TokenType.CONSTANT, reference, value, tokenIndexStack.peek(), line);
     }
 
     /*
@@ -235,10 +240,10 @@ public final class Parser extends Processor {
                 input.next();
                 final Token value = parseExpression();
                 return new BinaryToken<>(TokenType.DEFINITION, reference, value,
-                                         instructionIndex, line);
+                                         tokenIndexStack.peek(), line);
             }
             return new BinaryToken<>(TokenType.DEFINITION, reference, new EmptyToken(),
-                                     instructionIndex, line);
+                                     tokenIndexStack.peek(), line);
         }
         return input.error("expected identifier");
     }
