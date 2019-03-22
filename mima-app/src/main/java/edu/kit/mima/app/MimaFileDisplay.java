@@ -4,8 +4,11 @@ import edu.kit.mima.App;
 import edu.kit.mima.core.MimaConstants;
 import edu.kit.mima.core.instruction.InstructionSet;
 import edu.kit.mima.gui.components.folderdisplay.FileDisplay;
+import edu.kit.mima.preferences.Preferences;
+import edu.kit.mima.preferences.PropertyKey;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -40,6 +43,8 @@ public class MimaFileDisplay {
                 });
             }
         });
+        fileDisplay.setFile(
+                new File(Preferences.getInstance().readString(PropertyKey.DIRECTORY_MIMA)));
     }
 
     /**

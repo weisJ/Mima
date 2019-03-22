@@ -20,6 +20,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
+import java.util.Optional;
 import java.util.function.Function;
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
@@ -157,8 +158,12 @@ public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
             return maxIndex;
         }
         Function<Integer, Boolean> secondRow = i -> {
-            var t = tabbedPane.getTabComponentAt(0).getBounds();
-            return tabbedPane.getTabComponentAt(i).getBounds().y >= t.y + t.height;
+            var t = Optional.ofNullable(tabbedPane.getTabComponentAt(0))
+                    .map(Component::getBounds)
+                    .orElse(getTabBounds(0, new Rectangle()));
+            return Optional.ofNullable(tabbedPane.getTabComponentAt(i))
+                    .map(Component::getBounds)
+                    .orElse(getTabBounds(i, new Rectangle())).y >= t.y + t.height;
         };
         if (maxIndex >= 0 && secondRow.apply(maxIndex - 1)) {
             int i = 0;
@@ -190,7 +195,7 @@ public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
         return dest;
     }
 
-    private JMenuItem createStashItem(final int index, TabComponent c) {
+    private JMenuItem createStashItem(final int index, @NotNull TabComponent c) {
         var item = new JMenuItem(new AbstractAction() {
             @Override
             public void actionPerformed(final ActionEvent e) {
@@ -233,7 +238,6 @@ public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
                 JComponent tabContainer = (JComponent) field.get(CustomTabbedPaneUI.this);
                 tabContainer.add(stash);
                 installed = true;
-                System.out.println("installed");
             } catch (NoSuchFieldException
                     | IllegalAccessException
                     | NullPointerException ignored) {
@@ -283,24 +287,18 @@ public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
                 super.calculateTabRects(tabPlacement, tabCount);
                 return;
             }
+            if (tabCount == 0) {
+                return;
+            }
             FontMetrics metrics = getFontMetrics();
             Dimension size = tabPane.getSize();
             Insets insets = tabPane.getInsets();
             Insets tabAreaInsets = getTabAreaInsets(tabPlacement);
-            int selectedIndex = tabPane.getSelectedIndex();
-            int tabRunOverlay = getTabRunOverlay(tabPlacement);
             int x = insets.left + tabAreaInsets.left;
             int y = insets.top + tabAreaInsets.top;
             int returnAt = size.width - (insets.right + tabAreaInsets.right);
             maxTabHeight = calculateMaxTabHeight(tabPlacement);
-            runCount = 0;
             selectedRun = -1;
-
-            if (tabCount == 0) {
-                return;
-            }
-
-            // Run through tabs and partition them into runs
             Rectangle rect;
             int i;
             for (i = 0; i < tabCount; i++) {
@@ -309,7 +307,6 @@ public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
                     rect.x = rects[i - 1].x + rects[i - 1].width;
                 } else {
                     tabRuns[0] = 0;
-                    runCount = 1;
                     maxTabWidth = 0;
                     rect.x = x;
                 }
@@ -322,15 +319,20 @@ public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
                 }
                 // Initialize y position as there's just one run
                 rect.y = y;
-                rect.height = maxTabHeight/* - 2*/;
-
-                if (i == selectedIndex) {
-                    selectedRun = runCount - 1;
-                }
+                rect.height = maxTabHeight;
+                selectedRun = 0;
             }
-            //Selected tab is not visible try rearranging.
-            int swapIndex = i;
-            if (selectedRun < 0) {
+            swapSelected(tabPlacement, metrics, tabCount, i, returnAt);
+        }
+
+        private void swapSelected(final int tabPlacement,
+                                  final FontMetrics metrics,
+                                  final int tabCount,
+                                  final int lastVisibleIndex,
+                                  final int lineWidth) {
+            final int selectedIndex = tabPane.getSelectedIndex();
+            int swapIndex = lastVisibleIndex;
+            if (selectedIndex > lastVisibleIndex) {
                 int selWidth = calculateTabWidth(tabPlacement, selectedIndex, metrics);
                 int spacing = 0;
                 while (spacing < selWidth && swapIndex >= 0) {
@@ -354,33 +356,12 @@ public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
                 }
                 ensureInstalled();
                 int w = stash.getPreferredSize().width;
-                stash.setBounds(returnAt - w - 2, (maxTabHeight - w) / 2, w, w);
+                stash.setBounds(lineWidth - w - 2, (maxTabHeight - w) / 2, w, w);
                 listener.setPopupMenu(menu);
                 stash.setVisible(true);
             } else {
                 stash.setVisible(false);
             }
-
-            // Step through runs from back to front to calculate
-            // tab y locations and to pad runs appropriately
-            for (i = runCount - 1; i >= 0; i--) {
-                int start = tabRuns[i];
-                int next = tabRuns[i == (runCount - 1) ? 0 : i + 1];
-                int end = (next != 0 ? next - 1 : tabCount - 1);
-
-                for (int j = start; j <= end; j++) {
-                    rect = rects[j];
-                    rect.y = y;
-                    rect.x += getTabRunIndent(tabPlacement, i);
-                }
-                if (shouldPadTabRun(tabPlacement, i)) {
-                    padTabRun(tabPlacement, start, end, returnAt);
-                }
-                y += (maxTabHeight - tabRunOverlay);
-            }
-
-            // Pad the selected tab so that it appears raised in front
-            // padSelectedTab(tabPlacement, selectedIndex);
         }
     }
 

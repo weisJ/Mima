@@ -108,7 +108,7 @@ public class ThreadDebugController implements DebugController {
 
     @Override
     public void afterInstruction(@NotNull final Token currentInstruction) {
-        if (!shouldDie && (autoPause || breaks.contains(currentInstruction.getFilePos()))
+        if (!shouldDie && (autoPause || breaks.contains(currentInstruction.getOffset()))
                 && currentInstruction.getType() != TokenType.PROGRAM) {
             pause();
         }

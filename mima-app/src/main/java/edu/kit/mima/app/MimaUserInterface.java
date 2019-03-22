@@ -73,8 +73,8 @@ public final class MimaUserInterface extends JFrame {
      * @param filePath path of file to open
      */
     public MimaUserInterface(@Nullable final String filePath) {
-        tabbedEditor = editorManager.getTabbedEditor();
         fileDisplay = new MimaFileDisplay(fileActions).getDisplay();
+        tabbedEditor = editorManager.getTabbedEditor();
         console = new Console();
         memoryTable = new FixedScrollTable(new String[]{"Address", "Value"}, 100);
         memoryView = new MemoryTableView(mimaRunner, memoryTable);
@@ -109,7 +109,11 @@ public final class MimaUserInterface extends JFrame {
             if (editor == null) {
                 return;
             }
-            fileDisplay.setFile(new File(editorManager.currentFileManager().getLastFile()));
+            var file = new File(Optional.ofNullable(editorManager.managerForEditor(editor))
+                                        .map(FileManager::getLastFile)
+                                        .orElse(System.getProperty("SystemDrive")));
+
+            fileDisplay.setFile(file);
             EditorHotKeys.setEditor(editor);
         });
     }
@@ -138,7 +142,7 @@ public final class MimaUserInterface extends JFrame {
             if (filesString.length() < 2) {
                 return;
             }
-            final String[] files = filesString.substring(1).split("\"");
+            final String[] files = filesString.split("/");
             for (final String file : files) {
                 fileActions.openFile(file);
             }
@@ -209,7 +213,7 @@ public final class MimaUserInterface extends JFrame {
      */
     public void quit() {
         try {
-
+            editorManager.close();
             Preferences.getInstance().saveOptions();
             dispose();
             Settings.close();
