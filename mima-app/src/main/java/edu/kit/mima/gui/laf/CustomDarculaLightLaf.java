@@ -19,7 +19,6 @@ public class CustomDarculaLightLaf extends CustomDarculaLaf {
     public CustomDarculaLightLaf() {
         super();
         if (SystemInfo.isWindows || SystemInfo.isLinux) {
-            base = new MetalLookAndFeel();
             MetalLookAndFeel.setCurrentTheme(new LightMetalTheme());
         }
     }

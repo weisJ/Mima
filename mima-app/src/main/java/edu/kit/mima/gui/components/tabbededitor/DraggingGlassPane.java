@@ -125,11 +125,11 @@ public class DraggingGlassPane extends JPanel {
     public void setMouseLocation(final Point mouseLocation) {
         if (draggingGhost != null) {
             if (extended) {
-                mouseLocation.x = mouseLocation.x - (extendedImage.getWidth(this) / 2);
-                mouseLocation.y = mouseLocation.y - (extendedImage.getHeight(this) / 2);
+                mouseLocation.x -= (extendedImage.getWidth(this) / 2);
+                mouseLocation.y -= (extendedImage.getHeight(this) / 2);
             } else {
-                mouseLocation.x = mouseLocation.x - (draggingGhost.getWidth(this) / 2);
-                mouseLocation.y = mouseLocation.y - (draggingGhost.getHeight(this) / 2);
+                mouseLocation.x -= (draggingGhost.getWidth(this) / 2);
+                mouseLocation.y -= (draggingGhost.getHeight(this) / 2);
             }
         }
         this.mouseLocation = mouseLocation;

@@ -309,7 +309,7 @@ public class EditorTabbedPane extends JTabbedPane {
             BufferedImage tabImage = image.getSubimage(tabRect.x, tabRect.y,
                                                        tabRect.width, tabRect.height);
             if (comp instanceof Editor) {
-                var img = ((Editor) comp).getPreviewImage();
+                var img = ((Editor) comp).createPreviewImage();
                 compImage = img;
             } else {
                 compImage = image

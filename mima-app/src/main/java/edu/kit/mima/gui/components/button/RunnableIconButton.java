@@ -27,8 +27,6 @@ public class RunnableIconButton extends IconButton {
                               @NotNull final Icon running) {
         super(inactive, active);
         this.running = running;
-        this.inactive = inactive;
-        this.active = active;
     }
 
     @Override

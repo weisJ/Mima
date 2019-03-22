@@ -19,14 +19,17 @@ public class EditorDocumentFilter extends DocumentFilter {
     private static final String SPACE_TAB = "   ";
 
     private final Editor editor;
+    private final TextHistoryController controller;
 
     /**
      * Editor Document filter for the {@link Editor}.
      *
-     * @param editor editor to use with Filter
+     * @param editor     editor to use with Filter
+     * @param controller the history controller.
      */
-    public EditorDocumentFilter(final Editor editor) {
+    public EditorDocumentFilter(final Editor editor, final TextHistoryController controller) {
         this.editor = editor;
+        this.controller = controller;
     }
 
     @Override
@@ -39,7 +42,7 @@ public class EditorDocumentFilter extends DocumentFilter {
         while (TAB.matcher(replacedText).matches()) {
             replacedText = TAB.matcher(replacedText).replaceFirst(SPACE_TAB);
         }
-        editor.getHistoryController().addReplaceHistory(offset, length, replacedText);
+        controller.addReplaceHistory(offset, length, replacedText);
         super.replace(fb, offset, length, replacedText, attrs);
         editor.notifyEdit();
         editor.setCaretPosition(offset + replacedText.length());
@@ -54,7 +57,7 @@ public class EditorDocumentFilter extends DocumentFilter {
         while (TAB.matcher(replacedText).matches()) {
             replacedText = TAB.matcher(replacedText).replaceFirst(SPACE_TAB);
         }
-        editor.getHistoryController().addInsertHistory(offset, string);
+        controller.addInsertHistory(offset, string);
         super.insertString(fb, offset, replacedText, attr);
         editor.notifyEdit();
         editor.setCaretPosition(offset + replacedText.length());
@@ -63,7 +66,7 @@ public class EditorDocumentFilter extends DocumentFilter {
     @Override
     public void remove(@NotNull final DocumentFilter.FilterBypass fb,
                        final int offset, final int length) throws BadLocationException {
-        editor.getHistoryController().addRemoveHistory(offset, length);
+        controller.addRemoveHistory(offset, length);
         super.remove(fb, offset, length);
         editor.notifyEdit();
         editor.setCaretPosition(offset);

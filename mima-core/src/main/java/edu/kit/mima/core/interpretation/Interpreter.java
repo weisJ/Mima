@@ -296,7 +296,7 @@ public class Interpreter {
     /*
      * Evaluate a Identification reference
      */
-    @Nullable
+    @NotNull
     private Value evaluateIdentification(@NotNull final Token token,
                                          @NotNull final Environment environment) {
         final MachineWord value;

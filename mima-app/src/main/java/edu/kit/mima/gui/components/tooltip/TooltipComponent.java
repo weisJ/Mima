@@ -14,7 +14,6 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionAdapter;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -26,23 +25,25 @@ import javax.swing.SwingUtilities;
  * @author Jannis Weis
  * @since 2018
  */
-public class TooltipComponent<T extends JComponent & ITooltip> implements MouseListener,
-                                                                          TooltipConstants {
+public class TooltipComponent<T extends JComponent & ITooltip>
+        extends MouseAdapter implements TooltipConstants {
 
     private final int delay;
     private final int vanishingDelay;
     private final JComponent container;
     private final T content;
     private final int centerAt;
+
     private boolean installed;
     private boolean overContainer;
     private boolean inside;
     private boolean moved;
     private boolean visible;
     private boolean showOnce;
+    private boolean active;
+
     private Thread thread;
     private Point mousePos;
-    private boolean active;
 
     /**
      * Register a tooltip component.
@@ -95,26 +96,20 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
     }
 
     private void atAwtEvent(final AWTEvent event) {
-        if (!active || thread == null) {
+        if (!active || thread == null || !(event instanceof MouseEvent)) {
             return;
         }
-        if (event instanceof MouseEvent) {
-            final MouseEvent evt = (MouseEvent) event;
-            final int id = evt.getID();
-            if (id == MouseEvent.MOUSE_PRESSED) {
+        final MouseEvent evt = (MouseEvent) event;
+        final int id = evt.getID();
+        switch (id) {
+            case MouseEvent.MOUSE_PRESSED:
                 inside = false;
                 thread.interrupt();
                 hideTooltip();
-            } else if (id == MouseEvent.MOUSE_RELEASED) {
-                if (showOnce) {
-                    /*
-                     * If tooltip should only be shown once releasing the mouse should
-                     * not check if it can be shown again.
-                     */
-                    return;
-                }
+                break;
+            case MouseEvent.MOUSE_RELEASED:
                 //Try to show again.
-                if (inside) {
+                if (inside && !showOnce) {
                     new Thread(() -> {
                         synchronized (this) {
                             try {
@@ -125,11 +120,12 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
                         }
                     }).start();
                 }
-            } else if (id == MouseEvent.MOUSE_MOVED) {
-                if (inside) {
-                    moved = true;
-                }
-            }
+                break;
+            case MouseEvent.MOUSE_MOVED:
+                moved = inside || moved;
+                break;
+            default:
+                break;
         }
     }
 
@@ -145,18 +141,14 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
         thread = new Thread(() -> {
             synchronized (this) {
                 try {
-                    if (!showOnce) {
-                        //showing once means showing immediately.
-                        wait(delay);
-                    }
+                    //showing once means showing immediately.
+                    wait(showOnce ? 0 : delay);
                     //Only show tooltip if mouse is inside component.
                     if (inside) {
                         if (showOnce) {
-                            //Use given mousePosition.
-                            showTooltipInternal();
+                            showTooltipInternal(); //Use given mousePosition.
                         } else {
-                            //Use current mouse position.
-                            showTooltip();
+                            showTooltip(); //Use current mouse position.
                         }
                         container.repaint();
                         //Hide tooltip after time has passed.
@@ -215,18 +207,6 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
         container.repaint();
     }
 
-    @Override
-    public void mouseClicked(final MouseEvent e) {
-    }
-
-    @Override
-    public void mousePressed(final MouseEvent e) {
-    }
-
-    @Override
-    public void mouseReleased(final MouseEvent e) {
-    }
-
     /*
      * Checks if the given mouse position is inside of the container
      */
@@ -256,6 +236,7 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
         final var root = container.getRootPane();
         final JPanel layer = (JPanel) root.getGlassPane();
         content.setVisible(false);
+        container.removeMouseListener(this);
         layer.remove(content);
         layer.revalidate();
         layer.repaint();
@@ -362,14 +343,14 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
             default:
                 break;
         }
-        Alignment alignment = getAligment(pos, layer, size);
+        Alignment alignment = getAlignment(pos, layer, size);
         content.setAlignment(alignment);
         return new ValueTuple<>(posFromAlignment(size, pos, alignment), alignment);
     }
 
-    private Alignment getAligment(@NotNull final Point pos,
-                                  @NotNull final JComponent layer,
-                                  @NotNull final Dimension size) {
+    private Alignment getAlignment(@NotNull final Point pos,
+                                   @NotNull final JComponent layer,
+                                   @NotNull final Dimension size) {
         //Default alignment is centered if it cant hook onto the component.
         Alignment alignment = Alignment.CENTER;
         if (pos.x + size.width / 2 < layer.getWidth()

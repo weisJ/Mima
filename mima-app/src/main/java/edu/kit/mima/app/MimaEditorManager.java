@@ -97,8 +97,6 @@ public class MimaEditorManager implements AutoCloseable {
         editor.setHighlighter(highlighter);
         editor.addEditEventHandler(() -> fm
                 .setText(editor.getText().replaceAll(String.format("%n"), "\n")));
-        editor.useStyle(true);
-        editor.update();
         editor.useHistory(true,
                           Preferences.getInstance().readInteger(PropertyKey.EDITOR_HISTORY_SIZE));
         editor.showCharacterLimit(80); //Todo Preference
