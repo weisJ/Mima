@@ -3,12 +3,14 @@ package edu.kit.mima.core.interpretation.environment;
 import edu.kit.mima.core.data.MachineWord;
 import edu.kit.mima.core.instruction.Instruction;
 import edu.kit.mima.core.token.ProgramToken;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * The Environment holds references to accessible memory variables, constants, functions and jump
@@ -92,14 +94,8 @@ public class Environment {
      */
     @NotNull
     public Environment lookupVariable(final String name) {
-        Environment scope = this;
-        while (scope != null) {
-            if (scope.variables.containsKey(name)) {
-                return scope;
-            }
-            scope = scope.parent;
-        }
-        return EMPTY_ENV;
+        return lookup(env -> env.variables, name);
+
     }
 
     /**
@@ -110,14 +106,8 @@ public class Environment {
      */
     @NotNull
     public Environment lookupConstant(final String name) {
-        Environment scope = this;
-        while (scope != null) {
-            if (scope.constants.containsKey(name)) {
-                return scope;
-            }
-            scope = scope.parent;
-        }
-        return EMPTY_ENV;
+        return lookup(env -> env.constants, name);
+
     }
 
     /**
@@ -128,14 +118,8 @@ public class Environment {
      */
     @NotNull
     public Environment lookupFunction(final String name) {
-        Environment scope = this;
-        while (scope != null) {
-            if (scope.functions.containsKey(name)) {
-                return scope;
-            }
-            scope = scope.parent;
-        }
-        return EMPTY_ENV;
+        return lookup(env -> env.functions, name);
+
     }
 
     /**
@@ -146,9 +130,15 @@ public class Environment {
      */
     @NotNull
     public Environment lookupJump(final String name) {
+        return lookup(env -> env.jumps, name);
+    }
+
+    @Contract(pure = true)
+    private <T> Environment lookup(Function<Environment, Map<?, T>> mapFunction,
+                                   String name) {
         Environment scope = this;
         while (scope != null) {
-            if (scope.jumps.containsKey(name)) {
+            if (mapFunction.apply(scope).containsKey(name)) {
                 return scope;
             }
             scope = scope.parent;
@@ -182,14 +172,8 @@ public class Environment {
      * @return Integer associated with variable
      */
     public MachineWord getVariable(final String name) {
-        if (variables.containsKey(name)) {
-            return variables.get(name);
-        }
-        final Environment scope = lookupVariable(name);
-        if (scope == EMPTY_ENV) {
-            throw new IllegalArgumentException("Undefined variable: " + name);
-        }
-        return scope.getVariable(name);
+        return get(env -> env.variables, name);
+
     }
 
     /**
@@ -199,14 +183,8 @@ public class Environment {
      * @return value associated with variable
      */
     public MachineWord getConstant(final String name) {
-        if (constants.containsKey(name)) {
-            return constants.get(name);
-        }
-        final Environment scope = lookupConstant(name);
-        if (scope == EMPTY_ENV) {
-            throw new IllegalArgumentException("Undefined variable: " + name);
-        }
-        return scope.getConstant(name);
+        return get(env -> env.constants, name);
+
     }
 
     /**
@@ -216,14 +194,8 @@ public class Environment {
      * @return function associated with variable
      */
     public Instruction getFunction(final String name) {
-        if (functions.containsKey(name)) {
-            return functions.get(name);
-        }
-        final Environment scope = lookupFunction(name);
-        if (scope == EMPTY_ENV) {
-            throw new IllegalArgumentException("Undefined variable: " + name);
-        }
-        return scope.getFunction(name);
+        return get(env -> env.functions, name);
+
     }
 
     /**
@@ -234,14 +206,18 @@ public class Environment {
      */
     @NotNull
     public Integer getJump(final String name) {
-        if (jumps.containsKey(name)) {
-            return jumps.get(name);
+        return get(env -> env.jumps, name);
+    }
+
+    private <T> T get(@NotNull Function<Environment, Map<?, T>> mapFunction, String name) {
+        if (mapFunction.apply(this).containsKey(name)) {
+            return mapFunction.apply(this).get(name);
         }
-        final Environment scope = lookupJump(name);
+        final Environment scope = lookup(mapFunction, name);
         if (scope == EMPTY_ENV) {
             throw new IllegalArgumentException("Undefined variable: " + name);
         }
-        return scope.getJump(name);
+        return scope.get(mapFunction, name);
     }
 
 

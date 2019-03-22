@@ -362,6 +362,14 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
             default:
                 break;
         }
+        Alignment alignment = getAligment(pos, layer, size);
+        content.setAlignment(alignment);
+        return new ValueTuple<>(posFromAlignment(size, pos, alignment), alignment);
+    }
+
+    private Alignment getAligment(@NotNull final Point pos,
+                                  @NotNull final JComponent layer,
+                                  @NotNull final Dimension size) {
         //Default alignment is centered if it cant hook onto the component.
         Alignment alignment = Alignment.CENTER;
         if (pos.x + size.width / 2 < layer.getWidth()
@@ -401,8 +409,7 @@ public class TooltipComponent<T extends JComponent & ITooltip> implements MouseL
                 && pos.x + size.width < layer.getWidth()) {
             alignment = Alignment.NORTH_EAST;
         }
-        content.setAlignment(alignment);
-        return new ValueTuple<>(posFromAlignment(size, pos, alignment), alignment);
+        return alignment;
     }
 
     /*

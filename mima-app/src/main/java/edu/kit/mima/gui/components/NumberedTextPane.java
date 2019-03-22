@@ -3,6 +3,9 @@ package edu.kit.mima.gui.components;
 import edu.kit.mima.gui.components.listeners.IndexListener;
 import edu.kit.mima.util.DocumentUtil;
 import edu.kit.mima.util.HSLColor;
+import kotlin.Pair;
+import kotlin.Triple;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.Color;
@@ -167,70 +170,103 @@ public class NumberedTextPane extends JPanel {
     @Override
     public void paint(@NotNull final Graphics g) {
         super.paint(g);
+        var values = calculatePositions(g, pane.getDocument());
+        int startLine = values.getFirst();
+        int endLine = values.getSecond();
+        int startingY = values.getThird();
+        var boundsAndMetric = calculateBounds(g, endLine);
+        var bounds = boundsAndMetric.getFirst();
+        var fontMetrics = g.getFontMetrics(pane.getFont());
+        var metrics = new Pair<>(boundsAndMetric.getSecond(), fontMetrics);
+
+        g.setFont(font);
+        final var componentKeys = componentMap.navigableKeySet().iterator();
+        int componentIndex = componentKeys.hasNext() ? componentKeys.next() : -1;
+        for (int line = startLine, y = startingY;
+             line <= endLine;
+             y += fontMetrics.getHeight(), line++) {
+            var p = new Point(bounds.getFirst(), y);
+            paintNumber(g, metrics, line, bounds.getSecond(), p);
+            if (line == componentIndex + 1) {
+                paintComponent(g, fontMetrics, componentIndex, p);
+                componentIndex = componentKeys.hasNext() ? componentKeys.next() : -1;
+            }
+        }
+    }
+
+    @NotNull
+    @Contract("_, _ -> new")
+    private Pair<Pair<Integer, Integer>, FontMetrics> calculateBounds(
+            @NotNull final Graphics g, int maxIndex) {
+        final var metrics = g.getFontMetrics(font);
+        var d = String.valueOf(Math.max(100, maxIndex));
+        final var bounds = metrics.getStringBounds(d, g);
+        final int xOff = (int) bounds.getHeight() / 2;
+        final int size = (int) bounds.getWidth() + offsetMultiplier * xOff;
+        setPreferredSize(new Dimension(size, size));
+        actionThresholdX = xOff + (int) bounds.getWidth();
+        return new Pair<>(new Pair<>(xOff, d.length()), metrics);
+    }
+
+
+    @NotNull
+    @Contract("_, _ -> new")
+    private Triple<Integer, Integer, Integer> calculatePositions(@NotNull final Graphics g,
+                                                                 @NotNull final Document doc) {
         final int start = pane.viewToModel2D(scrollPane.getViewport().getViewPosition());
         final int end = pane.viewToModel2D(new Point(
                 scrollPane.getViewport().getViewPosition().x + pane.getWidth(),
                 scrollPane.getViewport().getViewPosition().y + pane.getHeight()));
-
-        final Document doc = pane.getDocument();
         final int startLine = doc.getDefaultRootElement().getElementIndex(start) + 1;
         final int endLine = doc.getDefaultRootElement().getElementIndex(end) + 1;
 
-        final int fontHeight = g.getFontMetrics(pane.getFont()).getHeight();
-        final int fontDesc = g.getFontMetrics(pane.getFont()).getDescent();
-        final int fontAsc = g.getFontMetrics(pane.getFont()).getAscent();
+        final FontMetrics fontMetrics = g.getFontMetrics(pane.getFont());
         int startingY = -1;
 
         try {
             startingY = (((int) pane.modelToView2D(start)
                     .getY() - scrollPane.getViewport().getViewPosition().y)
-                                 + fontHeight) - fontDesc;
-        } catch (@NotNull final BadLocationException e1) {
-            e1.printStackTrace();
+                                 + fontMetrics.getHeight()) - fontMetrics.getDescent();
+        } catch (@NotNull final BadLocationException ignored) {
         }
+        return new Triple<>(startLine, endLine, startingY);
+    }
 
-        g.setFont(font);
+    private void paintNumber(@NotNull final Graphics g,
+                             @NotNull Pair<FontMetrics, FontMetrics> metrics,
+                             final int line,
+                             final int digits,
+                             @NotNull final Point p) {
         final Color numberingColor = new HSLColor(color).adjustShade(30).getRGB();
         final Color currentNumberColor = new HSLColor(color).adjustTone(5).getRGB();
         g.setColor(numberingColor);
 
-        final var metrics = g.getFontMetrics(font);
-        final String digits = String.valueOf(Math.max(100, endLine));
-        final var bounds = metrics.getStringBounds(digits, g);
-        final int xOff = (int) bounds.getHeight() / 2;
-        final int size = (int) bounds.getWidth() + offsetMultiplier * xOff;
-        setPreferredSize(new Dimension(size, size));
-        actionThresholdX = xOff + (int) bounds.getWidth();
+        final String number = Integer.toString(line);
+        final int padding = (int) metrics.getFirst()
+                .getStringBounds("0".repeat(digits - number.length()), g).getWidth();
+        if (line == currentLineIndex() + 1 && pane.getYOff() >= 0) {
+            g.setColor(new HSLColor(getBackground()).adjustTone(20).getRGB());
+            g.fillRect(0, pane.getYOff(), getWidth(), metrics.getSecond().getHeight());
 
-        final var componentKeys = componentMap.navigableKeySet().iterator();
-        int componentIndex = componentKeys.hasNext() ? componentKeys.next() : -1;
-
-        for (int line = startLine, y = startingY; line <= endLine; y += fontHeight, line++) {
-            final String number = Integer.toString(line);
-            final int padding = (int) metrics
-                    .getStringBounds("0".repeat(digits.length() - number.length()), g).getWidth();
-            if (line == currentLineIndex() + 1 && pane.getYOff() >= 0) {
-                g.setColor(new HSLColor(getBackground()).adjustTone(20).getRGB());
-                g.fillRect(0, pane.getYOff(), getWidth(), fontHeight);
-
-                g.setColor(currentNumberColor);
-                g.drawString(Integer.toString(line), xOff + padding, y);
-                g.setColor(numberingColor);
-            } else {
-                g.drawString(Integer.toString(line), xOff + padding, y);
-            }
-            if (line == componentIndex + 1) {
-                final IndexComponent component = componentMap.get(componentIndex);
-                final var dim = component.getPreferredSize();
-                final int xPos = actionThresholdX + xOff;
-                final int yPos = y + (fontDesc - fontAsc) / 2 - dim.height / 2;
-                component.setVisible(true);
-                component.paintComponent(g.create(xPos, yPos,
-                                                  dim.width, dim.height));
-                g.setColor(numberingColor);
-                componentIndex = componentKeys.hasNext() ? componentKeys.next() : -1;
-            }
+            g.setColor(currentNumberColor);
+            g.drawString(Integer.toString(line), p.x + padding, p.y);
+            g.setColor(numberingColor);
+        } else {
+            g.drawString(Integer.toString(line), p.x + padding, p.y);
         }
+    }
+
+    private void paintComponent(@NotNull final Graphics g,
+                                @NotNull FontMetrics paneMetrics,
+                                int componentIndex,
+                                @NotNull final Point p) {
+        final IndexComponent component = componentMap.get(componentIndex);
+        final var dim = component.getPreferredSize();
+        final int xPos = actionThresholdX + p.x;
+        final int yPos = p.y
+                + (paneMetrics.getDescent() - paneMetrics.getAscent()) / 2 - dim.height / 2;
+        component.setVisible(true);
+        component.paintComponent(g.create(xPos, yPos, dim.width, dim.height));
     }
 
     /**

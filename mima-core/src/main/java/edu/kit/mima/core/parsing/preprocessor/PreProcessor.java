@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 public final class PreProcessor extends Processor {
 
     @NotNull private final String workingDirectory;
-    @NotNull private final String mimaDirecotry;
+    @NotNull private final String mimaDirectory;
     @NotNull private final StringBuilder processedInput;
     @NotNull private final CharsetDetector charsetDetector;
     @NotNull private final Set<String> processedFiles;
@@ -58,7 +58,7 @@ public final class PreProcessor extends Processor {
                         final boolean recursive) {
         super(inputString);
         this.workingDirectory = workingDirectory;
-        this.mimaDirecotry = mimaDirectory;
+        this.mimaDirectory = mimaDirectory;
         this.processedInput = new StringBuilder(inputString);
         this.charsetDetector = new CharsetDetector();
         this.processedFiles = new HashSet<>();
@@ -82,7 +82,7 @@ public final class PreProcessor extends Processor {
                          final boolean isHome) {
         super(inputString);
         this.workingDirectory = workingDirectory;
-        this.mimaDirecotry = mimaDirectory;
+        this.mimaDirectory = mimaDirectory;
         this.processedInput = new StringBuilder(inputString);
         this.charsetDetector = new CharsetDetector();
         this.processedFiles = processedFiles;
@@ -157,18 +157,20 @@ public final class PreProcessor extends Processor {
             final String newPath = parseInputPath(path);
 
             final File workingDir = new File(workingDirectory);
-            final File homeDir = new File(mimaDirecotry);
+            final File homeDir = new File(mimaDirectory);
             boolean success = false;
             for (final String ext : MimaConstants.EXTENSIONS) {
-                if (success
-                        || (!isHome && workingDir.exists()
-                                    && tryPath(workingDir.getAbsolutePath() + newPath
-                                                       + '.' + ext, false))
-                        || (homeDir.exists()
-                                    && tryPath(homeDir.getAbsolutePath() + newPath
-                                                       + '.' + ext, true))
-                        || (tryPath(path, false))) {
-                    success = true;
+                if (success) {
+                    break;
+                }
+                success = !isHome && workingDir.exists()
+                        && tryPath(workingDir.getAbsolutePath() + newPath + '.' + ext, false);
+                if (!success) {
+                    success = homeDir.exists()
+                            && tryPath(homeDir.getAbsolutePath() + newPath + '.' + ext, true);
+                    if (!success) {
+                        success = (tryPath(path, false));
+                    }
                 }
             }
             if (!success) {
@@ -196,7 +198,7 @@ public final class PreProcessor extends Processor {
 
             processedInput.append("\n#<<File = ").append(path).append(">>#\n");
             final var processed = new PreProcessor(file, processedFiles, workingDirectory,
-                                                   mimaDirecotry, isHome).process();
+                                                   mimaDirectory, isHome).process();
             final List<ParserException> err = processed.getSecond();
             if (!err.isEmpty()) {
                 errors.add(new ProcessorException("File not found: \"" + path + "\""));
