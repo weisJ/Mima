@@ -54,12 +54,12 @@ public class ThreadDebugController implements DebugController {
 
     @Override
     public void pause() {
+        System.out.println("paused");
         synchronized (lock) {
             isActive = false;
             try {
                 lock.wait();
             } catch (@NotNull final InterruptedException e) {
-                e.printStackTrace();
                 isActive = true;
             }
         }

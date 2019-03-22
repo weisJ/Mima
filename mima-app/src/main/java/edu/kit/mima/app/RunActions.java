@@ -88,9 +88,7 @@ public class RunActions {
                         MimaConstants.instructionSetForFile(file)));
                 if (debug) {
                     debugger.setBreakpoints(mimaUI.currentEditor().getBreakpoints());
-                    debugger.start(v -> {
-                        LoadingIndicator.stop("Executing (done)");
-                    });
+                    debugger.start(v -> LoadingIndicator.stop("Executing (done)"));
                 } else {
                     mimaRunner.start(v -> LoadingIndicator.stop("Executing (done)"));
                 }
