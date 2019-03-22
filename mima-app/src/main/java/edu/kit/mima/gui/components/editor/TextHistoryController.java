@@ -72,11 +72,9 @@ public class TextHistoryController {
         }
         final FileHistoryObject fhs = history.getCurrent();
         if ((fhs != null)
-                && (text.length() == 1)
-                && !text.contains("\n") && !text.contains(" ")
+                && useSingle(text, fhs)
                 && (fhs.getType() == ChangeType.INSERT)
-                && (offset == (fhs.getCaretOffset() + fhs.getText().length()))
-                && (fhs.getText().length() < MAXIMUM_AMEND_LENGTH)) {
+                && (offset == (fhs.getCaretOffset() + fhs.getText().length()))) {
             history.setCurrent(
                     new FileHistoryObject(editorPane, fhs.getCaretOffset(),
                                           fhs.getText() + text, "",
@@ -84,6 +82,12 @@ public class TextHistoryController {
         } else {
             history.add(new FileHistoryObject(editorPane, offset, text, "", ChangeType.INSERT));
         }
+    }
+
+    private boolean useSingle(@NotNull final String text, @NotNull final FileHistoryObject fhs) {
+        return (text.length() == 1)
+                && !text.contains("\n") && !text.contains(" ")
+                && (fhs.getText().length() < MAXIMUM_AMEND_LENGTH);
     }
 
     /**
@@ -105,11 +109,9 @@ public class TextHistoryController {
         }
         assert text != null;
         if ((fhs != null)
-                && (text.length() == 1)
-                && !text.contains("\n") && !text.contains(" ")
+                && useSingle(text, fhs)
                 && (fhs.getType() == ChangeType.REMOVE)
-                && ((offset + length) == fhs.getCaretOffset())
-                && (fhs.getOldText().length() < MAXIMUM_AMEND_LENGTH)) {
+                && ((offset + length) == fhs.getCaretOffset())) {
             history.setCurrent(
                     new FileHistoryObject(editorPane, offset, "", text + fhs.getOldText(),
                                           ChangeType.REMOVE));
@@ -122,31 +124,34 @@ public class TextHistoryController {
      * Undo last file change.
      */
     public void undo() {
-        if (!canUndo()) {
-            return;
-        }
-        try {
-            final FileHistoryObject fhs = history.back();
-            final boolean isActive = active;
-            setActive(false);
-            fhs.undo();
-            setActive(isActive);
-        } catch (@NotNull final IndexOutOfBoundsException ignored) {
-        }
+        walkHistory(true);
     }
 
     /**
      * Redo the last undo.
      */
     public void redo() {
-        if (!canRedo()) {
+        walkHistory(false);
+    }
+
+    /**
+     * Walk in history forward or backwards.
+     *
+     * @param undo true if undo false if redo.
+     */
+    private void walkHistory(boolean undo) {
+        if (undo ? !canUndo() : !canRedo()) {
             return;
         }
         try {
-            final FileHistoryObject fhs = history.forward();
+            final FileHistoryObject fhs = undo ? history.back() : history.forward();
             final boolean isActive = active;
             setActive(false);
-            fhs.redo();
+            if (undo) {
+                fhs.undo();
+            } else {
+                fhs.redo();
+            }
             setActive(isActive);
         } catch (@NotNull final IndexOutOfBoundsException ignored) {
         }

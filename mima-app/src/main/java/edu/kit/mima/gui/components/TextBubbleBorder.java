@@ -246,6 +246,31 @@ public class TextBubbleBorder extends AbstractBorder {
     public void paintBorder(@NotNull final Component c, final Graphics g,
                             final int x, final int y, final int width, final int height) {
         final Graphics2D g2 = (Graphics2D) g;
+        var bubble = calculateBubbleRect(width, height);
+        final int pointerPad;
+
+        if (pointerSide == Alignment.WEST || pointerSide == Alignment.EAST) {
+            pointerPad = pointerSize
+                    + (int) (pointerPadPercent * (height - radius * 2 - 3 * pointerSize));
+        } else if (pointerSide == Alignment.CENTER) {
+            pointerPad = 0;
+        } else {
+            pointerPad = pointerSize
+                    + (int) (pointerPadPercent * (width - radius * 2 - 3 * pointerSize));
+        }
+        final Polygon pointer = creatPointerShape(width, height, pointerPad, bubble);
+        final Area area = new Area(bubble);
+        area.add(new Area(pointer));
+        g2.setRenderingHints(hints);
+
+        g2.setColor(c.getBackground());
+        g2.fill(area);
+        g2.setColor(color);
+        g2.setStroke(stroke);
+        g2.draw(area);
+    }
+
+    private RoundRectangle2D.Double calculateBubbleRect(final int width, final int height) {
         final RoundRectangle2D.Double bubble;
         int rx;
         int ry;
@@ -277,45 +302,38 @@ public class TextBubbleBorder extends AbstractBorder {
                 break;
         }
         bubble = new RoundRectangle2D.Double(rx, ry, rw, rh, radius, radius);
-        final int pointerPad;
+        return bubble;
+    }
 
-        if (pointerSide == Alignment.WEST || pointerSide == Alignment.EAST) {
-            pointerPad = pointerSize
-                    + (int) (pointerPadPercent * (height - radius * 2 - 3 * pointerSize));
-        } else if (pointerSide == Alignment.CENTER) {
-            pointerPad = 0;
-        } else {
-            pointerPad = pointerSize
-                    + (int) (pointerPadPercent * (width - radius * 2 - 3 * pointerSize));
-        }
-
+    private Polygon creatPointerShape(final int width, final int height,
+                                      final int pointerPad, final RoundRectangle2D.Double bubble) {
         final int basePad = strokePad + radius + pointerPad;
         final int widthPad = pointerSize / 2;
 
         final Polygon pointer = new Polygon();
         switch (pointerSide) {
             case WEST:
-                pointer.addPoint(rx, basePad - widthPad);// top
-                pointer.addPoint(rx, basePad + pointerSize + widthPad);// bottom
+                pointer.addPoint((int) bubble.x, basePad - widthPad);// top
+                pointer.addPoint((int) bubble.x, basePad + pointerSize + widthPad);// bottom
                 pointer.addPoint(strokePad, basePad + pointerSize / 2);
                 break;
             case EAST:
-                pointer.addPoint(rw, basePad - widthPad);// top
-                pointer.addPoint(rw, basePad + pointerSize + widthPad);// bottom
+                pointer.addPoint((int) bubble.width, basePad - widthPad);// top
+                pointer.addPoint((int) bubble.width, basePad + pointerSize + widthPad);// bottom
                 pointer.addPoint(width - strokePad, basePad + pointerSize / 2);
                 break;
             case NORTH_WEST:
             case NORTH_EAST:
             case NORTH:
-                pointer.addPoint(basePad - widthPad, ry);// left
-                pointer.addPoint(basePad + pointerSize + widthPad, ry);// right
+                pointer.addPoint(basePad - widthPad, (int) bubble.y);// left
+                pointer.addPoint(basePad + pointerSize + widthPad, (int) bubble.y);// right
                 pointer.addPoint(basePad + (pointerSize / 2), strokePad);
                 break;
             case SOUTH_WEST:
             case SOUTH_EAST:
             case SOUTH:
-                pointer.addPoint(basePad - widthPad, rh);// left
-                pointer.addPoint(basePad + pointerSize + widthPad, rh);// right
+                pointer.addPoint(basePad - widthPad, (int) bubble.height);// left
+                pointer.addPoint(basePad + pointerSize + widthPad, (int) bubble.height);// right
                 pointer.addPoint(basePad + (pointerSize / 2), height - strokePad);
                 break;
             case CENTER:
@@ -323,15 +341,6 @@ public class TextBubbleBorder extends AbstractBorder {
             default:
                 break;
         }
-
-        final Area area = new Area(bubble);
-        area.add(new Area(pointer));
-        g2.setRenderingHints(hints);
-
-        g2.setColor(c.getBackground());
-        g2.fill(area);
-        g2.setColor(color);
-        g2.setStroke(stroke);
-        g2.draw(area);
+        return pointer;
     }
 }
