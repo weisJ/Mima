@@ -28,14 +28,13 @@ public final class LafManager implements UserPreferenceChangedListener {
 
     private static final String DARK_NAME = "Dark";
     private static final String LIGHT_NAME = "Light";
-    @NotNull private static final LafManager instance = new LafManager();
+    private static final LafManager instance = new LafManager();
     private static String currentLaf;
 
-    static {
-        Preferences.registerUserPreferenceChangedListener(instance);
-    }
 
-    private LafManager() { }
+    private LafManager() {
+        Preferences.registerUserPreferenceChangedListener(this);
+    }
 
     @Contract(pure = true)
     public static String getCurrentLaf() {

@@ -2,6 +2,7 @@ package edu.kit.mima.gui.components.button;
 
 import edu.kit.mima.api.observing.ClassObservable;
 import edu.kit.mima.api.observing.Observable;
+import edu.kit.mima.gui.components.AlignPolicy;
 import edu.kit.mima.gui.components.tooltip.ITooltip;
 import edu.kit.mima.gui.components.tooltip.Tooltip;
 import edu.kit.mima.gui.components.tooltip.TooltipComponent;
@@ -322,7 +323,7 @@ public final class ButtonPanelBuilder {
         public <T extends JComponent & ITooltip> ButtonBuilder setTooltip(
                 @NotNull final T component) {
             new TooltipComponent<>(button, component, BUTTON_DELAY, BUTTON_VANISH_DELAY,
-                                   TooltipComponent.COMPONENT_BOTH).setActive(true);
+                                   AlignPolicy.COMPONENT_BOTH).setActive(true);
             button.setToolTipText(null);
             return this;
         }

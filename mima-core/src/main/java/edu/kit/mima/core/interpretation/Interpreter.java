@@ -173,7 +173,6 @@ public class Interpreter {
             }
             if (i < tokens.length) {
                 currentToken = tokens[i];
-                System.out.println(currentToken);
                 if (i != startIndex || !(environment instanceof GlobalEnvironment)) {
                     debugController.afterInstruction(currentToken);
                 }

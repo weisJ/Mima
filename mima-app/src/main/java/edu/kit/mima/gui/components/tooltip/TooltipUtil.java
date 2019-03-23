@@ -1,5 +1,6 @@
 package edu.kit.mima.gui.components.tooltip;
 
+import edu.kit.mima.gui.components.AlignPolicy;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,7 +34,7 @@ public final class TooltipUtil {
         final Window window = findWindow();
         if (window instanceof JFrame) {
             final Point p = MouseInfo.getPointerInfo().getLocation();
-            showTooltip(tooltip, ((JFrame) window).getRootPane(), p, TooltipConstants.MOUSE_BOTH);
+            showTooltip(tooltip, ((JFrame) window).getRootPane(), p, AlignPolicy.MOUSE_BOTH);
         }
     }
 
@@ -49,7 +50,7 @@ public final class TooltipUtil {
                                                                      final Point p) {
         final Window window = findWindow();
         if (window instanceof JFrame) {
-            showTooltip(tooltip, ((JFrame) window).getRootPane(), p, TooltipConstants.MOUSE_BOTH);
+            showTooltip(tooltip, ((JFrame) window).getRootPane(), p, AlignPolicy.MOUSE_BOTH);
         }
     }
 
@@ -67,8 +68,9 @@ public final class TooltipUtil {
             @NotNull final T tooltip,
             @NotNull final JComponent container,
             final Point p,
-            final int alignAt) {
-        final var tooltipComponent = new TooltipComponent<>(container, tooltip, 0, 2000, alignAt);
+            final AlignPolicy alignAt) {
+        final var tooltipComponent = new TooltipComponent<>(container, tooltip,
+                                                            0, 2000, alignAt);
         tooltipComponent.showOnce(p);
     }
 

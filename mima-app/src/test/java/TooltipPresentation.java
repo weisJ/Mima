@@ -1,3 +1,4 @@
+import edu.kit.mima.gui.components.AlignPolicy;
 import edu.kit.mima.gui.components.tooltip.Tooltip;
 import edu.kit.mima.gui.components.tooltip.TooltipComponent;
 import edu.kit.mima.gui.laf.LafManager;
@@ -36,7 +37,7 @@ public class TooltipPresentation {
                 button.setBorder(new LineBorder(Color.RED));
                 new TooltipComponent<>(button,
                                        new Tooltip("Hallo Laaaaaaaaaaaaaaaaaaaaaanger Text \n Test1 \n Tes 2 \n\n\n\nHoher Text"),
-                                       600, 2000, TooltipComponent.MOUSE_BOTH);
+                                       600, 2000, AlignPolicy.MOUSE_BOTH);
                 frame.add(button);
             }
             frame.setBackground(Color.WHITE);
