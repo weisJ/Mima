@@ -6,6 +6,7 @@ import edu.kit.mima.core.interpretation.Value;
 import edu.kit.mima.core.interpretation.ValueType;
 import edu.kit.mima.core.interpretation.environment.Environment;
 import edu.kit.mima.core.logic.ArithmeticLogicUnit;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -118,10 +119,7 @@ public enum MimaInstruction implements Instruction {
         @Override
         protected MachineWord applyInternal(@NotNull final List<Value> arguments,
                                             final Environment environment) {
-            final var argument = InstructionTools.getMemoryReference(arguments, 0);
-            applyAlu((MachineWord) argument.getValue(), arithmeticLogicUnit::add);
-
-            return null;
+            return applyAlu(arguments, arithmeticLogicUnit::add);
         }
     },
     /**
@@ -131,10 +129,7 @@ public enum MimaInstruction implements Instruction {
         @Override
         protected MachineWord applyInternal(@NotNull final List<Value> arguments,
                                             final Environment environment) {
-            final var argument = InstructionTools.getMemoryReference(arguments, 0);
-            applyAlu((MachineWord) argument.getValue(), arithmeticLogicUnit::and);
-
-            return null;
+            return applyAlu(arguments, arithmeticLogicUnit::and);
         }
     },
     /**
@@ -144,10 +139,7 @@ public enum MimaInstruction implements Instruction {
         @Override
         protected MachineWord applyInternal(@NotNull final List<Value> arguments,
                                             final Environment environment) {
-            final var argument = InstructionTools.getMemoryReference(arguments, 0);
-            applyAlu((MachineWord) argument.getValue(), arithmeticLogicUnit::or);
-
-            return null;
+            return applyAlu(arguments, arithmeticLogicUnit::or);
         }
     },
     /**
@@ -157,10 +149,7 @@ public enum MimaInstruction implements Instruction {
         @Override
         protected MachineWord applyInternal(@NotNull final List<Value> arguments,
                                             final Environment environment) {
-            final var argument = InstructionTools.getMemoryReference(arguments, 0);
-            applyAlu((MachineWord) argument.getValue(), arithmeticLogicUnit::xor);
-
-            return null;
+            return applyAlu(arguments, arithmeticLogicUnit::xor);
         }
     },
     /**
@@ -170,9 +159,7 @@ public enum MimaInstruction implements Instruction {
         @Override
         protected MachineWord applyInternal(@NotNull final List<Value> arguments,
                                             final Environment environment) {
-            final var argument = InstructionTools.getMemoryReference(arguments, 0);
-            applyAlu((MachineWord) argument.getValue(), arithmeticLogicUnit::negativeIfEquals);
-            return null;
+            return applyAlu(arguments, arithmeticLogicUnit::negativeIfEquals);
         }
     };
 
@@ -188,6 +175,7 @@ public enum MimaInstruction implements Instruction {
      *
      * @param instruction instruction keyword
      */
+    @Contract(pure = true)
     MimaInstruction(final String instruction, final int argNum) {
         this.instruction = instruction;
         this.argNum = argNum;
@@ -226,11 +214,13 @@ public enum MimaInstruction implements Instruction {
     protected abstract @Nullable MachineWord applyInternal(List<Value> arguments,
                                                            Environment environment);
 
-    protected void applyAlu(@NotNull MachineWord argument,
-                            @NotNull BiFunction<MachineWord, MachineWord, MachineWord> func) {
+    protected @Nullable MachineWord applyAlu(List<Value> arguments,
+                                             @NotNull BiFunction<MachineWord, MachineWord, MachineWord> func) {
+        final var argument = InstructionTools.getMemoryReference(arguments, 0);
         mima.setAccumulator(func.apply(
                 MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
-                mima.loadValue((argument.intValue()))));
+                mima.loadValue((((MachineWord) argument.getValue()).intValue()))));
+        return null;
     }
 
 }

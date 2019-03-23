@@ -20,7 +20,7 @@ import java.util.stream.IntStream;
  */
 public class SyntaxTree {
 
-    @NotNull public final SyntaxToken[] tokens;
+    @NotNull private final SyntaxToken[] tokens;
     @NotNull private final SyntaxNode root;
 
     /**
@@ -62,30 +62,6 @@ public class SyntaxTree {
     }
 
     /**
-     * Group lines.
-     *
-     * @param node parent node to create lines on
-     */
-    private void buildLines(@NotNull final SyntaxNode node) {
-        insertLayer(n -> n.getType() == NodeType.NEW_LINE,
-                    (x, y) -> new SimpleSyntaxNode(NodeType.LINE, x, y, null), node);
-        buildJumps(node);
-    }
-
-    /**
-     * Create Jump layer.
-     *
-     * @param node parent node to create layer on
-     */
-    private void buildJumps(@NotNull final SyntaxNode node) {
-        for (final var line : new ArrayList<>(node.children())) {
-            groupLayer(n -> n.getType() == NodeType.JUMP_DEL,
-                       (x, y) -> new SimpleSyntaxNode(NodeType.JUMP, x, y, null), line, false);
-        }
-        buildInstructions(node);
-    }
-
-    /**
      * Build scopes.
      */
     private void buildScopes() {
@@ -99,27 +75,47 @@ public class SyntaxTree {
                 final SyntaxNode scope = scopes.pop();
                 scopes.peek().addChild(scope);
                 scopes.peek().addChild(n);
-                buildLines(scope);
+                buildLayers(scope);
             } else if (!scopes.isEmpty()) {
                 scopes.peek().addChild(n);
             }
         }
-        buildLines(root);
+        buildLayers(root);
+    }
+
+    private void buildLayers(@NotNull final SyntaxNode node) {
+        buildLines(node);
+        groupAndCreate(node, NodeType.JUMP_DEL, NodeType.JUMP);
+        groupAndCreate(node, NodeType.INSTRUCTION_END, NodeType.INSTRUCTION);
+        buildBlocks(node);
     }
 
     /**
-     * Group instructions into one node.
+     * Group lines.
      *
-     * @param node parent node to group on
+     * @param node parent node to create lines on
      */
-    private void buildInstructions(@NotNull final SyntaxNode node) {
+    private void buildLines(@NotNull final SyntaxNode node) {
+        insertLayer(n -> n.getType() == NodeType.NEW_LINE,
+                    (x, y) -> new SimpleSyntaxNode(NodeType.LINE, x, y, null), node);
+    }
+
+    /**
+     * Split layer at node type and create new node from split.
+     *
+     * @param node       Node to perform on.
+     * @param split      type to split at.
+     * @param createType type of new nodes.
+     */
+    private void groupAndCreate(@NotNull final SyntaxNode node,
+                                final NodeType split,
+                                final NodeType createType) {
         for (final var line : new ArrayList<>(node.children())) {
-            groupLayer(n -> n.getType() == NodeType.INSTRUCTION_END,
-                       (x, y) -> new SimpleSyntaxNode(NodeType.INSTRUCTION, x, y, null),
+            groupLayer(n -> n.getType() == split,
+                       (x, y) -> new SimpleSyntaxNode(createType, x, y, null),
                        line,
                        false);
         }
-        buildBlocks(node);
     }
 
     /**
@@ -143,7 +139,7 @@ public class SyntaxTree {
      * @param node node to calculate size of
      * @return all Leaf node descendants
      */
-    private int calculateSize(final SyntaxNode node) {
+    private int calculateSize(@NotNull final SyntaxNode node) {
         if (node.children().isEmpty()) {
             return 1;
         }
