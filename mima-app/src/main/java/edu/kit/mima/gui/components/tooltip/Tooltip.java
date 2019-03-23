@@ -80,7 +80,7 @@ public class Tooltip extends ShadowPane implements ITooltip {
     /*
      * Apply insets to adjust position
      */
-    private void adjustAlignment(final Alignment alignment) {
+    private void adjustAlignment(@NotNull final Alignment alignment) {
         final Rectangle bounds = getBounds();
         final Insets insets = getInsets();
         switch (alignment) {
@@ -122,7 +122,6 @@ public class Tooltip extends ShadowPane implements ITooltip {
                 bubbleBorder.setPointerPadPercent(1);
                 break;
             case CENTER:
-                break;
             default:
                 break;
         }
@@ -167,11 +166,7 @@ public class Tooltip extends ShadowPane implements ITooltip {
         //Move shadow according to alignment.
         switch (alignment) {
             case NORTH:
-                border.paintBorder(this, g, 0, 0, getWidth(), getHeight() - pointerSize);
-                break;
             case NORTH_EAST:
-                border.paintBorder(this, g, 0, 0, getWidth(), getHeight() - pointerSize);
-                break;
             case NORTH_WEST:
                 border.paintBorder(this, g, 0, 0, getWidth(), getHeight() - pointerSize);
                 break;
@@ -181,17 +176,13 @@ public class Tooltip extends ShadowPane implements ITooltip {
             case SOUTH:
                 border.paintBorder(this, g, 0, pointerSize, getWidth(), getHeight() - pointerSize);
                 break;
+            case CENTER:
             case SOUTH_EAST:
-                border.paintBorder(this, g, 0, 0, getWidth(), getHeight());
-                break;
             case SOUTH_WEST:
                 border.paintBorder(this, g, 0, 0, getWidth(), getHeight());
                 break;
             case WEST:
                 border.paintBorder(this, g, 0, 0, getWidth() - pointerSize, getHeight());
-                break;
-            case CENTER:
-                border.paintBorder(this, g, 0, 0, getWidth(), getHeight());
                 break;
             default:
                 break;

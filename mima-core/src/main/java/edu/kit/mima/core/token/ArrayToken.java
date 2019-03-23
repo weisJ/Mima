@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * {@link Token} implementation that holds an array of values.
@@ -60,6 +61,16 @@ public class ArrayToken<T> extends FileObjectAdapter implements Token<T[]> {
     @Override
     public TokenType getType() {
         return TokenType.ARRAY;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Stream<Token> stream(boolean includeChildren) {
+        if (includeChildren && values.length > 0 && values[0] instanceof Token) {
+            return Arrays.stream(values).flatMap(t -> ((Token) t).stream());
+        } else {
+            return Stream.of(this);
+        }
     }
 
     @Override

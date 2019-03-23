@@ -4,6 +4,7 @@ import edu.kit.mima.core.query.Query;
 import edu.kit.mima.core.query.QueryResult;
 import edu.kit.mima.core.token.ProgramToken;
 import edu.kit.mima.core.token.Token;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -28,6 +29,7 @@ public class ProgramQuery implements Query<Token> {
      *
      * @param program program to query.
      */
+    @Contract(pure = true)
     public ProgramQuery(final ProgramToken program) {
         this.program = program;
         this.filter = t -> true;

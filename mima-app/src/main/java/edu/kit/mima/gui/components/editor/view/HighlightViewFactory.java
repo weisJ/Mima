@@ -28,20 +28,14 @@ public class HighlightViewFactory implements ViewFactory {
     public View create(@NotNull final Element elem) {
         final String kind = elem.getName();
         if (kind != null) {
-            switch (kind) {
-                case AbstractDocument.ContentElementName:
-                    return new HighlightLabelView(elem);
-                case AbstractDocument.ParagraphElementName:
-                    return new ParagraphView(elem);
-                case AbstractDocument.SectionElementName:
-                    return new BoxView(elem, View.Y_AXIS);
-                case StyleConstants.ComponentElementName:
-                    return new ComponentView(elem);
-                case StyleConstants.IconElementName:
-                    return new IconView(elem);
-                default:
-                    return new PlainView(elem);
-            }
+            return switch (kind) {
+                case AbstractDocument.ContentElementName -> new HighlightLabelView(elem);
+                case AbstractDocument.ParagraphElementName -> new ParagraphView(elem);
+                case AbstractDocument.SectionElementName -> new BoxView(elem, View.Y_AXIS);
+                case StyleConstants.ComponentElementName -> new ComponentView(elem);
+                case StyleConstants.IconElementName -> new IconView(elem);
+                default -> new PlainView(elem);
+            };
         }
         return new LabelView(elem);
     }

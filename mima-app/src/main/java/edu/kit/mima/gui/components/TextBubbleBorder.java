@@ -180,6 +180,7 @@ public class TextBubbleBorder extends AbstractBorder {
         int right = pad;
         int bottom = pad;
         int top = pad;
+
         switch (pointerSide) {
             case NORTH:
             case NORTH_WEST:
@@ -198,7 +199,6 @@ public class TextBubbleBorder extends AbstractBorder {
                 bottom = pointerSidePad;
                 break;
             case CENTER:
-                break;
             default:
                 break;
         }

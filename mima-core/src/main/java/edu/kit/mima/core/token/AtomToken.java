@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * Implementation of a {@link Token} that holds a single value.
@@ -54,6 +55,16 @@ public class AtomToken<T> extends FileObjectAdapter implements Token<T> {
     @Override
     public TokenType getType() {
         return type;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Stream<Token> stream(boolean includeChildren) {
+        Stream<Token> stream = Stream.of(this);
+        if (includeChildren && value instanceof Token) {
+            stream = Stream.concat(stream, ((Token) (value)).stream());
+        }
+        return stream;
     }
 
     @Override
