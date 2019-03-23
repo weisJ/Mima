@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Point;
 import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -16,8 +17,7 @@ import javax.swing.border.EmptyBorder;
  */
 public class IconPanel extends JPanel {
     @NotNull private final Icon icon;
-    private int xoff;
-    private int yoff;
+    private Point off;
 
     /**
      * Create new Icon panel.
@@ -32,52 +32,35 @@ public class IconPanel extends JPanel {
                 icon.getIconWidth(),
                 icon.getIconHeight()
         ));
+        Point off = new Point(0, 0);
         switch (orientation) {
-            case NORTH:
-                xoff = icon.getIconWidth() / 2;
-                yoff = 0;
-                break;
-            case NORTH_EAST:
-                xoff = icon.getIconWidth();
-                yoff = 0;
-                break;
-            case EAST:
-                xoff = icon.getIconWidth();
-                yoff = icon.getIconHeight() / 2;
-                break;
-            case SOUTH_EAST:
-                xoff = icon.getIconWidth();
-                yoff = icon.getIconHeight();
-                break;
-            case SOUTH:
-                xoff = icon.getIconWidth() / 2;
-                yoff = icon.getIconHeight();
-                break;
-            case SOUTH_WEST:
-                xoff = 0;
-                yoff = icon.getIconHeight();
-                break;
-            case WEST:
-                xoff = 0;
-                yoff = icon.getIconHeight() / 2;
-                break;
-            case NORTH_WEST:
-                xoff = 0;
-                yoff = 0;
-                break;
-            case CENTER:
-                xoff = icon.getIconWidth() / 2;
-                yoff = icon.getIconHeight() / 2;
-                break;
-            default:
-                break;
+            case NORTH -> off.x = icon.getIconWidth() / 2;
+            case NORTH_EAST -> off.x = icon.getIconWidth();
+            case SOUTH_WEST -> off.y = icon.getIconHeight();
+            case WEST -> off.y = icon.getIconHeight() / 2;
+            case EAST -> {
+                off.x = icon.getIconWidth();
+                off.y = icon.getIconHeight() / 2;
+            }
+            case SOUTH_EAST -> {
+                off.x = icon.getIconWidth();
+                off.y = icon.getIconHeight();
+            }
+            case SOUTH -> {
+                off.x = icon.getIconWidth() / 2;
+                off.y = icon.getIconHeight();
+            }
+            case CENTER -> {
+                off.x = icon.getIconWidth() / 2;
+                off.y = icon.getIconHeight() / 2;
+            }
         }
         setOpaque(false);
     }
 
     @Override
     public void paint(final Graphics g) {
-        icon.paintIcon(this, g, xoff, yoff);
+        icon.paintIcon(this, g, off.x, off.y);
     }
 
     @NotNull

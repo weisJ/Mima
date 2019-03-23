@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * Implementation of a {@link Token} that holds two values.
@@ -86,6 +87,21 @@ public class BinaryToken<T, K> extends FileObjectAdapter implements Token<T>, Im
     @Override
     public TokenType getType() {
         return type;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Stream<Token> stream(boolean includeChildren) {
+        Stream<Token> stream = Stream.of(this);
+        if (includeChildren) {
+            if (first instanceof Token) {
+                stream = Stream.concat(stream, ((Token) first).stream());
+            }
+            if (second instanceof Token) {
+                stream = Stream.concat(stream, ((Token) second).stream());
+            }
+        }
+        return stream;
     }
 
     @Override

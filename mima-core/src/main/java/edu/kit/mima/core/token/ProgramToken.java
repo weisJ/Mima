@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Implementation of {@link Token} that holds an array of {@link Token}s representing a program.
@@ -71,6 +72,15 @@ public class ProgramToken extends FileObjectAdapter implements Token<Token[]> {
     @Override
     public TokenType getType() {
         return TokenType.PROGRAM;
+    }
+
+    @Override
+    public Stream<Token> stream(boolean includeChildren) {
+        if (includeChildren) {
+            return Arrays.stream(program).flatMap(Token::stream);
+        } else {
+            return Stream.of(this);
+        }
     }
 
     @Override

@@ -113,7 +113,7 @@ public class MimaEditorManager implements AutoCloseable {
      * @param editor      editor to open.
      * @param fileManager corresponding file manager.
      */
-    public void openEditor(Editor editor, FileManager fileManager) {
+    public void openEditor(Editor editor, @NotNull FileManager fileManager) {
         String lastFile = fileManager.getLastFile();
         for (final var entry : fileManagers.entrySet()) {
             if (entry.getValue() != fileManager
@@ -122,15 +122,12 @@ public class MimaEditorManager implements AutoCloseable {
                 return;
             }
         }
+        editor.setRepaint(true);
         editor.setText(fileManager.getText());
         lastFile = lastFile.substring(Math.max(Math.min(lastFile.lastIndexOf('\\') + 1,
                                                         lastFile.length() - 1), 0));
         tabbedEditor.addTab(lastFile, Icons.forFile(lastFile), editor);
         fileManagers.put(editor, fileManager);
-
-        editor.setRepaint(true);
-        editor.resetHistory();
-        editor.update();
     }
 
     /**

@@ -47,6 +47,7 @@ public class MimaFormatter implements Formatter {
         String s = "";
         switch (node.getType()) {
             case ROOT:
+            case JUMP:
                 for (final var n : node.children()) {
                     sb.append(printNode(n));
                 }
@@ -80,18 +81,11 @@ public class MimaFormatter implements Formatter {
             case JUMP_DEL:
                 s = sb.append(tokens[node.getBegin()].getValue().toString()).toString();
                 break;
-            case JUMP:
-                for (final var n : node.children()) {
-                    sb.append(printNode(n));
-                }
-                s = sb.toString();
-                break;
             case SCOPE_CLOSED:
             case SCOPE_OPEN:
                 s = tokens[node.getBegin()].getValue().toString() + '\n';
                 break;
             case NEW_LINE:
-                break;
             default:
                 break;
         }

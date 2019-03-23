@@ -438,7 +438,6 @@ public class TooltipComponent<T extends JComponent & ITooltip>
                 p.y = relativeTo.y - size.height;
                 break;
             case CENTER:
-                break;
             default:
                 break;
         }

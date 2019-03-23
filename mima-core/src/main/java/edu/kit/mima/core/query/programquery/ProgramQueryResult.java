@@ -4,11 +4,9 @@ import edu.kit.mima.core.query.IllegalRequestException;
 import edu.kit.mima.core.query.Query;
 import edu.kit.mima.core.query.QueryItem;
 import edu.kit.mima.core.query.QueryResult;
-import edu.kit.mima.core.token.ArrayToken;
-import edu.kit.mima.core.token.BinaryToken;
 import edu.kit.mima.core.token.ProgramToken;
 import edu.kit.mima.core.token.Token;
-import edu.kit.mima.core.token.TokenType;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -154,52 +152,9 @@ public class ProgramQueryResult implements QueryResult<Token> {
      */
     private Stream<Token> createTokenStream(@NotNull final ProgramToken programToken,
                                             final boolean recursive) {
-        return Arrays.stream(programToken.getValue()).flatMap(t -> mapToken(t, recursive));
-    }
-
-    @SuppressWarnings("unchecked") /*Construction of tokens guarantees these types*/
-    private Stream<Token> mapToken(@NotNull final Token token, final boolean recursive) {
-        Stream<Token> stream = Stream.empty();
-        switch (token.getType()) {
-            case PROGRAM:
-                if (recursive) {
-                    stream = createTokenStream((ProgramToken) token, true);
-                } else {
-                    stream = Stream.empty();
-                }
-                break;
-            case JUMP_POINT:
-                final BinaryToken<Token, Token> binaryToken = (BinaryToken<Token, Token>) token;
-                stream = Stream.concat(Stream.of(binaryToken),
-                                       mapToken(binaryToken.getSecond(), recursive));
-                break;
-            case ARRAY:
-                stream = Arrays.stream(((ArrayToken<Token>) token).getValue());
-                break;
-            case DEFINITION: /*fall through*/
-            case CONSTANT:
-                final Token value = ((Token<Token>) token).getValue();
-                if (value.getType() == TokenType.ARRAY) {
-                    stream = mapToken(value, recursive);
-                } else {
-                    stream = Stream.of(token);
-                }
-                break;
-            case IDENTIFICATION:
-            case KEYWORD:
-            case PUNCTUATION:
-            case BINARY:
-            case NUMBER:
-            case EMPTY:
-            case ERROR:
-            case CALL:
-                /*fall through*/
-                stream = Stream.of(token);
-                break;
-            default:
-                break;
-        }
-        return stream;
+        // The types work out perfectly but it gets erased.
+        //noinspection unchecked
+        return Arrays.stream(programToken.getValue()).flatMap(t -> t.stream(recursive));
     }
 
     /**
@@ -212,6 +167,7 @@ public class ProgramQueryResult implements QueryResult<Token> {
         private final Token optionalResult;
         private final boolean isPresent;
 
+        @Contract(pure = true)
         private ProgramQueryItem(@Nullable final Token optionalResult) {
             isPresent = optionalResult != null;
             this.optionalResult = optionalResult;

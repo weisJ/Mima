@@ -5,6 +5,8 @@ import edu.kit.mima.core.parsing.Parser;
 import edu.kit.mima.core.parsing.inputstream.TokenStream;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.stream.Stream;
+
 /**
  * Token to used in {@link TokenStream} or {@link Parser}.
  *
@@ -26,6 +28,23 @@ public interface Token<T> extends FileObject {
      * @return type of token
      */
     TokenType getType();
+
+    /**
+     * Get stream of token and child tokens.
+     *
+     * @return stream of token
+     */
+    default Stream<Token> stream() {
+        return stream(true);
+    }
+
+    /**
+     * Get stream of token and child tokens.
+     *
+     * @param includeChildren whether to include child tokens.
+     * @return stream of token
+     */
+    Stream<Token> stream(final boolean includeChildren);
 
     /**
      * Get a string representation of the token.
