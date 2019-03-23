@@ -9,6 +9,7 @@ import edu.kit.mima.preferences.ColorKey;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
 import edu.kit.mima.preferences.UserPreferenceChangedListener;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.Color;
@@ -77,17 +78,8 @@ public final class ConsoleLogger implements Logger {
      * @param overwriteLast true if last message should be overwritten.
      */
     public void log(final String message, final boolean overwriteLast) {
-        if (level == LogLevel.INFO && console != null) {
-            final String m = "[INFO] " + message;
-            if (overwriteLast) {
-                console.replaceLastLine(m);
-            } else {
-                if (locked) {
-                    messageQueue.offer(new ValueTuple<>(m, null));
-                    return;
-                }
-                console.println(m);
-            }
+        if (level == LogLevel.INFO) {
+            print("[INFO] " + message, LogColor.INFO, overwriteLast);
         }
     }
 
@@ -103,17 +95,8 @@ public final class ConsoleLogger implements Logger {
      * @param overwriteLast true if last message should be overwritten.
      */
     public void warning(final String message, final boolean overwriteLast) {
-        if (level != LogLevel.ERROR && console != null) {
-            final String m = "[WARNING] " + message;
-            if (overwriteLast) {
-                console.replaceLastLine(m, LogColor.WARNING.color);
-            } else {
-                if (locked) {
-                    messageQueue.offer(new ValueTuple<>(m, LogColor.WARNING.color));
-                    return;
-                }
-                console.println(m, LogColor.WARNING.color);
-            }
+        if (level != LogLevel.ERROR) {
+            print("[WARNING] " + message, LogColor.WARNING, overwriteLast);
         }
     }
 
@@ -129,18 +112,21 @@ public final class ConsoleLogger implements Logger {
      * @param overwriteLast true if last message should be overwritten.
      */
     public void error(final String message, final boolean overwriteLast) {
+        print("[ERROR] " + message, LogColor.ERROR, overwriteLast);
+    }
+
+    private void print(final String message, final LogColor logColor, final boolean overwriteLast) {
         if (console == null) {
             return;
         }
-        final String m = "[ERROR] " + message;
         if (overwriteLast) {
-            console.replaceLastLine(m, LogColor.ERROR.color);
+            console.replaceLastLine(message, logColor.color);
         } else {
             if (locked) {
-                messageQueue.offer(new ValueTuple<>(m, LogColor.ERROR.color));
+                messageQueue.offer(new ValueTuple<>(message, logColor.color));
                 return;
             }
-            console.println(m, LogColor.ERROR.color);
+            console.println(message, logColor.color);
         }
     }
 
@@ -175,6 +161,7 @@ public final class ConsoleLogger implements Logger {
         private Color color;
         private ColorKey key;
 
+        @Contract(pure = true)
         LogColor(final Color color, final ColorKey key) {
             this.color = color;
             this.key = key;
