@@ -77,6 +77,7 @@ public class MimaButtonArea {
                 .setVisible(false)
                 //Debug
                 .addButton(debugButton)
+                .addAccelerator("alt D").setTooltip("Debug (Alt+D)")
                 .addAction(runActions::debug)
                 .bindEnabled(debugger, () -> !debugger.isRunning(), Debugger.RUNNING_PROPERTY)
                 .bind(debugger,

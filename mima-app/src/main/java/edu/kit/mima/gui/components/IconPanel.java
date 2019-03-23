@@ -32,7 +32,7 @@ public class IconPanel extends JPanel {
                 icon.getIconWidth(),
                 icon.getIconHeight()
         ));
-        Point off = new Point(0, 0);
+        off = new Point(0, 0);
         switch (orientation) {
             case NORTH -> off.x = icon.getIconWidth() / 2;
             case NORTH_EAST -> off.x = icon.getIconWidth();

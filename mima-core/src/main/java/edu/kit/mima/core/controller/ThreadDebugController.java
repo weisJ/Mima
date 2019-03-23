@@ -54,7 +54,6 @@ public class ThreadDebugController implements DebugController {
 
     @Override
     public void pause() {
-        System.out.println("paused");
         synchronized (lock) {
             isActive = false;
             try {
@@ -96,10 +95,8 @@ public class ThreadDebugController implements DebugController {
             isActive = false;
         }
         try {
-            System.out.println("wait");
             resume();
             workingThread.join();
-            System.out.println("done");
         } catch (@NotNull final InterruptedException ignored) {
             /*doesn't matter thread should die*/
         }
