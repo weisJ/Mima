@@ -38,6 +38,7 @@ public class TokenStream {
      *
      * @param input string input
      */
+    @Contract(pure = true)
     public TokenStream(final String input) {
         this.input = new CharInputStream(input);
         current = null;

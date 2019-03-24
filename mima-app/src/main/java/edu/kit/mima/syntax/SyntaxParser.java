@@ -1,11 +1,13 @@
 package edu.kit.mima.syntax;
 
 import edu.kit.mima.core.instruction.InstructionSet;
+import edu.kit.mima.core.parsing.Processor;
 import edu.kit.mima.core.parsing.inputstream.CharInputStream;
 import edu.kit.mima.core.parsing.lang.Keyword;
 import edu.kit.mima.core.parsing.lang.Punctuation;
 import edu.kit.mima.core.token.AtomSyntaxToken;
 import edu.kit.mima.core.token.EmptySyntaxToken;
+import edu.kit.mima.core.token.ListToken;
 import edu.kit.mima.core.token.SyntaxToken;
 import edu.kit.mima.core.token.Token;
 import edu.kit.mima.core.token.TokenType;
@@ -14,7 +16,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -28,8 +29,7 @@ import java.util.stream.Collectors;
  * @author Jannis Weis
  * @since 2018
  */
-public class SyntaxParser {
-    @NotNull private final SyntaxTokenStream input;
+public class SyntaxParser extends Processor<SyntaxToken, SyntaxTokenStream> {
     @NotNull private final List<SyntaxToken> tokens;
 
     private final Set<String> instructions;
@@ -46,7 +46,7 @@ public class SyntaxParser {
      * @param instructionSet instruction set for input. Is needed to determine valid functions.
      */
     public SyntaxParser(final String input, @NotNull final InstructionSet instructionSet) {
-        this.input = new SyntaxTokenStream(input);
+        super(new SyntaxTokenStream(input));
         this.tokens = new ArrayList<>();
         this.unresolvedIdentifications = new ArrayList<>();
         this.jumps = new ArrayList<>();
@@ -127,14 +127,12 @@ public class SyntaxParser {
                                             expression.getLength())
                     : new EmptySyntaxToken();
             insideCall = true;
-            final SyntaxToken[] tokenA = delimited(
-                    Punctuation.OPEN_BRACKET,
-                    Punctuation.CLOSED_BRACKET,
-                    Punctuation.COMMA,
-                    this::parseExpression,
-                    false);
+            final var tokenA = delimited(
+                    new char[]{Punctuation.OPEN_BRACKET, Punctuation.CLOSED_BRACKET,
+                            Punctuation.COMMA},
+                    this::parseExpression, true);
             insideCall = false;
-            tokens.addAll(Arrays.asList(tokenA));
+            tokens.addAll(tokenA.getValue());
             return token;
         } else {
             return Objects.requireNonNullElseGet(expression, EmptySyntaxToken::new);
@@ -144,24 +142,15 @@ public class SyntaxParser {
     @NotNull
     private SyntaxToken parseAtomic() {
         final SyntaxToken token = peek();
-        switch (token.getType()) {
-            case PUNCTUATION:
-                return parsePunctuation();
-            case IDENTIFICATION:
-                return parseIdentification();
-            case STRING:
-                return parseString();
-            case EMPTY:
-            case ERROR:
-                return next();
-            //Can be kept as they are *fallthrough*
-            case NUMBER:
-            case BINARY:
-            case KEYWORD:
-                return maybeDefinition();
-            default:
-                return new EmptySyntaxToken();
-        }
+        //Can be kept as they are *fallthrough*
+        return switch (token.getType()) {
+            case PUNCTUATION -> parseDelimiter();
+            case IDENTIFICATION -> parseIdentification();
+            case STRING -> parseString();
+            case EMPTY, ERROR -> next();
+            case NUMBER, BINARY, KEYWORD -> maybeDefinition();
+            default -> new EmptySyntaxToken();
+        };
     }
 
     @NotNull
@@ -198,13 +187,11 @@ public class SyntaxParser {
         } else {
             supplier = () -> parseDefinition(variables, SyntaxColor.REFERENCE);
         }
-        final SyntaxToken[] tokenA = delimited(
-                CharInputStream.EMPTY_CHAR,
-                Punctuation.INSTRUCTION_END,
-                Punctuation.COMMA,
-                supplier,
-                false);
-        tokens.addAll(Arrays.asList(tokenA));
+        final var tokenA = delimited(
+                new char[]{CharInputStream.EMPTY_CHAR, Punctuation.INSTRUCTION_END,
+                        Punctuation.COMMA},
+                supplier, true);
+        tokens.addAll(tokenA.getValue());
         return new EmptySyntaxToken();
     }
 
@@ -217,7 +204,7 @@ public class SyntaxParser {
             referenceList.add(reference);
             if (isPunctuation(Punctuation.DEFINITION_DELIMITER)) {
                 tokens.add(reference);
-                tokens.add(parsePunctuation());
+                tokens.add(parseDelimiter());
                 if (!isPunctuation(Punctuation.INSTRUCTION_END)) {
                     return parseExpression();
                 }
@@ -238,28 +225,17 @@ public class SyntaxParser {
     }
 
     @NotNull
-    private SyntaxToken parsePunctuation() {
-        final SyntaxToken token = next();
+    protected SyntaxToken parseDelimiter() {
+        SyntaxToken token = next();
         switch (token.getValue().toString().charAt(0)) {
-            case Punctuation.DEFINITION_DELIMITER:
-            case Punctuation.JUMP_DELIMITER:
-            case Punctuation.INSTRUCTION_END:
-            case Punctuation.DEFINITION_BEGIN:
-            case Punctuation.PRE_PROC:
-            case Punctuation.COMMA:
-                token.setColor(SyntaxColor.KEYWORD);
-                return token;
-            case Punctuation.OPEN_BRACKET:
-            case Punctuation.CLOSED_BRACKET:
-                token.setColor(SyntaxColor.TEXT);
-                return token;
-            case Punctuation.SCOPE_CLOSED:
-            case Punctuation.SCOPE_OPEN:
-                token.setColor(SyntaxColor.SCOPE);
-                return token;
-            default:
-                return new EmptySyntaxToken();
+            case Punctuation.DEFINITION_DELIMITER, Punctuation.JUMP_DELIMITER,
+                    Punctuation.INSTRUCTION_END, Punctuation.DEFINITION_BEGIN,
+                    Punctuation.PRE_PROC, Punctuation.COMMA -> token.setColor(SyntaxColor.KEYWORD);
+            case Punctuation.OPEN_BRACKET, Punctuation.CLOSED_BRACKET -> token.setColor(SyntaxColor.TEXT);
+            case Punctuation.SCOPE_CLOSED, Punctuation.SCOPE_OPEN -> token.setColor(SyntaxColor.SCOPE);
+            default -> token = new EmptySyntaxToken();
         }
+        return token;
     }
 
     @NotNull
@@ -286,66 +262,25 @@ public class SyntaxParser {
         return token;
     }
 
-    /**
-     * Returns whether current token is of the given punctuation.
-     *
-     * @param expected expected punctuation
-     * @return true if punctuation matches
-     */
-    private boolean isPunctuation(final char expected) {
+    @Override
+    protected boolean isPunctuation(final char expected) {
         final Token token = peek();
         return token.getType() == TokenType.PUNCTUATION
                 && token.getValue().equals(String.valueOf(expected));
     }
 
     /**
-     * Return expressions contained in the delimiters as ArrayToken.
+     * Return expressions contained in the delimiters as ListToken.
      *
-     * @param start     start character (empty char if no begin is defined)
-     * @param stop      stop character
-     * @param separator separation character
-     * @param parser    instructions to parse tokens in between of separator
-     * @param skipLast  whether the stop delimiter should be skipped
-     * @return Expressions in ArrayToken
+     * @param del      array with delimiters [start, stop, separator]
+     * @param parser   instructions to parse tokens in between of separator
+     * @param skipLast whether the stop delimiter should be skipped
+     * @return Expressions in ListToken
      */
     @NotNull
-    private SyntaxToken[] delimited(final char start,
-                                    final char stop,
-                                    final char separator,
-                                    @NotNull final Supplier<SyntaxToken> parser,
-                                    final boolean skipLast) {
-        final List<SyntaxToken> tokenList = new ArrayList<>();
-        if (start != CharInputStream.EMPTY_CHAR) {
-            if (isPunctuation(start)) {
-                tokenList.add(parsePunctuation());
-            }
-        }
-        boolean first = true;
-        while (!input.isEmpty()) {
-            if (isPunctuation(stop)) {
-                tokenList.add(parsePunctuation());
-                break;
-            }
-            if (first) {
-                first = false;
-            } else {
-                if (isPunctuation(separator)) {
-                    tokenList.add(parsePunctuation());
-                } else {
-                    break;
-                }
-            }
-            if (isPunctuation(stop)) {
-                parsePunctuation();
-                break;
-            }
-            tokenList.add(parser.get());
-        }
-        if (skipLast) {
-            if (isPunctuation(separator)) {
-                tokenList.add(parsePunctuation());
-            }
-        }
-        return tokenList.toArray(new SyntaxToken[0]);
+    protected ListToken<SyntaxToken> delimited(@NotNull final char[] del,
+                                               @NotNull final Supplier<SyntaxToken> parser,
+                                               final boolean skipLast) {
+        return super.delimited(del, parser, skipLast, true);
     }
 }

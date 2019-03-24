@@ -7,11 +7,11 @@ import edu.kit.mima.core.MimaConstants;
 import edu.kit.mima.core.parsing.ParserException;
 import edu.kit.mima.core.parsing.Processor;
 import edu.kit.mima.core.parsing.ProcessorException;
+import edu.kit.mima.core.parsing.inputstream.TokenStream;
 import edu.kit.mima.core.parsing.lang.Keyword;
 import edu.kit.mima.core.parsing.lang.Punctuation;
 import edu.kit.mima.core.token.Token;
 import edu.kit.mima.core.token.TokenType;
-import org.apache.tika.parser.txt.CharsetDetector;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,12 +31,11 @@ import java.util.Set;
  * @author Jannis Weis
  * @since 2018
  */
-public final class PreProcessor extends Processor {
+public final class PreProcessor extends Processor<Token, TokenStream> {
 
     @NotNull private final String workingDirectory;
     @NotNull private final String mimaDirectory;
     @NotNull private final StringBuilder processedInput;
-    @NotNull private final CharsetDetector charsetDetector;
     @NotNull private final Set<String> processedFiles;
     private List<ParserException> errors;
     private boolean recursive;
@@ -54,11 +53,10 @@ public final class PreProcessor extends Processor {
                         @NotNull final String workingDirectory,
                         @NotNull final String mimaDirectory,
                         final boolean recursive) {
-        super(inputString);
+        super(new TokenStream(inputString));
         this.workingDirectory = workingDirectory;
         this.mimaDirectory = mimaDirectory;
         this.processedInput = new StringBuilder(inputString);
-        this.charsetDetector = new CharsetDetector();
         this.processedFiles = new HashSet<>();
         this.errors = new ArrayList<>();
         this.recursive = recursive;
@@ -78,11 +76,10 @@ public final class PreProcessor extends Processor {
                          @NotNull final String workingDirectory,
                          @NotNull final String mimaDirectory,
                          final boolean isHome) {
-        super(inputString);
+        super(new TokenStream(inputString));
         this.workingDirectory = workingDirectory;
         this.mimaDirectory = mimaDirectory;
         this.processedInput = new StringBuilder(inputString);
-        this.charsetDetector = new CharsetDetector();
         this.processedFiles = processedFiles;
         this.isHome = isHome;
         this.errors = new ArrayList<>();
@@ -228,4 +225,8 @@ public final class PreProcessor extends Processor {
         return newPath.toString();
     }
 
+    @Override
+    protected Token parseDelimiter() {
+        return input.next();
+    }
 }

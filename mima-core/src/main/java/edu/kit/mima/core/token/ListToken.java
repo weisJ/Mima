@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -17,43 +17,41 @@ import java.util.stream.Stream;
  * @author Jannis Weis
  * @since 2018
  */
-public class ArrayToken<T> extends FileObjectAdapter implements Token<T[]> {
+public class ListToken<T> extends FileObjectAdapter implements Token<List<T>> {
 
     private static final Pattern INDENT = Pattern.compile("\n");
     private static final String INDENT_REPLACEMENT = "\n\t";
     @NotNull private final String className;
     private final int filePos;
     private final int index;
-    private final T[] values;
+    private final List<T> values;
 
     /**
      * Token that holds an array of values.
      *
-     * @param values  array
+     * @param values  list of values
      * @param index   index
      * @param filePos position inf file
      */
-    public ArrayToken(@NotNull final T[] values, final int index, final int filePos) {
+    public ListToken(@NotNull final List<T> values, final int index, final int filePos) {
         this.values = values;
         this.index = index;
         this.filePos = filePos;
-        className = values.getClass()
-                .getSimpleName()
-                .substring(0, values.getClass().getSimpleName().length() - 2);
+        className = values.isEmpty() ? "" : values.get(0).getClass().getSimpleName();
     }
 
     /**
      * Token that holds an array of values.
      *
-     * @param values array
+     * @param values list of values
      */
-    public ArrayToken(@NotNull final T[] values) {
+    public ListToken(@NotNull final List<T> values) {
         this(values, -1, -1);
     }
 
     @NotNull
     @Override
-    public T[] getValue() {
+    public List<T> getValue() {
         return values;
     }
 
@@ -66,8 +64,8 @@ public class ArrayToken<T> extends FileObjectAdapter implements Token<T[]> {
     @Override
     @SuppressWarnings("unchecked")
     public Stream<Token> stream(boolean includeChildren) {
-        if (includeChildren && values.length > 0 && values[0] instanceof Token) {
-            return Arrays.stream(values).flatMap(t -> ((Token) t).stream());
+        if (includeChildren && !values.isEmpty() && values.get(0) instanceof Token) {
+            return values.stream().flatMap(t -> ((Token) t).stream());
         } else {
             return Stream.of(this);
         }
@@ -86,23 +84,24 @@ public class ArrayToken<T> extends FileObjectAdapter implements Token<T[]> {
     @NotNull
     @Override
     public String toString() {
-        return "[type=array, data=" + className + "] {\n\t"
-                + Arrays.stream(values)
+        return "[type=list, data=" + className + "] {\n\t"
+                + values.stream()
                 .map(t -> INDENT.matcher(t.toString()).replaceAll(INDENT_REPLACEMENT))
                 .collect(Collectors.joining("\n"))
                 + "\n}";
     }
 
+    @SuppressWarnings("unchecked")
     @NotNull
     @Override
     public String simpleName() {
-        if (values.length > 0 && values[0] instanceof Token) {
-            final Token[] tokens = (Token[]) values;
-            return '(' + Arrays.stream(tokens)
-                    .map(Token::simpleName).collect(Collectors.joining(", ")) + ')';
+        if (!values.isEmpty() && values.get(0) instanceof Token) {
+            final List<Token> tokens = (List<Token>) values;
+            return '(' + tokens.stream().map(Token::simpleName)
+                    .collect(Collectors.joining(", ")) + ')';
         } else {
-            return '(' + Arrays.stream(values)
-                    .map(Object::toString).collect(Collectors.joining(", ")) + ')';
+            return '(' + values.stream().map(Object::toString)
+                    .collect(Collectors.joining(", ")) + ')';
         }
     }
 
@@ -115,13 +114,13 @@ public class ArrayToken<T> extends FileObjectAdapter implements Token<T[]> {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final ArrayToken<?> that = (ArrayToken<?>) obj;
-        return Arrays.equals(values, that.values)
+        final ListToken<?> that = (ListToken<?>) obj;
+        return values.equals(that.values)
                 && Objects.equals(className, that.className);
     }
 
     @Override
     public int hashCode() {
-        return className.hashCode() + Arrays.hashCode(values);
+        return className.hashCode() + values.hashCode();
     }
 }
