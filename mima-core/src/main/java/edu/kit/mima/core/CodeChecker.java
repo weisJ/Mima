@@ -37,9 +37,7 @@ public final class CodeChecker {
         if (token == null) {
             return;
         }
-        List<String> warnings = new ArrayList<>();
-        warnings.addAll(checkReferenceDuplicates(token));
-        warnings.addAll(checkNonCalls(token));
+        List<String> warnings = new ArrayList<>(checkReferenceDuplicates(token));
         var logger = MimaCoreDefaults.getLogger();
         for (String s : warnings) {
             logger.warning(s);
@@ -79,25 +77,6 @@ public final class CodeChecker {
             final String duplicatesS = String.join(", ", duplicates);
             warnings.add("Multiple Definitions: \"" + duplicatesS + '\"');
         }
-    }
-
-    /**
-     * Search for program statements that are not function calls.
-     *
-     * @param token program token to check
-     */
-    private static List<String> checkNonCalls(final ProgramToken token) {
-        final List<Token> nonCalls = new ProgramQuery(token)
-                .whereNotEqual(Token::getType, TokenType.DEFINITION)
-                .and()
-                .whereNotEqual(Token::getType, TokenType.CONSTANT)
-                .and()
-                .whereNotEqual(Token::getType, TokenType.CALL)
-                .and()
-                .whereNotEqual(Token::getType, TokenType.JUMP_POINT).get();
-        return nonCalls.stream()
-                .map(t -> "not a function call: \"" + t.simpleName() + '\"')
-                .collect(Collectors.toList());
     }
 
     @NotNull

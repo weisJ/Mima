@@ -2,9 +2,10 @@ package edu.kit.mima.core.parsing;
 
 import edu.kit.mima.core.parsing.inputstream.CharInputStream;
 import edu.kit.mima.core.parsing.inputstream.TokenStream;
-import edu.kit.mima.core.token.ArrayToken;
+import edu.kit.mima.core.token.ListToken;
 import edu.kit.mima.core.token.Token;
 import edu.kit.mima.core.token.TokenType;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,64 +19,89 @@ import java.util.function.Supplier;
  * @author Jannis Weis
  * @since 2018
  */
-public abstract class Processor {
+public abstract class Processor<T extends Token, K extends TokenStream> {
 
     @NotNull
-    protected final TokenStream input;
+    protected final K input;
 
-    public Processor(final String input) {
-        this.input = new TokenStream(input);
+    @Contract(pure = true)
+    public Processor(@NotNull final K input) {
+        this.input = input;
     }
 
     /**
      * Cause an unexpected token error to happen.
      */
-    protected @Nullable Token unexpected() {
+    protected @Nullable T unexpected() {
         return input.error("Unexpected token: " + input.peek());
     }
 
     /**
-     * Return expressions contained in the delimiters as ArrayToken.
+     * Return expressions contained in the delimiters as ListToken.
      *
-     * @param start     start character (empty char if no begin is defined)
-     * @param stop      stop character
-     * @param separator separation character
-     * @param parser    function to parse tokens in between of separator
-     * @param skipLast  whether the stop delimiter should be skipped
-     * @return Expressions in ArrayToken
+     * @param del      array with delimiters [start, stop, separator]
+     * @param parser   function to parse tokens in between of separator
+     * @param skipLast whether the stop delimiter should be skipped
+     * @return Expressions in ListToken
      */
     @NotNull
-    protected ArrayToken<Token> delimited(final char start, final char stop,
-                                          final char separator,
-                                          @NotNull final Supplier<Token> parser,
-                                          final boolean skipLast) {
-        if (start != CharInputStream.EMPTY_CHAR) {
-            skipPunctuation(start);
+    protected ListToken<T> delimited(@NotNull final char[] del,
+                                     @NotNull final Supplier<T> parser,
+                                     final boolean skipLast) {
+        return delimited(del, parser, skipLast, false);
+    }
+
+    /**
+     * Return expressions contained in the delimiters as ListToken.
+     *
+     * @param del            array with delimiters [start, stop, separator]
+     * @param parser         function to parse tokens in between of separator
+     * @param skipLast       whether the stop delimiter should be skipped
+     * @param includeSkipped whether to include the skipped tokens.
+     * @return Expressions in ListToken
+     */
+    @NotNull
+    protected ListToken<T> delimited(@NotNull final char[] del,
+                                     @NotNull final Supplier<T> parser,
+                                     final boolean skipLast,
+                                     final boolean includeSkipped) {
+        final List<T> tokens = new ArrayList<>();
+        final List<T> skips = includeSkipped ? tokens : new ArrayList<>();
+        if (del[0] != CharInputStream.EMPTY_CHAR) {
+            skips.add(parseDelimiter());
         }
-        final List<Token> tokens = new ArrayList<>();
-        boolean first = true;
-        while (!input.isEmpty()) {
-            if (isPunctuation(stop)) {
-                break;
-            }
-            if (first) {
-                first = false;
-            } else {
-                skipPunctuation(separator);
-            }
-            if (isPunctuation(stop)) {
-                break;
-            }
-            final Token token = parser.get();
-            if (token.getType() != TokenType.ERROR) {
-                tokens.add(token);
-            }
+        boolean end = parseDelimited(new char[]{del[0], del[1], CharInputStream.EMPTY_CHAR},
+                                     parser, tokens, skips);
+        while (!end && !input.isEmpty()) {
+            end = parseDelimited(del, parser, tokens, skips);
         }
         if (skipLast) {
-            skipPunctuation(stop);
+            skips.add(parseDelimiter());
         }
-        return new ArrayToken<>(tokens.toArray(new Token[0]));
+        return new ListToken<>(tokens);
     }
+
+    private boolean parseDelimited(@NotNull final char[] del,
+                                   @NotNull final Supplier<T> parser,
+                                   final List<T> tokenList,
+                                   final List<T> skipList) {
+        if (!isPunctuation(del[1])
+                && (del[2] == CharInputStream.EMPTY_CHAR || isPunctuation(del[2]))) {
+            if (del[2] != CharInputStream.EMPTY_CHAR) {
+                skipList.add(parseDelimiter());
+            }
+            if (!isPunctuation(del[1])) {
+                final T token = parser.get();
+                if (token.getType() != TokenType.ERROR) {
+                    tokenList.add(token);
+                }
+                return false;
+            }
+        }
+        return true;
+    }
+
+    protected abstract T parseDelimiter();
 
     /**
      * Returns whether current token is of the given punctuation.

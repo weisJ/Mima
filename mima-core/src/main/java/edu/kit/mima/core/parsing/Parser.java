@@ -3,6 +3,7 @@ package edu.kit.mima.core.parsing;
 import edu.kit.mima.api.util.Tuple;
 import edu.kit.mima.api.util.ValueTuple;
 import edu.kit.mima.core.parsing.inputstream.CharInputStream;
+import edu.kit.mima.core.parsing.inputstream.TokenStream;
 import edu.kit.mima.core.parsing.lang.Keyword;
 import edu.kit.mima.core.parsing.lang.Punctuation;
 import edu.kit.mima.core.token.AtomToken;
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
 import java.util.function.Supplier;
@@ -27,7 +29,7 @@ import java.util.function.Supplier;
  * @author Jannis Weis
  * @since 2018
  */
-public final class Parser extends Processor {
+public final class Parser extends Processor<Token, TokenStream> {
 
     @NotNull private final Set<ParserException> errors;
     private boolean skipEndOfInstruction;
@@ -40,7 +42,7 @@ public final class Parser extends Processor {
      * @param input string input
      */
     public Parser(final String input) {
-        super(input);
+        super(new TokenStream(input));
         skipEndOfInstruction = true;
         errors = new HashSet<>();
         scopeIndex = -1;
@@ -182,11 +184,10 @@ public final class Parser extends Processor {
     private Token parseCall(@NotNull final Token reference) {
         final int line = input.getLine();
         return new BinaryToken<>(TokenType.CALL, reference, delimited(
-                Punctuation.OPEN_BRACKET,
-                Punctuation.CLOSED_BRACKET,
-                Punctuation.COMMA,
-                this::parseExpression,
-                true), tokenIndexStack.peek(), line);
+                new char[]{Punctuation.OPEN_BRACKET,
+                        Punctuation.CLOSED_BRACKET,
+                        Punctuation.COMMA},
+                this::parseExpression, true), tokenIndexStack.peek(), line);
     }
 
     /*
@@ -200,18 +201,16 @@ public final class Parser extends Processor {
         if (isKeyword(Keyword.CONSTANT)) {
             input.next();
             return new AtomToken<>(TokenType.CONSTANT, delimited(
-                    CharInputStream.EMPTY_CHAR,
-                    Punctuation.INSTRUCTION_END,
-                    Punctuation.COMMA,
-                    this::parseConstant,
-                    false), tokenIndexStack.peek(), input.getLine());
+                    new char[]{CharInputStream.EMPTY_CHAR,
+                            Punctuation.INSTRUCTION_END,
+                            Punctuation.COMMA},
+                    this::parseConstant, false), tokenIndexStack.peek(), input.getLine());
         }
         return new AtomToken<>(TokenType.DEFINITION, delimited(
-                CharInputStream.EMPTY_CHAR,
-                Punctuation.INSTRUCTION_END,
-                Punctuation.COMMA,
-                this::parseDefinition,
-                false), tokenIndexStack.peek(), line);
+                new char[]{CharInputStream.EMPTY_CHAR,
+                        Punctuation.INSTRUCTION_END,
+                        Punctuation.COMMA},
+                this::parseDefinition, false), tokenIndexStack.peek(), line);
     }
 
     /*
@@ -247,5 +246,11 @@ public final class Parser extends Processor {
                                      tokenIndexStack.peek(), line);
         }
         return input.error("expected identifier");
+    }
+
+    @Override
+    protected Token parseDelimiter() {
+        return Optional.ofNullable(input.peek()).map(t -> t.getType() == TokenType.PUNCTUATION)
+                .orElse(false) ? input.next() : new EmptyToken();
     }
 }

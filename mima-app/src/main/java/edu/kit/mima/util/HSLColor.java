@@ -4,6 +4,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.Color;
+import java.util.function.Function;
 
 /**
  * The HSLColor class provides methods to manipulate HSL (Hue, Saturation Luminance) values to
@@ -95,18 +96,18 @@ public class HSLColor {
     public static float[] fromRGB(@NotNull final Color color) {
         // Get RGB values in the range 0 - 1
         final float[] rgb = color.getRGBColorComponents(null);
-        final int r = (int) rgb[0];
-        final int g = (int) rgb[1];
-        final int b = (int) rgb[2];
+        final float r = rgb[0];
+        final float g = rgb[1];
+        final float b = rgb[2];
         // Minimum and Maximum RGB values are used in the HSL calculations
         final float min = Math.min(r, Math.min(g, b));
         final float max = Math.max(r, Math.max(g, b));
-        final float hue;
+        float hue = 0;
         if (max == r) {
             hue = ((60 * (g - b) / (max - min)) + 360) % 360;
         } else if (max == g) {
             hue = (60 * (b - r) / (max - min)) + 120;
-        } else {
+        } else if (max == b) {
             hue = (60 * (r - g) / (max - min)) + 240;
         }
         final float luminance = (max + min) / 2;
@@ -182,7 +183,7 @@ public class HSLColor {
 
         final float q = luminance < 0.5
                 ? luminance * (1 + saturation)
-                : (l + saturation) - (saturation * luminance);
+                : (luminance + saturation) - (saturation * luminance);
         final float p = 2 * luminance - q;
 
         final float r = Math.min(Math.max(0, hueToRGB(p, q, hue + (1.0f / 3.0f))), 1.0f);
@@ -274,7 +275,7 @@ public class HSLColor {
      */
     @NotNull
     public HSLColor adjustShade(final float percent) {
-        return adjustTone(-1 * percent);
+        return adjustLuminancePercent(-1 * percent, x -> Math.max(0.0f, x));
     }
 
     /**
@@ -286,9 +287,14 @@ public class HSLColor {
      */
     @NotNull
     public HSLColor adjustTone(final float percent) {
-        final float multiplier = (100.0f + percent) / 100.0f;
-        final float l = Math.min(100.0f, hsl[2] * multiplier);
+        return adjustLuminancePercent(percent, x -> Math.min(100.0f, x));
+    }
 
+    @NotNull
+    private HSLColor adjustLuminancePercent(final float percent,
+                                            @NotNull final Function<Float, Float> capFunction) {
+        final float multiplier = (100.0f + percent) / 100.0f;
+        final float l = capFunction.apply(hsl[2] * multiplier);
         return new HSLColor(toRGB(hsl[0], hsl[1], l, alpha));
     }
 
