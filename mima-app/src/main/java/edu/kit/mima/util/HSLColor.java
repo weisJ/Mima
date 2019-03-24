@@ -93,48 +93,33 @@ public class HSLColor {
     @NotNull
     @Contract("_ -> new")
     public static float[] fromRGB(@NotNull final Color color) {
-        //  Get RGB values in the range 0 - 1
-
+        // Get RGB values in the range 0 - 1
         final float[] rgb = color.getRGBColorComponents(null);
-        final float r = rgb[0];
-        final float g = rgb[1];
-        final float b = rgb[2];
-
-        //    Minimum and Maximum RGB values are used in the HSL calculations
+        final int r = (int) rgb[0];
+        final int g = (int) rgb[1];
+        final int b = (int) rgb[2];
+        // Minimum and Maximum RGB values are used in the HSL calculations
         final float min = Math.min(r, Math.min(g, b));
         final float max = Math.max(r, Math.max(g, b));
-
-        //  Calculate the Hue
-
-        float h = 0;
-
-        if (max == min) {
-            h = 0;
-        } else if (max == r) {
-            h = ((60 * (g - b) / (max - min)) + 360) % 360;
+        final float hue;
+        if (max == r) {
+            hue = ((60 * (g - b) / (max - min)) + 360) % 360;
         } else if (max == g) {
-            h = (60 * (b - r) / (max - min)) + 120;
-        } else if (max == b) {
-            h = (60 * (r - g) / (max - min)) + 240;
-        }
-
-        //  Calculate the Luminance
-
-        final float l = (max + min) / 2;
-
-        //  Calculate the Saturation
-
-        final float s;
-
-        if (max == min) {
-            s = 0;
-        } else if (l <= .5f) {
-            s = (max - min) / (max + min);
+            hue = (60 * (b - r) / (max - min)) + 120;
         } else {
-            s = (max - min) / (2 - max - min);
+            hue = (60 * (r - g) / (max - min)) + 240;
         }
+        final float luminance = (max + min) / 2;
 
-        return new float[]{h, s * 100, l * 100};
+        final float saturation;
+        if (max == min) {
+            saturation = 0;
+        } else if (luminance <= .5f) {
+            saturation = (max - min) / (max + min);
+        } else {
+            saturation = (max - min) / (2 - max - min);
+        }
+        return new float[]{hue, saturation * 100, luminance * 100};
     }
 
     /**
@@ -188,7 +173,26 @@ public class HSLColor {
      */
     @NotNull
     @Contract("_, _, _, _ -> new")
-    public static Color toRGB(float h, float s, float l, final float alpha) {
+    public static Color toRGB(final float h, final float s, final float l, final float alpha) {
+        checkParameters(s, l, alpha);
+        //  Formula needs all values between 0 - 1.
+        final float hue = (h % 360.0f) / 360.0f;
+        final float saturation = s / 100f;
+        final float luminance = l / 100f;
+
+        final float q = luminance < 0.5
+                ? luminance * (1 + saturation)
+                : (l + saturation) - (saturation * luminance);
+        final float p = 2 * luminance - q;
+
+        final float r = Math.min(Math.max(0, hueToRGB(p, q, hue + (1.0f / 3.0f))), 1.0f);
+        final float g = Math.min(Math.max(0, hueToRGB(p, q, hue)), 1.0f);
+        final float b = Math.min(Math.max(0, hueToRGB(p, q, hue - (1.0f / 3.0f))), 1.0f);
+
+        return new Color(r, g, b, alpha);
+    }
+
+    private static void checkParameters(final float s, final float l, final float alpha) {
         if (s < 0.0f || s > 100.0f) {
             final String message = "Color parameter outside of expected range - Saturation";
             throw new IllegalArgumentException(message);
@@ -203,33 +207,6 @@ public class HSLColor {
             final String message = "Color parameter outside of expected range - Alpha";
             throw new IllegalArgumentException(message);
         }
-
-        //  Formula needs all values between 0 - 1.
-
-        h %= 360.0f;
-        h /= 360f;
-        s /= 100f;
-        l /= 100f;
-
-        final float q;
-
-        if (l < 0.5) {
-            q = l * (1 + s);
-        } else {
-            q = (l + s) - (s * l);
-        }
-
-        final float p = 2 * l - q;
-
-        float r = Math.max(0, hueToRGB(p, q, h + (1.0f / 3.0f)));
-        float g = Math.max(0, hueToRGB(p, q, h));
-        float b = Math.max(0, hueToRGB(p, q, h - (1.0f / 3.0f)));
-
-        r = Math.min(r, 1.0f);
-        g = Math.min(g, 1.0f);
-        b = Math.min(b, 1.0f);
-
-        return new Color(r, g, b, alpha);
     }
 
     @Contract(pure = true)
@@ -297,10 +274,7 @@ public class HSLColor {
      */
     @NotNull
     public HSLColor adjustShade(final float percent) {
-        final float multiplier = (100.0f - percent) / 100.0f;
-        final float l = Math.max(0.0f, hsl[2] * multiplier);
-
-        return new HSLColor(toRGB(hsl[0], hsl[1], l, alpha));
+        return adjustTone(-1 * percent);
     }
 
     /**
@@ -387,9 +361,6 @@ public class HSLColor {
 
     @NotNull
     public String toString() {
-        return "HSLColor[h=" + hsl[0]
-                + ",s=" + hsl[1]
-                + ",l=" + hsl[2]
-                + ",alpha=" + alpha + "]";
+        return "HSLColor[h=" + hsl[0] + ",s=" + hsl[1] + ",l=" + hsl[2] + ",alpha=" + alpha + "]";
     }
 }
