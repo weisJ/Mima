@@ -1,5 +1,6 @@
 package edu.kit.mima.gui.components;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.BasicStroke;
@@ -31,7 +32,6 @@ public class TextBubbleBorder extends AbstractBorder {
     private int radius;
     private int pointerSize;
     private BasicStroke stroke;
-    private int strokePad;
     private double pointerPadPercent = 0.5;
 
 
@@ -41,7 +41,7 @@ public class TextBubbleBorder extends AbstractBorder {
      * @param color color of border
      */
     public TextBubbleBorder(final Color color) {
-        this(color, 2, 4, 0);
+        this(color, 2, 4, 5);
     }
 
     /**
@@ -131,7 +131,6 @@ public class TextBubbleBorder extends AbstractBorder {
     public TextBubbleBorder setThickness(final int n) {
         thickness = n < 0 ? 0 : n;
         stroke = new BasicStroke(thickness);
-        strokePad = thickness / 2;
         return setPointerSize(pointerSize);
     }
 
@@ -174,33 +173,20 @@ public class TextBubbleBorder extends AbstractBorder {
     @NotNull
     public TextBubbleBorder setPointerSize(final int size) {
         pointerSize = size < 0 ? 0 : size;
-        final int pad = radius / 2 + strokePad;
-        final int pointerSidePad = pad + pointerSize + strokePad;
+        final int pad = radius / 2 + thickness;
+        final int pointerSidePad = pad + pointerSize + thickness;
         int left = pad;
         int right = pad;
         int bottom = pad;
         int top = pad;
 
         switch (pointerSide) {
-            case NORTH:
-            case NORTH_WEST:
-            case NORTH_EAST:
-                top = pointerSidePad;
-                break;
-            case WEST:
-                left = pointerSidePad;
-                break;
-            case EAST:
-                right = pointerSidePad;
-                break;
-            case SOUTH:
-            case SOUTH_WEST:
-            case SOUTH_EAST:
-                bottom = pointerSidePad;
-                break;
-            case CENTER:
-            default:
-                break;
+            case NORTH, NORTH_WEST, NORTH_EAST -> top = pointerSidePad;
+            case SOUTH, SOUTH_WEST, SOUTH_EAST -> bottom = pointerSidePad;
+            case WEST -> left = pointerSidePad;
+            case EAST -> right = pointerSidePad;
+            default -> {
+            }
         }
         insets.set(top, left, bottom, right);
         return this;
@@ -246,17 +232,11 @@ public class TextBubbleBorder extends AbstractBorder {
                             final int x, final int y, final int width, final int height) {
         final Graphics2D g2 = (Graphics2D) g;
         var bubble = calculateBubbleRect(width, height);
-        final int pointerPad;
-
-        if (pointerSide == Alignment.WEST || pointerSide == Alignment.EAST) {
-            pointerPad = pointerSize
-                    + (int) (pointerPadPercent * (height - radius * 2 - 3 * pointerSize));
-        } else if (pointerSide == Alignment.CENTER) {
-            pointerPad = 0;
-        } else {
-            pointerPad = pointerSize
-                    + (int) (pointerPadPercent * (width - radius * 2 - 3 * pointerSize));
-        }
+        final int pointerPad = switch (pointerSide) {
+            case WEST, EAST -> (int) (pointerPadPercent * (height - 2 * radius - 5 * pointerSize));
+            case CENTER -> 0;
+            default -> (int) (pointerPadPercent * (width - 2 * radius - 5 * pointerSize));
+        };
         final Polygon pointer = creatPointerShape(width, height, pointerPad, bubble);
         final Area area = new Area(bubble);
         area.add(new Area(pointer));
@@ -269,76 +249,60 @@ public class TextBubbleBorder extends AbstractBorder {
         g2.draw(area);
     }
 
+    @NotNull
+    @Contract("_, _ -> new")
     private RoundRectangle2D.Double calculateBubbleRect(final int width, final int height) {
-        final RoundRectangle2D.Double bubble;
-        int rx;
-        int ry;
-        int rw;
-        int rh;
-        rx = ry = strokePad;
-        rw = width - thickness;
-        rh = height - thickness;
+        int rx = thickness;
+        int ry = thickness;
+        int rw = width - thickness;
+        int rh = height - thickness;
         switch (pointerSide) {
-            case WEST:
+            case WEST -> {
                 rx += pointerSize;
-                /*fallthrough*/
-            case EAST:
                 rw -= pointerSize;
-                break;
-            case NORTH:
-            case NORTH_WEST:
-            case NORTH_EAST:
+            }
+            case EAST -> rw -= pointerSize;
+            case NORTH, NORTH_WEST, NORTH_EAST -> {
                 ry += pointerSize;
-                /*fallthrough*/
-            case SOUTH:
-            case SOUTH_WEST:
-            case SOUTH_EAST:
                 rh -= pointerSize;
-                break;
-            case CENTER:
-                break;
-            default:
-                break;
+            }
+            case SOUTH, SOUTH_WEST, SOUTH_EAST -> rh -= pointerSize;
+            default -> {
+            }
         }
-        bubble = new RoundRectangle2D.Double(rx, ry, rw, rh, radius, radius);
-        return bubble;
+        return new RoundRectangle2D.Double(rx, ry, rw, rh, radius, radius);
     }
 
     private Polygon creatPointerShape(final int width, final int height,
                                       final int pointerPad, final RoundRectangle2D.Double bubble) {
-        final int basePad = strokePad + radius + pointerPad;
+        final int basePad = 2 * pointerSize + thickness + radius + pointerPad;
         final int widthPad = pointerSize / 2;
-
         final Polygon pointer = new Polygon();
         switch (pointerSide) {
-            case WEST:
+            case WEST -> {
                 pointer.addPoint((int) bubble.x, basePad - widthPad);// top
                 pointer.addPoint((int) bubble.x, basePad + pointerSize + widthPad);// bottom
-                pointer.addPoint(strokePad, basePad + pointerSize / 2);
-                break;
-            case EAST:
-                pointer.addPoint((int) bubble.width, basePad - widthPad);// top
-                pointer.addPoint((int) bubble.width, basePad + pointerSize + widthPad);// bottom
-                pointer.addPoint(width - strokePad, basePad + pointerSize / 2);
-                break;
-            case NORTH_WEST:
-            case NORTH_EAST:
-            case NORTH:
+                pointer.addPoint(thickness, basePad + pointerSize / 2);
+            }
+            case EAST -> {
+                int x = (int) (bubble.x + bubble.width);
+                pointer.addPoint(x, basePad - widthPad);// top
+                pointer.addPoint(x, basePad + pointerSize + widthPad);// bottom
+                pointer.addPoint(width - thickness, basePad + pointerSize / 2);
+            }
+            case NORTH, NORTH_WEST, NORTH_EAST -> {
                 pointer.addPoint(basePad - widthPad, (int) bubble.y);// left
                 pointer.addPoint(basePad + pointerSize + widthPad, (int) bubble.y);// right
-                pointer.addPoint(basePad + (pointerSize / 2), strokePad);
-                break;
-            case SOUTH_WEST:
-            case SOUTH_EAST:
-            case SOUTH:
-                pointer.addPoint(basePad - widthPad, (int) bubble.height);// left
-                pointer.addPoint(basePad + pointerSize + widthPad, (int) bubble.height);// right
-                pointer.addPoint(basePad + (pointerSize / 2), height - strokePad);
-                break;
-            case CENTER:
-                break;
-            default:
-                break;
+                pointer.addPoint(basePad + (pointerSize / 2), thickness);
+            }
+            case SOUTH, SOUTH_WEST, SOUTH_EAST -> {
+                int y = (int) (bubble.y + bubble.height);
+                pointer.addPoint(basePad - widthPad, y);// left
+                pointer.addPoint(basePad + pointerSize + widthPad, y);// right
+                pointer.addPoint(basePad + (pointerSize / 2), height - thickness);
+            }
+            default -> {
+            }
         }
         return pointer;
     }
