@@ -238,12 +238,8 @@ public class Environment {
      * @param function function body
      */
     public void defineFunction(final String name, final Instruction function) {
-        if (functions.containsKey(name)) {
-            throw new IllegalArgumentException("function: \""
-                                                       + name
-                                                       + "\" already defined in scope");
-        }
-        functions.put(name, function);
+        define(name, function, functions, List.of(functions));
+
     }
 
     /**
@@ -253,12 +249,7 @@ public class Environment {
      * @param value value
      */
     public void defineVariable(final String name, final MachineWord value) {
-        if (variables.containsKey(name) || constants.containsKey(name)) {
-            throw new IllegalArgumentException("reference: \""
-                                                       + name
-                                                       + "\" already defined in scope");
-        }
-        variables.put(name, value);
+        define(name, value, variables, List.of(variables, constants));
     }
 
     /**
@@ -268,12 +259,7 @@ public class Environment {
      * @param value value
      */
     public void defineConstant(final String name, final MachineWord value) {
-        if (variables.containsKey(name) || constants.containsKey(name)) {
-            throw new IllegalArgumentException("reference: \""
-                                                       + name
-                                                       + "\" already defined in scope");
-        }
-        constants.put(name, value);
+        define(name, value, constants, List.of(variables, constants));
     }
 
     /**
@@ -283,10 +269,29 @@ public class Environment {
      * @param index index of expression in Environment
      */
     public void defineJump(final String name, final Integer index) {
-        if (jumps.containsKey(name)) {
-            throw new IllegalArgumentException("jump: \"" + name + "\" already defined in scope");
+        define(name, index, jumps, List.of(jumps));
+    }
+
+    /**
+     * Define a value.
+     *
+     * @param key       key to define.
+     * @param value     value for key.
+     * @param putMap    map to put value in.
+     * @param checkMaps maps to check if key is already defined.
+     * @param <T>       Type of key
+     * @param <K>       Type of value.
+     */
+    private <T, K> void define(final T key, final K value,
+                               @NotNull final Map<T, K> putMap,
+                               @NotNull final List<Map<T, K>> checkMaps) {
+        for (var m : checkMaps) {
+            if (m.containsKey(key)) {
+                throw new IllegalArgumentException(
+                        "\"" + key.toString() + "\" already defined in scope");
+            }
         }
-        jumps.put(name, index);
+        putMap.put(key, value);
     }
 
     /**

@@ -61,11 +61,7 @@ public final class CodeChecker {
                 .stream()
                 .map(t -> ((Token<Token>) t).getValue().getValue().toString())
                 .collect(Collectors.toList());
-        Set<String> duplicates = findDuplicates(referencesJump);
-        if (!duplicates.isEmpty()) {
-            final String duplicatesS = String.join(", ", duplicates);
-            warnings.add("Multiple Jump Definitions: \"" + duplicatesS + '\"');
-        }
+        addWarnings(warnings, referencesJump);
         final List<String> referencesVar = query
                 .whereEqual(Token::getType, TokenType.CONSTANT)
                 .or()
@@ -73,12 +69,16 @@ public final class CodeChecker {
                 .stream()
                 .map(t -> ((Token<Token>) t).getValue().getValue().toString())
                 .collect(Collectors.toList());
-        duplicates = findDuplicates(referencesVar);
+        addWarnings(warnings, referencesVar);
+        return warnings;
+    }
+
+    private static void addWarnings(final List<String> warnings, final List<String> checkList) {
+        Set<String> duplicates = findDuplicates(checkList);
         if (!duplicates.isEmpty()) {
             final String duplicatesS = String.join(", ", duplicates);
-            warnings.add("Multiple Reference Definitions: \"" + duplicatesS + '\"');
+            warnings.add("Multiple Definitions: \"" + duplicatesS + '\"');
         }
-        return warnings;
     }
 
     /**
