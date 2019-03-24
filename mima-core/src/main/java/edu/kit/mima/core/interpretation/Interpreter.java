@@ -53,6 +53,7 @@ public class Interpreter {
      * @param debugController  the debug controller
      * @param exceptionHandler the exception listener
      */
+    @Contract(pure = true)
     public Interpreter(final int wordLength,
                        final DebugController debugController,
                        final ExceptionHandler exceptionHandler) {
@@ -110,46 +111,31 @@ public class Interpreter {
                           @NotNull final Consumer<Value> callback) throws Continuation {
         stackGuard.guard(() -> evaluate(expression, environment, callback));
         switch (expression.getType()) {
-            case PROGRAM:
-                /*
-                 * Subprograms need to have own scope for variable shadowing.
-                 */
+            case PROGRAM -> {
                 final ProgramToken programToken = (ProgramToken) expression;
                 final Environment scope = environment.extend(programToken);
                 scope.setReservedIndex(environment.getReservedIndex());
                 programToken.getJumps().forEach((t, i) -> scope
                         .defineJump(t.getValue().toString(), i));
                 evaluateProgram(programToken, scope, callback);
-                break;
-            case NUMBER:
-                callback.accept(evaluateNumber((String) expression.getValue()));
-                break;
-            case EMPTY:
-                callback.accept(VOID);
-                break;
-            case BINARY:
-                callback.accept(evaluateBinary((String) expression.getValue()));
-                break;
-            case IDENTIFICATION:
-                callback.accept(evaluateIdentification(expression, environment));
-                break;
-            case DEFINITION:
+            }
+            case DEFINITION -> {
                 final var defToken = (ArrayToken<Token>) expression.getValue();
                 evaluateDefinition(defToken, environment, callback);
-                break;
-            case CONSTANT:
+            }
+            case CONSTANT -> {
                 final var constToken = (ArrayToken<Token>) expression.getValue();
                 evaluateConstant(constToken, environment, callback);
-                break;
-            case CALL:
-                evaluateFunction((BinaryToken<Token, ArrayToken<Token>>) expression,
-                                 environment, callback);
-                break;
-            case JUMP_POINT:
-                evaluate(((Tuple<Token, Token>) expression).getSecond(), environment, callback);
-                break;
-            default:
-                fail("Can't evaluate: " + expression);
+            }
+            case NUMBER -> callback.accept(evaluateNumber((String) expression.getValue()));
+            case EMPTY -> callback.accept(VOID);
+            case BINARY -> callback.accept(evaluateBinary((String) expression.getValue()));
+            case IDENTIFICATION -> callback.accept(evaluateIdentification(expression, environment));
+            case CALL -> evaluateFunction((BinaryToken<Token, ArrayToken<Token>>) expression,
+                                          environment, callback);
+            case JUMP_POINT -> evaluate(((Tuple<Token, Token>) expression).getSecond(),
+                                        environment, callback);
+            default -> fail("Can't evaluate: " + expression);
         }
     }
 
@@ -172,9 +158,8 @@ public class Interpreter {
                 return;
             }
             if (i < tokens.length) {
-                currentToken = tokens[i];
                 if (i != startIndex || !(environment instanceof GlobalEnvironment)) {
-                    debugController.afterInstruction(currentToken);
+                    debugController.afterInstruction(tokens[i]);
                 }
                 environment.setExpressionIndex(i);
                 currentToken = tokens[i];
@@ -199,22 +184,19 @@ public class Interpreter {
                 if (definition.getSecond().getType() == TokenType.EMPTY) {
                     environment.defineVariable(
                             definition.getFirst().getValue().toString(),
-                            evaluateNumber(String.valueOf(env.getReservedIndex())).getValue()
-                    );
+                            evaluateNumber(String.valueOf(env.getReservedIndex())).getValue());
                     env.setReservedIndex(env.getReservedIndex() - 1);
                     func.accept(environment, i + 1);
                 } else {
                     evaluate(definition.getSecond(), environment, v -> {
-                        if (Objects.equals(v, VOID)) {
+                        if (VOID == v) {
                             fail("Not a definition body: " + definition.getSecond());
                         }
                         if (((MachineWord) v.getValue()).intValue() < 0) {
                             fail("Can't have negative memory references");
                         }
-                        environment.defineVariable(
-                                definition.getFirst().getValue().toString(),
-                                (MachineWord) v.getValue()
-                        );
+                        environment.defineVariable(definition.getFirst().getValue().toString(),
+                                                   (MachineWord) v.getValue());
                         func.accept(environment, i + 1);
                     });
                 }

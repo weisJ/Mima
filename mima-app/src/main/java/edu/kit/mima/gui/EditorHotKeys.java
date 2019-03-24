@@ -6,6 +6,7 @@ import edu.kit.mima.formatter.MimaFormatter;
 import edu.kit.mima.gui.components.editor.Editor;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -75,17 +76,13 @@ public enum EditorHotKeys implements Action {
     ZOOM_IN("control PLUS") {
         @Override
         public void actionPerformed(final ActionEvent e) {
-            final Font font = pref.readFont(PropertyKey.EDITOR_FONT);
-            final Font newFont = font.deriveFont((float) font.getSize() + 1);
-            pref.saveFont(PropertyKey.EDITOR_FONT, newFont);
+            changeFontSize(1);
         }
     },
     ZOOM_OUT("control MINUS") {
         @Override
         public void actionPerformed(final ActionEvent e) {
-            final Font font = pref.readFont(PropertyKey.EDITOR_FONT);
-            final Font newFont = font.deriveFont((float) font.getSize() - 1);
-            pref.saveFont(PropertyKey.EDITOR_FONT, newFont);
+            changeFontSize(-1);
         }
     };
 
@@ -94,12 +91,19 @@ public enum EditorHotKeys implements Action {
     private static Editor editor;
     private final String accelerator;
 
+    @Contract(pure = true)
     EditorHotKeys(final String accelerator) {
         this.accelerator = accelerator;
     }
 
     public static void setEditor(final Editor editor) {
         EditorHotKeys.editor = editor;
+    }
+
+    protected void changeFontSize(int increment) {
+        final Font font = pref.readFont(PropertyKey.EDITOR_FONT);
+        final Font newFont = font.deriveFont((float) font.getSize() + increment);
+        pref.saveFont(PropertyKey.EDITOR_FONT, newFont);
     }
 
     public String getAccelerator() {

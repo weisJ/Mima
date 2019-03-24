@@ -14,6 +14,7 @@ import edu.kit.mima.core.token.TokenType;
 import org.apache.tika.parser.txt.CharsetDetector;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.Point;
 import java.io.File;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -98,24 +100,28 @@ public final class PreProcessor extends Processor {
         errors = new ArrayList<>();
         errors.addAll(skipError());
         while (!input.isEmpty()) {
-            final int index = input.getPosition();
-            try {
-                if (isPunctuation(Punctuation.PRE_PROC)) {
-                    input.next();
-                    deleteRanges.add(processStatement(index - 1));
-                } else {
-                    input.next();
-                }
-            } catch (@NotNull final ParserException e) {
-                errors.add(e);
-                deleteRanges.add(new Point(index - 1, input.getPosition() - 1));
-            }
+            Optional.ofNullable(processCurrent()).ifPresent(deleteRanges::add);
         }
         deleteRanges.sort((p, q) -> Integer.compare(q.y, p.y));
         for (final Point p : deleteRanges) {
             processedInput.delete(p.x, p.y);
         }
         return new ValueTuple<>(processedInput.toString(), errors);
+    }
+
+    private @Nullable Point processCurrent() {
+        final int index = input.getPosition();
+        Point p = null;
+        try {
+            if (isPunctuation(Punctuation.PRE_PROC)) {
+                p = processStatement(index - 1);
+            }
+            input.next();
+        } catch (@NotNull final ParserException e) {
+            errors.add(e);
+            p = new Point(index - 1, input.getPosition() - 1);
+        }
+        return p;
     }
 
     /**
@@ -144,29 +150,17 @@ public final class PreProcessor extends Processor {
     private void processInput() {
         final Token token = input.peek();
         if (token != null && token.getType() == TokenType.STRING) {
+            input.next();
             if (!recursive) {
-                input.next();
                 return;
             }
-            input.next();
             final String path = token.getValue().toString();
             final String newPath = parseInputPath(path);
-
-            final File workingDir = new File(workingDirectory);
-            final File homeDir = new File(mimaDirectory);
             boolean success = false;
             for (final String ext : MimaConstants.EXTENSIONS) {
-                if (success) {
+                if (tryPaths(newPath, path, ext)) {
+                    success = true;
                     break;
-                }
-                success = !isHome && workingDir.exists()
-                        && tryPath(workingDir.getAbsolutePath() + newPath + '.' + ext, false);
-                if (!success) {
-                    success = homeDir.exists()
-                            && tryPath(homeDir.getAbsolutePath() + newPath + '.' + ext, true);
-                    if (!success) {
-                        success = (tryPath(path, false));
-                    }
                 }
             }
             if (!success) {
@@ -175,6 +169,16 @@ public final class PreProcessor extends Processor {
         } else {
             input.error("!input must be followed by input path");
         }
+    }
+
+    private boolean tryPaths(final String path, final String fullPath, final String extension) {
+        final File workingDir = new File(workingDirectory);
+        final File homeDir = new File(mimaDirectory);
+        return !isHome && workingDir.exists()
+                && tryPath(workingDir.getAbsolutePath() + path + '.' + extension, false)
+                || homeDir.exists()
+                && tryPath(homeDir.getAbsolutePath() + path + '.' + extension, true)
+                || tryPath(fullPath, false);
     }
 
     /**

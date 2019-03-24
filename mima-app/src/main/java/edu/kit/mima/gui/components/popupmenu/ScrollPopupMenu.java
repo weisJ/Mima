@@ -74,41 +74,46 @@ public class ScrollPopupMenu extends JPopupMenu {
             return;
         }
         if (visible) {
-            if (getInvoker() != null && !(getInvoker() instanceof JMenu)) {
-                if (getSubElements().length > 0) {
-                    final MenuElement[] menuElements = new MenuElement[2];
-                    menuElements[0] = this;
-                    menuElements[1] = getSubElements()[0];
-                    MenuSelectionManager.defaultManager().setSelectedPath(menuElements);
-                } else {
-                    final MenuElement[] menuElements = new MenuElement[1];
-                    menuElements[0] = this;
-                    MenuSelectionManager.defaultManager().setSelectedPath(menuElements);
-                }
-            }
-
-            firePopupMenuWillBecomeVisible();
-
-            Component comp = getInvoker();
-            while (comp.getParent() != null) {
-                comp = comp.getParent();
-            }
-
-            popWin = comp instanceof Window
-                    ? new JWindow((Window) comp)
-                    : new JWindow(new JFrame());
-            popWin.setLocation(posX, posY);
-
-            pack();
-            popWin.setVisible(true);
+            makeVisible();
         } else {
-            getSelectionModel().clearSelection();
-            if (popWin != null) {
-                firePopupMenuWillBecomeInvisible();
-                popWin.setVisible(false);
-                popWin = null;
-                scrollPane = null;
+            makeHidden();
+        }
+    }
+
+    private void makeVisible() {
+        Component comp = getInvoker();
+        if (comp == null) {
+            return;
+        }
+        if (!(comp instanceof JMenu)) {
+            MenuElement[] menuElements = new MenuElement[1];
+            if (getSubElements().length > 0) {
+                menuElements = new MenuElement[2];
+                menuElements[1] = getSubElements()[0];
             }
+            menuElements[0] = this;
+            MenuSelectionManager.defaultManager().setSelectedPath(menuElements);
+        }
+        firePopupMenuWillBecomeVisible();
+
+        while (comp.getParent() != null) {
+            comp = comp.getParent();
+        }
+        popWin = comp instanceof Window
+                ? new JWindow((Window) comp)
+                : new JWindow(new JFrame());
+        popWin.setLocation(posX, posY);
+        pack();
+        popWin.setVisible(true);
+    }
+
+    private void makeHidden() {
+        getSelectionModel().clearSelection();
+        if (popWin != null) {
+            firePopupMenuWillBecomeInvisible();
+            popWin.setVisible(false);
+            popWin = null;
+            scrollPane = null;
         }
     }
 
