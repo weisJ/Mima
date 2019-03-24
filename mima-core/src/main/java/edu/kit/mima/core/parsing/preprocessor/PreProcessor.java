@@ -1,5 +1,6 @@
 package edu.kit.mima.core.parsing.preprocessor;
 
+import edu.kit.mima.api.loading.IoTools;
 import edu.kit.mima.api.util.Tuple;
 import edu.kit.mima.api.util.ValueTuple;
 import edu.kit.mima.core.MimaConstants;
@@ -15,17 +16,12 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.Point;
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Preprocessor for Mima files.
@@ -193,7 +189,7 @@ public final class PreProcessor extends Processor {
             return true;
         }
         try {
-            final String file = loadFile(path);
+            final String file = IoTools.loadFile(path);
             processedFiles.add(path);
 
             processedInput.append("\n#<<File = ").append(path).append(">>#\n");
@@ -227,23 +223,5 @@ public final class PreProcessor extends Processor {
         }
         return newPath.toString();
     }
-
-    /**
-     * Load file.
-     *
-     * @param path path to file
-     * @return content of file
-     * @throws IOException if file is not found or could not be loaded
-     */
-    private String loadFile(@NotNull final String path) throws IOException {
-        final String charSet = charsetDetector
-                .setText(new BufferedInputStream(new FileInputStream(path)))
-                .detect().getName();
-        try (final BufferedReader reader = new BufferedReader(
-                new InputStreamReader(new FileInputStream(path), charSet))) {
-            return reader.lines().collect(Collectors.joining("\n"));
-        }
-    }
-
 
 }
