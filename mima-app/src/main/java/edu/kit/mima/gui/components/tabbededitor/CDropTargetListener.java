@@ -47,12 +47,9 @@ public class CDropTargetListener implements DropTargetListener {
     @Override
     public void dragOver(@NotNull final DropTargetDragEvent e) {
         tabbedPane.initTarget(e.getLocation());
-
         tabbedPane.repaint();
-        if (tabbedPane.hasGhost()) {
-            tabbedPane.glassPane.setPoint(tabbedPane.buildGhostLocation(e.getLocation()));
-            tabbedPane.glassPane.repaint();
-        }
+        tabbedPane.glassPane.setPoint(tabbedPane.buildGhostLocation(e.getLocation()));
+        tabbedPane.glassPane.repaint();
     }
 
     @Override
@@ -70,46 +67,21 @@ public class CDropTargetListener implements DropTargetListener {
     private void convertTab(@NotNull final TabTransferData transferData, int targetIndex) {
         final EditorTabbedPane source = transferData.getTabbedPane();
         final int sourceIndex = transferData.getTabIndex();
-        if (sourceIndex < 0) {
+        if (sourceIndex < 0
+                || targetIndex < 0
+                || (tabbedPane == source && sourceIndex == targetIndex)) {
             return;
         }
-
         final Component cmp = source.getComponentAt(sourceIndex);
         final String str = source.getTitleAt(sourceIndex);
         final Icon icon = source.getIconAt(sourceIndex);
         final String tooltip = source.getToolTipTextAt(sourceIndex);
-        if (tabbedPane != source) {
-            source.remove(sourceIndex);
-
-            if (targetIndex == tabbedPane.getTabCount()) {
-                tabbedPane.addTab(str, cmp);
-            } else {
-                if (targetIndex < 0) {
-                    targetIndex = 0;
-                }
-                tabbedPane.insertTab(str, icon, cmp, tooltip, targetIndex);
-            }
-            tabbedPane.setSelectedComponent(cmp);
-            return;
-        }
-
-        if (targetIndex < 0 || sourceIndex == targetIndex) {
-            return;
-        }
-
-        if (targetIndex == tabbedPane.getTabCount()) {
-            source.remove(sourceIndex);
-            tabbedPane.addTab(str, icon, cmp, tooltip);
-            tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
-        } else if (sourceIndex > targetIndex) {
-            source.remove(sourceIndex);
-            tabbedPane.insertTab(str, icon, cmp, tooltip, targetIndex);
-            tabbedPane.setSelectedIndex(targetIndex);
-        } else {
-            source.remove(sourceIndex);
-            tabbedPane.insertTab(str, icon, cmp, tooltip, targetIndex - 1);
-            tabbedPane.setSelectedIndex(targetIndex - 1);
-        }
+        int newIndex = tabbedPane == source && sourceIndex > targetIndex
+                ? targetIndex
+                : targetIndex - 1;
+        source.remove(sourceIndex);
+        tabbedPane.insertTab(str, icon, cmp, tooltip, newIndex);
+        tabbedPane.setSelectedIndex(newIndex);
     }
 
     /**
@@ -119,11 +91,8 @@ public class CDropTargetListener implements DropTargetListener {
      * @return true if target supports dragging.
      */
     public boolean isDragAcceptable(@NotNull final DropTargetDragEvent e) {
-        if (!isDoDAcceptable(e.getTransferable(), e.getCurrentDataFlavors())) {
-            return false;
-        } else {
-            return checkDropAcceptable(Objects.requireNonNull(DnDUtil.getTabTransferData(e)));
-        }
+        return isDoDAcceptable(e.getTransferable(), e.getCurrentDataFlavors(),
+                               DnDUtil.getTabTransferData(e));
     }
 
     /**
@@ -133,19 +102,19 @@ public class CDropTargetListener implements DropTargetListener {
      * @return true if target supports dropping.
      */
     public boolean isDropAcceptable(@NotNull final DropTargetDropEvent e) {
-        if (!isDoDAcceptable(e.getTransferable(), e.getCurrentDataFlavors())) {
-            return false;
-        } else {
-            return checkDropAcceptable(Objects.requireNonNull(DnDUtil.getTabTransferData(e)));
-        }
+        return isDoDAcceptable(e.getTransferable(), e.getCurrentDataFlavors(),
+                               DnDUtil.getTabTransferData(e));
     }
 
-    @Contract("null, _ -> false")
-    private boolean isDoDAcceptable(@Nullable final Transferable t, final DataFlavor[] flavor) {
-        if (t == null) {
+    @Contract("null, _, _ -> false")
+    private boolean isDoDAcceptable(@Nullable final Transferable t,
+                                    final DataFlavor[] flavor,
+                                    final TabTransferData data) {
+        if (t == null || !t.isDataFlavorSupported(flavor[0])) {
             return false;
+        } else {
+            return checkDropAcceptable(Objects.requireNonNull(data));
         }
-        return t.isDataFlavorSupported(flavor[0]);
     }
 
     private boolean checkDropAcceptable(@NotNull final TabTransferData data) {
