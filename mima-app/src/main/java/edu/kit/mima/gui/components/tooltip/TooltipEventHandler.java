@@ -77,12 +77,12 @@ public class TooltipEventHandler extends MouseAdapter {
         final MouseEvent evt = (MouseEvent) event;
         final int id = evt.getID();
         switch (id) {
-            case MouseEvent.MOUSE_PRESSED:
+            case MouseEvent.MOUSE_PRESSED -> {
                 inside = false;
                 thread.interrupt();
                 tooltipComponent.hideTooltip();
-                break;
-            case MouseEvent.MOUSE_RELEASED:
+            }
+            case MouseEvent.MOUSE_RELEASED -> {
                 //Try to show again.
                 if (inside) {
                     new Thread(() -> {
@@ -95,13 +95,16 @@ public class TooltipEventHandler extends MouseAdapter {
                         }
                     }).start();
                 }
-                break;
-            case MouseEvent.MOUSE_MOVED:
-                moved = inside || moved;
-                break;
-            default:
-                break;
+            }
+            case MouseEvent.MOUSE_MOVED -> mouseMoved(evt);
+            default -> {
+            }
         }
+    }
+
+    @Override
+    public void mouseMoved(final MouseEvent e) {
+        moved = inside || moved;
     }
 
     @Override
@@ -145,9 +148,7 @@ public class TooltipEventHandler extends MouseAdapter {
          * As entering the tooltip causes the container to think the mouse has left we need to
          * check if it really has left. If not tooltip shouldn't be hidden.
          */
-        final Point p = SwingUtilities.convertPoint(tooltipComponent.container, e.getPoint(),
-                                                    tooltipComponent.container.getParent());
-        if (tooltipComponent.container.contains(p)) {
+        if (isOnContainer(e.getPoint())) {
             propagator.mouseEntered(e);
             overContainer = true;
             moved = true;
@@ -164,6 +165,20 @@ public class TooltipEventHandler extends MouseAdapter {
             }
         }
         tooltipComponent.hideTooltip();
+    }
+
+    /*
+     * Checks if the given mouse position is inside of the container
+     */
+    private boolean isOnContainer(@NotNull final Point p) {
+        final Point point = SwingUtilities.convertPoint(tooltipComponent.container, p,
+                                                        tooltipComponent.container.getParent());
+        return point.x > tooltipComponent.container.getX()
+                && point.x < tooltipComponent.container.getX()
+                + tooltipComponent.container.getWidth()
+                && point.y > tooltipComponent.container.getY()
+                && point.y < tooltipComponent.container.getY()
+                + tooltipComponent.container.getHeight();
     }
 
     private void contentMouseMovedEvent(@NotNull final MouseEvent e) {

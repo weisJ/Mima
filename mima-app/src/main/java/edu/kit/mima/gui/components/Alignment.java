@@ -4,6 +4,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.function.BiFunction;
@@ -23,29 +24,6 @@ public enum Alignment {
         return new Point(bounds.x + bounds.width / 2 - toAlign.width / 2,
                          bounds.y - toAlign.height);
     }),
-    NORTH_EAST((toAlign, alignAt) -> {
-        return new Point(alignAt.x, alignAt.y - toAlign.height);
-    }, (toAlign, bounds) -> {
-        return new Point(bounds.x + bounds.width - toAlign.width, bounds.y);
-    }, (toAlign, bounds) -> {
-        return new Point(bounds.x + bounds.width - toAlign.width, bounds.y - toAlign.height);
-    }),
-    EAST((toAlign, alignAt) -> {
-        return new Point(alignAt.x, alignAt.y - toAlign.height / 2);
-    }, (toAlign, bounds) -> {
-        return new Point(bounds.x + bounds.width - toAlign.width,
-                         bounds.y + bounds.height / 2 - toAlign.height / 2);
-    }, (toAlign, bounds) -> {
-        return new Point(bounds.x, bounds.y + bounds.height / 2 - toAlign.height / 2);
-    }),
-    SOUTH_EAST((toAlign, alignAt) -> {
-        return new Point(alignAt.x, alignAt.y);
-    }, (toAlign, bounds) -> {
-        return new Point(bounds.x + bounds.width - toAlign.width,
-                         bounds.y + bounds.height - toAlign.height);
-    }, (toAlign, bounds) -> {
-        return new Point(bounds.x + bounds.width, bounds.y + bounds.height);
-    }),
     SOUTH((toAlign, alignAt) -> {
         return new Point(alignAt.x - toAlign.width / 2, alignAt.y);
     }, (toAlign, bounds) -> {
@@ -55,12 +33,13 @@ public enum Alignment {
         return new Point(bounds.x + bounds.width / 2 - toAlign.width / 2,
                          bounds.y + bounds.height);
     }),
-    SOUTH_WEST((toAlign, alignAt) -> {
-        return new Point(alignAt.x - toAlign.width, alignAt.y);
+    EAST((toAlign, alignAt) -> {
+        return new Point(alignAt.x, alignAt.y - toAlign.height / 2);
     }, (toAlign, bounds) -> {
-        return new Point(bounds.x, bounds.y + bounds.height - toAlign.height);
+        return new Point(bounds.x + bounds.width - toAlign.width,
+                         bounds.y + bounds.height / 2 - toAlign.height / 2);
     }, (toAlign, bounds) -> {
-        return new Point(bounds.x - toAlign.width, bounds.y + bounds.height);
+        return new Point(bounds.x, bounds.y + bounds.height / 2 - toAlign.height / 2);
     }),
     WEST((toAlign, alignAt) -> {
         return new Point(alignAt.x - toAlign.width, alignAt.y - toAlign.height / 2);
@@ -70,12 +49,34 @@ public enum Alignment {
         return new Point(bounds.x - toAlign.width,
                          bounds.y + bounds.height / 2 - toAlign.height / 2);
     }),
+    NORTH_EAST((toAlign, alignAt) -> {
+        return new Point(alignAt.x, alignAt.y - toAlign.height);
+    }, (toAlign, bounds) -> {
+        return new Point(bounds.x + bounds.width - toAlign.width, bounds.y);
+    }, (toAlign, bounds) -> {
+        return new Point(bounds.x + bounds.width - toAlign.width, bounds.y - toAlign.height);
+    }),
     NORTH_WEST((toAlign, alignAt) -> {
         return new Point(alignAt.x - toAlign.width, alignAt.y - toAlign.height);
     }, (toAlign, bounds) -> {
         return new Point(bounds.x, bounds.y);
     }, (toAlign, bounds) -> {
         return new Point(bounds.x - toAlign.width, bounds.y - toAlign.height);
+    }),
+    SOUTH_EAST((toAlign, alignAt) -> {
+        return new Point(alignAt.x, alignAt.y);
+    }, (toAlign, bounds) -> {
+        return new Point(bounds.x + bounds.width - toAlign.width,
+                         bounds.y + bounds.height - toAlign.height);
+    }, (toAlign, bounds) -> {
+        return new Point(bounds.x + bounds.width, bounds.y + bounds.height);
+    }),
+    SOUTH_WEST((toAlign, alignAt) -> {
+        return new Point(alignAt.x - toAlign.width, alignAt.y);
+    }, (toAlign, bounds) -> {
+        return new Point(bounds.x, bounds.y + bounds.height - toAlign.height);
+    }, (toAlign, bounds) -> {
+        return new Point(bounds.x - toAlign.width, bounds.y + bounds.height);
     }),
     CENTER((toAlign, alignAt) -> alignAt, (toAlign, bounds) -> {
         return new Point(bounds.x + bounds.width / 2 - toAlign.width / 2,
@@ -141,6 +142,21 @@ public enum Alignment {
             case WEST -> EAST;
             case NORTH_WEST -> SOUTH_EAST;
             case CENTER -> CENTER;
+        };
+    }
+
+    @Contract(pure = true)
+    public Insets maskInsets(@NotNull final Insets insets) {
+        return switch (this) {
+            case NORTH -> new Insets(insets.top, 0, 0, 0);
+            case NORTH_EAST -> new Insets(insets.top, 0, 0, insets.right);
+            case EAST -> new Insets(0, 0, 0, insets.right);
+            case SOUTH_EAST -> new Insets(0, 0, insets.bottom, insets.right);
+            case SOUTH -> new Insets(0, 0, insets.bottom, 0);
+            case SOUTH_WEST -> new Insets(0, insets.left, insets.bottom, 0);
+            case WEST -> new Insets(0, insets.left, 0, 0);
+            case NORTH_WEST -> new Insets(insets.top, insets.left, 0, 0);
+            case CENTER -> new Insets(0, 0, 0, 0);
         };
     }
 

@@ -4,13 +4,13 @@ import edu.kit.mima.gui.components.Alignment;
 import edu.kit.mima.gui.components.ShadowPane;
 import edu.kit.mima.gui.components.TextBubbleBorder;
 import edu.kit.mima.util.HSLColor;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Insets;
 import java.awt.Rectangle;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -45,7 +45,7 @@ public class Tooltip extends ShadowPane implements ITooltip {
 
         bubbleBorder = new TextBubbleBorder(
                 new HSLColor(textLabel.getBackground()).adjustTone(60)
-                        .getRGB()).setPointerSize(5).setThickness(1);
+                        .getRGB()).setPointerSize(10).setThickness(1);
 
         final JPanel labelPanel = new JPanel(new BorderLayout());
         labelPanel.setOpaque(false);
@@ -73,58 +73,47 @@ public class Tooltip extends ShadowPane implements ITooltip {
     @Override
     public void setAlignment(@NotNull final Alignment alignment) {
         this.alignment = alignment;
-        adjustAlignment(alignment);
         bubbleBorder.setPointerSide(alignment.opposite());
     }
 
     /*
      * Apply insets to adjust position
      */
-    private void adjustAlignment(@NotNull final Alignment alignment) {
-        final Rectangle bounds = getBounds();
-        final Insets insets = getInsets();
+    @Contract("_ -> param1")
+    private Rectangle adjustAlignment(@NotNull Rectangle bounds) {
+        final int pointerSize = bubbleBorder.getPointerSize();
         switch (alignment) {
-            case NORTH:
-                setBounds(bounds.x, bounds.y + insets.bottom,
-                          bounds.width, bounds.height);
-                break;
-            case EAST:
-                setBounds(bounds.x - insets.left, bounds.y + insets.bottom / 2,
-                          bounds.width + insets.right / 2, bounds.height);
-                break;
-            case SOUTH:
-                setBounds(bounds.x, bounds.y + insets.top,
-                          bounds.width, bounds.height);
-                break;
-            case WEST:
-                setBounds(bounds.x + insets.left / 2, bounds.y + insets.bottom / 2,
-                          bounds.width + insets.left / 2, bounds.height);
-                break;
-            case NORTH_EAST:
-                setBounds(bounds.x - insets.left - insets.right,
-                          bounds.y + insets.bottom,
-                          bounds.width, bounds.height);
-                bubbleBorder.setPointerPadPercent(0);
-                break;
-            case SOUTH_EAST:
-                setBounds(bounds.x - insets.right - insets.left,
-                          bounds.y, bounds.width, bounds.height);
-                bubbleBorder.setPointerPadPercent(0);
-                break;
-            case NORTH_WEST:
-                setBounds(bounds.x + insets.right + insets.left,
-                          bounds.y + insets.bottom, bounds.width, bounds.height);
+            case NORTH_WEST, SOUTH_WEST -> {
+                bounds.x += 4 * pointerSize;
                 bubbleBorder.setPointerPadPercent(1);
-                break;
-            case SOUTH_WEST:
-                setBounds(bounds.x + insets.right + insets.left,
-                          bounds.y, bounds.width, bounds.height);
-                bubbleBorder.setPointerPadPercent(1);
-                break;
-            case CENTER:
-            default:
-                break;
+            }
+            case NORTH_EAST, SOUTH_EAST -> {
+                bounds.x -= 4 * pointerSize;
+                bubbleBorder.setPointerPadPercent(0);
+            }
+            default -> {
+            }
         }
+        switch (alignment) {
+            case NORTH, NORTH_EAST, NORTH_WEST -> bounds.y += pointerSize;
+            case EAST -> {
+                bounds.x -= pointerSize;
+                bounds.y += pointerSize / 2;
+            }
+            case WEST -> {
+                bounds.y += pointerSize / 2;
+                bounds.x += pointerSize;
+            }
+            default -> {
+            }
+        }
+        return bounds;
+    }
+
+    @Override
+    public void setBounds(final int x, final int y, final int width, final int height) {
+        var r = adjustAlignment(new Rectangle(x, y, width, height));
+        super.setBounds(r.x, r.y, r.width, r.height);
     }
 
     @Override
@@ -164,29 +153,14 @@ public class Tooltip extends ShadowPane implements ITooltip {
         final int pointerSize = bubbleBorder.getPointerSize();
         final Border border = getBorder();
         //Move shadow according to alignment.
-        switch (alignment) {
-            case NORTH:
-            case NORTH_EAST:
-            case NORTH_WEST:
-                border.paintBorder(this, g, 0, 0, getWidth(), getHeight() - pointerSize);
-                break;
-            case EAST:
-                border.paintBorder(this, g, pointerSize, 0, getWidth() - pointerSize, getHeight());
-                break;
-            case SOUTH:
-                border.paintBorder(this, g, 0, pointerSize, getWidth(), getHeight() - pointerSize);
-                break;
-            case CENTER:
-            case SOUTH_EAST:
-            case SOUTH_WEST:
-                border.paintBorder(this, g, 0, 0, getWidth(), getHeight());
-                break;
-            case WEST:
-                border.paintBorder(this, g, 0, 0, getWidth() - pointerSize, getHeight());
-                break;
-            default:
-                break;
-        }
+        Rectangle rect = switch (alignment) {
+            case NORTH, NORTH_EAST, NORTH_WEST -> new Rectangle(0, 0, getWidth(), getHeight() - pointerSize);
+            case EAST -> new Rectangle(pointerSize, 0, getWidth() - pointerSize, getHeight());
+            case SOUTH, SOUTH_EAST, SOUTH_WEST -> new Rectangle(0, pointerSize, getWidth(), getHeight() - pointerSize);
+            case WEST -> new Rectangle(0, 0, getWidth() - pointerSize, getHeight());
+            default -> new Rectangle(0, 0, getWidth(), getHeight());
+        };
+        border.paintBorder(this, g, rect.x, rect.y, rect.width, rect.height);
     }
 
     @Override
