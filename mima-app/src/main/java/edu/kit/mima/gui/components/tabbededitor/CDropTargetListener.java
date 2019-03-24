@@ -23,7 +23,9 @@ import javax.swing.Icon;
 public class CDropTargetListener implements DropTargetListener {
     private final EditorTabbedPane tabbedPane;
 
-    /*default*/ CDropTargetListener(final EditorTabbedPane tabbedPane) {
+    /*default*/
+    @Contract(pure = true)
+    CDropTargetListener(final EditorTabbedPane tabbedPane) {
         this.tabbedPane = tabbedPane;
     }
 
