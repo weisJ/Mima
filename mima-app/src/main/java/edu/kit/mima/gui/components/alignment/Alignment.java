@@ -1,4 +1,4 @@
-package edu.kit.mima.gui.components;
+package edu.kit.mima.gui.components.alignment;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -9,6 +9,8 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.function.BiFunction;
 
+import static edu.kit.mima.gui.components.alignment.AlignmentHelper.*;
+
 /**
  * Alignment for GUI elements.
  *
@@ -16,75 +18,43 @@ import java.util.function.BiFunction;
  * @since 2018
  */
 public enum Alignment {
-    NORTH((toAlign, alignAt) -> {
-        return new Point(alignAt.x - toAlign.width / 2, alignAt.y - toAlign.height);
-    }, (toAlign, bounds) -> {
-        return new Point(bounds.x + bounds.width / 2 - toAlign.width / 2, bounds.y);
-    }, (toAlign, bounds) -> {
-        return new Point(bounds.x + bounds.width / 2 - toAlign.width / 2,
-                         bounds.y - toAlign.height);
-    }),
-    SOUTH((toAlign, alignAt) -> {
-        return new Point(alignAt.x - toAlign.width / 2, alignAt.y);
-    }, (toAlign, bounds) -> {
-        return new Point(bounds.x + bounds.width / 2 - toAlign.width / 2,
-                         bounds.y + bounds.height - toAlign.height);
-    }, (toAlign, bounds) -> {
-        return new Point(bounds.x + bounds.width / 2 - toAlign.width / 2,
-                         bounds.y + bounds.height);
-    }),
-    EAST((toAlign, alignAt) -> {
-        return new Point(alignAt.x, alignAt.y - toAlign.height / 2);
-    }, (toAlign, bounds) -> {
-        return new Point(bounds.x + bounds.width - toAlign.width,
-                         bounds.y + bounds.height / 2 - toAlign.height / 2);
-    }, (toAlign, bounds) -> {
-        return new Point(bounds.x, bounds.y + bounds.height / 2 - toAlign.height / 2);
-    }),
-    WEST((toAlign, alignAt) -> {
-        return new Point(alignAt.x - toAlign.width, alignAt.y - toAlign.height / 2);
-    }, (toAlign, bounds) -> {
-        return new Point(bounds.x, bounds.y + bounds.height / 2 - toAlign.height / 2);
-    }, (toAlign, bounds) -> {
-        return new Point(bounds.x - toAlign.width,
-                         bounds.y + bounds.height / 2 - toAlign.height / 2);
-    }),
-    NORTH_EAST((toAlign, alignAt) -> {
-        return new Point(alignAt.x, alignAt.y - toAlign.height);
-    }, (toAlign, bounds) -> {
-        return new Point(bounds.x + bounds.width - toAlign.width, bounds.y);
-    }, (toAlign, bounds) -> {
-        return new Point(bounds.x + bounds.width - toAlign.width, bounds.y - toAlign.height);
-    }),
-    NORTH_WEST((toAlign, alignAt) -> {
-        return new Point(alignAt.x - toAlign.width, alignAt.y - toAlign.height);
-    }, (toAlign, bounds) -> {
-        return new Point(bounds.x, bounds.y);
-    }, (toAlign, bounds) -> {
-        return new Point(bounds.x - toAlign.width, bounds.y - toAlign.height);
-    }),
-    SOUTH_EAST((toAlign, alignAt) -> {
-        return new Point(alignAt.x, alignAt.y);
-    }, (toAlign, bounds) -> {
-        return new Point(bounds.x + bounds.width - toAlign.width,
-                         bounds.y + bounds.height - toAlign.height);
-    }, (toAlign, bounds) -> {
-        return new Point(bounds.x + bounds.width, bounds.y + bounds.height);
-    }),
-    SOUTH_WEST((toAlign, alignAt) -> {
-        return new Point(alignAt.x - toAlign.width, alignAt.y);
-    }, (toAlign, bounds) -> {
-        return new Point(bounds.x, bounds.y + bounds.height - toAlign.height);
-    }, (toAlign, bounds) -> {
-        return new Point(bounds.x - toAlign.width, bounds.y + bounds.height);
-    }),
-    CENTER((toAlign, alignAt) -> alignAt, (toAlign, bounds) -> {
-        return new Point(bounds.x + bounds.width / 2 - toAlign.width / 2,
-                         bounds.y + bounds.height / 2 - toAlign.height / 2);
-    }, (toAlign, bounds) -> {
-        return new Point(bounds.x + bounds.width / 2 - toAlign.width / 2,
-                         bounds.y + bounds.height / 2 - toAlign.height / 2);
-    });
+    NORTH(AlignmentHelper.align(HOR_CENTER, VERT_TOP),
+          AlignmentHelper.alignRelative(HOR_CENTER_INSIDE, VERT_TOP_INSIDE),
+          AlignmentHelper.alignRelative(HOR_CENTER_OUTSIDE, VERT_TOP_OUTSIDE)
+    ),
+    SOUTH(AlignmentHelper.align(HOR_CENTER, VERT_BOTTOM),
+          AlignmentHelper.alignRelative(HOR_CENTER_INSIDE, VERT_BOTTOM_INSIDE),
+          AlignmentHelper.alignRelative(HOR_CENTER_OUTSIDE, VERT_BOTTOM_OUTSIDE)
+    ),
+    EAST(AlignmentHelper.align(HOR_RIGHT, VERT_CENTER),
+         AlignmentHelper.alignRelative(HOR_RIGHT_INSIDE, VERT_CENTER_INSIDE),
+         AlignmentHelper.alignRelative(HOR_RIGHT_OUTSIDE, VERT_CENTER_OUTSIDE)
+    ),
+    WEST(AlignmentHelper.align(HOR_LEFT, VERT_CENTER),
+         AlignmentHelper.alignRelative(HOR_LEFT_INSIDE, VERT_CENTER_INSIDE),
+         AlignmentHelper.alignRelative(HOR_LEFT_OUTSIDE, VERT_CENTER_OUTSIDE)
+    ),
+    NORTH_EAST(AlignmentHelper.align(HOR_LEFT, VERT_TOP),
+               AlignmentHelper.alignRelative(HOR_LEFT_INSIDE, VERT_TOP_INSIDE),
+               AlignmentHelper.alignRelative(HOR_LEFT_OUTSIDE, VERT_TOP_OUTSIDE)
+    ),
+    NORTH_WEST(AlignmentHelper.align(HOR_RIGHT, VERT_TOP),
+               AlignmentHelper.alignRelative(HOR_RIGHT_INSIDE, VERT_TOP_INSIDE),
+               AlignmentHelper.alignRelative(HOR_RIGHT_OUTSIDE, VERT_TOP_OUTSIDE)
+    ),
+    SOUTH_EAST(AlignmentHelper.align(HOR_RIGHT, VERT_BOTTOM),
+               AlignmentHelper.alignRelative(HOR_RIGHT_INSIDE, VERT_BOTTOM_INSIDE),
+               AlignmentHelper.alignRelative(HOR_RIGHT_OUTSIDE, VERT_BOTTOM_OUTSIDE)
+    ),
+    SOUTH_WEST(AlignmentHelper.align(HOR_LEFT, VERT_BOTTOM),
+               AlignmentHelper.alignRelative(HOR_LEFT_INSIDE, VERT_BOTTOM_INSIDE),
+               AlignmentHelper.alignRelative(HOR_LEFT_OUTSIDE, VERT_BOTTOM_OUTSIDE)
+    ),
+    CENTER((toAlign, alignAt) -> alignAt,
+           AlignmentHelper.alignRelative(HOR_CENTER_INSIDE, VERT_CENTER_INSIDE),
+           AlignmentHelper.alignRelative(HOR_CENTER_OUTSIDE, VERT_CENTER_OUTSIDE)
+    );
+
 
     private final BiFunction<Dimension, Point, Point> relativePos;
     private final BiFunction<Dimension, Rectangle, Point> alignInside;
@@ -211,6 +181,5 @@ public enum Alignment {
     public Point alignOutside(@NotNull final Dimension toAlign,
                               @NotNull final Rectangle innerBounds) {
         return this.alignOutside.apply(toAlign, innerBounds);
-
     }
 }

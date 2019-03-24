@@ -1,7 +1,7 @@
 package edu.kit.mima.gui.components.tooltip;
 
 import edu.kit.mima.gui.components.AlignPolicy;
-import edu.kit.mima.gui.components.Alignment;
+import edu.kit.mima.gui.components.alignment.Alignment;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 

@@ -138,7 +138,7 @@ public final class Parser extends Processor<Token, TokenStream> {
             }
             if (isPunctuation(Punctuation.DEFINITION_BEGIN)) {
                 input.next();
-                return maybeConstant();
+                return parseDefinition();
             }
             final Token token = input.peek();
             if (token != null
@@ -195,22 +195,25 @@ public final class Parser extends Processor<Token, TokenStream> {
      */
     @NotNull
     @Contract(" -> new")
-    private Token maybeConstant() {
+    private Token parseDefinition() {
         skipKeyword(Keyword.DEFINITION);
         final int line = input.getLine();
-        if (isKeyword(Keyword.CONSTANT)) {
-            input.next();
-            return new AtomToken<>(TokenType.CONSTANT, delimited(
-                    new char[]{CharInputStream.EMPTY_CHAR,
-                            Punctuation.INSTRUCTION_END,
-                            Punctuation.COMMA},
-                    this::parseConstant, false), tokenIndexStack.peek(), input.getLine());
-        }
         return new AtomToken<>(TokenType.DEFINITION, delimited(
                 new char[]{CharInputStream.EMPTY_CHAR,
                         Punctuation.INSTRUCTION_END,
                         Punctuation.COMMA},
-                this::parseDefinition, false), tokenIndexStack.peek(), line);
+                this::maybeConstant, false), tokenIndexStack.peek(), line);
+    }
+
+    @NotNull
+    @Contract(" -> new")
+    private Token maybeConstant() {
+        if (isKeyword(Keyword.CONSTANT)) {
+            skipKeyword(Keyword.CONSTANT);
+            return parseConstant();
+        } else {
+            return parseReference();
+        }
     }
 
     /*
@@ -221,28 +224,30 @@ public final class Parser extends Processor<Token, TokenStream> {
     private BinaryToken parseConstant() {
         final Token reference = input.next();
         final int line = input.getLine();
-        skipPunctuation(Punctuation.DEFINITION_DELIMITER);
-        final Token value = parseExpression();
-        assert reference != null;
-        return new BinaryToken<>(TokenType.CONSTANT, reference, value,
-                                 tokenIndexStack.peek(), line);
+        if (reference != null && reference.getType() == TokenType.IDENTIFICATION) {
+            skipPunctuation(Punctuation.DEFINITION_DELIMITER);
+            final Token value = parseExpression();
+            return new BinaryToken<>(TokenType.CONSTANT, reference, value,
+                                     tokenIndexStack.peek(), line);
+        }
+        return input.error("expected identifier");
     }
 
     /*
-     * Parse a definition. May have a value
+     * Parse a reference. May have a value
      */
     @NotNull
-    private BinaryToken parseDefinition() {
+    private BinaryToken parseReference() {
         final Token reference = input.next();
         final int line = input.getLine();
         if (reference != null && reference.getType() == TokenType.IDENTIFICATION) {
             if (isPunctuation(Punctuation.DEFINITION_DELIMITER)) {
-                input.next();
+                skipPunctuation(Punctuation.DEFINITION_DELIMITER);
                 final Token value = parseExpression();
-                return new BinaryToken<>(TokenType.DEFINITION, reference, value,
+                return new BinaryToken<>(TokenType.REFERENCE, reference, value,
                                          tokenIndexStack.peek(), line);
             }
-            return new BinaryToken<>(TokenType.DEFINITION, reference, new EmptyToken(),
+            return new BinaryToken<>(TokenType.REFERENCE, reference, new EmptyToken(),
                                      tokenIndexStack.peek(), line);
         }
         return input.error("expected identifier");

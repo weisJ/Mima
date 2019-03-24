@@ -1,8 +1,8 @@
 package edu.kit.mima.gui.components.tooltip;
 
-import edu.kit.mima.gui.components.Alignment;
 import edu.kit.mima.gui.components.ShadowPane;
 import edu.kit.mima.gui.components.TextBubbleBorder;
+import edu.kit.mima.gui.components.alignment.Alignment;
 import edu.kit.mima.util.HSLColor;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -151,13 +151,18 @@ public class Tooltip extends ShadowPane implements ITooltip {
         final int pointerSize = bubbleBorder.getPointerSize();
         final Border border = getBorder();
         //Move shadow according to alignment.
+        //@formatter:off
         Rectangle rect = switch (alignment) {
-            case NORTH, NORTH_EAST, NORTH_WEST -> new Rectangle(0, 0, getWidth(), getHeight() - pointerSize);
-            case EAST -> new Rectangle(pointerSize, 0, getWidth() - pointerSize, getHeight());
-            case SOUTH, SOUTH_EAST, SOUTH_WEST -> new Rectangle(0, pointerSize, getWidth(), getHeight() - pointerSize);
+            case NORTH, NORTH_EAST, NORTH_WEST
+                    -> new Rectangle(0, 0, getWidth(), getHeight() - pointerSize);
+            case EAST
+                    -> new Rectangle(pointerSize, 0, getWidth() - pointerSize, getHeight());
+            case SOUTH, SOUTH_EAST, SOUTH_WEST
+                    -> new Rectangle(0, pointerSize, getWidth(), getHeight() - pointerSize);
             case WEST -> new Rectangle(0, 0, getWidth() - pointerSize, getHeight());
             default -> new Rectangle(0, 0, getWidth(), getHeight());
         };
+        //@formatter:on
         border.paintBorder(this, g, rect.x, rect.y, rect.width, rect.height);
     }
 

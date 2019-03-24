@@ -2,7 +2,6 @@ package edu.kit.mima.core.token;
 
 import edu.kit.mima.api.util.ImmutableTuple;
 import edu.kit.mima.core.file.FileObjectAdapter;
-import edu.kit.mima.core.parsing.lang.Punctuation;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -133,20 +132,7 @@ public class BinaryToken<T, K> extends FileObjectAdapter implements Token<T>, Im
         final String secondName = second instanceof Token
                 ? ((Token) second).simpleName()
                 : second.toString();
-        if (type == TokenType.JUMP_POINT) {
-            return firstName + ' ' + Punctuation.JUMP_DELIMITER + ' ' + secondName;
-        } else if (type == TokenType.DEFINITION || type == TokenType.CONSTANT) {
-            final StringBuilder sb = new StringBuilder(firstName);
-            if (!secondName.isEmpty()) {
-                sb.append(' ').append(Punctuation.DEFINITION_DELIMITER)
-                        .append(' ').append(secondName);
-            }
-            return sb.toString();
-        } else if (type == TokenType.CALL) {
-            return firstName + secondName;
-        } else {
-            return firstName + ' ' + secondName;
-        }
+        return type.getPrefix() + firstName + ' ' + secondName;
     }
 
     @Contract(value = "null -> false", pure = true)

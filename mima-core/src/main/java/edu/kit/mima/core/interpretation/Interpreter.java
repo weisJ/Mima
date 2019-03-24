@@ -123,10 +123,6 @@ public class Interpreter {
                 final var defToken = (ListToken<Token>) expression.getValue();
                 evaluateDefinition(defToken, environment, callback);
             }
-            case CONSTANT -> {
-                final var constToken = (ListToken<Token>) expression.getValue();
-                evaluateConstant(constToken, environment, callback);
-            }
             case NUMBER -> callback.accept(evaluateNumber((String) expression.getValue()));
             case EMPTY -> callback.accept(VOID);
             case BINARY -> callback.accept(evaluateBinary((String) expression.getValue()));
@@ -135,7 +131,7 @@ public class Interpreter {
                                           environment, callback);
             case JUMP_POINT -> evaluate(((Tuple<Token, Token>) expression).getSecond(),
                                         environment, callback);
-            default -> fail("Can't evaluate: " + expression);
+            default -> fail("Unexpected: " + expression);
         }
     }
 
@@ -181,24 +177,11 @@ public class Interpreter {
         BiConsumer<Environment, Integer> loop = LambdaUtil.createRecursive(func -> (env, i) -> {
             if (i < tokens.size()) {
                 BinaryToken<Token, Token> definition = ((BinaryToken<Token, Token>) tokens.get(i));
-                if (definition.getSecond().getType() == TokenType.EMPTY) {
-                    environment.defineVariable(
-                            definition.getFirst().getValue().toString(),
-                            evaluateNumber(String.valueOf(env.getReservedIndex())).getValue());
-                    env.setReservedIndex(env.getReservedIndex() - 1);
-                    func.accept(environment, i + 1);
-                } else {
-                    evaluate(definition.getSecond(), environment, v -> {
-                        if (VOID == v) {
-                            fail("Not a definition body: " + definition.getSecond());
-                        }
-                        if (((MachineWord) v.getValue()).intValue() < 0) {
-                            fail("Can't have negative memory references");
-                        }
-                        environment.defineVariable(definition.getFirst().getValue().toString(),
-                                                   (MachineWord) v.getValue());
-                        func.accept(environment, i + 1);
-                    });
+                Runnable continuation = () -> func.accept(env, i + 1);
+                switch (definition.getType()) {
+                    case CONSTANT -> evaluateConstant(definition, env, continuation);
+                    case REFERENCE -> evaluateReference(definition, env, continuation);
+                    default -> fail("unexpected def type: " + definition.getType());
                 }
             } else {
                 evaluate(new EmptyToken(), environment, callback);
@@ -207,32 +190,49 @@ public class Interpreter {
         loop.accept(environment, 0);
     }
 
-    @SuppressWarnings("unchecked") /*Construction of tokens guarantees these types*/
-    private void evaluateConstant(@NotNull final ListToken<Token> token,
-                                  @NotNull final Environment environment,
-                                  @NotNull final Consumer<Value> callback) throws Continuation {
-        stackGuard.guard(() -> evaluateConstant(token, environment, callback));
-        List<Token> tokens = token.getValue();
-        BiConsumer<Environment, Integer> loop = LambdaUtil.createRecursive(func -> (env, i) -> {
-            if (i < tokens.size()) {
-                BinaryToken<Token, Token> definition = ((BinaryToken<Token, Token>) tokens.get(i));
-                evaluate(definition.getSecond(), environment, v -> {
-                    if (Objects.equals(v, VOID)) {
-                        fail("Not a definition body: " + definition.getSecond());
-                    }
-                    environment.defineConstant(
-                            definition.getFirst().getValue().toString(),
-                            (MachineWord) v.getValue()
-                    );
-                    func.accept(environment, i + 1);
-                });
-            } else {
-                evaluate(new EmptyToken(), environment, callback);
-            }
-        });
-        loop.accept(environment, 0);
+    /*
+     * Definition of reference.
+     */
+    private void evaluateReference(@NotNull final BinaryToken<Token, Token> definition,
+                                   @NotNull final Environment environment,
+                                   @NotNull final Runnable continuation) {
+        if (definition.getSecond().getType() == TokenType.EMPTY) {
+            environment.defineVariable(
+                    definition.getFirst().getValue().toString(),
+                    evaluateNumber(String.valueOf(environment.getReservedIndex())).getValue());
+            environment.setReservedIndex(environment.getReservedIndex() - 1);
+            continuation.run();
+        } else {
+            evaluate(definition.getSecond(), environment, v -> {
+                if (VOID == v) {
+                    fail("Not a definition body: " + definition.getSecond());
+                }
+                if (((MachineWord) v.getValue()).intValue() < 0) {
+                    fail("Can't have negative memory references");
+                }
+                environment.defineVariable(definition.getFirst().getValue().toString(),
+                                           (MachineWord) v.getValue());
+                continuation.run();
+            });
+        }
     }
 
+    /*
+     * Definition of constant.
+     */
+    private void evaluateConstant(@NotNull final BinaryToken<Token, Token> definition,
+                                  @NotNull final Environment environment,
+                                  @NotNull final Runnable continuation) {
+        evaluate(definition.getSecond(), environment, v -> {
+            if (Objects.equals(v, VOID)) {
+                fail("Not a definition body: " + definition.getSecond());
+            }
+            environment.defineConstant(definition.getFirst().getValue().toString(),
+                                       (MachineWord) v.getValue()
+            );
+            continuation.run();
+        });
+    }
     /*
      * Evaluate a function call
      */

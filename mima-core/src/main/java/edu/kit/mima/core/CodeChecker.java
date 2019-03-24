@@ -63,7 +63,7 @@ public final class CodeChecker {
         final List<String> referencesVar = query
                 .whereEqual(Token::getType, TokenType.CONSTANT)
                 .or()
-                .whereEqual(Token::getType, TokenType.DEFINITION)
+                .whereEqual(Token::getType, TokenType.REFERENCE)
                 .stream()
                 .map(t -> ((Token<Token>) t).getValue().getValue().toString())
                 .collect(Collectors.toList());

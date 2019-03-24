@@ -20,7 +20,7 @@ public class BreakpointComponent extends IndexComponent implements Breakpoint {
      */
     public BreakpointComponent(final int lineIndex) {
         this.lineIndex = lineIndex;
-        final IconPanel iconPanel = new IconPanel(Icons.BREAKPOINT, Alignment.NORTH_WEST);
+        final IconPanel iconPanel = new IconPanel(Icons.BREAKPOINT);
         setPreferredSize(iconPanel.getPreferredSize());
         add(iconPanel);
     }

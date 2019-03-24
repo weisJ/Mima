@@ -14,9 +14,11 @@ import edu.kit.mima.preferences.PropertyKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
 
@@ -138,7 +140,12 @@ public class MimaEditorManager implements AutoCloseable {
         for (final EditorHotKeys key : EditorHotKeys.values()) {
             editor.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
                     .put(KeyStroke.getKeyStroke(key.getAccelerator()), key.toString());
-            editor.getActionMap().put(key.toString(), key);
+            editor.getActionMap().put(key.toString(), new AbstractAction() {
+                @Override
+                public void actionPerformed(final ActionEvent e) {
+                    key.actionPerformed(e);
+                }
+            });
         }
     }
 
