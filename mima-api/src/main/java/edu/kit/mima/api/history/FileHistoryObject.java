@@ -1,5 +1,6 @@
 package edu.kit.mima.api.history;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.JTextPane;
@@ -29,12 +30,12 @@ public class FileHistoryObject {
      * @param oldText     old text
      * @param type        Type of Document change
      */
+    @Contract(pure = true)
     public FileHistoryObject(@NotNull final JTextPane editor,
                              final int caretOffset,
                              @NotNull final String newText,
                              @NotNull final String oldText,
                              @NotNull final ChangeType type) {
-        super();
         this.editor = editor;
         this.caretOffset = caretOffset;
         text = newText;
@@ -86,30 +87,11 @@ public class FileHistoryObject {
      */
     public void undo() {
         try {
-            int caret = 0;
-            switch (type) {
-                case INSERT:
-                    editor.getStyledDocument().remove(caretOffset, text.length());
-                    caret = caretOffset;
-                    break;
-                case REMOVE:
-                    editor.getStyledDocument().insertString(
-                            caretOffset, old,
-                            new SimpleAttributeSet());
-                    caret = caretOffset + old.length();
-                    break;
-                case REPLACE:
-                    editor.getStyledDocument().remove(caretOffset, text.length());
-                    editor.getStyledDocument().insertString(
-                            caretOffset, old,
-                            new SimpleAttributeSet());
-                    caret = caretOffset + old.length();
-                    break;
-                default:
-                    assert false : "illegal type";
-                    break;
-            }
-            editor.setCaretPosition(caret);
+            editor.setCaretPosition(switch (type) {
+                case INSERT -> removeText(text);
+                case REMOVE -> insertText(old);
+                case REPLACE -> replaceText(text, old);
+            });
         } catch (@NotNull final BadLocationException e) {
             e.printStackTrace();
         }
@@ -120,33 +102,52 @@ public class FileHistoryObject {
      */
     public void redo() {
         try {
-            int caret = 0;
-            switch (type) {
-                case INSERT:
-                    editor.getStyledDocument().insertString(
-                            caretOffset, text,
-                            new SimpleAttributeSet());
-                    caret = caretOffset + text.length();
-                    break;
-                case REMOVE:
-                    editor.getStyledDocument().remove(caretOffset, old.length());
-                    caret = caretOffset;
-                    break;
-                case REPLACE:
-                    editor.getStyledDocument().remove(caretOffset, old.length());
-                    editor.getStyledDocument().insertString(
-                            caretOffset, text,
-                            new SimpleAttributeSet());
-                    caret = caretOffset + text.length();
-                    break;
-                default:
-                    assert false : "illegal type";
-                    break;
-            }
-            editor.setCaretPosition(caret);
+            editor.setCaretPosition(switch (type) {
+                case INSERT -> insertText(text);
+                case REMOVE -> removeText(old);
+                case REPLACE -> replaceText(old, text);
+            });
         } catch (@NotNull final BadLocationException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Replace text in document.
+     *
+     * @param oldText old text.
+     * @param current new text.
+     * @return new caret position.
+     * @throws BadLocationException if text can't be replaced
+     */
+    private int replaceText(@NotNull final String oldText,
+                            @NotNull final String current) throws BadLocationException {
+        removeText(oldText);
+        return insertText(current);
+    }
+
+    /**
+     * Insert text to document.
+     *
+     * @param text text to insert.
+     * @return new caret position.
+     * @throws BadLocationException if text can't be inserted.
+     */
+    private int insertText(@NotNull final String text) throws BadLocationException {
+        editor.getStyledDocument().insertString(caretOffset, text, new SimpleAttributeSet());
+        return caretOffset + text.length();
+    }
+
+    /**
+     * Remove text in document.
+     *
+     * @param text tex to remove.
+     * @return new caret position.
+     * @throws BadLocationException if text can't be removed.
+     */
+    private int removeText(@NotNull final String text) throws BadLocationException {
+        editor.getStyledDocument().remove(caretOffset, text.length());
+        return caretOffset;
     }
 
     public enum ChangeType {

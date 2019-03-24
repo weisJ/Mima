@@ -1,5 +1,7 @@
 package edu.kit.mima.core.interpretation;
 
+import edu.kit.mima.api.util.ValueTuple;
+
 /**
  * Value that has a {@link ValueType} and holds value.
  *
@@ -7,10 +9,7 @@ package edu.kit.mima.core.interpretation;
  * @author Jannis Weis
  * @since 2018
  */
-public class Value<T> {
-
-    private final ValueType type;
-    private final T value;
+public class Value<T> extends ValueTuple<T, ValueType> {
 
     /**
      * create Value with given type and content.
@@ -19,8 +18,7 @@ public class Value<T> {
      * @param value value content
      */
     public Value(final ValueType type, final T value) {
-        this.type = type;
-        this.value = value;
+        super(value, type);
     }
 
     /**
@@ -29,7 +27,7 @@ public class Value<T> {
      * @return value
      */
     public T getValue() {
-        return value;
+        return getFirst();
     }
 
     /**
@@ -38,6 +36,6 @@ public class Value<T> {
      * @return value type
      */
     public ValueType getType() {
-        return type;
+        return getSecond();
     }
 }

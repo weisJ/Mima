@@ -55,10 +55,8 @@ public final class MimaUserInterface extends JFrame {
     private final MimaRunner mimaRunner = new MimaRunner();
     private final Debugger debugger = mimaRunner.debugger();
     private final FileActions fileActions = new FileActions(this, editorManager);
-    private final RunActions runActions = new RunActions(this,
-                                                         new MimaCompiler(),
-                                                         mimaRunner,
-                                                         debugger);
+    private final RunActions runActions = new RunActions(this, new MimaCompiler(),
+                                                         mimaRunner, debugger);
 
     private final FileDisplay fileDisplay;
     private final EditorTabbedPane tabbedEditor;
@@ -89,7 +87,8 @@ public final class MimaUserInterface extends JFrame {
 
     private void createBinding() {
         BindingUtil.bind(debugger, () -> {
-            int index = Optional.ofNullable(mimaRunner.getCurrentStatement()).map(Token::getOffset)
+            int index = Optional.ofNullable(mimaRunner.getCurrentStatement())
+                    .map(Token::getLineIndex)
                     .orElse(-1);
             editorManager.currentEditor().markLine(index);
             memoryView.updateView();

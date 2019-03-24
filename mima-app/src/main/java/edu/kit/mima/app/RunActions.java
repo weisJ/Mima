@@ -12,6 +12,7 @@ import edu.kit.mima.logger.LoadingIndicator;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
 import edu.kit.mima.util.FileName;
+import org.jetbrains.annotations.Contract;
 
 /**
  * Actions for mima App.
@@ -35,10 +36,9 @@ public class RunActions {
      * @param mimaRunner   runner of app.
      * @param debugger     the debugger of app.
      */
-    public RunActions(final MimaUserInterface mimaUI,
-                      final MimaCompiler mimaCompiler,
-                      final MimaRunner mimaRunner,
-                      final Debugger debugger) {
+    @Contract(pure = true)
+    public RunActions(final MimaUserInterface mimaUI, final MimaCompiler mimaCompiler,
+                      final MimaRunner mimaRunner, final Debugger debugger) {
         this.mimaUI = mimaUI;
         this.mimaRunner = mimaRunner;
         this.debugger = debugger;

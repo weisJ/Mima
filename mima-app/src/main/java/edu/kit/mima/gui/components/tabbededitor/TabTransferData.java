@@ -1,14 +1,15 @@
 package edu.kit.mima.gui.components.tabbededitor;
 
+import edu.kit.mima.api.util.ValueTuple;
+import org.jetbrains.annotations.Contract;
+
 /**
  * Transfer Data of the Tab.
  *
  * @author Jannis Weis
  * @since 2018
  */
-public class TabTransferData {
-    private final EditorTabbedPane tabbedPane;
-    private final int tabIndex;
+public class TabTransferData extends ValueTuple<EditorTabbedPane, Integer> {
 
     /**
      * Create TabTransferData from tab at given index.
@@ -16,9 +17,9 @@ public class TabTransferData {
      * @param tabbedPane Editor Tabbed Pane.
      * @param tabIndex   index of tab.
      */
+    @Contract(pure = true)
     public TabTransferData(final EditorTabbedPane tabbedPane, final int tabIndex) {
-        this.tabbedPane = tabbedPane;
-        this.tabIndex = tabIndex;
+        super(tabbedPane, tabIndex);
     }
 
     /**
@@ -27,7 +28,7 @@ public class TabTransferData {
      * @return the tabbed pane.
      */
     public EditorTabbedPane getTabbedPane() {
-        return tabbedPane;
+        return getFirst();
     }
 
     /**
@@ -36,6 +37,6 @@ public class TabTransferData {
      * @return index of the tab.
      */
     public int getTabIndex() {
-        return tabIndex;
+        return getSecond();
     }
 }
