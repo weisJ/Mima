@@ -97,21 +97,9 @@ public class DraggingGlassPane extends JPanel {
         if (mouseLocation == null) {
             setMouseLocation(MouseInfo.getPointerInfo().getLocation());
         }
-        if (showDrag && draggingGhost != null) {
-            if (extended) {
-                cursorWindow.setBounds(mouseLocation.x, mouseLocation.y,
-                                       extendedImage.getWidth(this),
-                                       extendedImage.getHeight(this));
-            } else {
-                cursorWindow.setBounds(mouseLocation.x, mouseLocation.y,
-                                       draggingGhost.getWidth(this),
-                                       draggingGhost.getHeight(this));
-            }
-            cursorWindow.repaint();
-            if (!timer.isRunning()) {
-                timer.setRepeats(true);
-                timer.start();
-            }
+        if (showDrag && !timer.isRunning()) {
+            timer.setRepeats(true);
+            timer.start();
         } else {
             timer.stop();
         }
@@ -124,13 +112,13 @@ public class DraggingGlassPane extends JPanel {
      */
     public void setMouseLocation(final Point mouseLocation) {
         if (draggingGhost != null) {
-            if (extended) {
-                mouseLocation.x -= (extendedImage.getWidth(this) / 2);
-                mouseLocation.y -= (extendedImage.getHeight(this) / 2);
-            } else {
-                mouseLocation.x -= (draggingGhost.getWidth(this) / 2);
-                mouseLocation.y -= (draggingGhost.getHeight(this) / 2);
-            }
+            var image = extended ? extendedImage : draggingGhost;
+            mouseLocation.x -= (image.getWidth(this) / 2);
+            mouseLocation.y -= (image.getHeight(this) / 2);
+            cursorWindow.setBounds(mouseLocation.x, mouseLocation.y,
+                                   image.getWidth(this),
+                                   image.getHeight(this));
+            cursorWindow.repaint();
         }
         this.mouseLocation = mouseLocation;
     }
