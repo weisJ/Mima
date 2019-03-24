@@ -119,29 +119,27 @@ public class Tooltip extends ShadowPane implements ITooltip {
     @Override
     public void showTooltip() {
         setVisible(true);
-        startFadeTimer(true);
+        startFadeTimer(0, 1, 0.05f);
     }
 
     @Override
     public void hideTooltip() {
-        startFadeTimer(false);
+        startFadeTimer(1, 0, -0.05f);
+        setVisible(false);
     }
 
-    private void startFadeTimer(final boolean fadeIn) {
-        final float end = fadeIn ? 1 : 0;
-        alpha = fadeIn ? 0 : 1;
+    private void startFadeTimer(final float start, final float end, final float increment) {
+        alpha = start;
         final var timer = new Timer();
         final var task = new TimerTask() {
             @Override
             public void run() {
                 if (alpha == end) {
                     timer.cancel();
-                    if (alpha == 0) {
-                        setVisible(false);
-                    }
                 }
-                alpha = fadeIn ? (float) Math.min(alpha + 0.075, 1)
-                        : (float) Math.max(alpha - 0.075, 0);
+                alpha = start < end
+                        ? Math.min(alpha + increment, end)
+                        : Math.max(alpha + increment, end);
                 repaint();
             }
         };

@@ -1,6 +1,7 @@
 package edu.kit.mima.gui.components.tabbededitor;
 
 import edu.kit.mima.gui.components.editor.Editor;
+import edu.kit.mima.util.ImageUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.Component;
@@ -20,7 +21,6 @@ import java.awt.dnd.DragSourceEvent;
 import java.awt.dnd.DragSourceListener;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.InvalidDnDOperationException;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.Icon;
@@ -33,7 +33,6 @@ import javax.swing.SwingUtilities;
  * @author Jannis Weis
  * @since 2018
  */
-@SuppressWarnings("IntegerDivisionInFloatingPointContext")
 public class EditorTabbedPane extends JTabbedPane {
     public static final String SELECTED_TAB_PROPERTY = "selectedTab";
     /*default*/ static final String NAME = "TabTransferData";
@@ -45,7 +44,6 @@ public class EditorTabbedPane extends JTabbedPane {
     /*default*/ int dropSourceIndex = -1;
     private int selectedTab;
     private boolean dragging = false;
-    private boolean hasGhost = true;
     private TabAcceptor tabAcceptor;
 
     /**
@@ -97,10 +95,8 @@ public class EditorTabbedPane extends JTabbedPane {
             }
 
             public void dragDropEnd(final DragSourceDropEvent e) {
-                if (hasGhost()) {
-                    glassPane.showDrag(false);
-                    glassPane.setImage(null);
-                }
+                glassPane.showDrag(false);
+                glassPane.setImage(null);
                 getTabComponentAt(dropSourceIndex).setVisible(true);
                 dragging = false;
                 dropTargetIndex = -1;
@@ -196,33 +192,6 @@ public class EditorTabbedPane extends JTabbedPane {
         tabAcceptor = acceptor;
     }
 
-    /**
-     * Set whether tp paint the ghost image when dragging.
-     *
-     * @param flag true if ghost should be painted.
-     */
-    public void setPaintGhost(final boolean flag) {
-        hasGhost = flag;
-    }
-
-    /**
-     * Returns whether a ghost image is painted while dragging.
-     *
-     * @return true if painted.
-     */
-    public boolean hasGhost() {
-        return hasGhost;
-    }
-
-    /**
-     * Set the title for the selected tab.
-     *
-     * @param title new title
-     */
-    public void setSelectedTitle(final String title) {
-        ((TabComponent) getTabComponentAt(getSelectedIndex())).setTitle(title);
-    }
-
 
     Point buildGhostLocation(final Point location) {
         Point ghostLocation = new Point(location);
@@ -262,67 +231,42 @@ public class EditorTabbedPane extends JTabbedPane {
      * @return returns potential index for drop.
      */
     /*default*/ int getTargetTabIndex(final Point point) {
-        final boolean isTopOrBottom = getTabPlacement() == JTabbedPane.TOP
-                || getTabPlacement() == JTabbedPane.BOTTOM;
         if (getTabCount() == 0) {
             return 0;
         }
-
         for (int i = 0; i < getTabCount(); i++) {
             final Rectangle r = getBoundsAt(i);
-            if (isTopOrBottom) {
-                r.setRect(r.x - r.width / 2, r.y, r.width, r.height);
-            } else {
-                r.setRect(r.x, r.y - r.height / 2, r.width, r.height);
-            }
-
+            r.setRect(r.x - r.width / 2, r.y, r.width, r.height);
             if (r.contains(point)) {
                 return i;
             }
         }
-
         final Rectangle r = getBoundsAt(getTabCount() - 1);
-        if (isTopOrBottom) {
-            final int x = r.x + r.width / 2;
-            r.setRect(x, r.y, getWidth() - x, r.height);
-        } else {
-            final int y = r.y + r.height / 2;
-            r.setRect(r.x, y, r.width, getHeight() - y);
-        }
-
+        final int x = r.x + r.width / 2;
+        r.setRect(x, r.y, getWidth() - x, r.height);
         return r.contains(point) ? getTabCount() : -1;
     }
 
-    private void initGlassPane(final Component c,
+    private void initGlassPane(@NotNull final Component c,
                                final Point tabPos,
                                final int tabIndex) {
         getRootPane().setGlassPane(glassPane);
-        if (hasGhost()) {
-            final Rectangle tabRect = getBoundsAt(tabIndex);
-            var comp = getComponentAt(tabIndex);
-            final Rectangle compRect = getComponentAt(tabIndex).getBounds();
-            Image compImage;
-            BufferedImage image = new BufferedImage(c.getWidth(),
-                                                    c.getHeight(), BufferedImage.TYPE_INT_ARGB);
-            final Graphics g = image.getGraphics();
-            c.paint(g);
-            BufferedImage tabImage = image.getSubimage(tabRect.x, tabRect.y,
-                                                       tabRect.width, tabRect.height);
-            if (comp instanceof Editor) {
-                var img = ((Editor) comp).createPreviewImage();
-                compImage = img;
-            } else {
-                compImage = image
-                        .getSubimage(compRect.x, compRect.y, compRect.width, compRect.height)
-                        .getScaledInstance(compRect.width / 3, compRect.height / 2,
-                                           BufferedImage.SCALE_DEFAULT);
-            }
-            glassPane.setImage(tabImage);
-            glassPane.setExtendedImage(compImage);
-            dropSourceIndex = tabIndex;
-            dropTargetIndex = tabIndex;
-            getTabComponentAt(tabIndex).setVisible(false);
+        final Rectangle compRect = getComponentAt(tabIndex).getBounds();
+        final var comp = getComponentAt(tabIndex);
+        Image compImage;
+        Image tabImage = ImageUtil.imageFromComponent(c, getBoundsAt(tabIndex));
+        if (comp instanceof Editor) {
+            compImage = ((Editor) comp).createPreviewImage();
+        } else {
+            compImage = ImageUtil.imageFromComponent(
+                    c, new Rectangle(compRect.x, compRect.y, Math.max(compRect.width, 200),
+                                     Math.max(compRect.height, 400)));
         }
+        glassPane.setImage(tabImage);
+        glassPane.setExtendedImage(compImage);
+        dropSourceIndex = tabIndex;
+        dropTargetIndex = tabIndex;
+        getTabComponentAt(tabIndex).setVisible(false);
         glassPane.setPoint(buildGhostLocation(tabPos));
         glassPane.setVisible(true);
     }
