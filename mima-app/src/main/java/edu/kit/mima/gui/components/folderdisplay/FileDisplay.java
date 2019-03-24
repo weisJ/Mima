@@ -1,6 +1,5 @@
 package edu.kit.mima.gui.components.folderdisplay;
 
-import edu.kit.mima.gui.components.Alignment;
 import edu.kit.mima.gui.components.IconPanel;
 import edu.kit.mima.gui.components.listeners.FilePopupActionHandler;
 import edu.kit.mima.gui.laf.icons.Icons;
@@ -35,7 +34,7 @@ public class FileDisplay extends JPanel {
     public FileDisplay() {
         this.handler = f -> {};
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-        add(new IconPanel(Icons.FOLDER_ROOT, Alignment.CENTER));
+        add(new IconPanel(Icons.FOLDER_ROOT));
     }
 
     /**
@@ -65,7 +64,7 @@ public class FileDisplay extends JPanel {
             sb.append(directories[i]).append(SEPARATOR);
         }
         if (sb.length() == 0) {
-            add(new IconPanel(Icons.FOLDER_ROOT, Alignment.NORTH_WEST));
+            add(new IconPanel(Icons.FOLDER_ROOT));
         } else {
             add(new FolderDisplay(null, new File(sb.toString()), Icons.FOLDER_ROOT, handler));
         }
@@ -73,7 +72,7 @@ public class FileDisplay extends JPanel {
             final String s = directories[i];
             sb.append(s).append(SEPARATOR);
             if (!s.contains(":")) {
-                add(new IconPanel(Icons.DIVIDER, Alignment.NORTH_WEST));
+                add(new IconPanel(Icons.DIVIDER));
                 add(new FolderDisplay(s, new File(sb.toString()), handler));
             }
         }

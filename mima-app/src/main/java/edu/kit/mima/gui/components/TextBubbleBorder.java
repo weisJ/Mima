@@ -1,5 +1,6 @@
 package edu.kit.mima.gui.components;
 
+import edu.kit.mima.gui.components.alignment.Alignment;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 

@@ -1,6 +1,6 @@
 package edu.kit.mima.gui.components.tooltip;
 
-import edu.kit.mima.gui.components.Alignment;
+import edu.kit.mima.gui.components.alignment.Alignment;
 
 /**
  * Tooltip interface.

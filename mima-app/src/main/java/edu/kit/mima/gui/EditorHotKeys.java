@@ -8,12 +8,10 @@ import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.awt.Font;
 import java.awt.event.ActionEvent;
-import java.beans.PropertyChangeListener;
-import javax.swing.Action;
+import java.awt.event.ActionListener;
 import javax.swing.text.BadLocationException;
 
 /**
@@ -22,7 +20,7 @@ import javax.swing.text.BadLocationException;
  * @author Jannis Weis
  * @since 2018
  */
-public enum EditorHotKeys implements Action {
+public enum EditorHotKeys implements ActionListener {
 
     COMMENT_TOGGLE("control 7") {
         @Override
@@ -112,28 +110,4 @@ public enum EditorHotKeys implements Action {
 
     @Override
     public abstract void actionPerformed(ActionEvent e);
-
-    @Nullable
-    @Override
-    public Object getValue(final String key) {
-        return null;
-    }
-
-    @Override
-    public void putValue(final String key, final Object value) { }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
-    @Override
-    public void setEnabled(final boolean b) { }
-
-    @Override
-    public void addPropertyChangeListener(final PropertyChangeListener listener) { }
-
-    @Override
-    public void removePropertyChangeListener(final PropertyChangeListener listener) { }
-
 }

@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -95,15 +96,20 @@ public class ProgramToken extends FileObjectAdapter implements Token<Token[]> {
 
     @Override
     public String toString() {
-        return Arrays.stream(program)
-                .map(t -> '\t' + INDENT.matcher(t.toString()).replaceAll(INDENT_REPLACEMENT) + '\n')
-                .collect(Collectors.joining("", "[prog]{\n", "}"));
+        return print(Token::toString, "[prog]");
     }
 
     @NotNull
     @Override
     public String simpleName() {
-        return "...";
+        return print(Token::simpleName, "");
+    }
+
+    private String print(Function<Token, String> mapping, String prefix) {
+        return Arrays.stream(program)
+                .map(t -> '\t' + INDENT.matcher(mapping.apply(t))
+                        .replaceAll(INDENT_REPLACEMENT) + '\n')
+                .collect(Collectors.joining("", prefix + "{\n", "}"));
     }
 
     @Contract(value = "null -> false", pure = true)

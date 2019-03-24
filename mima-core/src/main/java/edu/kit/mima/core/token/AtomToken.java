@@ -1,8 +1,6 @@
 package edu.kit.mima.core.token;
 
 import edu.kit.mima.core.file.FileObjectAdapter;
-import edu.kit.mima.core.parsing.lang.Keyword;
-import edu.kit.mima.core.parsing.lang.Punctuation;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -92,23 +90,7 @@ public class AtomToken<T> extends FileObjectAdapter implements Token<T> {
     @NotNull
     @Override
     public String simpleName() {
-        final StringBuilder prefix = new StringBuilder();
-        switch (type) {
-            case BINARY:
-                prefix.append('~');
-                break;
-            case DEFINITION:
-                prefix.append(Punctuation.DEFINITION_BEGIN)
-                        .append(Keyword.DEFINITION).append(' ');
-                break;
-            case CONSTANT:
-                prefix.append(Punctuation.DEFINITION_BEGIN)
-                        .append(Keyword.DEFINITION).append(' ')
-                        .append(Keyword.CONSTANT).append(' ');
-                break;
-            default:
-                break;
-        }
+        final String prefix = type.getPrefix();
         if (value instanceof Token) {
             return prefix + ((Token) value).simpleName();
         } else {

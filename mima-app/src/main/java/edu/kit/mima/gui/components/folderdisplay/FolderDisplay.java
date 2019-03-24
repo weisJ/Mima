@@ -1,6 +1,5 @@
 package edu.kit.mima.gui.components.folderdisplay;
 
-import edu.kit.mima.gui.components.Alignment;
 import edu.kit.mima.gui.components.IconPanel;
 import edu.kit.mima.gui.components.listeners.FilePopupActionHandler;
 import edu.kit.mima.gui.components.listeners.PopupListener;
@@ -53,7 +52,7 @@ import javax.swing.border.EmptyBorder;
         setOpaque(false);
         final var tooltip = new DirectoryTooltip(file, handler);
         addMouseListener(new PopupListener(tooltip, MouseEvent.BUTTON1, true));
-        add(new IconPanel(icon, Alignment.NORTH_WEST));
+        add(new IconPanel(icon));
         if (name != null && name.length() != 0) {
             final String title = file.isDirectory() ? name
                     : name.substring(0, name.lastIndexOf('.'));

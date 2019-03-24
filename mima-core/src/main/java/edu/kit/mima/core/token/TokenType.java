@@ -1,5 +1,9 @@
 package edu.kit.mima.core.token;
 
+import edu.kit.mima.core.parsing.lang.Keyword;
+import edu.kit.mima.core.parsing.lang.Punctuation;
+import org.jetbrains.annotations.Contract;
+
 /**
  * Possible types of {@link Token}.
  *
@@ -38,7 +42,7 @@ public enum TokenType {
     /**
      * Binary number type.
      */
-    BINARY,
+    BINARY(String.valueOf(Punctuation.BINARY_PREFIX)),
     /**
      * String type.
      */
@@ -46,7 +50,7 @@ public enum TokenType {
     /**
      * Comment type.
      */
-    COMMENT,
+    COMMENT(String.valueOf(Punctuation.COMMENT)),
     /**
      * new line type.
      */
@@ -59,11 +63,15 @@ public enum TokenType {
     /**
      * Definition type.
      */
-    DEFINITION,
+    DEFINITION(Keyword.DEFINITION + " "),
     /**
      * Constant type.
      */
-    CONSTANT,
+    CONSTANT(Keyword.CONSTANT + " "),
+    /**
+     * Reference type.
+     */
+    REFERENCE("var "),
 
     /*Utility types*/
     /**
@@ -81,5 +89,22 @@ public enum TokenType {
     /**
      * End of Scope.
      */
-    SCOPE_END
+    SCOPE_END;
+
+    private final String prefix;
+
+    @Contract(pure = true)
+    TokenType(final String prefix) {
+        this.prefix = prefix;
+    }
+
+    @Contract(pure = true)
+    TokenType() {
+        this("");
+    }
+
+    @Contract(pure = true)
+    public String getPrefix() {
+        return prefix;
+    }
 }
