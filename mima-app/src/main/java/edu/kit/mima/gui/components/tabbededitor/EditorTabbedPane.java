@@ -47,7 +47,7 @@ public class EditorTabbedPane extends JTabbedPane {
 
         glassPane = new DraggingGlassPane(this);
         setFocusable(false); //Prevent focus dotted line from appearing
-        setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
+        super.setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
         addChangeListener(e -> {
             firePropertyChange(SELECTED_TAB_PROPERTY, selectedTab, getSelectedIndex());
             selectedTab = getSelectedIndex();
@@ -131,7 +131,7 @@ public class EditorTabbedPane extends JTabbedPane {
 
     @Override
     public void setTabLayoutPolicy(final int tabLayoutPolicy) {
-        throw new UnsupportedOperationException("Only top tabs are supported at the moment.");
+        // Only top tabs are supported at the moment.
     }
 
     @NotNull

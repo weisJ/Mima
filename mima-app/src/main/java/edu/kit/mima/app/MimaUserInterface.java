@@ -135,12 +135,14 @@ public final class MimaUserInterface extends JFrame {
         return editorManager.currentFileManager();
     }
 
+    /**
+     * Start session.
+     *
+     * @param filePath path to open or null if session should be restored.
+     */
     private void startSession(@Nullable final String filePath) {
         if (filePath == null || filePath.isEmpty()) {
             final String filesString = Preferences.getInstance().readString(PropertyKey.LAST_FILE);
-            if (filesString.length() < 2) {
-                return;
-            }
             final String[] files = filesString.split("/");
             for (final String file : files) {
                 fileActions.openFile(file);

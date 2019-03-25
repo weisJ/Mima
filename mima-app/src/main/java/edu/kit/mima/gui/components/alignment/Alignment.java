@@ -18,53 +18,41 @@ import static edu.kit.mima.gui.components.alignment.AlignmentHelper.*;
  * @since 2018
  */
 public enum Alignment {
-    NORTH(AlignmentHelper.align(HOR_CENTER, VERT_TOP),
-          AlignmentHelper.alignRelative(HOR_CENTER_INSIDE, VERT_TOP_INSIDE),
-          AlignmentHelper.alignRelative(HOR_CENTER_OUTSIDE, VERT_TOP_OUTSIDE)
+    NORTH(AlignmentHelper.align(HOR_CENTER_INSIDE, VERT_TOP_INSIDE),
+          AlignmentHelper.align(HOR_CENTER_OUTSIDE, VERT_TOP_OUTSIDE)
     ),
-    SOUTH(AlignmentHelper.align(HOR_CENTER, VERT_BOTTOM),
-          AlignmentHelper.alignRelative(HOR_CENTER_INSIDE, VERT_BOTTOM_INSIDE),
-          AlignmentHelper.alignRelative(HOR_CENTER_OUTSIDE, VERT_BOTTOM_OUTSIDE)
+    SOUTH(AlignmentHelper.align(HOR_CENTER_INSIDE, VERT_BOTTOM_INSIDE),
+          AlignmentHelper.align(HOR_CENTER_OUTSIDE, VERT_BOTTOM_OUTSIDE)
     ),
-    EAST(AlignmentHelper.align(HOR_RIGHT, VERT_CENTER),
-         AlignmentHelper.alignRelative(HOR_RIGHT_INSIDE, VERT_CENTER_INSIDE),
-         AlignmentHelper.alignRelative(HOR_RIGHT_OUTSIDE, VERT_CENTER_OUTSIDE)
+    EAST(AlignmentHelper.align(HOR_RIGHT_INSIDE, VERT_CENTER_INSIDE),
+         AlignmentHelper.align(HOR_RIGHT_OUTSIDE, VERT_CENTER_OUTSIDE)
     ),
-    WEST(AlignmentHelper.align(HOR_LEFT, VERT_CENTER),
-         AlignmentHelper.alignRelative(HOR_LEFT_INSIDE, VERT_CENTER_INSIDE),
-         AlignmentHelper.alignRelative(HOR_LEFT_OUTSIDE, VERT_CENTER_OUTSIDE)
+    WEST(AlignmentHelper.align(HOR_LEFT_INSIDE, VERT_CENTER_INSIDE),
+         AlignmentHelper.align(HOR_LEFT_OUTSIDE, VERT_CENTER_OUTSIDE)
     ),
-    NORTH_EAST(AlignmentHelper.align(HOR_LEFT, VERT_TOP),
-               AlignmentHelper.alignRelative(HOR_LEFT_INSIDE, VERT_TOP_INSIDE),
-               AlignmentHelper.alignRelative(HOR_LEFT_OUTSIDE, VERT_TOP_OUTSIDE)
+    NORTH_EAST(AlignmentHelper.align(HOR_RIGHT_INSIDE, VERT_TOP_INSIDE),
+               AlignmentHelper.align(HOR_RIGHT_OUTSIDE, VERT_TOP_OUTSIDE)
     ),
-    NORTH_WEST(AlignmentHelper.align(HOR_RIGHT, VERT_TOP),
-               AlignmentHelper.alignRelative(HOR_RIGHT_INSIDE, VERT_TOP_INSIDE),
-               AlignmentHelper.alignRelative(HOR_RIGHT_OUTSIDE, VERT_TOP_OUTSIDE)
+    NORTH_WEST(AlignmentHelper.align(HOR_LEFT_INSIDE, VERT_TOP_INSIDE),
+               AlignmentHelper.align(HOR_LEFT_OUTSIDE, VERT_TOP_OUTSIDE)
     ),
-    SOUTH_EAST(AlignmentHelper.align(HOR_RIGHT, VERT_BOTTOM),
-               AlignmentHelper.alignRelative(HOR_RIGHT_INSIDE, VERT_BOTTOM_INSIDE),
-               AlignmentHelper.alignRelative(HOR_RIGHT_OUTSIDE, VERT_BOTTOM_OUTSIDE)
+    SOUTH_EAST(AlignmentHelper.align(HOR_RIGHT_INSIDE, VERT_BOTTOM_INSIDE),
+               AlignmentHelper.align(HOR_RIGHT_OUTSIDE, VERT_BOTTOM_OUTSIDE)
     ),
-    SOUTH_WEST(AlignmentHelper.align(HOR_LEFT, VERT_BOTTOM),
-               AlignmentHelper.alignRelative(HOR_LEFT_INSIDE, VERT_BOTTOM_INSIDE),
-               AlignmentHelper.alignRelative(HOR_LEFT_OUTSIDE, VERT_BOTTOM_OUTSIDE)
+    SOUTH_WEST(AlignmentHelper.align(HOR_LEFT_INSIDE, VERT_BOTTOM_INSIDE),
+               AlignmentHelper.align(HOR_LEFT_OUTSIDE, VERT_BOTTOM_OUTSIDE)
     ),
-    CENTER((toAlign, alignAt) -> alignAt,
-           AlignmentHelper.alignRelative(HOR_CENTER_INSIDE, VERT_CENTER_INSIDE),
-           AlignmentHelper.alignRelative(HOR_CENTER_OUTSIDE, VERT_CENTER_OUTSIDE)
+    CENTER(AlignmentHelper.align(HOR_CENTER_INSIDE, VERT_CENTER_INSIDE),
+           AlignmentHelper.align(HOR_CENTER_OUTSIDE, VERT_CENTER_OUTSIDE)
     );
 
 
-    private final BiFunction<Dimension, Point, Point> relativePos;
     private final BiFunction<Dimension, Rectangle, Point> alignInside;
     private final BiFunction<Dimension, Rectangle, Point> alignOutside;
 
     @Contract(pure = true)
-    Alignment(BiFunction<Dimension, Point, Point> relativePos,
-              BiFunction<Dimension, Rectangle, Point> alignInside,
+    Alignment(BiFunction<Dimension, Rectangle, Point> alignInside,
               BiFunction<Dimension, Rectangle, Point> alignOutside) {
-        this.relativePos = relativePos;
         this.alignInside = alignInside;
         this.alignOutside = alignOutside;
     }
@@ -138,7 +126,7 @@ public enum Alignment {
      * @return top/left position of aligned rectangle
      */
     public Point relativePos(@NotNull final Dimension toAlign, @NotNull final Point alignAt) {
-        return this.relativePos.apply(toAlign, alignAt);
+        return alignOutside(toAlign, new Rectangle(alignAt.x, alignAt.y, 0, 0));
     }
 
 

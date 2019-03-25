@@ -219,20 +219,6 @@ public class SyntaxTree {
     }
 
     /**
-     * Duplicate a layer.
-     *
-     * @param parent parent of layer to duplicate
-     */
-    private void duplicateLayer(final SyntaxNode parent) {
-        for (final var n : new ArrayList<>(parent.children())) {
-            final var duplicate = new SimpleSyntaxNode(n.getType(), n.getBegin(), n.getEnd(), null);
-            parent.removeChild(n);
-            duplicate.addChild(n);
-            parent.addChild(duplicate);
-        }
-    }
-
-    /**
      * Group items based on predicate.
      *
      * @param items       items to group
