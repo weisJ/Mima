@@ -242,7 +242,6 @@ public class TextBubbleBorder extends AbstractBorder {
         final Area area = new Area(bubble);
         area.add(new Area(pointer));
         g2.setRenderingHints(hints);
-
         g2.setColor(c.getBackground());
         g2.fill(area);
         g2.setColor(color);
@@ -261,13 +260,21 @@ public class TextBubbleBorder extends AbstractBorder {
             case WEST -> {
                 rx += pointerSize;
                 rw -= pointerSize;
+                rh -= thickness;
             }
-            case EAST -> rw -= pointerSize;
+            case EAST -> {
+                rw -= pointerSize;
+                rh -= thickness;
+            }
             case NORTH, NORTH_WEST, NORTH_EAST -> {
                 ry += pointerSize;
                 rh -= pointerSize;
+                rw -= thickness;
             }
-            case SOUTH, SOUTH_WEST, SOUTH_EAST -> rh -= pointerSize;
+            case SOUTH, SOUTH_WEST, SOUTH_EAST -> {
+                rh -= pointerSize;
+                rw -= thickness;
+            }
             default -> {
             }
         }

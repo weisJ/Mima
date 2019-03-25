@@ -1,6 +1,7 @@
 #Compute the Factorial of a number.
 #Works up to val = 10.
 §define const val = 5;
+§define x = 5, const y = 7, z, u, const w = 25;
 
 LDC(val);
 CALL(FACTORIAL);

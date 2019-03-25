@@ -66,23 +66,23 @@ public class GlobalEnvironment extends Environment {
      */
     private void setupDefaultInstructions() {
         //Halt Instruction
-        defineNewFunction("HALT", 0, (args, env, callback) -> {
+        defineNewFunction("HALT", 0, (args, env, call) -> {
             interpreter.setRunning(false);
             GlobalEnvironment.this.callback
                     .accept(new Value<>(ValueType.NUMBER, mima.getAccumulator()));
         });
         //Jump Instruction
-        defineNewFunction("JMP", 1, (args, env, callback) -> {
+        defineNewFunction("JMP", 1, (args, env, call) -> {
             var info = getJumpInformation(args, env);
-            interpreter.jump(info.getFirst(), info.getSecond(), callback);
+            interpreter.jump(info.getFirst(), info.getSecond(), call);
         });
         //Jump if negative Instruction
-        defineNewFunction("JMN", 1, (args, env, callback) -> {
+        defineNewFunction("JMN", 1, (args, env, call) -> {
             var info = getJumpInformation(args, env);
             if (mima.getAccumulator().msb() == 1) {
-                interpreter.jump(info.getFirst(), info.getSecond(), callback);
+                interpreter.jump(info.getFirst(), info.getSecond(), call);
             } else {
-                callback.accept(new Value<>(ValueType.NUMBER, 0));
+                call.accept(new Value<>(ValueType.NUMBER, 0));
             }
         });
     }
@@ -102,20 +102,20 @@ public class GlobalEnvironment extends Environment {
      */
     public void setupExtendedInstructionSet() {
         //CALL subroutine
-        defineNewFunction("CALL", 1, (args, env, callback) -> {
+        defineNewFunction("CALL", 1, (args, env, call) -> {
             final var argument = InstructionTools.getJumpReference(args, 0);
             mima.pushRoutine(env.getExpressionIndex() + 1, env);
             final Environment jumpEnv = env.lookupJump(argument.getValue().toString());
             final int jumpIndex = env.getJump(argument.getValue().toString());
-            interpreter.jump(jumpEnv, jumpIndex, callback);
+            interpreter.jump(jumpEnv, jumpIndex, call);
         });
         //Return from subroutine
-        defineNewFunction("RET", 0, (args, env, callback) -> {
+        defineNewFunction("RET", 0, (args, env, call) -> {
             if (mima.hasEmptyReturnStack()) {
                 throw new IllegalArgumentException("nowhere to return to");
             }
             final var pair = mima.returnRoutine();
-            interpreter.jump(pair.getSecond(), pair.getFirst(), callback);
+            interpreter.jump(pair.getSecond(), pair.getFirst(), call);
         });
     }
 
@@ -129,9 +129,9 @@ public class GlobalEnvironment extends Environment {
     private void defineNewFunction(@NotNull final String name,
                                    final int argNum,
                                    @NotNull final Instruction instruction) {
-        defineFunction(name, (args, env, callback) -> {
+        defineFunction(name, (args, env, call) -> {
             InstructionTools.checkArgNumber(args, argNum);
-            instruction.apply(args, env, callback);
+            instruction.apply(args, env, call);
         });
     }
 }

@@ -204,7 +204,7 @@ public class Interpreter {
             continuation.run();
         } else {
             evaluate(definition.getSecond(), environment, v -> {
-                if (VOID == v) {
+                if (v == VOID) {
                     fail("Not a definition body: " + definition.getSecond());
                 }
                 if (((MachineWord) v.getValue()).intValue() < 0) {

@@ -43,6 +43,7 @@ public class TooltipEventHandler extends MouseAdapter {
         this.showDelay = showDelay;
         this.vanishingDelay = vanishingDelay;
         tooltipComponent.container.addMouseListener(this);
+        tooltipComponent.container.addMouseMotionListener(this);
         tooltipComponent.content.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(@NotNull final MouseEvent e) {
