@@ -1,6 +1,6 @@
 package edu.kit.mima.core.token;
 
-import edu.kit.mima.core.file.FileObjectAdapter;
+import edu.kit.mima.api.util.ValueTuple;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,12 +14,10 @@ import java.util.stream.Stream;
  * @author Jannis Weis
  * @since 2018
  */
-public class AtomToken<T> extends FileObjectAdapter implements Token<T> {
+public class AtomToken<T> extends ValueTuple<T, TokenType> implements Token<T> {
 
-    @NotNull private final TokenType type;
     private final int filePos;
     private final int index;
-    private final T value;
 
     /**
      * Plain Token that holds any value type.
@@ -33,8 +31,7 @@ public class AtomToken<T> extends FileObjectAdapter implements Token<T> {
                      @NotNull final T value,
                      final int index,
                      final int filePos) {
-        this.type = type;
-        this.value = value;
+        super(value, type);
         this.index = index;
         this.filePos = filePos;
     }
@@ -49,22 +46,6 @@ public class AtomToken<T> extends FileObjectAdapter implements Token<T> {
         this(type, value, -1, -1);
     }
 
-    @NotNull
-    @Override
-    public TokenType getType() {
-        return type;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public Stream<Token> stream(boolean includeChildren) {
-        Stream<Token> stream = Stream.of(this);
-        if (includeChildren && value instanceof Token) {
-            stream = Stream.concat(stream, ((Token) (value)).stream());
-        }
-        return stream;
-    }
-
     @Override
     public int getLineIndex() {
         return index;
@@ -75,27 +56,47 @@ public class AtomToken<T> extends FileObjectAdapter implements Token<T> {
         return filePos;
     }
 
-    @NotNull
     @Override
-    public T getValue() {
-        return value;
+    public int getLength() {
+        return 0;
     }
 
     @NotNull
     @Override
-    public String toString() {
-        return "[type=" + type + "]{ " + value + " }";
+    public T getValue() {
+        return getFirst();
+    }
+
+    @NotNull
+    @Override
+    public TokenType getType() {
+        return getSecond();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Stream<Token> stream(boolean includeChildren) {
+        Stream<Token> stream = Stream.of(this);
+        if (includeChildren && getValue() instanceof Token) {
+            stream = Stream.concat(stream, ((Token) (getValue())).stream());
+        }
+        return stream;
     }
 
     @NotNull
     @Override
     public String simpleName() {
-        final String prefix = type.getPrefix();
-        if (value instanceof Token) {
-            return prefix + ((Token) value).simpleName();
+        final String prefix = getType().getPrefix();
+        if (getValue() instanceof Token) {
+            return prefix + ((Token) getValue()).simpleName();
         } else {
-            return prefix + value.toString();
+            return prefix + getValue().toString();
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getType(), getValue());
     }
 
     @Contract(value = "null -> false", pure = true)
@@ -108,12 +109,13 @@ public class AtomToken<T> extends FileObjectAdapter implements Token<T> {
             return false;
         }
         final AtomToken<?> atomToken = (AtomToken<?>) obj;
-        return type == atomToken.type
-                && Objects.equals(value, atomToken.value);
+        return getType() == atomToken.getType()
+                && Objects.equals(getValue(), atomToken.getValue());
     }
 
+    @NotNull
     @Override
-    public int hashCode() {
-        return Objects.hash(type, value);
+    public String toString() {
+        return "[type=" + getType() + "]{ " + getValue() + " }";
     }
 }

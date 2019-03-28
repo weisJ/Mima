@@ -83,6 +83,7 @@ public class RunActions {
                 var pref = Preferences.getInstance();
                 mimaRunner.setProgram(new Program(
                         mimaCompiler.compile(mimaUI.currentEditor().getText(),
+                                             mimaUI.currentFileManager().getLastFile(),
                                              pref.readString(PropertyKey.DIRECTORY_WORKING),
                                              pref.readString(PropertyKey.DIRECTORY_MIMA)),
                         MimaConstants.instructionSetForFile(file)));

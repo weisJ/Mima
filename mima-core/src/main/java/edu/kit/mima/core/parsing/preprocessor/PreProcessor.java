@@ -36,7 +36,7 @@ public final class PreProcessor extends Processor<Token, TokenStream> {
     @NotNull private final String workingDirectory;
     @NotNull private final String mimaDirectory;
     @NotNull private final StringBuilder processedInput;
-    @NotNull private final Set<String> processedFiles;
+    @NotNull private final Set<File> processedFiles;
     private List<ParserException> errors;
     private boolean recursive;
     private boolean isHome = false;
@@ -45,11 +45,13 @@ public final class PreProcessor extends Processor<Token, TokenStream> {
      * Create new PreProcessor to process preProcessor Statements.
      *
      * @param inputString      string to process
+     * @param inputPath        path to input file.
      * @param workingDirectory working directory
      * @param mimaDirectory    mima directory
      * @param recursive        whether to recursively parse and input included files
      */
     public PreProcessor(@NotNull final String inputString,
+                        @NotNull final String inputPath,
                         @NotNull final String workingDirectory,
                         @NotNull final String mimaDirectory,
                         final boolean recursive) {
@@ -58,6 +60,7 @@ public final class PreProcessor extends Processor<Token, TokenStream> {
         this.mimaDirectory = mimaDirectory;
         this.processedInput = new StringBuilder(inputString);
         this.processedFiles = new HashSet<>();
+        processedFiles.add(new File(inputPath));
         this.errors = new ArrayList<>();
         this.recursive = recursive;
     }
@@ -72,7 +75,7 @@ public final class PreProcessor extends Processor<Token, TokenStream> {
      * @param isHome           whether the file to process is on the working directory
      */
     private PreProcessor(@NotNull final String inputString,
-                         @NotNull final Set<String> processedFiles,
+                         @NotNull final Set<File> processedFiles,
                          @NotNull final String workingDirectory,
                          @NotNull final String mimaDirectory,
                          final boolean isHome) {
@@ -186,27 +189,29 @@ public final class PreProcessor extends Processor<Token, TokenStream> {
      * @return true if successful
      */
     private boolean tryPath(@NotNull final String path, final boolean isHome) {
-        if (processedFiles.contains(path)) {
-            return true;
-        }
-        try {
-            final String file = IoTools.loadFile(path);
-            processedFiles.add(path);
-
-            processedInput.append("\n#<<File = ").append(path).append(">>#\n");
-            final var processed = new PreProcessor(file, processedFiles, workingDirectory,
-                                                   mimaDirectory, isHome).process();
-            final List<ParserException> err = processed.getSecond();
-            if (!err.isEmpty()) {
-                errors.add(new ProcessorException("File not found: \"" + path + "\""));
-                errors.addAll(err);
+        var filePath = new File(path);
+        boolean success;
+        if (processedFiles.add(filePath)) {
+            try {
+                final String file = IoTools.loadFile(path);
+                processedInput.append("\n#<<File = ").append(path).append(">>#\n");
+                final var processed = new PreProcessor(file, processedFiles, workingDirectory,
+                                                       mimaDirectory, isHome).process();
+                final List<ParserException> err = processed.getSecond();
+                if (!err.isEmpty()) {
+                    errors.add(new ProcessorException("File not found: \"" + path + "\""));
+                    errors.addAll(err);
+                }
+                processedInput.append(processed.getFirst());
+                processedInput.append("\n#<<File>>#\n");
+                success = true;
+            } catch (@NotNull final IOException e) {
+                success = false;
             }
-            processedInput.append(processed.getFirst());
-            processedInput.append("\n#<<File>>#\n");
-            return true;
-        } catch (@NotNull final IOException e) {
-            return false;
+        } else {
+            success = false;
         }
+        return success;
     }
 
     /**

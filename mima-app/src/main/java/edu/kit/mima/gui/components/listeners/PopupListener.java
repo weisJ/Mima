@@ -39,7 +39,7 @@ public class PopupListener extends MouseAdapter {
 
     public PopupListener(final JPopupMenu popupMenu, final int mouseButton,
                          final boolean attachToComponent) {
-        this(popupMenu, -1, false, false);
+        this(popupMenu, mouseButton, attachToComponent, false);
     }
 
 

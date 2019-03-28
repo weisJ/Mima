@@ -76,7 +76,7 @@ public class MimaHighlighter implements Highlighter, FileEventHandler,
             }
 
             var pref = Preferences.getInstance();
-            final var processed = new PreProcessor(text,
+            final var processed = new PreProcessor(text, "",
                                                    pref.readString(PropertyKey.DIRECTORY_WORKING),
                                                    pref.readString(PropertyKey.DIRECTORY_MIMA),
                                                    false).process();

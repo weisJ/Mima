@@ -82,6 +82,11 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <compilerArgs combine.children="append">
+                        <arg>--enable-preview</arg>
+                    </compilerArgs>
+                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -107,16 +112,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
-                <configuration>
-                    <compilerArgs combine.children="append">
-                        <arg>--enable-preview</arg>
-                    </compilerArgs>
-                </configuration>
             </plugin>
         </plugins>
     </build>

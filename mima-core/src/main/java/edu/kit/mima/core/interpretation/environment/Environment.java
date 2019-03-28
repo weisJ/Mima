@@ -119,7 +119,6 @@ public class Environment {
     @NotNull
     public Environment lookupFunction(final String name) {
         return lookup(env -> env.functions, name);
-
     }
 
     /**
