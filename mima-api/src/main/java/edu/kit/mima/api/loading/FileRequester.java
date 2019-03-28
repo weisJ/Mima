@@ -1,11 +1,13 @@
 package edu.kit.mima.api.loading;
 
+import edu.kit.mima.api.lambda.LambdaUtil;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.Component;
 import java.io.File;
-import java.io.IOException;
+import java.util.Optional;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -27,6 +29,7 @@ public class FileRequester {
      * @param parent  parent component for dialogs
      * @param manager underlying load manager
      */
+    @Contract(pure = true)
     public FileRequester(final Component parent, final LoadManager manager) {
         this.manager = manager;
         this.parent = parent;
@@ -44,19 +47,14 @@ public class FileRequester {
                             final String searchPath,
                             @NotNull final String extension,
                             @NotNull final Runnable abortHandler) {
-        String path = requestPath(searchPath, new String[]{extension}, abortHandler);
-        if (path == null) {
-            return;
-        }
-        if (!path.endsWith(extension)) {
-            path += '.' + extension;
-        }
-
-        manager.onSave(path);
         try {
-            IoTools.saveFile(text, path);
-            manager.afterSave();
-        } catch (@NotNull final IOException e) {
+            Optional.ofNullable(requestPath(searchPath, new String[]{extension}, abortHandler))
+                    .map(p -> !p.endsWith(extension) ? p + '.' + extension : p)
+                    .stream()
+                    .peek(manager::onSave)
+                    .peek(LambdaUtil.reduceFirst(LambdaUtil.wrap(IoTools::saveFile), text))
+                    .forEach(p -> manager.afterSave());
+        } catch (final RuntimeException e) {
             manager.onFail(e.getMessage());
         }
     }
@@ -73,21 +71,16 @@ public class FileRequester {
                                         final String[] extensions,
                                         @NotNull final Runnable abortHandler) {
         manager.beforeLoad();
-        final String path = requestPath(searchPath, extensions, abortHandler);
-        if (path == null) {
-            abortHandler.run();
-            throw new IllegalArgumentException("aborted");
-        }
-
-        manager.onLoad(path);
-        String text = null;
         try {
-            text = IoTools.loadFile(path);
-            manager.afterLoad();
-        } catch (@NotNull final IOException e) {
+            return Optional.ofNullable(requestPath(searchPath, extensions, abortHandler))
+                    .stream()
+                    .peek(manager::onLoad)
+                    .map(LambdaUtil.wrap(IoTools::loadFile))
+                    .findFirst().orElse(null);
+        } catch (final RuntimeException e) {
             manager.onFail(e.getMessage());
+            return null;
         }
-        return text;
     }
 
     /*
@@ -100,15 +93,15 @@ public class FileRequester {
         final FileNameExtensionFilter filter = new FileNameExtensionFilter(extensions[0],
                                                                            extensions);
         chooser.setFileFilter(filter);
-        final int value = chooser.showDialog(parent, "Choose File");
-        String path = null;
-        if (value == JFileChooser.APPROVE_OPTION) {
-            final File file = chooser.getSelectedFile();
-            path = file.getAbsolutePath();
-            manager.afterRequest(file);
-        } else {
-            abortHandler.run();
-        }
-        return path;
+        return Optional.of(chooser.showDialog(parent, "Choose File")).stream()
+                .filter(i -> i == JFileChooser.APPROVE_OPTION)
+                .map(i -> chooser.getSelectedFile())
+                .peek(manager::afterRequest)
+                .map(File::getAbsolutePath)
+                .findFirst()
+                .orElseGet(() -> {
+                    abortHandler.run();
+                    return null;
+                });
     }
 }

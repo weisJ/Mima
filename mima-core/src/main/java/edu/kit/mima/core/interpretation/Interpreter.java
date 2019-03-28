@@ -1,5 +1,6 @@
 package edu.kit.mima.core.interpretation;
 
+import edu.kit.mima.api.lambda.LambdaUtil;
 import edu.kit.mima.api.util.Tuple;
 import edu.kit.mima.core.controller.DebugController;
 import edu.kit.mima.core.data.MachineWord;
@@ -14,7 +15,6 @@ import edu.kit.mima.core.token.ListToken;
 import edu.kit.mima.core.token.ProgramToken;
 import edu.kit.mima.core.token.Token;
 import edu.kit.mima.core.token.TokenType;
-import edu.kit.mima.core.util.LambdaUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

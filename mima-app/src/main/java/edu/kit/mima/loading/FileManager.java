@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import javax.swing.JOptionPane;
 
@@ -75,7 +76,7 @@ public class FileManager implements AutoCloseable {
             @Override
             public void afterRequest(@NotNull final File chosenFile) {
                 lastFile = chosenFile.getAbsolutePath();
-                updateReferences(chosenFile);
+                updateReferences(chosenFile.getAbsolutePath());
             }
         });
         directory = Preferences.getInstance().readString(PropertyKey.DIRECTORY_WORKING);
@@ -239,7 +240,7 @@ public class FileManager implements AutoCloseable {
      */
     @NotNull
     public String getLastFile() {
-        return lastFile == null ? "" : lastFile;
+        return Optional.ofNullable(lastFile).orElse("");
     }
 
     /**
@@ -249,13 +250,6 @@ public class FileManager implements AutoCloseable {
      */
     public String getLastExtension() {
         return lastExtension;
-    }
-
-    /*
-     * Set the extension used by file
-     */
-    private void updateReferences(@NotNull final File file) {
-        updateReferences(file.getAbsolutePath());
     }
 
     /*

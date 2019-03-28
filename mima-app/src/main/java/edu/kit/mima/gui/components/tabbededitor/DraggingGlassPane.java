@@ -100,7 +100,7 @@ public class DraggingGlassPane extends JPanel {
         if (showDrag && !timer.isRunning()) {
             timer.setRepeats(true);
             timer.start();
-        } else {
+        } else if (!showDrag) {
             timer.stop();
         }
     }

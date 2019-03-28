@@ -194,15 +194,11 @@ public class MimaFormatter implements Formatter {
      */
     private String printLeaf(@NotNull final SyntaxNode node) {
         final SyntaxToken token = tokens[node.getBegin()];
-        switch (token.getType()) {
-            case JUMP_POINT:
-            case KEYWORD:
-                return token.getValue().toString() + ' ';
-            case PUNCTUATION:
-                return printPunctuation(token.getValue().toString().charAt(0));
-            default:
-                return token.getValue().toString();
-        }
+        return switch (token.getType()) {
+            case JUMP_POINT, KEYWORD -> token.getValue().toString() + ' ';
+            case PUNCTUATION -> printPunctuation(token.getValue().toString().charAt(0));
+            default -> token.getValue().toString();
+        };
     }
 
     /**

@@ -20,21 +20,24 @@ public class MimaCompiler {
     /**
      * Compile given input.
      *
-     * @param input file input.
+     * @param input            file input.
+     * @param filePath         path to file.
      * @param workingDirectory working directory
      * @param mimaDirectory    mima directory
      * @return compiled {@link ProgramToken}.
      */
     public ProgramToken compile(@NotNull String input,
+                                @NotNull String filePath,
                                 @NotNull String workingDirectory,
                                 @NotNull String mimaDirectory) {
-        return compile(input, workingDirectory, mimaDirectory, true, true, true);
+        return compile(input, filePath, workingDirectory, mimaDirectory, true, true, true);
     }
 
     /**
      * Compile given input.
      *
      * @param input            input file
+     * @param filePath         path to file.
      * @param workingDirectory working directory
      * @param mimaDirectory    mima directory
      * @param throwErrors      whether errors should be thrown or ignored.
@@ -43,6 +46,7 @@ public class MimaCompiler {
      * @return compiled {@link ProgramToken}.
      */
     public ProgramToken compile(@NotNull String input,
+                                @NotNull String filePath,
                                 @NotNull String workingDirectory,
                                 @NotNull String mimaDirectory,
                                 final boolean throwErrors,
@@ -51,7 +55,7 @@ public class MimaCompiler {
         final List<Exception> errors = new ArrayList<>();
         String text = input;
         if (preProcess) {
-            final var processed = new PreProcessor(input, workingDirectory,
+            final var processed = new PreProcessor(input, filePath, workingDirectory,
                                                    mimaDirectory, true).process();
             errors.addAll(processed.getSecond());
             text = processed.getFirst();
