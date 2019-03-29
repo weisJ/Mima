@@ -33,6 +33,7 @@ __rs__ is the return stack
 
 __Mima:__
 
+- `$\x^2$`
 - __LDC__ __c__ : c  ⟶  accu
 - __LDV__ __a__ : <a\> ⟶ accu
 - __STV__ __a__ : accu ⟶ <a\>
@@ -68,17 +69,17 @@ __MimaX:__
 
 # Language details
 
-- Comments: __#...__ or __#...#__
+- Comments: ```#...``` or ```#...#```.
 - Definitions:
-    - __§define__ __"def"__ __=__ __"value"__ (use with e.g. STV "def")
-    - __§define__ __const__ __"ref"__ __=__ __"value"__ (use with e.g. LDC("ref"))
-    - __"ref"__ __:__ __...__ (use with e.g. JMP "ref")
-- Statements must be terminated with __;__
-- Arguments are passed within parenthesis (e.g. STV(5), LDVR(1,SP())
-- __SP__ is a function call, so it has to be used by typing __"SP()"__ and **not** __"SP"__
-- You can use scopes "__{ ... }__" for variable shadowing.
-  Variables are lost after the scope except they explicitly define a memory cell.
-  Constants are lost indefinitely
+    - ```§define "def" = "value"``` (use with e.g. STV "def").
+    - ```§define const "ref" = "value"``` (use with e.g. LDC("ref")).
+    - ```"ref" : ...``` (use with e.g. JMP "ref").
+- Statements must be terminated by ```;```.
+- Arguments are passed within parenthesis (e.g. ```STV(5)```, ```LDVR(1,SP()```)
+- ```SP``` is a function call, so it has to be used by typing ```SP()``` and **not** ```SP```.
+- You can use scopes ```{ ... }``` for variable shadowing.
+  Variables are lost outisde the scope except they explicitly define a memory cell.
+  Constants are lost indefinitely.
 - Variables must be defined before they can be used. Jumps are the only exception for this.
 - You can **not** jump into an inner scope. Jumps can only occur within the same or an outer scope.
 
