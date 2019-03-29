@@ -22,16 +22,6 @@ import edu.kit.mima.util.BindingUtil;
 import edu.kit.mima.util.FileName;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Toolkit;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.IOException;
-import java.util.Optional;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -39,6 +29,14 @@ import javax.swing.UIManager;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
+import java.util.Optional;
 
 /**
  * Mima Editor Frame.
@@ -79,9 +77,9 @@ public final class MimaUserInterface extends JFrame {
 
         App.logger.setConsole(console);
         createBinding();
-        startSession(filePath);
         setupWindow();
         setupComponents();
+        startSession(filePath);
         memoryView.updateView();
     }
 
@@ -97,12 +95,6 @@ public final class MimaUserInterface extends JFrame {
                          MimaRunner.RUNNING_PROPERTY);
         BindingUtil.bind(debugger, () -> currentEditor().markLine(-1),
                          Debugger.RUNNING_PROPERTY);
-        fileDisplay.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusLost(final FocusEvent e) {
-                fileDisplay.setFile(new File(editorManager.currentFileManager().getLastFile()));
-            }
-        });
         tabbedEditor.addChangeListener(e -> {
             final Editor editor = (Editor) tabbedEditor.getSelectedComponent();
             if (editor == null) {
@@ -231,14 +223,19 @@ public final class MimaUserInterface extends JFrame {
      * Update window title to current file name.
      */
     public void fileChanged() {
-        final String file = editorManager.currentFileManager().getLastFile();
-        setTitle(TITLE + ' ' + FileName.shorten(file));
-        final File parent = new File(file).getParentFile();
-        final var pref = Preferences.getInstance();
-        final String workDir = parent != null
-                ? parent.getAbsolutePath()
-                : pref.readString(PropertyKey.DIRECTORY_MIMA);
-        pref.saveString(PropertyKey.DIRECTORY_WORKING, workDir);
-        pref.saveString(PropertyKey.LAST_FILE, file);
+        Optional.ofNullable(editorManager.currentFileManager())
+                .map(FileManager::getLastFile)
+                .stream()
+                .peek(f -> fileDisplay.setFile(new File(f)))
+                .peek(f -> setTitle(TITLE + ' ' + FileName.shorten(f)))
+                .findFirst()
+                .ifPresent(f -> {
+                    final File parent = new File(f).getParentFile();
+                    final var pref = Preferences.getInstance();
+                    final String workDir = parent != null
+                                           ? parent.getAbsolutePath()
+                                           : pref.readString(PropertyKey.DIRECTORY_MIMA);
+                    pref.saveString(PropertyKey.DIRECTORY_WORKING, workDir);
+                });
     }
 }

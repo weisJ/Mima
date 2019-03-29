@@ -11,18 +11,6 @@ import edu.kit.mima.preferences.UserPreferenceChangedListener;
 import edu.kit.mima.util.HSLColor;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.event.MouseListener;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Function;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.text.AbstractDocument;
@@ -31,6 +19,19 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyledDocument;
 import javax.swing.text.StyledEditorKit;
 import javax.swing.text.ViewFactory;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.event.FocusListener;
+import java.awt.event.MouseListener;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
 
 /**
  * Editor that supports highlighting and text history. If the instance of an Editor isn't used
@@ -322,6 +323,16 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
         historyController.setActive(true);
         setCaretPosition(Math.max(Math.min(pos, text.length() - 1), 0));
         update();
+    }
+
+    @Override
+    public synchronized void addFocusListener(FocusListener l) {
+        numberedTextPane.getPane().addFocusListener(l);
+    }
+
+    @Override
+    public synchronized void removeFocusListener(FocusListener l) {
+        numberedTextPane.getPane().removeFocusListener(l);
     }
 
     /**
