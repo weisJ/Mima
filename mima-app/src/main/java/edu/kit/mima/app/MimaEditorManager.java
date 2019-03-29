@@ -18,6 +18,8 @@ import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,6 +71,7 @@ public class MimaEditorManager implements AutoCloseable {
                 throw new IllegalArgumentException("didn't save", e);
             }
         });
+        pane.addChangeListener(e -> parent.fileChanged());
         return pane;
     }
 
@@ -99,6 +102,12 @@ public class MimaEditorManager implements AutoCloseable {
         fm.addFileEventHandler(highlighter);
         editor.setRepaint(false);
         editor.setHighlighter(highlighter);
+        editor.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                parent.fileChanged();
+            }
+        });
         editor.addEditEventHandler(() -> fm
                 .setText(editor.getText().replaceAll(String.format("%n"), "\n")));
         editor.useHistory(true,
