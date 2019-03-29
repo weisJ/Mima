@@ -3,11 +3,11 @@ package edu.kit.mima.gui.components.listeners;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.JPopupMenu;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.JPopupMenu;
 
 /**
  * Listener for Popups.
@@ -87,6 +87,7 @@ public class PopupListener extends MouseAdapter {
             x = p.x;
         }
         if (attachToComponent) {
+            x = 0;
             y = c.getHeight();
         }
         return new Point(x, y);

@@ -1,4 +1,4 @@
-package edu.kit.mima.api.function;
+package edu.kit.mima.api.lambda;
 
 /**
  * Function with 3 arguments.
@@ -6,6 +6,7 @@ package edu.kit.mima.api.function;
  * @author Jannis Weis
  * @since 2018
  */
+@FunctionalInterface
 public interface TriFunction<T, K, R, S> {
 
     /**

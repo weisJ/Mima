@@ -14,13 +14,13 @@ import edu.kit.mima.preferences.PropertyKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.AbstractAction;
+import javax.swing.JComponent;
+import javax.swing.KeyStroke;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import javax.swing.AbstractAction;
-import javax.swing.JComponent;
-import javax.swing.KeyStroke;
 
 /**
  * Manager for mima files.
@@ -30,8 +30,10 @@ import javax.swing.KeyStroke;
  */
 public class MimaEditorManager implements AutoCloseable {
 
-    @NotNull private final Map<Editor, FileManager> fileManagers;
-    @NotNull private final EditorTabbedPane tabbedEditor;
+    @NotNull
+    private final Map<Editor, FileManager> fileManagers;
+    @NotNull
+    private final EditorTabbedPane tabbedEditor;
     private final MimaUserInterface parent;
     private Tuple<Editor, FileManager> cashed;
 
@@ -103,7 +105,6 @@ public class MimaEditorManager implements AutoCloseable {
                           Preferences.getInstance().readInteger(PropertyKey.EDITOR_HISTORY_SIZE));
         editor.showCharacterLimit(80); //Todo Preference
         editor.setText(fm.getText());
-        editor.setRepaint(false);
         setupHotKeys(editor);
         cashed = new ValueTuple<>(editor, fm);
         return cashed;
@@ -119,13 +120,16 @@ public class MimaEditorManager implements AutoCloseable {
         String lastFile = fileManager.getLastFile();
         for (final var entry : fileManagers.entrySet()) {
             if (entry.getValue() != fileManager
-                    && entry.getValue().getLastFile().equals(lastFile)) {
+                && entry.getValue().getLastFile().equals(lastFile)) {
                 tabbedEditor.setSelectedComponent(entry.getKey());
                 return;
             }
         }
         editor.setRepaint(true);
         editor.setText(fileManager.getText());
+        var pref = Preferences.getInstance();
+        editor.useHistory(pref.readBoolean(PropertyKey.EDITOR_HISTORY),
+                          pref.readInteger(PropertyKey.EDITOR_HISTORY_SIZE));
         lastFile = lastFile.substring(Math.max(Math.min(lastFile.lastIndexOf('\\') + 1,
                                                         lastFile.length() - 1), 0));
         tabbedEditor.addTab(lastFile, Icons.forFile(lastFile), editor);

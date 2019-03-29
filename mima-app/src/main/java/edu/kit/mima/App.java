@@ -9,8 +9,8 @@ import edu.kit.mima.logger.ConsoleLogger;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.SplashScreen;
 import javax.swing.SwingUtilities;
+import java.awt.SplashScreen;
 
 /**
  * Entry point for the Application.
