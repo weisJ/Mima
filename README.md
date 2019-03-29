@@ -33,7 +33,6 @@ __rs__ is the return stack
 
 __Mima:__
 
-- `$\x^2$`
 - __LDC__ __c__ : c  ⟶  accu
 - __LDV__ __a__ : <a\> ⟶ accu
 - __STV__ __a__ : accu ⟶ <a\>
