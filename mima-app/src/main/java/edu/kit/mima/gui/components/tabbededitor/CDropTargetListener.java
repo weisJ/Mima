@@ -4,6 +4,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.Icon;
 import java.awt.Component;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -12,7 +13,6 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.util.Objects;
-import javax.swing.Icon;
 
 /**
  * Target Listener for {@link EditorTabbedPane} dragging events.
@@ -69,18 +69,18 @@ public class CDropTargetListener implements DropTargetListener {
     private void convertTab(@NotNull final TabTransferData transferData, int targetIndex) {
         final EditorTabbedPane source = transferData.getTabbedPane();
         final int sourceIndex = transferData.getTabIndex();
-        if (sourceIndex < 0
-                || targetIndex < 0
-                || (tabbedPane == source && sourceIndex == targetIndex)) {
+        int newIndex = tabbedPane == source && sourceIndex > targetIndex
+                       ? targetIndex
+                       : targetIndex - 1;
+        if (newIndex < 0
+            || targetIndex < 0
+            || (tabbedPane == source && newIndex == sourceIndex)) {
             return;
         }
         final Component cmp = source.getComponentAt(sourceIndex);
         final String str = source.getTitleAt(sourceIndex);
         final Icon icon = source.getIconAt(sourceIndex);
         final String tooltip = source.getToolTipTextAt(sourceIndex);
-        int newIndex = tabbedPane == source && sourceIndex > targetIndex
-                ? targetIndex
-                : targetIndex - 1;
         source.remove(sourceIndex);
         tabbedPane.insertTab(str, icon, cmp, tooltip, newIndex);
         tabbedPane.setSelectedIndex(newIndex);

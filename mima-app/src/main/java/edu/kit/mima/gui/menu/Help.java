@@ -1,16 +1,18 @@
 package edu.kit.mima.gui.menu;
 
 import edu.kit.mima.app.MimaUserInterface;
-import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
-import javafx.scene.Scene;
-import javafx.scene.web.WebView;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.JEditorPane;
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -23,7 +25,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import javax.swing.JFrame;
 
 /**
  * Help menu frame for {@link MimaUserInterface}.
@@ -44,13 +45,16 @@ public final class Help extends JFrame {
 
     private static final Dimension SIZE = Toolkit.getDefaultToolkit().getScreenSize();
 
-    private static Help instance;
+    private static Help instance = new Help();
 
-    @Nullable private static Thread loadSource;
+    @Nullable
+    private static Thread loadSource;
     private static boolean loadedFromWeb;
 
-    private static JFXPanel jfxPanel;
-    @Nullable private static String source;
+    private static JEditorPane panel;
+    private static HTMLEditorKit kit;
+    @Nullable
+    private static String source;
 
     /*
      * Construct the Help Screen
@@ -64,8 +68,17 @@ public final class Help extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
 
-        jfxPanel = new JFXPanel();
-        add(jfxPanel);
+        panel = new JEditorPane();
+        kit = new HTMLEditorKit();
+        panel.setEditorKit(kit);
+        panel.setEditable(false);
+
+        StyleSheet styleSheet = kit.getStyleSheet();
+        styleSheet.addRule("body {color:#D8D8D8, font-family:Monospaced}");
+
+        var scrollPane = new JScrollPane();
+        scrollPane.setViewportView(panel);
+        add(scrollPane);
 
         loadSource = new Thread(this::fetchFromWebSource);
         loadSource.start();
@@ -77,9 +90,6 @@ public final class Help extends JFrame {
      * @return instance of Help
      */
     public static Help getInstance() {
-        if (instance == null) {
-            instance = new Help();
-        }
         return instance;
     }
 
@@ -102,17 +112,10 @@ public final class Help extends JFrame {
     }
 
     private static void showHtml(final String htmlSource) {
-        Platform.runLater(() -> {
-            final WebView webView = new WebView();
-            webView.getEngine().loadContent(
-                    "<html><body text=\"#D8D8D8\" "
-                            + "bgcolor=\"#3c3f41\""
-                            + "style='font-family: "
-                            + "Menlo,Monaco,Consolas,\"Liberation Mono\",\"Courier New\","
-                            + "monospace'>"
-                            + htmlSource
-                            + "</body></html>");
-            jfxPanel.setScene(new Scene(webView));
+        SwingUtilities.invokeLater(() -> {
+            var doc = kit.createDefaultDocument();
+            panel.setDocument(doc);
+            panel.setText("<html><body>" + htmlSource + "</body></html>");
         });
     }
 
@@ -143,7 +146,8 @@ public final class Help extends JFrame {
     /*
      * Load ReadMe from github
      */
-    private @Nullable String loadMarkdown() {
+    private @Nullable
+    String loadMarkdown() {
         try {
             final URLConnection urlConnection = new URL(HELP_WEB).openConnection();
 

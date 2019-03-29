@@ -8,15 +8,15 @@ import edu.kit.mima.util.HSLColor;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Frame;
-import java.awt.Insets;
-import java.awt.Window;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.metal.DefaultMetalTheme;
 import javax.swing.plaf.metal.MetalLookAndFeel;
+import java.awt.Frame;
+import java.awt.Insets;
+import java.awt.Window;
 
 /**
  * Manager for the Look and Feel.

@@ -8,16 +8,16 @@ import edu.kit.mima.util.FileName;
 import edu.kit.mima.util.HSLColor;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.AbstractAction;
+import javax.swing.JMenuItem;
+import javax.swing.SwingUtilities;
+import javax.swing.border.LineBorder;
 import java.awt.AWTException;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.Robot;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import javax.swing.AbstractAction;
-import javax.swing.JMenuItem;
-import javax.swing.SwingUtilities;
-import javax.swing.border.LineBorder;
 
 /**
  * Tooltip Menu for Displaying directories and files.
@@ -64,7 +64,7 @@ public class DirectoryTooltip extends ScrollPopupMenu {
     public void show(final Component invoker, final int x, final int y) {
         super.show(invoker, x, y);
         SwingUtilities.invokeLater(() -> {
-            if (getComponentCount() < 1) {
+            if (getComponentCount() < 1 || !this.isVisible()) {
                 return;
             }
             final var c = this.getComponent(0);

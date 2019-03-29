@@ -215,7 +215,7 @@ public class SyntaxParser extends Processor<SyntaxToken, SyntaxTokenStream> {
                 tokens.add(reference);
                 tokens.add(parseDelimiter());
                 if (!isPunctuation(Punctuation.INSTRUCTION_END)) {
-                    return parseExpression();
+                    tokens.add(parseExpression());
                 }
             }
             return reference;
