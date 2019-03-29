@@ -1,9 +1,8 @@
+<img src="https://user-images.githubusercontent.com/31143295/40985489-8630f3be-68e4-11e8-8eae-c1adc6bf9ade.png" width="100" height="100" align="right">
+
 # Mima
 Simple environment for writing Mima-Code (see http://gbi.ira.uka.de/ chapter 10)
-
-<p align="center"> 
-<img src="https://user-images.githubusercontent.com/31143295/40985489-8630f3be-68e4-11e8-8eae-c1adc6bf9ade.png">
-</p>
+<img src="https://raw.githubusercontent.com/weisJ/Mima/master/images/Mima_Preview.png" align="center">
 
 This mima runs on 24bit machine words in memory and 20 bits addresses / constants
 
