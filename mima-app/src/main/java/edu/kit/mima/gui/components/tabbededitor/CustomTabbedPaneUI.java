@@ -8,6 +8,13 @@ import edu.kit.mima.gui.laf.icons.Icons;
 import edu.kit.mima.util.HSLColor;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.AbstractAction;
+import javax.swing.JComponent;
+import javax.swing.JMenuItem;
+import javax.swing.JTabbedPane;
+import javax.swing.UIManager;
+import javax.swing.plaf.UIResource;
+import javax.swing.plaf.basic.BasicTabbedPaneUI;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -22,13 +29,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.util.Optional;
 import java.util.function.Function;
-import javax.swing.AbstractAction;
-import javax.swing.JComponent;
-import javax.swing.JMenuItem;
-import javax.swing.JTabbedPane;
-import javax.swing.UIManager;
-import javax.swing.plaf.UIResource;
-import javax.swing.plaf.basic.BasicTabbedPaneUI;
 
 /**
  * Custom UI for {@link EditorTabbedPane}.
@@ -38,13 +38,16 @@ import javax.swing.plaf.basic.BasicTabbedPaneUI;
  */
 public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
 
-    @NotNull private final EditorTabbedPane tabbedPane;
+    @NotNull
+    private final EditorTabbedPane tabbedPane;
+    private final Stash stash = new Stash();
 
     private final Color dropColor;
     private final Color selectedColor;
     private final Color tabBorderColor;
     private final Color selectedBackground;
     private int xoff = 0;
+    private int swappedSelectedTabIndex = -1;
 
     /**
      * Create Custom Tabbed Pane ui.
@@ -65,7 +68,12 @@ public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
     }
 
     private void drawTab(@NotNull final Graphics g, final int index, final boolean isSelected) {
-        final var bounds = tabbedPane.getBoundsAt(index);
+        int ind = isSelected
+                  ? swappedSelectedTabIndex >= 0
+                    ? tabbedPane.getSelectedIndex()
+                    : index
+                  : index;
+        final var bounds = tabbedPane.getBoundsAt(ind);
         final int yOff = bounds.height / 6;
         if (isSelected) {
             g.setColor(selectedBackground);
@@ -109,12 +117,12 @@ public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
         }
         g = g.create();
         xoff = tabbedPane.dropSourceIndex >= 0
-                ? tabbedPane.getBoundsAt(tabbedPane.dropSourceIndex).width
-                : 0;
+               ? tabbedPane.getBoundsAt(tabbedPane.dropSourceIndex).width
+               : 0;
         final int tabCount = getMaxIndex();
         final var sourceBounds = tabbedPane.dropSourceIndex >= 0
-                ? tabbedPane.getBoundsAt(tabbedPane.dropSourceIndex)
-                : new Rectangle(0, 0, 0, 0);
+                                 ? tabbedPane.getBoundsAt(tabbedPane.dropSourceIndex)
+                                 : new Rectangle(0, 0, 0, 0);
         for (int i = 0; i < tabCount; i++) {
             if (i == tabbedPane.dropTargetIndex) {
                 final var b = tabbedPane.getBoundsAt(i);
@@ -123,7 +131,11 @@ public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
                 g.translate(sourceBounds.width, 0);
             }
             if (i != tabbedPane.dropSourceIndex) {
-                drawTab(g, i, i == selectedIndex);
+                if (swappedSelectedTabIndex >= 0) {
+                    drawTab(g, i, i == swappedSelectedTabIndex);
+                } else {
+                    drawTab(g, i, i == selectedIndex);
+                }
             }
         }
         if (tabCount == tabbedPane.dropTargetIndex) {
@@ -133,8 +145,6 @@ public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
         if (tabbedPane.getLayout() instanceof CustomTabbedPaneLayout) {
             ((CustomTabbedPaneLayout) tabbedPane.getLayout()).layoutTabComponents();
         }
-        g.setColor(Color.RED);
-        tabbedPane.repaint();
     }
 
     @Override
@@ -167,8 +177,8 @@ public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
                     .map(Component::getBounds)
                     .orElse(getTabBounds(0, new Rectangle()));
             return Optional.ofNullable(tabbedPane.getTabComponentAt(i))
-                    .map(Component::getBounds)
-                    .orElse(getTabBounds(i, new Rectangle())).y >= t.y + t.height;
+                           .map(Component::getBounds)
+                           .orElse(getTabBounds(i, new Rectangle())).y >= t.y + t.height;
         };
         if (maxIndex >= 0 && secondRow.apply(maxIndex - 1)) {
             int i = 0;
@@ -199,7 +209,7 @@ public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
         if (selectedIndex > lastVisibleIndex) {
             int selWidth = calculateTabWidth(EditorTabbedPane.TOP, selectedIndex, metrics);
             int spacing = 0;
-            while (spacing < selWidth && swapIndex >= 0) {
+            while (spacing < selWidth && swapIndex > 0) {
                 spacing += rects[swapIndex].width;
                 swapIndex--;
             }
@@ -208,14 +218,32 @@ public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
                 rects[selectedIndex].height = maxTabHeight;
                 rects[selectedIndex].width = selWidth;
             }
+            swappedSelectedTabIndex = swapIndex;
+        } else {
+            swappedSelectedTabIndex = -1;
         }
         return swapIndex;
+    }
+
+    @Override
+    public Dimension getMinimumSize(JComponent c) {
+        EditorTabbedPane t = (EditorTabbedPane) c;
+        var dim = super.getMinimumSize(c);
+        if (t.getTabCount() <= 0) {
+            return dim;
+        }
+
+        var rect = getTabBounds(t.getSelectedIndex(), new Rectangle());
+        if (stash.isVisible()) {
+            rect.width += stash.getPreferredSize().width;
+            rect.width += 2 * (t.getWidth() - stash.getX() - stash.getWidth());
+        }
+        return new Dimension(rect.width, dim != null ? dim.height : rect.height);
     }
 
     private class CustomTabbedPaneLayout extends BasicTabbedPaneUI.TabbedPaneLayout {
 
         private final PopupListener listener;
-        private final Stash stash = new Stash();
         private boolean installed = false;
 
         private CustomTabbedPaneLayout() {
@@ -251,12 +279,15 @@ public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
             int returnAt = size.width - (insets.right + tabAreaInsets.right);
             maxTabHeight = calculateMaxTabHeight(tabPlacement);
             selectedRun = -1;
-            int i;
+            int index = tabPane.getTabCount() - 1;
             boolean reachedEnd = false;
-            for (i = 0; i < tabCount && !reachedEnd; i++) {
-                reachedEnd = !calculateRect(metrics, i, p, returnAt);
+            for (int i = 0; i < tabCount && !reachedEnd; i++) {
+                if (!calculateRect(metrics, i, p, returnAt)) {
+                    reachedEnd = true;
+                    index = i - 1;
+                }
             }
-            int swapIndex = calculateSwapIndex(metrics, i);
+            int swapIndex = calculateSwapIndex(metrics, index);
             swapSelected(swapIndex, tabCount, returnAt);
         }
 
@@ -341,7 +372,7 @@ public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
 
         private void swapSelected(final int swapIndex, final int tabCount, final int lineWidth) {
             final int selectedIndex = tabPane.getSelectedIndex();
-            if (swapIndex == tabCount) {
+            if (swapIndex >= tabCount - 1) {
                 stash.setVisible(false);
                 return;
             }

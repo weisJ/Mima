@@ -1,19 +1,22 @@
 package edu.kit.mima.gui.components.folderdisplay;
 
+import com.intellij.openapi.util.io.FileUtil;
 import edu.kit.mima.gui.components.IconPanel;
 import edu.kit.mima.gui.components.listeners.FilePopupActionHandler;
 import edu.kit.mima.gui.laf.icons.Icons;
 import edu.kit.mima.util.FileName;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.BoxLayout;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import java.awt.AWTException;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Robot;
 import java.awt.event.InputEvent;
 import java.io.File;
-import javax.swing.BoxLayout;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 /**
  * Display that shows a file hierarchy that can be navigated.
@@ -24,9 +27,13 @@ import javax.swing.SwingUtilities;
 public class FileDisplay extends JPanel {
     private static final String SEPARATOR = FileName
             .escapeMetaCharacters(System.getProperty("file.separator"));
-    private static final int maxLength = 10;
-    @Nullable private File file;
+    private int maxLength = 10;
+    @Nullable
+    private File file;
     private FilePopupActionHandler handler;
+    private Component[] dirComps;
+    private Component root;
+    private int firstVisible;
 
     /**
      * File display panel.
@@ -34,7 +41,8 @@ public class FileDisplay extends JPanel {
     public FileDisplay() {
         this.handler = f -> {};
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-        add(new IconPanel(Icons.FOLDER_ROOT));
+        root = add(new IconPanel(Icons.FOLDER_ROOT));
+        dirComps = new Component[0];
     }
 
     /**
@@ -52,29 +60,90 @@ public class FileDisplay extends JPanel {
      * @param file file to display
      */
     public void setFile(@Nullable final File file) {
-        if (file == null || file.equals(this.file)) {
+        if (file == null || FileUtil.filesEqual(file, this.file)) {
             return;
         }
         removeAll();
         this.file = file;
         final String[] directories = file.getPath().split(SEPARATOR);
+        dirComps = new Component[2 * (directories.length - 1)];
         final StringBuilder sb = new StringBuilder();
-        final int beginIndex = Math.max(directories.length - maxLength, 0);
-        for (int i = 0; i < beginIndex; i++) {
-            sb.append(directories[i]).append(SEPARATOR);
-        }
-        if (sb.length() == 0) {
-            add(new IconPanel(Icons.FOLDER_ROOT));
-        } else {
-            add(new FolderDisplay(null, new File(sb.toString()), Icons.FOLDER_ROOT, handler));
-        }
-        for (int i = beginIndex; i < directories.length; i++) {
-            final String s = directories[i];
+        int index = 0;
+        for (final String s : directories) {
             sb.append(s).append(SEPARATOR);
             if (!s.contains(":")) {
-                add(new IconPanel(Icons.DIVIDER));
-                add(new FolderDisplay(s, new File(sb.toString()), handler));
+                dirComps[index++] = add(new IconPanel(Icons.DIVIDER));
+                dirComps[index++] = add(new FolderDisplay(s, new File(sb.toString()), handler));
             }
+        }
+        firstVisible = maxLength;
+        setMaximumSize(getMaximumSize());
+    }
+
+    private void updateRoot(final String[] directories, int max) {
+        if (root != null) {
+            remove(root);
+        }
+        final int beginIndex = Math.max(directories.length - max, 0);
+        final StringBuilder sb = new StringBuilder();
+        int index = 0;
+        for (int i = 0; i < beginIndex; i++) {
+            sb.append(directories[i]).append(SEPARATOR);
+            dirComps[index++].setVisible(false); //Separator
+            dirComps[index++].setVisible(false); //Item
+        }
+        sb.append(directories[beginIndex]);
+        for (int i = beginIndex; i < directories.length - 1; i++) {
+            dirComps[index++].setVisible(true); //Separator
+            dirComps[index++].setVisible(true); //Item
+        }
+        if (sb.length() == 0) {
+            root = new IconPanel(Icons.FOLDER_ROOT);
+        } else {
+            root = new FolderDisplay(null, new File(sb.toString()), Icons.FOLDER_ROOT, handler);
+        }
+        add(root, 0);
+    }
+
+    /**
+     * Get the current maximum length for parent directories.
+     *
+     * @return max length for parent directories.
+     */
+    public int getMaxLength() {
+        return maxLength;
+    }
+
+    /**
+     * Set the maximum length for parent directories.
+     *
+     * @param maxLength maximum amount of parent directories to be displayed.
+     */
+    public void setMaxLength(final int maxLength) {
+        if (this.maxLength != maxLength) {
+            this.maxLength = maxLength;
+            setFile(file);
+        }
+    }
+
+    @Override
+    public void setMaximumSize(Dimension maximumSize) {
+        super.setMaximumSize(maximumSize);
+        if (file == null) {
+            return;
+        }
+        int width = root.getPreferredSize().width;
+        int index = dirComps.length - 1;
+        int length = 0;
+        while (width <= maximumSize.width && index >= 0) {
+            width += dirComps[index--].getPreferredSize().width;
+            width += dirComps[index--].getPreferredSize().width;
+            length++;
+        }
+        length = Math.min(maxLength, length);
+        if (firstVisible != length) {
+            firstVisible = length;
+            updateRoot(file.getPath().split(SEPARATOR), length);
         }
         revalidate();
     }

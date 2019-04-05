@@ -1,5 +1,7 @@
 package edu.kit.mima.gui.components.editor;
 
+import edu.kit.mima.core.interpretation.Breakpoint;
+import edu.kit.mima.core.interpretation.SimpleBreakpoint;
 import edu.kit.mima.gui.components.BreakpointComponent;
 import edu.kit.mima.gui.components.NumberedTextPane;
 import edu.kit.mima.gui.components.editor.highlighter.Highlighter;
@@ -8,6 +10,7 @@ import edu.kit.mima.preferences.ColorKey;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
 import edu.kit.mima.preferences.UserPreferenceChangedListener;
+import edu.kit.mima.util.DocumentUtil;
 import edu.kit.mima.util.HSLColor;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,14 +26,17 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -43,9 +49,14 @@ import java.util.function.Function;
  */
 public class Editor extends JScrollPane implements UserPreferenceChangedListener, AutoCloseable {
 
-    @NotNull private final NumberedTextPane numberedTextPane;
-    @NotNull private final TextHistoryController historyController;
-    @NotNull private final List<EditEventHandler> editEventHandlers;
+    @NotNull
+    private final NumberedTextPane numberedTextPane;
+    @NotNull
+    private final TextHistoryController historyController;
+    @NotNull
+    private final List<EditEventHandler> editEventHandlers;
+    @NotNull
+    private final Set<Breakpoint> breakpoints;
 
     private Highlighter highlighter;
     private boolean changeLock;
@@ -62,6 +73,7 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
         final Color breakpointColor = new HSLColor(getBackground())
                 .adjustHue(5).adjustShade(30).adjustSaturation(30).getRGB();
 
+        breakpoints = new HashSet<>();
         numberedTextPane = new NumberedTextPane(this,
                                                 new Font("Monospaced", Font.PLAIN, 12),
                                                 pref.readColor(ColorKey.EDITOR_TEXT_SECONDARY));
@@ -70,9 +82,11 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
             if (numberedTextPane.hasComponentAt(index)) {
                 editorPane.unmarkLine(index);
                 numberedTextPane.removeComponentAt(index);
+                breakpoints.remove(new SimpleBreakpoint(index));
             } else {
                 editorPane.markLine(index, breakpointColor);
                 numberedTextPane.addComponentAt(new BreakpointComponent(index), index);
+                breakpoints.add(new SimpleBreakpoint(index));
             }
         });
 
@@ -116,16 +130,6 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
         update();
     }
 
-    /**
-     * Get all placed breakpoints.
-     *
-     * @return Array of breakpoints.
-     */
-    @NotNull
-    public BreakpointComponent[] getBreakpoints() {
-        return Arrays.stream(numberedTextPane.getIndexComponents())
-                .map(c -> (BreakpointComponent) c).toArray(BreakpointComponent[]::new);
-    }
 
     /**
      * Update the document.
@@ -227,9 +231,24 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
      * @param index index of line
      */
     public void markLine(final int index) {
-        numberedTextPane.getPane().unmarkLine(currentMark);
-        numberedTextPane.getPane().markLine(index, new Color(0x2D71D2)); //Todo decouple colour
+        var pane = numberedTextPane.getPane();
+        pane.unmarkLine(currentMark);
+        pane.markLine(index, new Color(0x2D71D2)); //Todo decouple colour
         currentMark = index;
+        if (index > 0) {
+            try {
+                Rectangle r = pane.modelToView2D(
+                        DocumentUtil.getLineStartOffset(pane, index)).getBounds();
+                var viewport = getViewport();
+                var viewRect = viewport.getViewRect();
+                if (viewRect.y + viewRect.height < r.y || viewRect.y > r.y) {
+                    getViewport().setViewPosition(
+                            new Point(0, r.y - (viewRect.height - r.height) / 2));
+                }
+            } catch (BadLocationException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /*----------Getter-and-Setter----------*/
@@ -323,6 +342,16 @@ public class Editor extends JScrollPane implements UserPreferenceChangedListener
         historyController.setActive(true);
         setCaretPosition(Math.max(Math.min(pos, text.length() - 1), 0));
         update();
+    }
+
+    /**
+     * Get declared breakpoints.
+     *
+     * @return list of breakpoints.
+     */
+    @NotNull
+    public Set<Breakpoint> getBreakpoints() {
+        return breakpoints;
     }
 
     @Override

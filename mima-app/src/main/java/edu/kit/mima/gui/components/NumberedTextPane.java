@@ -8,6 +8,11 @@ import kotlin.Triple;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextPane;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -18,13 +23,9 @@ import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.TreeMap;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 
 /**
  * An LineNumber wrapper for a {@link JTextPane}.
@@ -158,8 +159,8 @@ public class NumberedTextPane extends JPanel {
      *
      * @return array of components.
      */
-    public IndexComponent[] getIndexComponents() {
-        return componentMap.values().toArray(IndexComponent[]::new);
+    public Collection<IndexComponent> getIndexComponents() {
+        return componentMap.values();
     }
 
     /**

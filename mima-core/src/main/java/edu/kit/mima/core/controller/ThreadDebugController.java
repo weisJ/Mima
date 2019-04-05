@@ -1,12 +1,15 @@
 package edu.kit.mima.core.controller;
 
+import edu.kit.mima.core.interpretation.Breakpoint;
+import edu.kit.mima.core.interpretation.SimpleBreakpoint;
 import edu.kit.mima.core.token.Token;
 import edu.kit.mima.core.token.TokenType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.Optional;
 
 /**
  * Implementation of {@link DebugController} using a threat to handle control flow.
@@ -17,7 +20,8 @@ import java.util.Set;
 public class ThreadDebugController implements DebugController {
 
     private final Object lock = new Object();
-    private final Set<Integer> breaks;
+    @Nullable
+    private Collection<Breakpoint> breaks;
     private Thread workingThread;
     private boolean isActive;
     private boolean autoPause;
@@ -104,9 +108,15 @@ public class ThreadDebugController implements DebugController {
     }
 
     @Override
-    public void afterInstruction(@NotNull final Token currentInstruction) {
-        if (!shouldDie && (autoPause || breaks.contains(currentInstruction.getOffset()))
-                && currentInstruction.getType() != TokenType.PROGRAM) {
+    public void afterInstruction(final Token currentInstruction) {
+        if (shouldDie || breaks == null) {
+            return;
+        }
+        if (autoPause
+            || Optional.ofNullable(currentInstruction)
+                    .map(t -> breaks.contains(new SimpleBreakpoint(t.getOffset()))
+                              && t.getType() != TokenType.PROGRAM)
+                    .orElse(false)) {
             pause();
         }
     }
@@ -116,9 +126,8 @@ public class ThreadDebugController implements DebugController {
      *
      * @param breaks break point collection.
      */
-    public void setBreaks(@NotNull final Collection<Integer> breaks) {
-        this.breaks.clear();
-        this.breaks.addAll(breaks);
+    public void setBreaks(@NotNull final Collection<Breakpoint> breaks) {
+        this.breaks = breaks;
     }
 
     /**

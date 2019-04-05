@@ -87,7 +87,7 @@ public enum InstructionSet {
      *
      * @return number of bits in argument machine word
      */
-    public int getConstCordLength() {
+    public int getConstWordLength() {
         return constCordLength;
     }
 

@@ -32,6 +32,8 @@ import javax.swing.border.MatteBorder;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -61,7 +63,6 @@ public final class MimaUserInterface extends JFrame {
     private final Console console;
     private final MemoryTableView memoryView;
     private final FixedScrollTable memoryTable;
-    private final JPanel controlPanel = new JPanel(new BorderLayout());
 
     /**
      * Create a new Mima UI window.
@@ -86,8 +87,9 @@ public final class MimaUserInterface extends JFrame {
     private void createBinding() {
         BindingUtil.bind(debugger, () -> {
             int index = Optional.ofNullable(mimaRunner.getCurrentStatement())
-                    .map(Token::getLineIndex)
+                    .map(Token::getOffset)
                     .orElse(-1);
+
             editorManager.currentEditor().markLine(index);
             memoryView.updateView();
         }, Debugger.PAUSE_PROPERTY);
@@ -96,16 +98,15 @@ public final class MimaUserInterface extends JFrame {
         BindingUtil.bind(debugger, () -> currentEditor().markLine(-1),
                          Debugger.RUNNING_PROPERTY);
         tabbedEditor.addChangeListener(e -> {
-            final Editor editor = (Editor) tabbedEditor.getSelectedComponent();
-            if (editor == null) {
-                return;
-            }
-            var file = new File(Optional.ofNullable(editorManager.managerForEditor(editor))
-                                        .map(FileManager::getLastFile)
-                                        .orElse(System.getProperty("SystemDrive")));
+            Optional.ofNullable((Editor) tabbedEditor.getSelectedComponent())
+                    .ifPresent(editor -> {
+                        var file = new File(Optional.ofNullable(editorManager.managerForEditor(editor))
+                                                    .map(FileManager::getLastFile)
+                                                    .orElse(System.getProperty("SystemDrive")));
 
-            fileDisplay.setFile(file);
-            EditorHotKeys.setEditor(editor);
+                        fileDisplay.setFile(file);
+                        EditorHotKeys.setEditor(editor);
+                    });
         });
     }
 
@@ -180,17 +181,33 @@ public final class MimaUserInterface extends JFrame {
         memoryConsole.setTopComponent(memoryTable);
         memoryConsole.setBottomComponent(console);
         memoryConsole.setContinuousLayout(true);
+
         final JSplitPane splitPane = new ZeroWidthSplitPane();
         splitPane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setLeftComponent(memoryConsole);
         splitPane.setRightComponent(tabbedEditor);
+
+        final JPanel controlPanel = new JPanel(new BorderLayout());
         controlPanel.add(fileDisplay, BorderLayout.WEST);
-        controlPanel.add(new MimaButtonArea(this, tabbedEditor, runActions).getPane(),
-                         BorderLayout.EAST);
+        var buttonArea = new MimaButtonArea(this, tabbedEditor, runActions).getPane();
+
+        controlPanel.add(buttonArea, BorderLayout.EAST);
         controlPanel.setBorder(new CompoundBorder(
                 new MatteBorder(0, 0, 1, 0,
                                 UIManager.getColor("Border.light")),
                 new EmptyBorder(2, 2, 2, 2)));
+        controlPanel.setComponentZOrder(fileDisplay, 1);
+        controlPanel.setComponentZOrder(buttonArea, 0);
+        controlPanel.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                fileDisplay.setMaximumSize(new Dimension(
+                        buttonArea.getX() - fileDisplay.getX(),
+                        controlPanel.getMinimumSize().height));
+            }
+        });
+
+
         add(controlPanel, BorderLayout.NORTH);
         add(splitPane, BorderLayout.CENTER);
 
