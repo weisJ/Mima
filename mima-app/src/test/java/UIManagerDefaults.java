@@ -3,10 +3,16 @@
  *  to create a table of key/value pairs for each Swing component.
  */
 
-import edu.kit.mima.gui.laf.CustomDarculaLaf;
+import edu.kit.mima.gui.laf.LafManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
+import javax.swing.plaf.ColorUIResource;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -21,42 +27,10 @@ import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
-import javax.swing.AbstractAction;
-import javax.swing.AbstractButton;
-import javax.swing.Action;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultButtonModel;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JRadioButton;
-import javax.swing.JRadioButtonMenuItem;
-import javax.swing.JRootPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.Painter;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
-import javax.swing.plaf.ColorUIResource;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
 
 public class UIManagerDefaults implements ActionListener, ItemListener {
     private final static String[] COLUMN_NAMES = {"Key", "Value", "Sample"};
@@ -104,11 +78,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
      *  UIManagerDefaults Main. Called only if we're an application.
      */
     public static void main(final String[] args) {
-        try {
-            UIManager.setLookAndFeel(CustomDarculaLaf.class.getCanonicalName());
-        } catch (final ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
-        }
+        LafManager.setDefaultTheme(true);
         SwingUtilities.invokeLater(UIManagerDefaults::createAndShowGUI);
     }
 
@@ -217,7 +187,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
 
         //  Build of Map of items and a Map of attributes for each item
 
-        for (final Object key : defaults.keySet()) {
+        for (final Object key : new HashSet<>(defaults.keySet())) {
             final Object value = defaults.get(key);
 
             final String itemName = getItemName(key.toString(), value);

@@ -7,13 +7,13 @@ import edu.kit.mima.gui.laf.icons.Icons;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.event.MouseEvent;
-import java.io.File;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import java.awt.event.MouseEvent;
+import java.io.File;
 
 /**
  * Display for one specific file/folder.
@@ -61,5 +61,4 @@ import javax.swing.border.EmptyBorder;
             add(label);
         }
     }
-
 }

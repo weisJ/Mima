@@ -16,11 +16,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.beans.PropertyChangeListener;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * CodeRunner to start/stop execution of Mima Code.
@@ -49,7 +48,7 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
         sharedException = new AtomicReference<>();
         threadDebugController = new ThreadDebugController();
         mima = new Mima(InstructionSet.MIMA_X.getWordLength(),
-                        InstructionSet.MIMA_X.getConstCordLength());
+                        InstructionSet.MIMA_X.getConstWordLength());
     }
 
     /**
@@ -77,7 +76,7 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
         if (program == null) {
             throw new IllegalStateException("must parse program before starting");
         }
-        interpreter = new Interpreter(program.getInstructionSet().getConstCordLength(),
+        interpreter = new Interpreter(program.getInstructionSet().getConstWordLength(),
                                       threadDebugController,
                                       this);
         createGlobalEnvironment(callback);
@@ -98,7 +97,7 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
      */
     private void createGlobalEnvironment(final Consumer<Value> callback) {
         final InstructionSet instructionSet = program.getInstructionSet();
-        mima = new Mima(instructionSet.getWordLength(), instructionSet.getConstCordLength());
+        mima = new Mima(instructionSet.getWordLength(), instructionSet.getConstWordLength());
         globalEnvironment = new GlobalEnvironment(program.getProgramToken(), mima,
                                                   interpreter, callback);
         globalEnvironment.setupGlobalFunctions(MimaInstruction.values());
@@ -260,10 +259,8 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
         }
 
         @Override
-        public void setBreakpoints(@NotNull final Breakpoint[] breakpoints) {
-            threadDebugController.setBreaks(Arrays.stream(breakpoints)
-                                                    .map(Breakpoint::getLineIndex)
-                                                    .collect(Collectors.toList()));
+        public void setBreakpoints(@NotNull final Collection<Breakpoint> breakpoints) {
+            threadDebugController.setBreaks(breakpoints);
         }
 
         @Override

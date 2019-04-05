@@ -43,7 +43,7 @@ public class Interpreter {
     private final ExceptionHandler exceptionHandler;
 
     private boolean running;
-    @Nullable private Token currentToken;
+    private Token currentToken;
     private Environment currentScope;
 
     /**
@@ -155,10 +155,10 @@ public class Interpreter {
             }
             if (i < tokens.length) {
                 if (i != startIndex || !(environment instanceof GlobalEnvironment)) {
-                    debugController.afterInstruction(tokens[i]);
+                    debugController.afterInstruction(currentToken);
                 }
-                environment.setExpressionIndex(i);
                 currentToken = tokens[i];
+                environment.setExpressionIndex(i);
                 evaluate(currentToken, environment, v -> func.accept(v, i + 1));
             } else {
                 environment.setExpressionIndex(0);

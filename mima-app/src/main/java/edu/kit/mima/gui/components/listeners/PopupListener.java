@@ -82,13 +82,12 @@ public class PopupListener extends MouseAdapter {
         var x = 0;
         var y = 0;
         if (attachToComponent && rightAlign) {
+            y = c.getHeight();
             x = c.getWidth() - popupMenu.getPreferredSize().width;
+        } else if (attachToComponent) {
+            y = c.getHeight();
         } else {
             x = p.x;
-        }
-        if (attachToComponent) {
-            x = 0;
-            y = c.getHeight();
         }
         return new Point(x, y);
     }

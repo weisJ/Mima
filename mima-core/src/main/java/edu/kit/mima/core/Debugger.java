@@ -4,6 +4,7 @@ import edu.kit.mima.api.observing.Observable;
 import edu.kit.mima.core.interpretation.Breakpoint;
 import edu.kit.mima.core.interpretation.Value;
 
+import java.util.Collection;
 import java.util.function.Consumer;
 
 /**
@@ -28,5 +29,5 @@ public interface Debugger extends Observable {
 
     boolean isPaused();
 
-    void setBreakpoints(Breakpoint[] breakpoints);
+    void setBreakpoints(Collection<Breakpoint> breakpoints);
 }

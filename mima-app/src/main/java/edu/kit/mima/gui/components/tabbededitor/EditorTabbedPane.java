@@ -4,6 +4,9 @@ import edu.kit.mima.gui.components.editor.Editor;
 import edu.kit.mima.util.ImageUtil;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.Icon;
+import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -15,9 +18,6 @@ import java.awt.dnd.DragSource;
 import java.awt.dnd.DropTarget;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.Icon;
-import javax.swing.JTabbedPane;
-import javax.swing.SwingUtilities;
 
 /**
  * Tabbed Pane with custom UI.
