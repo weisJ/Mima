@@ -4,18 +4,15 @@ import edu.kit.mima.App;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
 import edu.kit.mima.preferences.UserPreferenceChangedListener;
-import edu.kit.mima.util.HSLColor;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.metal.DefaultMetalTheme;
 import javax.swing.plaf.metal.MetalLookAndFeel;
 import java.awt.Frame;
-import java.awt.Insets;
 import java.awt.Window;
 
 /**
@@ -76,7 +73,6 @@ public final class LafManager implements UserPreferenceChangedListener {
     }
 
     private static void updateLaf() {
-        installFixes();
         if (App.isInitialized()) {
             for (final Frame f : Frame.getFrames()) {
                 updateLafRecursively(f);
@@ -96,25 +92,6 @@ public final class LafManager implements UserPreferenceChangedListener {
      */
     public static void update() {
         instance.notifyUserPreferenceChanged(PropertyKey.THEME_PATH);
-    }
-
-    private static void installFixes() {
-        UIManager.put("TabbedPane.contentBorderInsets", new Insets(0, 0, 0, 0));
-        UIManager.put("ToolTip.background", UIManager.getColor("TabbedPane.background"));
-        UIManager.put("TabbedPane.tabsOverlapBorder", true);
-        UIManager.put("TabbedPane.labelShift", 0);
-        UIManager.put("TabbedPane.selectedLabelShift", 0);
-        UIManager.put("TabbedPane.selectedTabPadInsets", new Insets(0, 0, 0, 0));
-        UIManager.put("TabbedPane.tabAreaInsets", new Insets(0, 0, 0, 0));
-        UIManager.put("TabbedPane.separatorHighlight", UIManager.getColor("TabbedPane.selected"));
-        UIManager.put("TabbedPane.selected",
-                      new HSLColor(UIManager.getColor("TabbedPane.background"))
-                              .adjustTone(20).getRGB());
-        UIManager.put("Border.light",
-                      new HSLColor(UIManager.getColor("TabbedPane.background"))
-                              .adjustTone(30).getRGB());
-        UIManager.put("Button.separator", new ColorUIResource(95, 95, 95));
-        UIManager.put("swing.boldMetal", Boolean.FALSE);
     }
 
     @Override

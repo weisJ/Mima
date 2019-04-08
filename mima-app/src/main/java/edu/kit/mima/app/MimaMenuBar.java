@@ -59,7 +59,7 @@ public class MimaMenuBar {
                 .addItem("Show Help", () -> Help.showWindow(mimaUI))
                 .get();
         menu.setBorder(new MatteBorder(0, 0, 1, 0,
-                                       UIManager.getColor("Border.light")));
+                                       UIManager.getColor("Border.line1")));
         return menu;
     }
 

@@ -194,7 +194,7 @@ public final class MimaUserInterface extends JFrame {
         controlPanel.add(buttonArea, BorderLayout.EAST);
         controlPanel.setBorder(new CompoundBorder(
                 new MatteBorder(0, 0, 1, 0,
-                                UIManager.getColor("Border.light")),
+                                UIManager.getColor("Border.line1")),
                 new EmptyBorder(2, 2, 2, 2)));
         controlPanel.setComponentZOrder(fileDisplay, 1);
         controlPanel.setComponentZOrder(buttonArea, 0);

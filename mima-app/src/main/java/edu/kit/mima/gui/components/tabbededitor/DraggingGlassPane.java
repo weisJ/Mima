@@ -3,8 +3,12 @@ package edu.kit.mima.gui.components.tabbededitor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.JPanel;
+import javax.swing.JWindow;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
+import javax.swing.UIManager;
 import java.awt.AWTEvent;
-import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -15,11 +19,6 @@ import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
-import javax.swing.JPanel;
-import javax.swing.JWindow;
-import javax.swing.SwingUtilities;
-import javax.swing.Timer;
-import javax.swing.UIManager;
 
 /**
  * GlassPane for drawing the dragging ghost during dragging.
@@ -28,16 +27,17 @@ import javax.swing.UIManager;
  * @since 2018
  */
 public class DraggingGlassPane extends JPanel {
-    private final AlphaComposite alphaComposite;
-
     private final Window cursorWindow;
     private final Timer timer;
     private final Point location = new Point(0, 0);
-    @Nullable private Image draggingGhost;
+    @Nullable
+    private Image draggingGhost;
     private Image extendedImage;
+    @Nullable
     private Point mouseLocation;
     private boolean paintDrag;
     private boolean extended;
+    private boolean snapped = true;
 
     /**
      * Create new ghost glass pane.
@@ -46,12 +46,12 @@ public class DraggingGlassPane extends JPanel {
      */
     public DraggingGlassPane(EditorTabbedPane tabbedPane) {
         setOpaque(false);
-        alphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1);
 
         final long mask = AWTEvent.MOUSE_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK;
 
         Toolkit.getDefaultToolkit().addAWTEventListener((AWTEvent e) -> {
             if (e.getID() == MouseEvent.MOUSE_RELEASED) {
+                setSnapped(false);
                 showDrag(false);
             }
         }, mask);
@@ -62,7 +62,7 @@ public class DraggingGlassPane extends JPanel {
             SwingUtilities.convertPointFromScreen(p, this);
             extended = !this.contains(p) && extendedImage != null;
             SwingUtilities.convertPointFromScreen(p2, tabbedPane);
-            showDrag(!tabbedPane.getTabAreaBound().contains(p2));
+            setSnapped(tabbedPane.getTabAreaBound().contains(p2));
         });
 
         cursorWindow = new JWindow() {
@@ -74,7 +74,7 @@ public class DraggingGlassPane extends JPanel {
                                 extendedImage.getHeight(this) - 4, this);
                     var g2 = (Graphics2D) g;
                     g2.setStroke(new BasicStroke(2));
-                    g2.setColor(UIManager.getColor("Border.light").brighter());
+                    g2.setColor(UIManager.getColor("Border.line2"));
                     g2.drawRect(1, 1, getWidth() - 2, getHeight() - 2);
                 } else {
                     g.drawImage(draggingGhost, 0, 0, this);
@@ -87,13 +87,12 @@ public class DraggingGlassPane extends JPanel {
     }
 
     /**
-     * Srt whether to show the drag image.
+     * Set whether to show the drag image.
      *
      * @param showDrag true if it should be shown.
      */
     public void showDrag(final boolean showDrag) {
         this.paintDrag = showDrag;
-        cursorWindow.setVisible(showDrag);
         if (mouseLocation == null) {
             setMouseLocation(MouseInfo.getPointerInfo().getLocation());
         }
@@ -102,6 +101,16 @@ public class DraggingGlassPane extends JPanel {
             timer.start();
         } else if (!showDrag) {
             timer.stop();
+            repaint();
+        }
+    }
+
+    private void setSnapped(final boolean snapped) {
+        this.snapped = snapped;
+        showDrag(true);
+        cursorWindow.setVisible(!snapped);
+        if (!snapped) {
+            repaint();
         }
     }
 
@@ -191,10 +200,8 @@ public class DraggingGlassPane extends JPanel {
         if (draggingGhost == null) {
             return;
         }
-        if (!paintDrag) {
-            final Graphics2D g2 = (Graphics2D) g;
-            g2.setComposite(alphaComposite);
-            g2.drawImage(draggingGhost, (int) location.getX(), (int) location.getY(), null);
+        if (snapped) {
+            g.drawImage(draggingGhost, (int) location.getX(), (int) location.getY(), null);
         }
     }
 }

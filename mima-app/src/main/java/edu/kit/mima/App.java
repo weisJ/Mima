@@ -33,7 +33,7 @@ public final class App {
     public static void main(@Nullable final String[] args) {
         SplashScreen.getSplashScreen();
         SwingUtilities.invokeLater(() -> {
-            LafManager.setDefaultTheme(true);
+            LafManager.setDefaultTheme(false);
             final String filePath = args != null && args.length >= 1 ? args[0] : null;
             frame = new MimaUserInterface(filePath);
             logger.setLevel(LogLevel.INFO);

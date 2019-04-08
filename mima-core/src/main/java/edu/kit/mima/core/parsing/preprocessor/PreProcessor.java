@@ -119,6 +119,7 @@ public final class PreProcessor extends Processor<Token, TokenStream> {
             input.next();
         } catch (@NotNull final ParserException e) {
             errors.add(e);
+            errors.addAll(skipError());
             p = new Point(index - 1, input.getPosition() - 1);
         }
         return p;

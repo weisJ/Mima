@@ -6,12 +6,12 @@ import org.jdesktop.swingx.icon.EmptyIcon;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.Icon;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.Objects;
-import javax.swing.Icon;
 
 /**
  * Icons class for the App. Contains all used icons.
@@ -65,9 +65,9 @@ public final class Icons {
     @Contract("_, _, _ -> new")
     private static Icon loadIcon(@NotNull final String name, final int w, final int h) {
         try {
-            return new SVGIcon(Objects.requireNonNull(
+            return new MimaIcon(new SVGIcon(Objects.requireNonNull(
                     instance.getClass()
-                            .getResource(name)).toURI().toString(), w, h);
+                            .getResource(name)).toURI().toString(), 4 * w, 4 * h), w, h);
         } catch (@NotNull final TranscoderException | URISyntaxException e) {
             e.printStackTrace();
         }

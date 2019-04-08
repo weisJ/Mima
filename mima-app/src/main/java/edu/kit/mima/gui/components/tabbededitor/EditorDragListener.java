@@ -3,6 +3,7 @@ package edu.kit.mima.gui.components.tabbededitor;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.SwingUtilities;
 import java.awt.Cursor;
 import java.awt.MouseInfo;
 import java.awt.Point;
@@ -14,7 +15,6 @@ import java.awt.dnd.DragSourceDropEvent;
 import java.awt.dnd.DragSourceEvent;
 import java.awt.dnd.DragSourceListener;
 import java.awt.dnd.InvalidDnDOperationException;
-import javax.swing.SwingUtilities;
 
 /**
  * Drag Source Listener for {@link EditorTabbedPane}.
@@ -35,13 +35,13 @@ public class EditorDragListener implements DragSourceListener, DragGestureListen
 
     @Override
     public void dragEnter(@NotNull final DragSourceDragEvent e) {
+        checkExit();
         e.getDragSourceContext().setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-        checkExit(e);
     }
 
     @Override
     public void dragOver(final DragSourceDragEvent e) {
-        checkExit(e);
+        checkExit();
         final TabTransferData data = DnDUtil.getTabTransferData(e);
         if (data == null) {
             e.getDragSourceContext().setCursor(DragSource.DefaultMoveNoDrop);
@@ -72,8 +72,8 @@ public class EditorDragListener implements DragSourceListener, DragGestureListen
         tabbedPane.dropSourceIndex = -1;
     }
 
-    private void checkExit(@NotNull final DragSourceEvent e) {
-        final var p = e.getLocation();
+    private void checkExit() {
+        final var p = MouseInfo.getPointerInfo().getLocation();
         SwingUtilities.convertPointFromScreen(p, tabbedPane);
         final var show = !tabbedPane.getTabAreaBound().contains(p);
         if (show) {

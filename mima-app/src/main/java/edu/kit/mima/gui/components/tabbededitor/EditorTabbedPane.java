@@ -8,7 +8,6 @@ import javax.swing.Icon;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import java.awt.Component;
-import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -43,9 +42,8 @@ public class EditorTabbedPane extends JTabbedPane {
      * Create new Editor Tabbed Pane.
      */
     public EditorTabbedPane() {
-        setUI(new CustomTabbedPaneUI(this));
-
         glassPane = new DraggingGlassPane(this);
+        setBorder(null);
         setFocusable(false); //Prevent focus dotted line from appearing
         super.setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
         addChangeListener(e -> {
@@ -58,6 +56,11 @@ public class EditorTabbedPane extends JTabbedPane {
         new DragSource().createDefaultDragGestureRecognizer(this,
                                                             DnDConstants.ACTION_COPY_OR_MOVE,
                                                             listener);
+    }
+
+    @Override
+    public String getUIClassID() {
+        return "EditorTabbedPaneUI";
     }
 
     @Override
@@ -124,12 +127,6 @@ public class EditorTabbedPane extends JTabbedPane {
     }
 
     @Override
-    public void paint(final Graphics g) {
-        getUI().paint(g, this);
-        super.paint(g);
-    }
-
-    @Override
     public void setTabLayoutPolicy(final int tabLayoutPolicy) {
         // Only top tabs are supported at the moment.
     }
@@ -150,16 +147,22 @@ public class EditorTabbedPane extends JTabbedPane {
         if (getTabCount() == 0) {
             return 0;
         }
-        for (int i = 0; i < getTabCount(); i++) {
-            final Rectangle r = getBoundsAt(i);
-            r.setRect(r.x - r.width / 2, r.y, r.width, r.height);
-            if (r.contains(point)) {
+        Rectangle rect;
+        for (int i = 0; i < dropSourceIndex; i++) {
+            rect = getBoundsAt(i);
+            if (rect.contains(point)) {
+                return i;
+            }
+        }
+        for (int i = dropSourceIndex; i < getTabCount(); i++) {
+            rect = getBoundsAt(i);
+            rect.x -= rect.width / 2;
+            if (rect.contains(point)) {
                 return i;
             }
         }
         final Rectangle r = getBoundsAt(getTabCount() - 1);
-        final int x = r.x + r.width / 2;
-        r.setRect(x, r.y, getWidth() - x, r.height);
+        r.setRect(r.x + r.width / 2, r.y, getWidth() - r.x, r.height);
         return r.contains(point) ? getTabCount() : -1;
     }
 
@@ -198,6 +201,14 @@ public class EditorTabbedPane extends JTabbedPane {
         getTabComponentAt(tabIndex).setVisible(false);
         glassPane.setPoint(buildGhostLocation(tabPos));
         glassPane.setVisible(true);
+    }
+
+    @Override
+    public Rectangle getBoundsAt(int index) {
+        var bounds = super.getBoundsAt(index);
+        bounds.width += 1;
+        bounds.height += 1;
+        return bounds;
     }
 
     /*default*/ void initTarget(final Point location) {
