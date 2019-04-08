@@ -11,6 +11,18 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import sun.awt.AppContext;
 
+import javax.swing.InputMap;
+import javax.swing.KeyStroke;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
+import javax.swing.plaf.ColorUIResource;
+import javax.swing.plaf.IconUIResource;
+import javax.swing.plaf.InsetsUIResource;
+import javax.swing.plaf.basic.BasicLookAndFeel;
+import javax.swing.plaf.metal.MetalLookAndFeel;
+import javax.swing.text.DefaultEditorKit;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.InputEvent;
@@ -26,26 +38,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
-import javax.swing.InputMap;
-import javax.swing.KeyStroke;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
-import javax.swing.plaf.ColorUIResource;
-import javax.swing.plaf.IconUIResource;
-import javax.swing.plaf.InsetsUIResource;
-import javax.swing.plaf.basic.BasicLookAndFeel;
-import javax.swing.plaf.metal.MetalLookAndFeel;
-import javax.swing.text.DefaultEditorKit;
-import javax.swing.text.html.HTMLEditorKit;
-import javax.swing.text.html.StyleSheet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * CustomDarcula Look and Feel to allow for better extension.
  */
-@SuppressWarnings({"CheckStyle", "deprecation"})
+@SuppressWarnings({"CheckStyle"})
 public class CustomDarculaLaf extends BasicLookAndFeel {
-    public static final String NAME = "Darcula";
-    BasicLookAndFeel base;
+    private static final Logger LOGGER = Logger.getLogger(CustomDarculaLaf.class.getName());
+    private static final String NAME = "Darcula";
+    private BasicLookAndFeel base;
 
     /**
      * Create Custom Darcula LaF.
@@ -57,9 +60,10 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
                 MetalLookAndFeel.setCurrentTheme(new DarculaMetalTheme());
             } else {
                 final String name = UIManager.getSystemLookAndFeelClassName();
-                base = (BasicLookAndFeel) Class.forName(name).newInstance();
+                base = (BasicLookAndFeel) Class.forName(name).getDeclaredConstructor().newInstance();
             }
-        } catch (@NotNull final Exception ignored) {
+        } catch (@NotNull final Exception e) {
+            LOGGER.log(Level.SEVERE, e.toString(), e);
         }
     }
 
@@ -71,7 +75,6 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
         defaults.put("ComboBox.actionMap", metalDefaults.get("ComboBox.actionMap"));
     }
 
-    @SuppressWarnings("IOResourceOpenedButNotSafelyClosed")
     private static void patchStyledEditorKit() {
         try {
             final StyleSheet defaultStyles = new StyleSheet();
@@ -83,7 +86,9 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
             keyField.setAccessible(true);
             final Object key = keyField.get(null);
             AppContext.getAppContext().put(key, defaultStyles);
-        } catch (@NotNull final Throwable ignore) {
+            is.close();
+        } catch (@NotNull final Throwable e) {
+            LOGGER.log(Level.SEVERE, e.toString(), e);
         }
     }
 
@@ -100,15 +105,16 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
                                         Integer.parseInt(numbers.get(3)));
         } else if (key.endsWith(".border")) {
             try {
-                return Class.forName(value).newInstance();
-            } catch (@NotNull final Exception ignored) {
+                return Class.forName(value).getDeclaredConstructor().newInstance();
+            } catch (@NotNull final Exception e) {
+                LOGGER.log(Level.SEVERE, e.toString(), e);
             }
         } else {
             final Color color = ColorUtil.fromHex(value, null);
             final Integer invVal = getInteger(value);
             final Boolean boolVal = "true".equals(value)
-                    ? Boolean.TRUE
-                    : "false".equals(value) ? Boolean.FALSE : null;
+                                    ? Boolean.TRUE
+                                    : "false".equals(value) ? Boolean.FALSE : null;
             //TODO: copy image loading
             //
             // final Icon icon = key.toLowerCase().endsWith("icon") ? null : null;
@@ -127,13 +133,13 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
     private static Integer getInteger(@NotNull final String value) {
         try {
             return Integer.parseInt(value);
-        } catch (@NotNull final NumberFormatException e) {
+        } catch (@NotNull final NumberFormatException ignored) {
             return null;
         }
     }
 
     @SuppressWarnings({"HardCodedStringLiteral"})
-    public static void initInputMapDefaults(final UIDefaults defaults) {
+    private static void initInputMapDefaults(final UIDefaults defaults) {
         // Make ENTER work in JTrees
         final InputMap treeInputMap = (InputMap) defaults.get("Tree.focusInputMap");
         if (treeInputMap != null) {
@@ -215,7 +221,8 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
                     .getDeclaredMethod(method, UIDefaults.class);
             superMethod.setAccessible(true);
             superMethod.invoke(base, defaults);
-        } catch (@NotNull final Exception ignore) {
+        } catch (@NotNull final Exception e) {
+            LOGGER.log(Level.SEVERE, e.toString(), e);
         }
     }
 
@@ -233,22 +240,32 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
             patchComboBox(metalDefaults, defaults);
             defaults.remove("Spinner.arrowButtonBorder");
             defaults.put("Spinner.arrowButtonSize", new Dimension(16, 5));
-            defaults.put("Tree.collapsedIcon", new IconUIResource(IconLoader.getIcon("/com/bulenkov/darcula/icons/treeNodeCollapsed.png")));
-            defaults.put("Tree.expandedIcon", new IconUIResource(IconLoader.getIcon("/com/bulenkov/darcula/icons/treeNodeExpanded.png")));
-            defaults.put("Menu.arrowIcon", new IconUIResource(IconLoader.getIcon("/com/bulenkov/darcula/icons/menuItemArrowIcon.png")));
+            defaults.put("Tree.collapsedIcon", new IconUIResource(IconLoader.getIcon(
+                    "/com/bulenkov/darcula/icons/treeNodeCollapsed.png")));
+            defaults.put("Tree.expandedIcon", new IconUIResource(IconLoader.getIcon(
+                    "/com/bulenkov/darcula/icons/treeNodeExpanded.png")));
+            defaults.put("Menu.arrowIcon", new IconUIResource(IconLoader.getIcon(
+                    "/com/bulenkov/darcula/icons/menuItemArrowIcon.png")));
             defaults.put("CheckBoxMenuItem.checkIcon", EmptyIcon.create(16));
             defaults.put("RadioButtonMenuItem.checkIcon", EmptyIcon.create(16));
-            defaults.put("InternalFrame.icon", new IconUIResource(IconLoader.getIcon("/com/bulenkov/darcula/icons/internalFrame.png")));
-            defaults.put("OptionPane.informationIcon", new IconUIResource(IconLoader.getIcon("/com/bulenkov/darcula/icons/option_pane_info.png")));
-            defaults.put("OptionPane.questionIcon", new IconUIResource(IconLoader.getIcon("/com/bulenkov/darcula/icons/option_pane_question.png")));
-            defaults.put("OptionPane.warningIcon", new IconUIResource(IconLoader.getIcon("/com/bulenkov/darcula/icons/option_pane_warning.png")));
-            defaults.put("OptionPane.errorIcon", new IconUIResource(IconLoader.getIcon("/com/bulenkov/darcula/icons/option_pane_error.png")));
-            if (SystemInfo.isMac && !"true".equalsIgnoreCase(System.getProperty("apple.laf.useScreenMenuBar", "false"))) {
+            defaults.put("InternalFrame.icon", new IconUIResource(IconLoader.getIcon(
+                    "/com/bulenkov/darcula/icons/internalFrame.png")));
+            defaults.put("OptionPane.informationIcon", new IconUIResource(IconLoader.getIcon(
+                    "/com/bulenkov/darcula/icons/option_pane_info.png")));
+            defaults.put("OptionPane.questionIcon", new IconUIResource(IconLoader.getIcon(
+                    "/com/bulenkov/darcula/icons/option_pane_question.png")));
+            defaults.put("OptionPane.warningIcon", new IconUIResource(IconLoader.getIcon(
+                    "/com/bulenkov/darcula/icons/option_pane_warning.png")));
+            defaults.put("OptionPane.errorIcon", new IconUIResource(IconLoader.getIcon(
+                    "/com/bulenkov/darcula/icons/option_pane_error.png")));
+            if (SystemInfo.isMac && !"true".equalsIgnoreCase(System.getProperty(
+                    "apple.laf.useScreenMenuBar", "false"))) {
                 defaults.put("MenuBarUI", "com.bulenkov.darcula.ui.DarculaMenuBarUI");
                 defaults.put("MenuUI", "javax.swing.plaf.basic.BasicMenuUI");
             }
             return defaults;
-        } catch (@NotNull final Exception ignore) {
+        } catch (@NotNull final Exception e) {
+            LOGGER.log(Level.SEVERE, e.toString(), e);
         }
         return super.getDefaults();
     }
@@ -258,7 +275,8 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
             final Method superMethod = BasicLookAndFeel.class.getDeclaredMethod(method);
             superMethod.setAccessible(true);
             superMethod.invoke(base);
-        } catch (@NotNull final Exception ignore) {
+        } catch (@NotNull final Exception e) {
+            LOGGER.log(Level.SEVERE, e.toString(), e);
         }
     }
 
@@ -267,7 +285,7 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
     }
 
     @SuppressWarnings({"HardCodedStringLiteral"})
-    void initIdeaDefaults(@NotNull final UIDefaults defaults) {
+    private void initIdeaDefaults(@NotNull final UIDefaults defaults) {
         loadDefaults(defaults);
         defaults.put("Table.ancestorInputMap", new UIDefaults.LazyInputMap(new Object[]{
                 "ctrl C", "copy",
@@ -325,7 +343,7 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
     private void loadDefaults(@NotNull final UIDefaults defaults) {
         final Properties properties = new Properties();
         final String osSuffix = SystemInfo.isMac
-                ? "mac" : SystemInfo.isWindows ? "windows" : "linux";
+                                ? "mac" : SystemInfo.isWindows ? "windows" : "linux";
         try {
             InputStream stream = CustomDarculaLaf.class
                     .getResourceAsStream(getPrefix() + ".properties");
@@ -361,7 +379,12 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
                 final String value = properties.getProperty(key);
                 defaults.put(key, parseValue(key, value));
             }
-        } catch (@NotNull final IOException ignored) {
+
+            //CustomUI classes.
+            defaults.put("EditorTabbedPane",
+                         "edu.kit.mima.gui.laf.components.DarculaEditorTabbedPaneUI");
+        } catch (@NotNull final IOException e) {
+            LOGGER.log(Level.SEVERE, e.toString(), e);
         }
     }
 
@@ -423,7 +446,8 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
                                                                                 boolean.class);
             superMethod.setAccessible(true);
             superMethod.invoke(base, defaults, systemColors, useNative);
-        } catch (@NotNull final Exception ignore) {
+        } catch (@NotNull final Exception e) {
+            LOGGER.log(Level.SEVERE, e.toString(), e);
         }
     }
 

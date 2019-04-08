@@ -4,6 +4,7 @@ import edu.kit.mima.core.parsing.lang.Keyword;
 import edu.kit.mima.core.parsing.lang.Punctuation;
 import edu.kit.mima.core.parsing.lang.Symbol;
 import edu.kit.mima.core.token.AtomToken;
+import edu.kit.mima.core.token.EmptyToken;
 import edu.kit.mima.core.token.Token;
 import edu.kit.mima.core.token.TokenType;
 import org.jetbrains.annotations.Contract;
@@ -21,6 +22,7 @@ import java.util.regex.Pattern;
  * @since 2018
  */
 public class TokenStream {
+    protected static final Token EMPTY = new EmptyToken();
     protected static final char NEW_LINE = '\n';
     private static final List<String> KEYWORDS = List.of(Keyword.getKeywords());
     private static final Pattern WHITESPACE = Pattern.compile("[ \t\n\r\f]");
@@ -142,7 +144,8 @@ public class TokenStream {
      * @return true if no more tokens can be read
      */
     public boolean isEmpty() {
-        return peek() == null;
+        var t = peek();
+        return t == null || t == EMPTY;
     }
 
     /**
@@ -201,7 +204,7 @@ public class TokenStream {
     protected @Nullable Token readNext() {
         readWhile(TokenStream::isWhitespace);
         if (input.isEmpty()) {
-            return null;
+            return EMPTY;
         }
         final char c = input.peek();
         Token token = null;

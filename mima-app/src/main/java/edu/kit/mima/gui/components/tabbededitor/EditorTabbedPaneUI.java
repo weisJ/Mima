@@ -1,18 +1,15 @@
 package edu.kit.mima.gui.components.tabbededitor;
 
-import com.bulenkov.darcula.ui.DarculaTabbedPaneUI;
 import edu.kit.mima.gui.components.button.IconButton;
 import edu.kit.mima.gui.components.listeners.PopupListener;
 import edu.kit.mima.gui.components.popupmenu.ScrollPopupMenu;
 import edu.kit.mima.gui.laf.icons.Icons;
-import edu.kit.mima.util.HSLColor;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JTabbedPane;
-import javax.swing.UIManager;
 import javax.swing.plaf.UIResource;
 import javax.swing.plaf.basic.BasicTabbedPaneUI;
 import java.awt.Color;
@@ -21,10 +18,12 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.util.Optional;
@@ -36,38 +35,35 @@ import java.util.function.Function;
  * @author Jannis Weis
  * @since 2018
  */
-public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
+public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
 
-    @NotNull
-    private final EditorTabbedPane tabbedPane;
     private final Stash stash = new Stash();
-
-    private final Color dropColor;
-    private final Color selectedColor;
-    private final Color tabBorderColor;
-    private final Color selectedBackground;
+    protected Color dropColor;
+    protected Color selectedColor;
+    protected Color tabBorderColor;
+    protected Color selectedBackground;
+    private EditorTabbedPane tabbedPane;
     private int xoff = 0;
     private int swappedSelectedTabIndex = -1;
 
     /**
      * Create Custom Tabbed Pane ui.
-     *
-     * @param tabbedPane the tabbed Pane for this UI.
      */
-    public CustomTabbedPaneUI(@NotNull final EditorTabbedPane tabbedPane) {
-        this.tabbedPane = tabbedPane;
-
-        final var c = UIManager.getColor("TabbedPane.separatorHighlight");
-        final Color lineColor = c == null ? UIManager.getColor("TabbedPane.selected") : c;
-        selectedColor = new HSLColor(lineColor).adjustTone(10).adjustSaturation(40).getRGB();
-        tabBorderColor = UIManager.getColor("Border.light");
-        selectedBackground = new HSLColor(tabbedPane.getBackground())
-                .adjustTone(20).adjustSaturation(5).getRGB();
-        dropColor = new HSLColor(tabbedPane.getBackground())
-                .adjustTone(15).adjustHue(20).adjustSaturation(0.2f).getRGB();
+    public EditorTabbedPaneUI() {
+        setupColors();
     }
 
+    @Override
+    public void installUI(JComponent c) {
+        super.installUI(c);
+        tabbedPane = (EditorTabbedPane) c;
+    }
+
+    protected abstract void setupColors();
+
     private void drawTab(@NotNull final Graphics g, final int index, final boolean isSelected) {
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         int ind = isSelected
                   ? swappedSelectedTabIndex >= 0
                     ? tabbedPane.getSelectedIndex()
@@ -76,18 +72,23 @@ public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
         final var bounds = tabbedPane.getBoundsAt(ind);
         final int yOff = bounds.height / 6;
         if (isSelected) {
-            g.setColor(selectedBackground);
-            g.fillRect(0, bounds.y, bounds.width, bounds.height);
-            g.setColor(selectedColor);
-            g.fillRect(0, bounds.y + bounds.height - yOff, bounds.width, yOff);
+            g2.setColor(selectedBackground);
+            g2.fillRect(0 - 1, bounds.y, bounds.width, bounds.height);
         } else {
-            g.setColor(tabbedPane.getBackground());
-            g.fillRect(0, bounds.y, bounds.width, bounds.height);
+            g2.setColor(tabbedPane.getBackground());
+            g2.fillRect(0, bounds.y, bounds.width, bounds.height);
         }
-        g.setColor(tabBorderColor);
-        g.drawLine(0 - 1, bounds.height - 1, bounds.width - 1, bounds.height - 1);
-        g.drawLine(0 - 1, 0, 0 - 1, bounds.height - 1);
-        g.drawLine(bounds.width - 1, 0, bounds.width - 1, bounds.height - 1);
+        g2.setColor(tabBorderColor);
+        //Bottom
+        g2.drawLine(-1, bounds.height - 1, bounds.width - 1, bounds.height - 1);
+        //Left
+        g2.drawLine(-1, 0, -1, bounds.height - 1);
+        //Top
+        g2.drawLine(bounds.width - 1, 0, bounds.width - 1, bounds.height - 1);
+        if (isSelected) {
+            g2.setColor(selectedColor);
+            g2.fillRect(0, bounds.y + bounds.height - yOff, bounds.width - 1, yOff - 1);
+        }
         g.translate(bounds.width, 0);
     }
 
@@ -108,14 +109,14 @@ public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
     }
 
     @Override
-    protected void paintTabArea(@NotNull Graphics g,
+    protected void paintTabArea(@NotNull Graphics graphics,
                                 final int tabPlacement,
                                 final int selectedIndex) {
-        if (tabPlacement != CustomTabbedPaneUI.TOP) {
-            super.paintTabArea(g, tabPlacement, selectedIndex);
+        if (tabPlacement != EditorTabbedPaneUI.TOP) {
+            super.paintTabArea(graphics, tabPlacement, selectedIndex);
             return;
         }
-        g = g.create();
+        Graphics g = graphics.create();
         xoff = tabbedPane.dropSourceIndex >= 0
                ? tabbedPane.getBoundsAt(tabbedPane.dropSourceIndex).width
                : 0;
@@ -145,6 +146,7 @@ public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
         if (tabbedPane.getLayout() instanceof CustomTabbedPaneLayout) {
             ((CustomTabbedPaneLayout) tabbedPane.getLayout()).layoutTabComponents();
         }
+        g.dispose();
     }
 
     @Override
@@ -325,7 +327,7 @@ public class CustomTabbedPaneUI extends DarculaTabbedPaneUI {
                 var field = BasicTabbedPaneUI.class
                         .getDeclaredField("tabContainer");
                 field.setAccessible(true);
-                JComponent tabContainer = (JComponent) field.get(CustomTabbedPaneUI.this);
+                JComponent tabContainer = (JComponent) field.get(EditorTabbedPaneUI.this);
                 tabContainer.add(stash);
                 installed = true;
             } catch (NoSuchFieldException
