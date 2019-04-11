@@ -136,7 +136,9 @@ public final class MimaUserInterface extends JFrame {
     private void startSession(@Nullable final String filePath) {
         if (filePath == null || filePath.isEmpty()) {
             final String filesString = Preferences.getInstance().readString(PropertyKey.LAST_FILE);
-            final String[] files = filesString.split("/");
+            final String[] files = filesString.isEmpty()
+                                   ? new String[0]
+                                   : filesString.split("/");
             for (final String file : files) {
                 fileActions.openFile(file);
             }
@@ -181,6 +183,7 @@ public final class MimaUserInterface extends JFrame {
         memoryConsole.setTopComponent(memoryTable);
         memoryConsole.setBottomComponent(console);
         memoryConsole.setContinuousLayout(true);
+
 
         final JSplitPane splitPane = new ZeroWidthSplitPane();
         splitPane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);

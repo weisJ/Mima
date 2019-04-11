@@ -4,16 +4,16 @@ import edu.kit.mima.api.util.Tuple;
 import edu.kit.mima.api.util.ValueTuple;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.BoxLayout;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.BoxLayout;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 
 /**
  * CardPanelItem for {@link CardPanelBuilder}.
@@ -75,6 +75,10 @@ public class CardPanelItem {
     public CardPanelItem addSetting(final String description, final JComponent component) {
         settings.add(new ValueTuple<>(description, component));
         return this;
+    }
+
+    public CardPanelBuilder addItem(final String title, final JComponent c) {
+        return builder.addItem(title, c);
     }
 
     /**

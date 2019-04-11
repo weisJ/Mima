@@ -33,7 +33,12 @@ public class ConsolePreview extends AbstractPreviewPane {
 
     @Override
     public void setDimension(final Dimension dimension) {
-        console.setPreferredSize(dimension);
         setPreferredSize(dimension);
+    }
+
+    @Override
+    public void setPreferredSize(Dimension preferredSize) {
+        console.setPreferredSize(preferredSize);
+        super.setPreferredSize(preferredSize);
     }
 }

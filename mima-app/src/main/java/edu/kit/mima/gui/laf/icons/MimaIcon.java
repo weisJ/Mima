@@ -15,7 +15,7 @@ import java.awt.Graphics2D;
  */
 public class MimaIcon implements Icon {
 
-    private final SVGIcon icon;
+    private final Icon icon;
     private final int width;
     private final int height;
     private final double scaleX;
@@ -28,7 +28,7 @@ public class MimaIcon implements Icon {
      * @param width  display width
      * @param height display height
      */
-    public MimaIcon(@NotNull final SVGIcon icon, final int width, final int height) {
+    public MimaIcon(@NotNull final Icon icon, final int width, final int height) {
         this.icon = icon;
         this.height = height;
         this.width = width;

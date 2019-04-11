@@ -1,12 +1,10 @@
 package edu.kit.mima.gui.laf.components;
 
 import edu.kit.mima.gui.components.tabbededitor.EditorTabbedPaneUI;
-import edu.kit.mima.util.HSLColor;
 
 import javax.swing.JComponent;
 import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
-import java.awt.Color;
 
 /**
  * Darcula UI for {@link edu.kit.mima.gui.components.tabbededitor.EditorTabbedPane}.
@@ -28,13 +26,9 @@ public class LightEditorTabbedPaneUI extends EditorTabbedPaneUI {
 
     @Override
     protected void setupColors() {
-        final var c = UIManager.getColor("TabbedPane.separatorHighlight");
-        final Color lineColor = c == null ? UIManager.getColor("TabbedPane.selected") : c;
         selectedColor = UIManager.getColor("EditorTabbedPane.selectionAccent");
-        tabBorderColor = UIManager.getColor("Border.light");
-        selectedBackground = new HSLColor(UIManager.getColor("TabbedPane.background"))
-                .adjustTone(20).adjustSaturation(5).getRGB();
-        dropColor = new HSLColor(UIManager.getColor("TabbedPane.background"))
-                .adjustTone(15).adjustHue(20).adjustSaturation(0.2f).getRGB();
+        tabBorderColor = UIManager.getColor("Border.line1");
+        selectedBackground = UIManager.getColor("EditorTabbedPane.selectedTab");
+        dropColor = UIManager.getColor("EditorTabbedPane.dropColor");
     }
 }

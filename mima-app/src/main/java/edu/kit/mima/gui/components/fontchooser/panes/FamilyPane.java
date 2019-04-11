@@ -1,23 +1,22 @@
 package edu.kit.mima.gui.components.fontchooser.panes;
 
-import edu.kit.mima.gui.components.SearchField;
+import edu.kit.mima.gui.components.SearchTextField;
 import edu.kit.mima.gui.components.fontchooser.FontFamilies;
 import edu.kit.mima.gui.components.fontchooser.FontFamily;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionListener;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 
 /**
  * Family Display Pane.
@@ -44,7 +43,7 @@ public class FamilyPane extends JPanel {
         initializeList(familyListModel);
 
         setMinimumSize(new Dimension(80, 50));
-        setPreferredSize(new Dimension(240, 100));
+        setPreferredSize(new Dimension(240, 180));
 
         setLayout(new GridBagLayout());
         addSearchField();
@@ -63,11 +62,11 @@ public class FamilyPane extends JPanel {
         gridBagConstraints.insets = new Insets(0, 0, 5, 0);
         gridBagConstraints.weightx = 1.0;
 
-        final JTextField searchField = new SearchField();
+        final var searchField = new SearchTextField();
         searchField.setBorder(BorderFactory.createEmptyBorder());
         searchField.requestFocus();
-        searchField.addKeyListener(searchListener);
-        add(new JScrollPane(searchField), gridBagConstraints);
+        searchField.addKeyboardListener(searchListener);
+        add(searchField, gridBagConstraints);
     }
 
     private void addScrollPane() {
@@ -77,8 +76,7 @@ public class FamilyPane extends JPanel {
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
 
-        final JScrollPane scrollPane = new JScrollPane(familyList);
-        add(scrollPane, gridBagConstraints);
+        add(new JScrollPane(familyList), gridBagConstraints);
     }
 
     public void addListSelectionListener(final ListSelectionListener listener) {

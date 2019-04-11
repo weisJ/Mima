@@ -5,7 +5,16 @@ import edu.kit.mima.api.util.ValueTuple;
 import edu.kit.mima.gui.components.ZeroWidthSplitPane;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.BorderFactory;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTree;
+import javax.swing.UIManager;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import java.awt.CardLayout;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -16,12 +25,6 @@ import java.util.Comparator;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import javax.swing.DefaultListSelectionModel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.UIManager;
 
 /**
  * Builder for Panel with {@link CardLayout} that uses a sidebar for navigation.
@@ -31,12 +34,27 @@ import javax.swing.UIManager;
  */
 public class CardPanelBuilder {
 
-    @NotNull private final JPanel panel;
-    @NotNull private final SortedMap<Integer, Tuple<String, JPanel>> panelMap;
+    @NotNull
+    private final JPanel panel;
+    @NotNull
+    private final SortedMap<Integer, Tuple<String, JComponent>> panelMap;
     private int count = 0;
 
+    /**
+     * Create new Card Panel Builder.
+     */
     public CardPanelBuilder() {
-        panel = new JPanel(new CardLayout());
+        panel = new JPanel(new CardLayout()) {
+            @Override
+            public Dimension getMinimumSize() {
+                for (Component comp : getComponents()) {
+                    if (comp.isVisible()) {
+                        return comp.getMinimumSize();
+                    }
+                }
+                return super.getMinimumSize();
+            }
+        };
         panelMap = new TreeMap<>();
     }
 
@@ -63,10 +81,17 @@ public class CardPanelBuilder {
         return new CardPanelItem(title, this, alignLeft);
     }
 
+    public CardPanelBuilder addItem(final String title, final JComponent c) {
+        this.panelMap.put(count, new ValueTuple<>(title, c));
+        count++;
+        return this;
+    }
+
     /*default*/
-    @NotNull CardPanelItem nextItem(final String title,
-                                    @NotNull final CardPanelItem item,
-                                    final boolean alignRight) {
+    @NotNull
+    CardPanelItem nextItem(final String title,
+                           @NotNull final CardPanelItem item,
+                           final boolean alignRight) {
         this.panelMap.put(count, new ValueTuple<>(item.getTitle(), item.getPanel()));
         count++;
         return new CardPanelItem(title, this, alignRight);
@@ -90,33 +115,41 @@ public class CardPanelBuilder {
             final Rectangle2D bounds = metrics.getStringBounds(maxElement.get(), null);
             minWidth = Math.max(minWidth, (int) bounds.getWidth());
         }
-        final JList<String> sidebar = new JList<>();
+        final var sidebar = new JTree(items) {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setBackground(UIManager.getColor("Background.blue"));
+                setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1,
+                                                          UIManager.getColor("Border.line1")));
+            }
+        };
         sidebar.setDragEnabled(false);
-        sidebar.setListData(items);
-        sidebar.setSelectionMode(DefaultListSelectionModel.SINGLE_SELECTION);
-        panelMap.forEach((i, t) -> panel.add(t.getSecond(), t.getFirst()));
+        sidebar.putClientProperty("TreeTableTree", Boolean.TRUE);
+        DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) sidebar.getCellRenderer();
+        renderer.setLeafIcon(null);
 
+        panelMap.forEach((i, t) -> panel.add(t.getSecond(), t.getFirst()));
         final JSplitPane cardPanel = new ZeroWidthSplitPane();
         cardPanel.setDividerLocation(JSplitPane.HORIZONTAL_SPLIT);
 
-        sidebar.addListSelectionListener(e -> {
-            if (e.getValueIsAdjusting()) {
-                final CardLayout cl = (CardLayout) (panel.getLayout());
-                cl.show(panel, sidebar.getSelectedValue());
-                cardPanel.repaint();
-            }
+        final Dimension minDim = new Dimension(minWidth, parent.getHeight());
+        sidebar.addTreeSelectionListener(e -> {
+            final CardLayout cl = (CardLayout) (panel.getLayout());
+            cl.show(panel, sidebar.getSelectionPath().getLastPathComponent().toString());
+            cardPanel.repaint();
+            parent.setMinimumSize(new Dimension(minDim.width + calcMinWidth(),
+                                                minDim.height));
+            panel.setMinimumSize(new Dimension(calcMinWidth(),
+                                               minDim.height));
         });
-        if (items.length > 0) {
-            sidebar.setSelectedIndex(0);
-        }
+
 
         final JScrollPane sideBarPane = new JScrollPane();
         sideBarPane.setViewportView(sidebar);
 
-        final Dimension minDim = new Dimension(minWidth, parent.getHeight());
-        final Dimension maxDim = new Dimension(parent.getWidth() / 2, parent.getHeight());
+
         sideBarPane.setMinimumSize(minDim);
-        panel.setMinimumSize(maxDim);
 
         cardPanel.setLeftComponent(sideBarPane);
         cardPanel.setRightComponent(panel);
@@ -126,5 +159,11 @@ public class CardPanelBuilder {
         panel.revalidate();
         cardPanel.setDividerLocation(-1);
         parent.add(cardPanel);
+    }
+
+    private int calcMinWidth() {
+        return panelMap.values().stream()
+                .map(Tuple::getSecond).filter(Component::isVisible)
+                .findFirst().map(p -> p.getMinimumSize().width).orElse(0);
     }
 }

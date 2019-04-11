@@ -25,6 +25,7 @@ import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
@@ -109,6 +110,14 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
             } catch (@NotNull final Exception e) {
                 LOGGER.log(Level.SEVERE, e.toString(), e);
             }
+        } else if (key.endsWith(".font")) {
+            try {
+                final String[] decode = value.split("-");
+                //noinspection MagicConstant
+                return new Font(decode[0], Integer.parseInt(decode[1]), Integer.parseInt(decode[2]));
+            } catch (@NotNull final Exception e) {
+                return new Font("Monospaced", Font.PLAIN, 12);
+            }
         } else {
             final Color color = ColorUtil.fromHex(value, null);
             final Integer invVal = getInteger(value);
@@ -184,29 +193,23 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
         final String cutActionKey = useSimpleActionKeys ? "cut" : DefaultEditorKit.cutAction;
         // Ctrl+Ins, Shift+Ins, Shift+Del
         inputMap.put(
-                KeyStroke.getKeyStroke(KeyEvent.VK_INSERT,
-                                       InputEvent.CTRL_MASK | InputEvent.CTRL_DOWN_MASK),
+                KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, InputEvent.CTRL_DOWN_MASK),
                 copyActionKey);
         inputMap.put(
-                KeyStroke.getKeyStroke(KeyEvent.VK_INSERT,
-                                       InputEvent.SHIFT_MASK | InputEvent.SHIFT_DOWN_MASK),
+                KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, InputEvent.SHIFT_DOWN_MASK),
                 pasteActionKey);
         inputMap.put(
-                KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,
-                                       InputEvent.SHIFT_MASK | InputEvent.SHIFT_DOWN_MASK),
+                KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, InputEvent.SHIFT_DOWN_MASK),
                 cutActionKey);
         // Ctrl+C, Ctrl+V, Ctrl+X
         inputMap.put(
-                KeyStroke.getKeyStroke(KeyEvent.VK_C,
-                                       InputEvent.CTRL_MASK | InputEvent.CTRL_DOWN_MASK),
+                KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK),
                 copyActionKey);
         inputMap.put(
-                KeyStroke.getKeyStroke(KeyEvent.VK_V,
-                                       InputEvent.CTRL_MASK | InputEvent.CTRL_DOWN_MASK),
+                KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK),
                 pasteActionKey);
         inputMap.put(
-                KeyStroke.getKeyStroke(KeyEvent.VK_X,
-                                       InputEvent.CTRL_MASK | InputEvent.CTRL_DOWN_MASK),
+                KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_DOWN_MASK),
                 DefaultEditorKit.cutAction);
     }
 

@@ -53,6 +53,12 @@ public final class Icons {
     public static final Icon UNDO = loadIcon("undo.svg");
     public static final Icon UNDO_INACTIVE = loadIcon("undo_inactive.svg");
 
+    public static final Icon SEARCH = loadIcon("search.svg");
+    public static final Icon SEARCH_WITH_HISTORY = loadIcon("searchWithHistory.svg");
+    public static final Icon CLOSE = loadIcon("close.svg");
+    public static final Icon CLOSE_HOVER = loadIcon("closeHovered.svg");
+    public static final Icon CLEAR = loadIcon("clear.svg", 12, 12);
+
     private Icons() {
     }
 

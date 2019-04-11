@@ -1,11 +1,11 @@
 package edu.kit.mima.gui.components.fontchooser.panes;
 
-import java.awt.Dimension;
-import java.awt.Font;
-import java.util.ResourceBundle;
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.util.ResourceBundle;
 
 public class PreviewPane extends AbstractPreviewPane {
 
@@ -22,9 +22,7 @@ public class PreviewPane extends AbstractPreviewPane {
                 previewText.getBorder(),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5))
         );
-        scrollPane.setPreferredSize(new Dimension(200, 80));
         scrollPane.setViewportView(previewText);
-        setPreferredSize(new Dimension(200, 80));
         add(scrollPane);
     }
 

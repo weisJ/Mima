@@ -80,7 +80,7 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
         }
         g2.setColor(tabBorderColor);
         //Bottom
-        g2.drawLine(-1, bounds.height - 1, bounds.width - 1, bounds.height - 1);
+        g2.drawLine(-1, bounds.height - 2, bounds.width - 1, bounds.height - 2);
         //Left
         g2.drawLine(-1, 0, -1, bounds.height - 1);
         //Top
