@@ -2,13 +2,13 @@ package edu.kit.mima.gui.components;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Graphics;
-import java.awt.Rectangle;
 import javax.swing.JSplitPane;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 
 /**
  * Split Pane with zero width splitters.
@@ -63,7 +63,7 @@ public class ZeroWidthSplitPane extends JSplitPane {
 
         private ZeroSizeDivider(@NotNull final BasicSplitPaneUI ui) {
             super(ui);
-            setBackground(UIManager.getColor("InternalFrame.borderColor"));
+            setBackground(UIManager.getColor("Border.line1"));
         }
 
         @Override
@@ -79,6 +79,11 @@ public class ZeroWidthSplitPane extends JSplitPane {
             } else {
                 g.drawLine(0, DIVIDER_DRAG_OFFSET, getWidth() - 1, DIVIDER_DRAG_OFFSET);
             }
+        }
+
+        @Override
+        public int getDividerSize() {
+            return 1;
         }
 
         @Override

@@ -1,10 +1,15 @@
 package edu.kit.mima.gui.components;
 
 import edu.kit.mima.util.DocumentUtil;
-import edu.kit.mima.util.HSLColor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.JTextPane;
+import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.text.BadLocationException;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
@@ -13,11 +18,6 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.util.HashMap;
 import java.util.Map;
-import javax.swing.JTextPane;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.text.BadLocationException;
 
 /**
  * Text Pane that supports line highlighting and visual hints.
@@ -26,15 +26,19 @@ import javax.swing.text.BadLocationException;
  * @since 2018
  */
 public class HighlightTextPane extends JTextPane implements ChangeListener {
-    private static final Color SELECTION_COLOR = new HSLColor(new JTextPane().getSelectionColor())
-            .adjustShade(20).adjustSaturation(60).getRGB();
     private final Component container;
-    @NotNull private final Map<Integer, Color> markings;
+    @NotNull
+    private final Map<Integer, Color> markings;
+    private Color selectedBackground;
+    private Color vertLineColor;
+    private Color selectionColor;
     private int yoff;
     private int xoff;
     private boolean lineSelected;
-    @Nullable private Point selectionStart;
-    @Nullable private Point selectionEnd;
+    @Nullable
+    private Point selectionStart;
+    @Nullable
+    private Point selectionEnd;
     private int vertLine;
 
     /**
@@ -56,22 +60,12 @@ public class HighlightTextPane extends JTextPane implements ChangeListener {
         getCaret().addChangeListener(this);
     }
 
-    /**
-     * Vertical offset of current line in pixels.
-     *
-     * @return offset in pixels to start of line.
-     */
-    public int getYOff() {
-        return yoff;
-    }
-
-    /**
-     * Horizontal offset to first character in pixels.
-     *
-     * @return offset in pixels.
-     */
-    public int getXOff() {
-        return xoff;
+    @Override
+    public void updateUI() {
+        super.updateUI();
+        selectedBackground = UIManager.getColor("Editor.selectedBackground");
+        vertLineColor = UIManager.getColor("Border.line1");
+        selectionColor = UIManager.getColor("Editor.selection");
     }
 
     /**
@@ -109,7 +103,7 @@ public class HighlightTextPane extends JTextPane implements ChangeListener {
      */
     private void drawLineHighlight(@NotNull final Graphics g, final int height) {
         if (yoff >= 0) {
-            g.setColor(new HSLColor(getBackground()).adjustTone(20).getRGB());
+            g.setColor(selectedBackground);
             g.fillRect(0, yoff, getWidth(), height);
         }
     }
@@ -119,13 +113,13 @@ public class HighlightTextPane extends JTextPane implements ChangeListener {
      */
     private void drawSelection(@NotNull final Graphics g, final int height) {
         if (selectionStart != null && selectionEnd != null
-                && (!selectionStart.equals(selectionEnd) || lineSelected)) {
+            && (!selectionStart.equals(selectionEnd) || lineSelected)) {
             if (selectionStart.y > selectionEnd.y) {
                 final var tmp = selectionEnd;
                 selectionEnd = selectionStart;
                 selectionStart = tmp;
             }
-            g.setColor(SELECTION_COLOR);
+            g.setColor(selectionColor);
             if (selectionStart.y == selectionEnd.y) {
                 final int w = lineSelected ? getWidth() : selectionEnd.x - selectionStart.x;
                 g.fillRect(selectionStart.x, selectionStart.y, w, height);
@@ -158,7 +152,7 @@ public class HighlightTextPane extends JTextPane implements ChangeListener {
      */
     private void drawVertLine(@NotNull final Graphics g) {
         if (vertLine > 0) {
-            g.setColor(new HSLColor(getBackground()).adjustTone(30).getRGB());
+            g.setColor(vertLineColor);
             g.drawLine(vertLine, 0, vertLine, getHeight());
         }
     }
@@ -173,9 +167,9 @@ public class HighlightTextPane extends JTextPane implements ChangeListener {
             final var view = modelToView2D(getSelectionStart());
             final var endView = modelToView2D(getSelectionEnd());
             selectionStart = view == null ? null
-                    : new Point((int) view.getX(), (int) view.getY());
+                                          : new Point((int) view.getX(), (int) view.getY());
             selectionEnd = endView == null ? null
-                    : new Point((int) endView.getX(), (int) endView.getY());
+                                           : new Point((int) endView.getX(), (int) endView.getY());
             yoff = endView == null ? -1 : (int) endView.getY();
         } catch (@NotNull final NullPointerException | BadLocationException ignored) {
             yoff = -1;

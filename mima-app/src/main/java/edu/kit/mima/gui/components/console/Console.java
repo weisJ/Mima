@@ -1,5 +1,6 @@
 package edu.kit.mima.gui.components.console;
 
+import edu.kit.mima.gui.components.BorderlessScrollPane;
 import edu.kit.mima.gui.components.NonWrappingTextPane;
 import edu.kit.mima.preferences.ColorKey;
 import edu.kit.mima.preferences.Preferences;
@@ -7,18 +8,17 @@ import edu.kit.mima.preferences.PropertyKey;
 import edu.kit.mima.preferences.UserPreferenceChangedListener;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Adjustable;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
 import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+import java.awt.Adjustable;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 
 /**
  * Swing Console.
@@ -26,7 +26,7 @@ import javax.swing.text.StyledDocument;
  * @author Jannis Weis
  * @since 2018
  */
-public class Console extends JScrollPane implements UserPreferenceChangedListener {
+public class Console extends BorderlessScrollPane implements UserPreferenceChangedListener {
 
     @NotNull private final JTextPane textPane;
     private final StyledDocument document;
@@ -52,9 +52,9 @@ public class Console extends JScrollPane implements UserPreferenceChangedListene
 
         style = textPane.addStyle("Color", null);
         StyleConstants.setForeground(style, textColor);
-
-        setViewportView(textPane);
+        scrollPane.setViewportView(textPane);
     }
+
 
     /**
      * Replace the last message printed.
@@ -176,7 +176,7 @@ public class Console extends JScrollPane implements UserPreferenceChangedListene
      * Scroll to the top of the console
      */
     private void scrollToTop() {
-        final JScrollBar verticalBar = getVerticalScrollBar();
+        final JScrollBar verticalBar = getScrollPane().getVerticalScrollBar();
         final AdjustmentListener downScroller = new AdjustmentListener() {
             @Override
             public void adjustmentValueChanged(@NotNull final AdjustmentEvent e) {

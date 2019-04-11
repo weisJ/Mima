@@ -1,9 +1,5 @@
 package edu.kit.mima.gui.components.fontchooser.panes;
 
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JFormattedTextField;
@@ -15,12 +11,17 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionListener;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 
 public class SizePane extends JPanel {
 
     private final JList<Integer> sizeList = new JList<>();
     private final JSpinner sizeSpinner = new JSpinner();
     private final DefaultListModel<Integer> sizeListModel = new DefaultListModel<>();
+    private final JScrollPane sizeScrollPane = new JScrollPane();
 
     /**
      * Create Size Pane.
@@ -36,7 +37,6 @@ public class SizePane extends JPanel {
     }
 
     private void addSizeScrollPane() {
-        final JScrollPane sizeScrollPane = new JScrollPane();
         sizeScrollPane.setMinimumSize(new Dimension(50, 50));
         sizeScrollPane.setPreferredSize(new Dimension(60, 100));
         sizeScrollPane.setViewportView(sizeList);
@@ -46,6 +46,12 @@ public class SizePane extends JPanel {
         gridBagConstraints.anchor = GridBagConstraints.LINE_START;
         gridBagConstraints.weighty = 1.0;
         add(sizeScrollPane, gridBagConstraints);
+    }
+
+    @Override
+    public void setPreferredSize(Dimension preferredSize) {
+        preferredSize.height -= sizeSpinner.getPreferredSize().height + 6;
+        sizeScrollPane.setPreferredSize(preferredSize);
     }
 
     private void addSizeSpinner() {

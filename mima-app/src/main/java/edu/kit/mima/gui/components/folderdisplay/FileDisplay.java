@@ -60,7 +60,7 @@ public class FileDisplay extends JPanel {
      * @param file file to display
      */
     public void setFile(@Nullable final File file) {
-        if (file == null || FileUtil.filesEqual(file, this.file)) {
+        if (file == null || file.toString().isEmpty() || FileUtil.filesEqual(file, this.file)) {
             return;
         }
         removeAll();

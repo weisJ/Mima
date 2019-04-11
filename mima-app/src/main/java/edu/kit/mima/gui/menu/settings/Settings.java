@@ -14,7 +14,13 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.BorderLayout;
+import javax.swing.BorderFactory;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.UIManager;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -24,14 +30,6 @@ import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.swing.BorderFactory;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.UIManager;
 
 /**
  * Setting Dialog for Mima App.
@@ -43,7 +41,7 @@ public final class Settings extends JDialog {
 
     private static final Dimension SIZE = Toolkit.getDefaultToolkit().getScreenSize();
     private static Settings instance;
-    private static Component parent;
+    private Component parent;
 
     private Settings() {
         setIconImage(Toolkit.getDefaultToolkit().getImage(
@@ -58,7 +56,7 @@ public final class Settings extends JDialog {
         setSize((int) SIZE.getWidth() / 3, (int) SIZE.getHeight() / 3);
         setTitle("Settings");
         setLocationRelativeTo(null);
-        setResizable(false);
+        setResizable(true);
         initializeComponents();
     }
 
@@ -84,19 +82,20 @@ public final class Settings extends JDialog {
         s.setLocationRelativeTo(parent);
         s.setVisible(true);
         parent.setEnabled(false);
-        Settings.parent = parent;
+        s.parent = parent;
     }
 
     /**
      * Hide the settings dialog.
      */
     public static void hideWindow() {
-        getInstance().setVisible(false);
-        parent.setFocusable(true);
-        parent.setEnabled(true);
-        parent.requestFocus();
-        ((JFrame) parent).toFront();
-        parent.repaint();
+        var s = getInstance();
+        s.setVisible(false);
+        s.parent.setFocusable(true);
+        s.parent.setEnabled(true);
+        s.parent.requestFocus();
+        ((JFrame) s.parent).toFront();
+        s.parent.repaint();
     }
 
     /**
@@ -117,24 +116,24 @@ public final class Settings extends JDialog {
         }
     }
 
+
     private void initializeComponents() {
         new CardPanelBuilder()
                 .addItem("General")
                 .addItem("Theme")
                 .addSetting("Editor:", new JComboBox<>(new String[]{"Light", "Dark"}))
-                .addItem("Editor")
-                .addSetting(createFontChooserPanel(PropertyKey.EDITOR_FONT, new EditorPreview()))
-                .addItem("Console")
-                .addSetting(createFontChooserPanel(PropertyKey.CONSOLE_FONT, new ConsolePreview()))
+                .addItem("Editor",
+                         createFontChooserPanel(PropertyKey.EDITOR_FONT, new EditorPreview()))
+                .addItem("Console",
+                         createFontChooserPanel(PropertyKey.CONSOLE_FONT, new ConsolePreview()))
                 .addItem("View")
                 .addSetting("Show Binary:", new JCheckBox())
                 .addToComponent(this);
     }
 
     @NotNull
-    private JPanel createFontChooserPanel(@NotNull final PropertyKey key,
-                                          @NotNull final AbstractPreviewPane previewPane) {
-        final JPanel panel = new JPanel(new BorderLayout());
+    private JComponent createFontChooserPanel(@NotNull final PropertyKey key,
+                                              @NotNull final AbstractPreviewPane previewPane) {
         final FontChooser fontChooser
                 = new FontChooser(Preferences.getInstance().readFont(key), previewPane);
         fontChooser.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -142,8 +141,7 @@ public final class Settings extends JDialog {
             final FontSelectionModel model = (FontSelectionModel) event.getSource();
             Preferences.getInstance().saveFont(key, model.getSelectedFont());
         });
-        panel.add(fontChooser);
-        return panel;
+        return fontChooser;
     }
 
     @NotNull

@@ -1,7 +1,8 @@
 package edu.kit.mima.gui.components;
 
-import java.awt.Graphics;
 import javax.swing.JComponent;
+import java.awt.Color;
+import java.awt.Graphics;
 
 /**
  * Component to draw at line index.
@@ -23,11 +24,15 @@ public class IndexComponent extends JComponent {
         return true;
     }
 
+    public Color getLineColor() {
+        return null;
+    }
+
     @Override
-    protected void paintComponent(final Graphics g) {
+    public void paint(final Graphics g) {
         for (final var c : getComponents()) {
             c.paint(g);
         }
-        this.paint(g);
+        super.paint(g);
     }
 }
