@@ -1,5 +1,7 @@
 package edu.kit.mima.gui.components.editor.highlighter;
 
+import edu.kit.mima.api.history.FileHistoryObject;
+
 import javax.swing.JTextPane;
 
 /**
@@ -14,6 +16,7 @@ public interface Highlighter {
      * Update Highlighting.
      *
      * @param pane TextPane to style
+     * @param fhs  history change object
      */
-    void updateHighlighting(JTextPane pane);
+    void updateHighlighting(JTextPane pane, FileHistoryObject fhs);
 }

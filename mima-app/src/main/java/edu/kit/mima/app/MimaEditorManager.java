@@ -40,7 +40,7 @@ public class MimaEditorManager implements AutoCloseable {
     private Tuple<Editor, FileManager> cashed;
 
     /**
-     * Cretae new Editor Manager for Mima App.
+     * Create new Editor Manager for Mima App.
      *
      * @param parent parent App.
      */

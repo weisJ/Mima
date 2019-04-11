@@ -218,7 +218,6 @@ public class SyntaxParser extends Processor<SyntaxToken, SyntaxTokenStream> {
                     tokens.add(parseExpression());
                 }
             }
-            return reference;
         }
         return new EmptySyntaxToken();
     }

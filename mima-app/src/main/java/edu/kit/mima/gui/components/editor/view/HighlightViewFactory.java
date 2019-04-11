@@ -9,7 +9,6 @@ import javax.swing.text.Element;
 import javax.swing.text.IconView;
 import javax.swing.text.LabelView;
 import javax.swing.text.ParagraphView;
-import javax.swing.text.PlainView;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
@@ -34,10 +33,9 @@ public class HighlightViewFactory implements ViewFactory {
                 case AbstractDocument.SectionElementName -> new BoxView(elem, View.Y_AXIS);
                 case StyleConstants.ComponentElementName -> new ComponentView(elem);
                 case StyleConstants.IconElementName -> new IconView(elem);
-                default -> new PlainView(elem);
+                default -> new LabelView(elem);
             };
         }
         return new LabelView(elem);
     }
-
 }

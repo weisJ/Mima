@@ -1,9 +1,9 @@
 package edu.kit.mima.gui.components.numberedpane;
 
 import edu.kit.mima.gui.components.BorderlessScrollPane;
-import edu.kit.mima.gui.components.HighlightTextPane;
 import edu.kit.mima.gui.components.IndexComponent;
 import edu.kit.mima.gui.components.listeners.IndexListener;
+import edu.kit.mima.gui.components.text.HighlightTextPane;
 import edu.kit.mima.util.DocumentUtil;
 import org.jetbrains.annotations.NotNull;
 

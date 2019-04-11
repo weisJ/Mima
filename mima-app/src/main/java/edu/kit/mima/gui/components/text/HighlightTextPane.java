@@ -1,10 +1,10 @@
-package edu.kit.mima.gui.components;
+package edu.kit.mima.gui.components.text;
 
+import edu.kit.mima.api.lambda.LambdaUtil;
 import edu.kit.mima.util.DocumentUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JTextPane;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
@@ -16,8 +16,10 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Text Pane that supports line highlighting and visual hints.
@@ -25,14 +27,13 @@ import java.util.Map;
  * @author Jannis Weis
  * @since 2018
  */
-public class HighlightTextPane extends JTextPane implements ChangeListener {
+public class HighlightTextPane extends NonWrappingTextPane implements ChangeListener {
     private final Component container;
     @NotNull
     private final Map<Integer, Color> markings;
     private Color selectedBackground;
     private Color vertLineColor;
     private Color selectionColor;
-    private int yoff;
     private int xoff;
     private boolean lineSelected;
     @Nullable
@@ -51,13 +52,14 @@ public class HighlightTextPane extends JTextPane implements ChangeListener {
         this.container = container;
         setBorder(new EmptyBorder(0, 7, 0, 7));
         setOpaque(false);
-        yoff = -1;
         vertLine = 0;
         selectionStart = null;
         selectionEnd = null;
         lineSelected = false;
         markings = new HashMap<>();
+        setCaret(new LineCaret(2));
         getCaret().addChangeListener(this);
+//        addCaretListener(new VisibleCaretListener(25));
     }
 
     @Override
@@ -102,10 +104,9 @@ public class HighlightTextPane extends JTextPane implements ChangeListener {
      * Highlight background of current line
      */
     private void drawLineHighlight(@NotNull final Graphics g, final int height) {
-        if (yoff >= 0) {
-            g.setColor(selectedBackground);
-            g.fillRect(0, yoff, getWidth(), height);
-        }
+        int y = (int) LambdaUtil.wrap(this::modelToView2D).apply((getCaretPosition())).getY();
+        g.setColor(selectedBackground);
+        g.fillRect(0, y, getWidth(), height);
     }
 
     /*
@@ -162,20 +163,19 @@ public class HighlightTextPane extends JTextPane implements ChangeListener {
      */
     private void updateSelectionView() {
         try {
-            final var firstView = modelToView2D(0);
-            xoff = firstView == null ? 0 : (int) firstView.getX();
-            final var view = modelToView2D(getSelectionStart());
-            final var endView = modelToView2D(getSelectionEnd());
-            selectionStart = view == null ? null
-                                          : new Point((int) view.getX(), (int) view.getY());
-            selectionEnd = endView == null ? null
-                                           : new Point((int) endView.getX(), (int) endView.getY());
-            yoff = endView == null ? -1 : (int) endView.getY();
+            final var firstView = modelToView2D(0).getBounds();
+            final var view = modelToView2D(getSelectionStart()).getBounds();
+            final var endView = modelToView2D(getSelectionEnd()).getBounds();
+            selectionStart = Optional.ofNullable(view)
+                    .map(Rectangle::getLocation).orElse(null);
+            selectionEnd = Optional.ofNullable(endView)
+                    .map(Rectangle::getLocation).orElse(null);
+            xoff = Optional.ofNullable(firstView).map(r -> r.x).orElse(0);
         } catch (@NotNull final NullPointerException | BadLocationException ignored) {
-            yoff = -1;
             xoff = 0;
         }
         lineSelected = false;
+        repaint();
     }
 
     @Nullable
@@ -194,14 +194,12 @@ public class HighlightTextPane extends JTextPane implements ChangeListener {
     public void stateChanged(@NotNull final ChangeEvent e) {
         if (e.getSource() == getCaret()) {
             updateSelectionView();
-            container.repaint();
         }
     }
 
     @Override
     public void setFont(final Font font) {
         super.setFont(font);
-        repaint();
         updateSelectionView();
     }
 

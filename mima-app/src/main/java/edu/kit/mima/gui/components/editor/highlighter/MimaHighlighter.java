@@ -1,5 +1,6 @@
 package edu.kit.mima.gui.components.editor.highlighter;
 
+import edu.kit.mima.api.history.FileHistoryObject;
 import edu.kit.mima.api.loading.FileEventHandler;
 import edu.kit.mima.core.MimaConstants;
 import edu.kit.mima.core.instruction.InstructionSet;
@@ -15,14 +16,14 @@ import edu.kit.mima.preferences.UserPreferenceChangedListener;
 import edu.kit.mima.syntax.SyntaxParser;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Color;
-import java.util.List;
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
+import java.awt.Color;
+import java.util.List;
 
 /**
  * Highlighter for Mima Code.
@@ -48,8 +49,15 @@ public class MimaHighlighter implements Highlighter, FileEventHandler,
     }
 
     @Override
-    public void updateHighlighting(@NotNull final JTextPane textPane) {
-        update(textPane);
+    public void updateHighlighting(@NotNull final JTextPane textPane, FileHistoryObject fhs) {
+        boolean update = !switch (fhs.getType()) {
+            case INSERT -> fhs.getText().isBlank();
+            case REMOVE -> fhs.getOldText().isBlank();
+            case REPLACE -> fhs.getOldText().isBlank() && fhs.getText().isBlank();
+        };
+        if (update) {
+            update(textPane);
+        }
     }
 
     /**

@@ -106,7 +106,7 @@ public class FixedScrollTable extends BorderlessScrollPane {
     /**
      * Get the table.
      *
-     * @returns the table.
+     * @return the table.
      */
     @NotNull
     public JTable getTable() {

@@ -1,5 +1,5 @@
 # Mima
-Simple environment for writing Mima-Code (see http://gbi.ira.uka.de/ chapter 10)
+Simple environment for writing Mima-Code (see <http://gbi.ira.uka.de/> chapter 10)
 
 This mima runs on 24bit machine words in memory and 20 bits addresses / constants
 

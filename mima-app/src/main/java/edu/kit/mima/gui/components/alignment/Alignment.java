@@ -131,7 +131,7 @@ public enum Alignment {
 
 
     /**
-     * Check wheter the given Rectangle can be aligned at point inside boundaries.
+     * Check whether the given Rectangle can be aligned at point inside boundaries.
      *
      * @param point       point to align at.
      * @param size        size of rectangle to align.

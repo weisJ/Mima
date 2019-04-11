@@ -1,4 +1,4 @@
-import edu.kit.mima.gui.components.SearchTextField;
+import edu.kit.mima.gui.components.text.SearchTextField;
 import edu.kit.mima.gui.laf.LafManager;
 
 import javax.swing.JFrame;
