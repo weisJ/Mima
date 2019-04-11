@@ -1,7 +1,7 @@
 package edu.kit.mima.gui.components.console;
 
 import edu.kit.mima.gui.components.BorderlessScrollPane;
-import edu.kit.mima.gui.components.NonWrappingTextPane;
+import edu.kit.mima.gui.components.text.NonWrappingTextPane;
 import edu.kit.mima.preferences.ColorKey;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;

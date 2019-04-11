@@ -97,17 +97,15 @@ public final class MimaUserInterface extends JFrame {
                          MimaRunner.RUNNING_PROPERTY);
         BindingUtil.bind(debugger, () -> currentEditor().markLine(-1),
                          Debugger.RUNNING_PROPERTY);
-        tabbedEditor.addChangeListener(e -> {
-            Optional.ofNullable((Editor) tabbedEditor.getSelectedComponent())
-                    .ifPresent(editor -> {
-                        var file = new File(Optional.ofNullable(editorManager.managerForEditor(editor))
-                                                    .map(FileManager::getLastFile)
-                                                    .orElse(System.getProperty("SystemDrive")));
+        tabbedEditor.addChangeListener(e -> Optional.ofNullable((Editor) tabbedEditor.getSelectedComponent())
+                .ifPresent(editor -> {
+                    var file = new File(Optional.ofNullable(editorManager.managerForEditor(editor))
+                                                .map(FileManager::getLastFile)
+                                                .orElse(System.getProperty("SystemDrive")));
 
-                        fileDisplay.setFile(file);
-                        EditorHotKeys.setEditor(editor);
-                    });
-        });
+                    fileDisplay.setFile(file);
+                    EditorHotKeys.setEditor(editor);
+                }));
     }
 
     /**

@@ -66,7 +66,7 @@ public class MimaMenuBar {
     /**
      * Get the menubar.
      *
-     * @return themenu bar.
+     * @return the menu bar.
      */
     public JMenuBar getMenuBar() {
         return menuBar;

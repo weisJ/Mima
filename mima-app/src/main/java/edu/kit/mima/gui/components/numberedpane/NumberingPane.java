@@ -88,7 +88,7 @@ class NumberingPane extends JPanel {
      *
      * @return index of line the caret is currently in.
      */
-    private int currentLineIndex() {
+    public int currentLineIndex() {
         int currentLineIndex = -1;
         if (onceFocused || pane.hasFocus()) {
             onceFocused = true;

@@ -46,7 +46,7 @@ public class BorderlessScrollPane extends JLayeredPane {
      * whenever the component's contents are larger than the view and scrolling
      * in underway or the mouse is over the scrollbar position.
      *
-     * @param view the component to display in the scrollpane's viewport
+     * @param view the component to display in the scrollable viewport
      * @see JScrollPane#setViewportView
      */
     public BorderlessScrollPane(final JComponent view) {
@@ -143,10 +143,12 @@ public class BorderlessScrollPane extends JLayeredPane {
     }
 
     public void setVerticalScrollBarPolicy(int policy) {
+        scrollPane.setVerticalScrollBarPolicy(policy);
         controlPanel.showVerticalScrollBar(policy != JScrollPane.VERTICAL_SCROLLBAR_NEVER);
     }
 
     public void setHorizontalScrollBarPolicy(int policy) {
+        scrollPane.setHorizontalScrollBarPolicy(policy);
         controlPanel.showHorizontalScrollBar(policy != JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     }
 

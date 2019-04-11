@@ -1,8 +1,8 @@
 package edu.kit.mima.gui.components.fontchooser.panes;
 
-import edu.kit.mima.gui.components.SearchTextField;
 import edu.kit.mima.gui.components.fontchooser.FontFamilies;
 import edu.kit.mima.gui.components.fontchooser.FontFamily;
+import edu.kit.mima.gui.components.text.SearchTextField;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.BorderFactory;

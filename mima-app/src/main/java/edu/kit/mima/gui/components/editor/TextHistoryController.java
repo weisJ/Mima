@@ -18,7 +18,8 @@ public class TextHistoryController {
 
     private static final int MAXIMUM_AMEND_LENGTH = 10;
     private final JTextPane editorPane;
-    @NotNull private final History<FileHistoryObject> history;
+    @NotNull
+    private final History<FileHistoryObject> history;
     private boolean active;
 
     /**
@@ -72,9 +73,9 @@ public class TextHistoryController {
         }
         final FileHistoryObject fhs = history.getCurrent();
         if ((fhs != null)
-                && useSingle(text, fhs)
-                && (fhs.getType() == ChangeType.INSERT)
-                && (offset == (fhs.getCaretOffset() + fhs.getText().length()))) {
+            && useSingle(text, fhs)
+            && (fhs.getType() == ChangeType.INSERT)
+            && (offset == (fhs.getCaretOffset() + fhs.getText().length()))) {
             history.setCurrent(
                     new FileHistoryObject(editorPane, fhs.getCaretOffset(),
                                           fhs.getText() + text, "",
@@ -86,8 +87,8 @@ public class TextHistoryController {
 
     private boolean useSingle(@NotNull final String text, @NotNull final FileHistoryObject fhs) {
         return (text.length() == 1)
-                && !text.contains("\n") && !text.contains(" ")
-                && (fhs.getText().length() < MAXIMUM_AMEND_LENGTH);
+               && !text.contains("\n") && !text.contains(" ")
+               && (fhs.getText().length() < MAXIMUM_AMEND_LENGTH);
     }
 
     /**
@@ -109,9 +110,9 @@ public class TextHistoryController {
         }
         assert text != null;
         if ((fhs != null)
-                && useSingle(text, fhs)
-                && (fhs.getType() == ChangeType.REMOVE)
-                && ((offset + length) == fhs.getCaretOffset())) {
+            && useSingle(text, fhs)
+            && (fhs.getType() == ChangeType.REMOVE)
+            && ((offset + length) == fhs.getCaretOffset())) {
             history.setCurrent(
                     new FileHistoryObject(editorPane, offset, "", text + fhs.getOldText(),
                                           ChangeType.REMOVE));
@@ -215,7 +216,7 @@ public class TextHistoryController {
      * @return the history
      */
     @NotNull
-    public History getHistory() {
+    public History<FileHistoryObject> getHistory() {
         return history;
     }
 }

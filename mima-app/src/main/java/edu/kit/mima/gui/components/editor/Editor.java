@@ -47,7 +47,6 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
                                                         AutoCloseable {
 
     private static final Preferences PREF = Preferences.getInstance();
-
     @NotNull
     private final TextHistoryController historyController;
     @NotNull
@@ -127,7 +126,8 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
         historyController.setActive(false);
         final int caret = pane.getCaretPosition();
         if (highlighter != null) {
-            highlighter.updateHighlighting(pane);
+            var fhs = historyController.getHistory().getCurrent();
+            highlighter.updateHighlighting(pane, fhs);
         }
         setCaretPosition(caret);
         changeLock = false;

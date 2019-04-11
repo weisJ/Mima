@@ -2,10 +2,10 @@ package edu.kit.mima.gui.components.editor;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.regex.Pattern;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
+import java.util.regex.Pattern;
 
 /**
  * Document filter for use with {@link Editor}.
