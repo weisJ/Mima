@@ -79,8 +79,9 @@ public final class LoadingIndicator {
     public static void error(final String message) {
         timer.cancel();
         timer.purge();
-        App.logger.error(message, true);
+        App.logger.error(message, running);
         App.logger.setLock(false);
+
         running = false;
     }
 

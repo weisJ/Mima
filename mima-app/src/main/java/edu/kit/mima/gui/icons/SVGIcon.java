@@ -1,4 +1,4 @@
-package edu.kit.mima.gui.laf.icons;
+package edu.kit.mima.gui.icons;
 
 import org.apache.batik.bridge.UserAgentAdapter;
 import org.apache.batik.transcoder.TranscoderException;
@@ -8,12 +8,12 @@ import org.apache.batik.transcoder.image.ImageTranscoder;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 
+import javax.swing.Icon;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.geom.Dimension2D;
 import java.awt.image.BufferedImage;
-import javax.swing.Icon;
 
 /**
  * A Swing Icon that draws an SVG image.

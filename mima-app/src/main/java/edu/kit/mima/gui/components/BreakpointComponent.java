@@ -2,7 +2,7 @@ package edu.kit.mima.gui.components;
 
 import edu.kit.mima.core.interpretation.Breakpoint;
 import edu.kit.mima.gui.components.numberedpane.NumberedTextPane;
-import edu.kit.mima.gui.laf.icons.Icons;
+import edu.kit.mima.gui.icons.Icons;
 
 import javax.swing.UIManager;
 import java.awt.Color;

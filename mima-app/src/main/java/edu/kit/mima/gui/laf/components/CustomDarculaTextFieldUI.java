@@ -4,8 +4,11 @@ import com.bulenkov.darcula.ui.DarculaTextBorder;
 import com.bulenkov.darcula.ui.DarculaTextFieldUI;
 import com.bulenkov.iconloader.util.GraphicsConfig;
 import com.bulenkov.iconloader.util.Gray;
+import edu.kit.mima.api.annotations.ReflectionCall;
+import edu.kit.mima.gui.icons.Icons;
 import edu.kit.mima.gui.laf.MimaUIUtil;
-import edu.kit.mima.gui.laf.icons.Icons;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;
 import javax.swing.JComponent;
@@ -25,6 +28,9 @@ import java.awt.RenderingHints;
 public class CustomDarculaTextFieldUI extends DarculaTextFieldUI {
 
 
+    @NotNull
+    @Contract("_ -> new")
+    @ReflectionCall
     public static ComponentUI createUI(JComponent c) {
         return new CustomDarculaTextFieldUI();
     }

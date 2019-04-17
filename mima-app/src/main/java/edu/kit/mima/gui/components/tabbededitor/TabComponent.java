@@ -1,23 +1,22 @@
 package edu.kit.mima.gui.components.tabbededitor;
 
-import com.bulenkov.iconloader.util.EmptyIcon;
-import edu.kit.mima.gui.laf.icons.Icons;
+import edu.kit.mima.gui.components.IconLabel;
+import edu.kit.mima.gui.components.listeners.MouseClickListener;
+import edu.kit.mima.gui.icons.Icons;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicButtonUI;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.function.Consumer;
 
 /**
@@ -27,50 +26,30 @@ import java.util.function.Consumer;
  * @since 2018
  */
 public class TabComponent extends JPanel {
-    @NotNull
-    private final JLabel text;
-    private final Icon icon;
+
+    private final IconLabel iconLabel;
 
     /**
      * Create new Tab Component.
      *
      * @param title   title of tab.
-     * @param icon    icon of tab.
+     * @param icon the icon
      * @param onClick event handler when closing.
      */
     public TabComponent(final String title,
                         @Nullable final Icon icon,
                         @NotNull final Consumer<TabComponent> onClick) {
-        final Icon newicon = icon == null ? new EmptyIcon(0, 0) : icon;
-        final JLabel ic = new JLabel(newicon);
-        ic.setSize(newicon.getIconWidth(), newicon.getIconHeight());
-
-        this.icon = newicon;
-        text = new JLabel(title);
-        text.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
+        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+        iconLabel = new IconLabel(icon, title, IconLabel.LEFT);
+        iconLabel.setOpaque(false);
+        add(iconLabel);
+        add(Box.createGlue());
 
         final ButtonTab button = new ButtonTab();
-        button.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(final MouseEvent e) {
-                onClick.accept(TabComponent.this);
-            }
-        });
-        button.setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
-
-        final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        p.setSize(getWidth() - newicon.getIconWidth(), getHeight());
-        p.add(text);
-        p.add(button);
-
+        button.addMouseListener((MouseClickListener) e -> onClick.accept(TabComponent.this));
+        add(button);
+        setBorder(new EmptyBorder(3, 0, 2, 0));
         setOpaque(false);
-        text.setOpaque(false);
-        ic.setOpaque(false);
-        button.setOpaque(false);
-        p.setOpaque(false);
-
-        add(ic);
-        add(p);
     }
 
     /**
@@ -79,7 +58,7 @@ public class TabComponent extends JPanel {
      * @return the title
      */
     public String getTitle() {
-        return text.getText();
+        return iconLabel.getTitle();
     }
 
     /**
@@ -88,7 +67,7 @@ public class TabComponent extends JPanel {
      * @param title title to use.
      */
     public void setTitle(final String title) {
-        text.setText(title);
+        iconLabel.setTitle(title);
     }
 
     /**
@@ -97,7 +76,7 @@ public class TabComponent extends JPanel {
      * @return the icon
      */
     public Icon getIcon() {
-        return this.icon;
+        return iconLabel.getIcon();
     }
 
     private class ButtonTab extends JButton {
@@ -116,6 +95,7 @@ public class TabComponent extends JPanel {
             setBorderPainted(false);
 
             setRolloverEnabled(true);
+            setOpaque(false);
         }
 
         @Override

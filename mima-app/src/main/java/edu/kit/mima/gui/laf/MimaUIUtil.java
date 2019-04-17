@@ -4,6 +4,8 @@ import com.bulenkov.darcula.DarculaUIUtil;
 import com.bulenkov.iconloader.util.ColorUtil;
 import com.bulenkov.iconloader.util.DoubleColor;
 import com.bulenkov.iconloader.util.UIUtil;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -18,6 +20,8 @@ import java.awt.RenderingHints;
  */
 public class MimaUIUtil extends DarculaUIUtil {
 
+    @NotNull
+    @Contract(" -> new")
     private static Color getGlow() {
         return new DoubleColor(new Color(35, 121, 212), new Color(96, 175, 255));
     }
@@ -30,7 +34,8 @@ public class MimaUIUtil extends DarculaUIUtil {
      * @param g      the graphics object.
      * @param bounds the bounds.
      */
-    public static void paintSearchFocusOval(final Graphics2D g, final Rectangle bounds) {
+    public static void paintSearchFocusOval(@NotNull final Graphics2D g,
+                                            @NotNull final Rectangle bounds) {
         int correction = UIUtil.isUnderDarcula() ? 50 : 0;
         Color[] colors = new Color[]{ColorUtil.toAlpha(
                 getGlow(), 180 - correction),

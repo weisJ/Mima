@@ -1,6 +1,9 @@
 package edu.kit.mima.gui.laf.components;
 
+import edu.kit.mima.api.annotations.ReflectionCall;
 import edu.kit.mima.gui.components.tabbededitor.EditorTabbedPaneUI;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.JComponent;
 import javax.swing.UIManager;
@@ -20,6 +23,9 @@ public class LightEditorTabbedPaneUI extends EditorTabbedPaneUI {
      * @param c a component
      * @return a UI
      */
+    @NotNull
+    @Contract("_ -> new")
+    @ReflectionCall
     public static ComponentUI createUI(JComponent c) {
         return new LightEditorTabbedPaneUI();
     }

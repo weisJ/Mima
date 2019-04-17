@@ -7,7 +7,7 @@ import edu.kit.mima.gui.EditorHotKeys;
 import edu.kit.mima.gui.components.editor.Editor;
 import edu.kit.mima.gui.components.editor.highlighter.MimaHighlighter;
 import edu.kit.mima.gui.components.tabbededitor.EditorTabbedPane;
-import edu.kit.mima.gui.laf.icons.Icons;
+import edu.kit.mima.gui.icons.Icons;
 import edu.kit.mima.loading.FileManager;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;

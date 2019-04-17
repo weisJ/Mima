@@ -5,9 +5,7 @@ import edu.kit.mima.core.Debugger;
 import edu.kit.mima.core.MimaCompiler;
 import edu.kit.mima.core.MimaConstants;
 import edu.kit.mima.core.MimaRunner;
-import edu.kit.mima.core.MimaRuntimeException;
 import edu.kit.mima.core.Program;
-import edu.kit.mima.core.interpretation.InterpreterException;
 import edu.kit.mima.logger.LoadingIndicator;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
@@ -75,26 +73,24 @@ public class RunActions {
     }
 
     private void executionAction(final boolean debug) {
+        Thread.currentThread().setUncaughtExceptionHandler(
+                (t, e) -> LoadingIndicator.error("Execution failed: " + e.getMessage()));
         runThread = new Thread(() -> {
             String file = mimaUI.currentFileManager().getLastFile();
             App.logger.log("Executing program: " + FileName.shorten(file));
             LoadingIndicator.start("Executing", 3);
-            try {
-                var pref = Preferences.getInstance();
-                mimaRunner.setProgram(new Program(
-                        mimaCompiler.compile(mimaUI.currentEditor().getText(),
-                                             mimaUI.currentFileManager().getLastFile(),
-                                             pref.readString(PropertyKey.DIRECTORY_WORKING),
-                                             pref.readString(PropertyKey.DIRECTORY_MIMA)),
-                        MimaConstants.instructionSetForFile(file)));
-                if (debug) {
-                    debugger.setBreakpoints(mimaUI.currentEditor().getBreakpoints());
-                    debugger.start(v -> LoadingIndicator.stop("Executing (done)"));
-                } else {
-                    mimaRunner.start(v -> LoadingIndicator.stop("Executing (done)"));
-                }
-            } catch (final InterpreterException | MimaRuntimeException e) {
-                LoadingIndicator.error("Execution failed: " + e.getMessage());
+            var pref = Preferences.getInstance();
+            mimaRunner.setProgram(new Program(
+                    mimaCompiler.compile(mimaUI.currentEditor().getText(),
+                                         mimaUI.currentFileManager().getLastFile(),
+                                         pref.readString(PropertyKey.DIRECTORY_WORKING),
+                                         pref.readString(PropertyKey.DIRECTORY_MIMA)),
+                    MimaConstants.instructionSetForFile(file)));
+            if (debug) {
+                debugger.start(v -> LoadingIndicator.stop("Executing (done)"),
+                               mimaUI.currentEditor().getBreakpoints());
+            } else {
+                mimaRunner.start(v -> LoadingIndicator.stop("Executing (done)"));
             }
         });
         runThread.start();

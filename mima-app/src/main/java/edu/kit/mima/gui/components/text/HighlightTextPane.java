@@ -1,7 +1,10 @@
 package edu.kit.mima.gui.components.text;
 
 import edu.kit.mima.api.lambda.LambdaUtil;
+import edu.kit.mima.api.util.Tuple;
+import edu.kit.mima.api.util.ValueTuple;
 import edu.kit.mima.util.DocumentUtil;
+import org.apache.commons.collections4.map.LinkedMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,12 +15,14 @@ import javax.swing.event.ChangeListener;
 import javax.swing.text.BadLocationException;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 
@@ -30,7 +35,7 @@ import java.util.Optional;
 public class HighlightTextPane extends NonWrappingTextPane implements ChangeListener {
     private final Component container;
     @NotNull
-    private final Map<Integer, Color> markings;
+    private final Map<Integer, Tuple<String, LinkedMap<String, Color>>> markings;
     private Color selectedBackground;
     private Color vertLineColor;
     private Color selectionColor;
@@ -59,7 +64,7 @@ public class HighlightTextPane extends NonWrappingTextPane implements ChangeList
         markings = new HashMap<>();
         setCaret(new LineCaret(2));
         getCaret().addChangeListener(this);
-//        addCaretListener(new VisibleCaretListener(25));
+        setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
     }
 
     @Override
@@ -92,8 +97,11 @@ public class HighlightTextPane extends NonWrappingTextPane implements ChangeList
         g.fillRect(0, 0, this.getWidth(), this.getHeight());
         final int height = g.getFontMetrics(getFont()).getHeight();
         drawLineHighlight(g, height);
-        for (final var entry : markings.entrySet()) {
-            drawMarking(g, entry.getValue(), entry.getKey(), height);
+        for (final var entry : new HashSet<>(markings.entrySet())) {
+            if (!entry.getValue().getSecond().isEmpty()) {
+                var color = entry.getValue().getSecond().get(entry.getValue().getFirst());
+                drawMarking(g, color, entry.getKey(), height);
+            }
         }
         drawSelection(g, height);
         drawVertLine(g);
@@ -207,19 +215,32 @@ public class HighlightTextPane extends NonWrappingTextPane implements ChangeList
      * Mark the background of line in given colour.
      *
      * @param lineIndex index of line to mark
+     * @param label label of color.
      * @param color     marking colour.
      */
-    public void markLine(final int lineIndex, final Color color) {
-        markings.put(lineIndex, color);
+    public void markLine(final int lineIndex, final String label, final Color color) {
+        if (!markings.containsKey(lineIndex)) {
+            markings.put(lineIndex, new ValueTuple<>(label, new LinkedMap<>()));
+        }
+        var t = markings.get(lineIndex);
+        t.setFirst(label);
+        t.getSecond().put(label, color);
     }
 
     /**
      * Remove Marking from line.
      *
      * @param lineIndex index of line to remove marking from
+     * @param label the label to remove.
      */
-    public void unmarkLine(final int lineIndex) {
-        markings.remove(lineIndex);
+    public void removeMark(final int lineIndex, final String label) {
+        if (markings.containsKey(lineIndex)) {
+            var t = markings.get(lineIndex);
+            t.getSecond().remove(label);
+            if (!t.getSecond().isEmpty()) {
+                t.setFirst(t.getSecond().lastKey());
+            }
+        }
     }
 
     /**

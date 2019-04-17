@@ -3,7 +3,7 @@ package edu.kit.mima.gui.components.folderdisplay;
 import edu.kit.mima.gui.components.IconPanel;
 import edu.kit.mima.gui.components.listeners.FilePopupActionHandler;
 import edu.kit.mima.gui.components.listeners.PopupListener;
-import edu.kit.mima.gui.laf.icons.Icons;
+import edu.kit.mima.gui.icons.Icons;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,6 +12,7 @@ import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.io.File;
 
@@ -49,6 +50,7 @@ import java.io.File;
                               @NotNull final Icon icon,
                               @NotNull final FilePopupActionHandler handler) {
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+        setAlignmentY(Component.CENTER_ALIGNMENT);
         setOpaque(false);
         final var tooltip = new DirectoryTooltip(file, handler);
         addMouseListener(new PopupListener(tooltip, MouseEvent.BUTTON1, true));

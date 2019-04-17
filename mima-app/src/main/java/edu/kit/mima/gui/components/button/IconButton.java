@@ -3,6 +3,9 @@ package edu.kit.mima.gui.components.button;
 import edu.kit.mima.util.HSLColor;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JPanel;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -11,9 +14,6 @@ import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JPanel;
 
 /**
  * Button that is visualized by an {@link Icon} based on state.
@@ -57,10 +57,6 @@ public class IconButton extends JButton {
         setRolloverEnabled(true);
         setFocusable(false);
         setBorderPainted(false);
-        setPreferredSize(new Dimension(
-                Math.max(active.getIconWidth(), inactive.getIconWidth()) + 2 * border,
-                Math.max(active.getIconHeight(), inactive.getIconHeight()) + 2 * border
-        ));
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(final MouseEvent e) {
@@ -113,6 +109,24 @@ public class IconButton extends JButton {
         }
         currentIcon().paintIcon(this, g2, border, border);
         g2.dispose();
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(
+                Math.max(active.getIconWidth(), inactive.getIconWidth()) + 2 * border,
+                Math.max(active.getIconHeight(), inactive.getIconHeight()) + 2 * border
+        );
+    }
+
+    @Override
+    public Dimension getMaximumSize() {
+        return getPreferredSize();
+    }
+
+    @Override
+    public Dimension getMinimumSize() {
+        return getPreferredSize();
     }
 
     @Override

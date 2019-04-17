@@ -1,4 +1,4 @@
-package edu.kit.mima.gui.laf.icons;
+package edu.kit.mima.gui.icons;
 
 import org.jetbrains.annotations.NotNull;
 
