@@ -79,6 +79,7 @@ public final class LambdaUtil {
      * Wrap checked consumer to normal function.
      *
      * @param checkedFunction checked consumer to wrap.
+     * @param <T>             first type argument of consumer.
      * @param <K>             second type argument of consumer.
      * @return wrapped function.
      */
@@ -108,13 +109,13 @@ public final class LambdaUtil {
 
     @NotNull
     @Contract(pure = true)
-    public static <T, K> BiConsumer<T, K> elevateFirst(final Consumer<K> cons) {
+    public static <T, K> BiConsumer<T, K> liftFirst(final Consumer<K> cons) {
         return (T t, K k) -> cons.accept(k);
     }
 
     @NotNull
     @Contract(pure = true)
-    public static <T, K> BiConsumer<T, K> elevateSecond(final Consumer<T> cons) {
+    public static <T, K> BiConsumer<T, K> liftSecond(final Consumer<T> cons) {
         return (T t, K k) -> cons.accept(t);
     }
 
