@@ -40,6 +40,7 @@ public class TabFrameLayout implements LayoutManager {
      */
     private final int increase = 10;
     private final TabFrameContent content = new TabFrameContent();
+    @NotNull
     private final TabFrame tabFrame;
 
     private final Map<TabFrameTabComponent, DefaultTransformModel>
@@ -51,13 +52,13 @@ public class TabFrameLayout implements LayoutManager {
     private final int[] sizes = new int[8];
 
 
-    public TabFrameLayout(final TabFrame tabFrame) {
+    public TabFrameLayout(@NotNull final TabFrame tabFrame) {
         this.tabFrame = tabFrame;
         tabFrame.add(content);
     }
 
 
-    protected PopupComponent[] componentsForAlignment(final Alignment a) {
+    protected PopupComponent[] componentsForAlignment(@NotNull final Alignment a) {
         int index = indexForAlignment(a);
         if (compMap[index] == null) {
             compMap[index] = new PopupComponent[increase];
@@ -65,7 +66,7 @@ public class TabFrameLayout implements LayoutManager {
         return compMap[index];
     }
 
-    protected TabFrameTabComponent[] tabsForAlignment(final Alignment a) {
+    protected TabFrameTabComponent[] tabsForAlignment(@NotNull final Alignment a) {
         int index = indexForAlignment(a);
         if (tabMap[index] == null) {
             tabMap[index] = new TabFrameTabComponent[increase];
@@ -73,7 +74,7 @@ public class TabFrameLayout implements LayoutManager {
         return tabMap[index];
     }
 
-    protected int indexForAlignment(final Alignment a) {
+    protected int indexForAlignment(@NotNull final Alignment a) {
         if (a == Alignment.CENTER) {
             throw new IllegalArgumentException("invalid alignment: " + a);
         } else {
@@ -82,7 +83,7 @@ public class TabFrameLayout implements LayoutManager {
     }
 
     public void insertTab(@NotNull final PopupComponent c, final String title, final Icon icon,
-                          final Alignment a, final int index) {
+                          @NotNull final Alignment a, final int index) {
         indexForAlignment(a); //Check alignment
         var tabComponent = new TabFrameTabComponent(title, icon, a, index, this);
         var transformModel = new DefaultTransformModel();
@@ -106,12 +107,12 @@ public class TabFrameLayout implements LayoutManager {
         c.setEnabled(false);
     }
 
-    public void addTab(final PopupComponent c, final String title,
-                       final Icon icon, final Alignment a) {
+    public void addTab(@NotNull final PopupComponent c, final String title, final Icon icon,
+                       @NotNull final Alignment a) {
         indexForAlignment(a); //Check alignment
         ensureSize(a);
         insertTab(c, title, icon, a, sizes[indexForAlignment(a)]);
-        sizes[indexForAlignment(a)] = sizes[indexForAlignment(a)] + 1;
+        sizes[indexForAlignment(a)] += 1;
     }
 
     @Contract(pure = true)
@@ -123,7 +124,7 @@ public class TabFrameLayout implements LayoutManager {
         };
     }
 
-    private void ensureSize(Alignment a) {
+    private void ensureSize(@NotNull Alignment a) {
         int size = sizes[indexForAlignment(a)];
         int oldSize = tabsForAlignment(a).length;
         if (size == oldSize) {
@@ -145,6 +146,7 @@ public class TabFrameLayout implements LayoutManager {
     public void removeLayoutComponent(Component comp) {
     }
 
+    @NotNull
     @Override
     public Dimension preferredLayoutSize(Container parent) {
         var b = content.getPreferredSize();
@@ -152,6 +154,7 @@ public class TabFrameLayout implements LayoutManager {
                              topRect.height + bottomRect.height + b.height);
     }
 
+    @NotNull
     @Override
     public Dimension minimumLayoutSize(Container parent) {
         var b = content.getMinimumSize();
@@ -219,7 +222,7 @@ public class TabFrameLayout implements LayoutManager {
     }
 
 
-    protected void layoutHorizontalTab(@NotNull final Point start, final Alignment a,
+    protected void layoutHorizontalTab(@NotNull final Point start, @NotNull final Alignment a,
                                        final boolean forward) {
         int length = sizes[indexForAlignment(a)];
         var tabComps = tabsForAlignment(a);
@@ -244,7 +247,7 @@ public class TabFrameLayout implements LayoutManager {
         }
     }
 
-    protected void layoutVerticalTab(@NotNull final Point start, final Alignment a,
+    protected void layoutVerticalTab(@NotNull final Point start, @NotNull final Alignment a,
                                      final boolean downwards) {
         int length = sizes[indexForAlignment(a)];
         var tabComps = tabsForAlignment(a);

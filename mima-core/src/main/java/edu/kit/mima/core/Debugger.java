@@ -17,7 +17,7 @@ public interface Debugger extends Observable {
     String RUNNING_PROPERTY = "running";
     String PAUSE_PROPERTY = "paused";
 
-    void start(Consumer<Value> callback);
+    void start(Consumer<Value> callback, Collection<Breakpoint> breakpoints);
 
     void pause();
 
@@ -28,6 +28,4 @@ public interface Debugger extends Observable {
     boolean isRunning();
 
     boolean isPaused();
-
-    void setBreakpoints(Collection<Breakpoint> breakpoints);
 }

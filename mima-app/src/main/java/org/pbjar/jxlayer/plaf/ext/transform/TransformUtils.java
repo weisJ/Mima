@@ -32,6 +32,7 @@
 package org.pbjar.jxlayer.plaf.ext.transform;
 
 import org.jdesktop.jxlayer.JXLayer;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.pbjar.jxlayer.plaf.ext.TransformUI;
 
@@ -46,39 +47,75 @@ import java.util.Map;
  */
 public class TransformUtils {
 
+    @Contract(pure = true)
     private TransformUtils() {
     }
 
+    /**
+     * Create a Transform JXLayer.
+     *
+     * @param component the component.
+     * @return the JXLayer.
+     */
     @NotNull
-    public static JXLayer<JComponent> createTransformJXLayer(
-            JComponent component) {
+    public static JXLayer<JComponent> createTransformJXLayer(JComponent component) {
         return createTransformJXLayer(component, 1.0, null);
     }
 
+    /**
+     * Create a Transform JXLayer.
+     *
+     * @param component the component.
+     * @param scale     the scaling
+     * @return the JXLayer.
+     */
     @NotNull
-    public static JXLayer<JComponent> createTransformJXLayer(
-            JComponent component, double scale) {
+    public static JXLayer<JComponent> createTransformJXLayer(JComponent component, double scale) {
         return createTransformJXLayer(component, scale, null);
     }
 
+    /**
+     * Create a Transform JXLayer.
+     *
+     * @param component the component.
+     * @param scale     the scaling
+     * @param hints     the rendering hints.
+     * @return the JXLayer.
+     */
     @NotNull
-    public static JXLayer<JComponent> createTransformJXLayer(
-            JComponent component, double scale, Map<RenderingHints.Key, Object> hints) {
+    public static JXLayer<JComponent> createTransformJXLayer(JComponent component, double scale,
+                                                             Map<RenderingHints.Key, Object> hints) {
         DefaultTransformModel model = new DefaultTransformModel();
         model.setScale(scale);
         return createTransformJXLayer(component, model, hints);
     }
 
+    /**
+     * Create a Transform JXLayer.
+     *
+     * @param component the component.
+     * @param model     the transform model.
+     * @return the JXLayer.
+     */
     @NotNull
-    public static JXLayer<JComponent> createTransformJXLayer(
-            JComponent component, TransformModel model) {
+    public static JXLayer<JComponent> createTransformJXLayer(JComponent component,
+                                                             TransformModel model) {
         return createTransformJXLayer(component, model, null);
     }
 
+    /**
+     * Create a Transform JXLayer.
+     *
+     * @param component the component.
+     * @param model     the transform model.
+     * @param hints     the rendering hints.
+     * @return the JXLayer.
+     */
+    @Contract("_, _, _ -> new")
     @NotNull
-    public static JXLayer<JComponent> createTransformJXLayer(
-            JComponent component, TransformModel model,
-            Map<RenderingHints.Key, Object> hints) {
+    public static JXLayer<JComponent> createTransformJXLayer(JComponent component,
+                                                             TransformModel model,
+                                                             Map<RenderingHints.Key, Object> hints) {
         TransformUI ui = new TransformUI(model);
         ui.setRenderingHints(hints);
         return new JXLayer<>(component, ui);

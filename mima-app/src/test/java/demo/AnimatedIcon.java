@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2008-2009, Piet Blok All rights reserved.
  * <p>
  * Redistribution and use in source and binary forms, with or without modification, are permitted
@@ -23,6 +23,8 @@
 
 package demo;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.Timer;
@@ -45,10 +47,12 @@ public class AnimatedIcon implements Icon {
 
     private static final int maxRadius = 4;
 
-    private Map<Component, Object> componentMap = new WeakHashMap<Component, Object>();
+    @NotNull
+    private Map<Component, Object> componentMap = new WeakHashMap<>();
 
     private double radius = 0;
 
+    @NotNull
     private Ellipse2D dot = new Ellipse2D.Float();
 
     public AnimatedIcon() {
@@ -63,8 +67,8 @@ public class AnimatedIcon implements Icon {
                 if (radius > maxRadius) {
                     radius = 0.1;
                 }
-                dot.setFrameFromCenter(maxRadius, maxRadius,
-                                       maxRadius - radius, maxRadius - radius);
+                dot.setFrameFromCenter(maxRadius, maxRadius, maxRadius - radius,
+                                       maxRadius - radius);
                 // For all registered components
                 Iterator<Component> iterator = componentMap.keySet().iterator();
                 while (iterator.hasNext()) {
@@ -79,8 +83,14 @@ public class AnimatedIcon implements Icon {
     }
 
     @Override
-    public int getIconHeight() {
-        return 2 * maxRadius;
+    public void paintIcon(Component c, @NotNull Graphics g, int x, int y) {
+        // Remember the component for a repaint
+        componentMap.put(c, null);
+        // Paint the icon
+        ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                                          RenderingHints.VALUE_ANTIALIAS_ON);
+        g.translate(x, y);
+        ((Graphics2D) g).fill(dot);
     }
 
     @Override
@@ -89,14 +99,8 @@ public class AnimatedIcon implements Icon {
     }
 
     @Override
-    public void paintIcon(Component c, Graphics g, int x, int y) {
-        // Remember the component for a repaint
-        componentMap.put(c, null);
-        // Paint the icon
-        ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                                          RenderingHints.VALUE_ANTIALIAS_ON);
-        g.translate(x, y);
-        ((Graphics2D) g).fill(dot);
+    public int getIconHeight() {
+        return 2 * maxRadius;
     }
 
 }

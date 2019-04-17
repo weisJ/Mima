@@ -88,7 +88,7 @@ public class GlobalEnvironment extends Environment {
     }
 
     @NotNull
-    private Tuple<Environment, Integer> getJumpInformation(List<Value> args,
+    private Tuple<Environment, Integer> getJumpInformation(@NotNull List<Value> args,
                                                            @NotNull Environment env) {
         final var argument = InstructionTools.getJumpReference(args, 0);
         final Environment jumpEnv = env.lookupJump(argument.getValue().toString());

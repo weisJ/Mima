@@ -25,6 +25,7 @@ public class EmptyToken extends FileObjectAdapter implements Token {
         return TokenType.EMPTY;
     }
 
+    @NotNull
     @Override
     public Stream<Token> stream(boolean includeChildren) {
         return Stream.empty();

@@ -14,6 +14,7 @@ import edu.kit.mima.core.token.Token;
 import edu.kit.mima.core.token.TokenType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -253,9 +254,10 @@ public final class Parser extends Processor<Token, TokenStream> {
         return input.error("expected identifier");
     }
 
+    @Nullable
     @Override
     protected Token parseDelimiter() {
         return Optional.ofNullable(input.peek()).map(t -> t.getType() == TokenType.PUNCTUATION)
-                .orElse(false) ? input.next() : new EmptyToken();
+                       .orElse(false) ? input.next() : new EmptyToken();
     }
 }

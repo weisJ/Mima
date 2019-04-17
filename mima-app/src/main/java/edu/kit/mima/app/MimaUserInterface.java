@@ -24,6 +24,7 @@ import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
 import edu.kit.mima.util.BindingUtil;
 import edu.kit.mima.util.FileName;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.BorderFactory;
@@ -59,10 +60,15 @@ public final class MimaUserInterface extends JFrame {
     private final RunActions runActions = new RunActions(this, new MimaCompiler(),
                                                          mimaRunner, debugger);
 
+    @NotNull
     private final FileDisplay fileDisplay;
+    @NotNull
     private final EditorTabbedPane tabbedEditor;
+    @NotNull
     private final Console console;
+    @NotNull
     private final MemoryTableView memoryView;
+    @NotNull
     private final FixedScrollTable memoryTable;
 
     /**
@@ -219,11 +225,11 @@ public final class MimaUserInterface extends JFrame {
             Preferences.getInstance().saveOptions();
             dispose();
             Settings.close();
-            Help.close();
+            Help.getInstance().close();
             mimaRunner.stop();
             System.exit(0);
-        } catch (final IllegalArgumentException ignored) {
-        } catch (final IOException e) {
+        } catch (@NotNull final IllegalArgumentException ignored) {
+        } catch (@NotNull final IOException e) {
             App.logger.error(e.getMessage());
         }
     }

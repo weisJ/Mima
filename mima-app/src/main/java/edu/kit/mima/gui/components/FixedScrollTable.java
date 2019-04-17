@@ -10,6 +10,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.border.AbstractBorder;
+import javax.swing.border.CompoundBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -18,6 +19,7 @@ import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.function.BiConsumer;
 
 /**
  * Table with scroll bar that can't be edited by the user.
@@ -38,37 +40,42 @@ public class FixedScrollTable extends BorderlessScrollPane {
      *
      * @param tableHeader    header of table
      * @param initialEntries number of initial entries
+     * @param cellInsets  the insets for cell display.
      */
     public FixedScrollTable(@NotNull final String[] tableHeader, final int initialEntries,
-                            final Insets cellInsets) {
+                            @NotNull final Insets cellInsets) {
         this.tableHeader = tableHeader;
         table = new JTable(new DefaultTableModel(tableHeader, 0)) {
+            private final BiConsumer<JComponent, Integer> borderSetup = (c, row) -> {
+                final var spacing = BorderFactory
+                        .createEmptyBorder(cellInsets.top, cellInsets.left, cellInsets.bottom,
+                                           cellInsets.right);
+                if (isRowSelected(row)) {
+                    c.setBorder(new CompoundBorder(new SelectedBorder(), spacing));
+                } else {
+                    c.setBorder(spacing);
+                }
+            };
+
             @Override
             public boolean isCellEditable(final int row, final int column) {
                 return editable;
             }
 
+            @NotNull
             @Override
-            public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
-                var c = (JComponent) super.prepareRenderer(renderer, row, column);
-                if (isRowSelected(row)) {
-                    c.setBorder(new SelectedBorder());
-                } else {
-                    c.setBorder(BorderFactory.createEmptyBorder(
-                            cellInsets.top, cellInsets.left, cellInsets.bottom, cellInsets.right));
-                }
+            public Component prepareRenderer(@NotNull TableCellRenderer renderer, int row,
+                                             int column) {
+                final var c = (JComponent) super.prepareRenderer(renderer, row, column);
+                borderSetup.accept(c, row);
                 return c;
             }
 
+            @NotNull
             @Override
-            public Component prepareEditor(TableCellEditor editor, int row, int column) {
+            public Component prepareEditor(@NotNull TableCellEditor editor, int row, int column) {
                 var c = (JComponent) super.prepareEditor(editor, row, column);
-                if (isRowSelected(row)) {
-                    c.setBorder(new SelectedBorder());
-                } else {
-                    c.setBorder(BorderFactory.createEmptyBorder(
-                            cellInsets.top, cellInsets.left, cellInsets.bottom, cellInsets.right));
-                }
+                borderSetup.accept(c, row);
                 return c;
             }
         };

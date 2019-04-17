@@ -43,19 +43,6 @@ public final class DnDUtil {
         return getData(event.getTransferable());
     }
 
-    /*
-     * Fetch data from Transferable.
-     */
-    @Nullable
-    private static TabTransferData getData(final Transferable transferable) {
-        try {
-            return (TabTransferData) transferable
-                    .getTransferData(EditorTabbedPane.FLAVOR);
-        } catch (@NotNull final Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     /**
      * Get Tab TransferData from DragSourceEvent.
@@ -68,4 +55,18 @@ public final class DnDUtil {
         return getData(event.getDragSourceContext().getTransferable());
     }
 
+
+    /*
+     * Fetch data from Transferable.
+     */
+    @Nullable
+    private static TabTransferData getData(@NotNull final Transferable transferable) {
+        try {
+            return (TabTransferData) transferable
+                    .getTransferData(EditorTabbedPane.FLAVOR);
+        } catch (@NotNull final Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

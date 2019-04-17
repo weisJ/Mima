@@ -11,6 +11,8 @@ import org.jdesktop.swingx.JXTaskPane;
 import org.jdesktop.swingx.JXTaskPaneContainer;
 import org.jdesktop.swingx.border.DropShadowBorder;
 import org.jdesktop.swingx.painter.BusyPainter;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -43,7 +45,8 @@ import java.util.HashMap;
  * A SwingX and TransformUI demo by <b>s_barlow</b>.
  * <p>
  * Run a web start demo: <a href="http://www.pbjar.org/blogs/jxlayer/jxlayer40/SBarlowDemo.jnlp">
- * <IMG style="CLEAR: right" alt="Web Start Shared JXLayer" src="http://javadesktop.org/javanet_images/webstart.small2.gif"
+ * <IMG style="CLEAR: right" alt="Web Start Shared JXLayer" src="http://javadesktop
+ * .org/javanet_images/webstart.small2.gif"
  * align="middle" border="1" /> </a>
  * </p>
  */
@@ -71,34 +74,36 @@ public class TestTransformerUI extends JXFrame {
         SwingUtilities.invokeLater(() -> new TestTransformerUI().setVisible(true));
     }
 
+    @NotNull
     private static Border createBorder(boolean active) {
         Color baseColor = Color.LIGHT_GRAY;
         Color shadowColor = Color.DARK_GRAY;
         Border inner = new LineBorder(active ? shadowColor : baseColor);
-        Border outer = new DropShadowBorder(shadowColor, 20, .7f, 15, false,
-                                            false, active, active);
+        Border outer = new DropShadowBorder(shadowColor, 20, .7f, 15, false, false, active, active);
         return new CompoundBorder(outer, inner);
     }
 
-    private static Color setAlpha(Color color, double alpha) {
+    @NotNull
+    private static Color setAlpha(@NotNull Color color, double alpha) {
         int alphaInt = (int) (alpha * 255);
-        return new Color(color.getRed(), color.getGreen(), color.getBlue(),
-                         alphaInt);
+        return new Color(color.getRed(), color.getGreen(), color.getBlue(), alphaInt);
     }
 
-    private static void setUpBackground(JXLabel comp, Color bg,
-                                        boolean translucent) {
+    private static void setUpBackground(@NotNull JXLabel comp, Color bg, boolean translucent) {
+        Color bg1 = bg;
         if (translucent) {
-            bg = setAlpha(bg, 0.25);
+            bg1 = setAlpha(bg1, 0.25);
         }
-        comp.setBackground(bg);
+        comp.setBackground(bg1);
     }
 
+    @NotNull
     private Container createContent() {
         JXPanel panel = new JXPanel(new GridLayout(3, 3));
         Component note;
-        Color[] color = {Color.YELLOW, Color.ORANGE, Color.RED, Color.GREEN,
-                Color.MAGENTA, Color.GRAY, Color.LIGHT_GRAY, Color.PINK};
+        Color[] color =
+                {Color.YELLOW, Color.ORANGE, Color.RED, Color.GREEN, Color.MAGENTA, Color.GRAY,
+                 Color.LIGHT_GRAY, Color.PINK};
         for (int i = 1; i <= color.length; i++) {
             note = createNote("note number " + i, color[i - 1]);
             panel.add(note);
@@ -106,6 +111,7 @@ public class TestTransformerUI extends JXFrame {
         return panel;
     }
 
+    @NotNull
     private Component createNote(String title, Color color) {
         JXPanel note = new JXPanel(new BorderLayout());
         note.setName(title);
@@ -135,6 +141,7 @@ public class TestTransformerUI extends JXFrame {
         return note;
     }
 
+    @NotNull
     private Component createTaskPanel() {
         JXTaskPaneContainer container = new JXTaskPaneContainer();
 
@@ -186,8 +193,7 @@ public class TestTransformerUI extends JXFrame {
         busyPainter.setPaintCentered(true);
         busyPainter.setPoints(60);
         busyPainter.setTrailLength(15);
-        busyPainter.setPointShape(new RoundRectangle2D.Float(2f, 2f, 10f, 1f,
-                                                             2f, 2f));
+        busyPainter.setPointShape(new RoundRectangle2D.Float(2f, 2f, 10f, 1f, 2f, 2f));
 
         busyLabel.setBusyPainter(busyPainter);
 
@@ -206,6 +212,7 @@ public class TestTransformerUI extends JXFrame {
         clock.setRepeats(true);
         clock.setDelay(1000);
         clock.addActionListener(new ActionListener() {
+            @NotNull
             String timeFormat = "%02d:%02d:%02d";
 
             public void actionPerformed(ActionEvent e) {
@@ -230,12 +237,11 @@ public class TestTransformerUI extends JXFrame {
         return container;
     }
 
+    @NotNull
     private JXLayer<?> wrapLayer(JXPanel content) {
         HashMap<RenderingHints.Key, Object> hints = new HashMap<>();
-        hints.put(RenderingHints.KEY_RENDERING,
-                  RenderingHints.VALUE_RENDER_QUALITY);
-        hints.put(RenderingHints.KEY_ANTIALIASING,
-                  RenderingHints.VALUE_ANTIALIAS_ON);
+        hints.put(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        hints.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         /*
          * PB Wrap the content in a panel that displays the current
@@ -246,7 +252,7 @@ public class TestTransformerUI extends JXFrame {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public void paint(Graphics g) {
+            public void paint(@NotNull Graphics g) {
                 super.paint(g);
                 // System.out.println(RepaintManager.currentManager(this)
                 // .getClass().getName());
@@ -254,23 +260,24 @@ public class TestTransformerUI extends JXFrame {
         };
         debugPanel.add(content);
 
-//	TransformPort transformPort = new TransformPort(debugPanel);
-//	transformPort.setOpaque(true);
-//	transformPort.setBackground(Color.ORANGE);
+        //	TransformPort transformPort = new TransformPort(debugPanel);
+        //	transformPort.setOpaque(true);
+        //	transformPort.setBackground(Color.ORANGE);
 
-//	TransformUI zoomUI = new TransformUI();
-//	DefaultTransformModel transformer = new DefaultTransformModel();
-//	transformer.setPreferredScale(2.0);
-//	zoomUI.setModel(transformer);
-//	zoomUI.setRenderingHints(hints);
+        //	TransformUI zoomUI = new TransformUI();
+        //	DefaultTransformModel transformer = new DefaultTransformModel();
+        //	transformer.setPreferredScale(2.0);
+        //	zoomUI.setModel(transformer);
+        //	zoomUI.setRenderingHints(hints);
 
         return TransformUtils.createTransformJXLayer(debugPanel, 2.0, hints);
 
-//	return new JXLayer<TransformPort>(transformPort, zoomUI);
+        //	return new JXLayer<TransformPort>(transformPort, zoomUI);
     }
 
     class ReLocator extends MouseAdapter {
         private final JXPanel myComp;
+        @Nullable
         private Point offset;
 
         public ReLocator(JXPanel myComp) {
@@ -296,13 +303,24 @@ public class TestTransformerUI extends JXFrame {
             panel.repaint();
         }
 
-        public void mouseDragged(MouseEvent e) {
+        public void mousePressed(@NotNull MouseEvent e) {
+            System.out.println("pressed: " + myComp.getName());
+            offset = e.getPoint();
+            offset.x = -offset.x;
+            offset.y = -offset.y;
+        }
+
+        public void mouseReleased(MouseEvent e) {
+            System.out.println("released: " + myComp.getName());
+            offset = null;
+        }
+
+        public void mouseDragged(@NotNull MouseEvent e) {
             Dimension size = myComp.getSize();
             Dimension pSize = myComp.getParent().getSize();
 
             Point location = e.getPoint();
-            location = SwingUtilities.convertPoint(myComp, location, myComp
-                    .getParent());
+            location = SwingUtilities.convertPoint(myComp, location, myComp.getParent());
             location.translate(offset.x, offset.y);
 
             if (location.x < 0) {
@@ -322,18 +340,6 @@ public class TestTransformerUI extends JXFrame {
 
             JXPanel panel = (JXPanel) myComp.getParent();
             panel.setComponentZOrder(myComp, 0); // moveToFront
-        }
-
-        public void mousePressed(MouseEvent e) {
-            System.out.println("pressed: " + myComp.getName());
-            offset = e.getPoint();
-            offset.x = -offset.x;
-            offset.y = -offset.y;
-        }
-
-        public void mouseReleased(MouseEvent e) {
-            System.out.println("released: " + myComp.getName());
-            offset = null;
         }
     }
 }

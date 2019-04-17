@@ -2,13 +2,13 @@ package edu.kit.mima.gui.components.tooltip;
 
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.SwingUtilities;
 import java.awt.AWTEvent;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-import javax.swing.SwingUtilities;
 
 /**
  * Event handler for Tooltip display management.
@@ -18,9 +18,11 @@ import javax.swing.SwingUtilities;
  */
 public class TooltipEventHandler extends MouseAdapter {
 
+    @NotNull
     private final TooltipComponent tooltipComponent;
     private final int showDelay;
     private final int vanishingDelay;
+    @NotNull
     private final EventPropagator propagator;
 
     private boolean overContainer;

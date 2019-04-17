@@ -23,6 +23,7 @@ public class MimaButtonArea {
     private final MimaUserInterface mimaUI;
     private final EditorTabbedPane tabbedPane;
     private final RunActions runActions;
+    @NotNull
     private final JPanel panel;
 
     /**
@@ -124,6 +125,7 @@ public class MimaButtonArea {
      *
      * @return panel with buttons.
      */
+    @NotNull
     public JPanel getPane() {
         return panel;
     }

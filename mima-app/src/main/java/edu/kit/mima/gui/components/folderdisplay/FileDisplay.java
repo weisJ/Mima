@@ -5,6 +5,7 @@ import edu.kit.mima.gui.components.IconPanel;
 import edu.kit.mima.gui.components.listeners.FilePopupActionHandler;
 import edu.kit.mima.gui.icons.Icons;
 import edu.kit.mima.util.FileName;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.BoxLayout;
@@ -32,6 +33,7 @@ public class FileDisplay extends JPanel {
     private File file;
     private FilePopupActionHandler handler;
     private Component[] dirComps;
+    @Nullable
     private Component root;
     private int firstVisible;
 
@@ -59,6 +61,7 @@ public class FileDisplay extends JPanel {
      *
      * @param file file to display
      */
+    @SuppressWarnings("ValueOfIncrementOrDecrementUsed")
     public void setFile(@Nullable final File file) {
         if (file == null || file.toString().isEmpty() || FileUtil.filesEqual(file, this.file)) {
             return;
@@ -80,7 +83,7 @@ public class FileDisplay extends JPanel {
         setMaximumSize(getMaximumSize());
     }
 
-    private void updateRoot(final String[] directories, int max) {
+    private void updateRoot(@NotNull final String[] directories, int max) {
         if (root != null) {
             remove(root);
         }
@@ -127,7 +130,7 @@ public class FileDisplay extends JPanel {
     }
 
     @Override
-    public void setMaximumSize(Dimension maximumSize) {
+    public void setMaximumSize(@NotNull Dimension maximumSize) {
         super.setMaximumSize(maximumSize);
         if (file == null) {
             return;
@@ -159,7 +162,7 @@ public class FileDisplay extends JPanel {
                 final Robot robot = new Robot();
                 robot.mouseMove(point.x + c.getWidth() / 2, point.y + c.getHeight() / 2);
                 robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-            } catch (final AWTException ignored) {
+            } catch (@NotNull final AWTException ignored) {
             }
         });
     }

@@ -66,7 +66,7 @@ public class PopupListener extends MouseAdapter {
      *
      * @param e mouse event.
      */
-    private void maybeShowPopup(final MouseEvent e) {
+    private void maybeShowPopup(@NotNull final MouseEvent e) {
         if (popupMenu == null) {
             return;
         }
@@ -78,7 +78,7 @@ public class PopupListener extends MouseAdapter {
 
     @NotNull
     @Contract("_, _ -> new")
-    private Point calculatePos(final Point p, final Component c) {
+    private Point calculatePos(@NotNull final Point p, @NotNull final Component c) {
         var x = 0;
         var y = 0;
         if (attachToComponent && rightAlign) {

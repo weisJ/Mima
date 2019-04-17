@@ -148,7 +148,7 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
     }
 
     @SuppressWarnings({"HardCodedStringLiteral"})
-    private static void initInputMapDefaults(final UIDefaults defaults) {
+    private static void initInputMapDefaults(@NotNull final UIDefaults defaults) {
         // Make ENTER work in JTrees
         final InputMap treeInputMap = (InputMap) defaults.get("Tree.focusInputMap");
         if (treeInputMap != null) {

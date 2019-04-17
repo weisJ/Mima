@@ -29,6 +29,7 @@ public final class MimaConstants {
      * @param file the file.
      * @return Instructions set of {@link InstructionSet#EMPTY} if none is found.
      */
+    @NotNull
     public static InstructionSet instructionSetForFile(@NotNull File file) {
         return instructionSetForFile(file.getName());
     }
@@ -39,6 +40,7 @@ public final class MimaConstants {
      * @param file path of file or filename.
      * @return Instructions set of {@link InstructionSet#EMPTY} if none is found.
      */
+    @NotNull
     @Contract(pure = true)
     public static InstructionSet instructionSetForFile(@NotNull final String file) {
         if (file.endsWith("." + MimaConstants.MIMA_X_EXTENSION)) {

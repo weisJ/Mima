@@ -4,6 +4,7 @@
  */
 
 import edu.kit.mima.gui.laf.LafManager;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,6 +27,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -37,13 +39,16 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
     @Nullable
     private static String selectedItem;
 
+    @NotNull
     private final JComponent contentPane;
+    @NotNull
+    private final TreeMap<String, TreeMap<String, Object>> items;
+    @NotNull
+    private final HashMap<String, DefaultTableModel> models;
     private JMenuBar menuBar;
     private JComboBox<String> comboBox;
     private JRadioButton byComponent;
     private JTable table;
-    private final TreeMap<String, TreeMap<String, Object>> items;
-    private final HashMap<String, DefaultTableModel> models;
 
     /*
      * Constructor
@@ -85,6 +90,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
     /*
      *  The content pane should be added to a high level container
      */
+    @NotNull
     public JComponent getContentPane() {
         return contentPane;
     }
@@ -136,6 +142,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
     /*
      *  This panel is added to the Center of the content pane
      */
+    @NotNull
     private JComponent buildCenterComponent() {
         final DefaultTableModel model = new DefaultTableModel(COLUMN_NAMES, 0);
         table = new JTable(model);
@@ -182,6 +189,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
      *	The item map will contain items for each component or
      *  items for each attribute type.
      */
+    @NotNull
     private TreeMap buildItemsMap() {
         final UIDefaults defaults = UIManager.getLookAndFeelDefaults();
 
@@ -199,7 +207,8 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
             //  Get the attribute map for this componenent, or
             //  create a map when one is not found
 
-            final TreeMap<String, Object> attributeMap = items.computeIfAbsent(itemName, k -> new TreeMap<>());
+            final TreeMap<String, Object> attributeMap =
+                    items.computeIfAbsent(itemName, k -> new TreeMap<>());
 
             //  Add the attribute to the map for this componenent
 
@@ -212,7 +221,8 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
     /*
      *  Parse the key to determine the item name to use
      */
-    private String getItemName(final String key, final Object value) {
+    @Nullable
+    private String getItemName(@NotNull final String key, final Object value) {
         //  Seems like this is an old check required for JDK1.4.2
 
         if (key.startsWith("class") || key.startsWith("javax")) {
@@ -255,7 +265,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
         return componentName;
     }
 
-    private int componentNameEndOffset(final String key) {
+    private int componentNameEndOffset(@NotNull final String key) {
         //  Handle Nimbus properties first
 
         //  "ComboBox.scrollPane", "Table.editor" and "Tree.cellEditor"
@@ -283,6 +293,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
         return key.indexOf(".");
     }
 
+    @NotNull
     private String getValueName(@NotNull final String key, final Object value) {
         if (value instanceof Icon) {
             return "Icon";
@@ -447,20 +458,22 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
                 int rowHeight = table.getRowHeight();
 
                 for (int column = 0; column < table.getColumnCount(); column++) {
-                    final Component comp = table.prepareRenderer(table.getCellRenderer(row, column), row, column);
+                    final Component comp =
+                            table.prepareRenderer(table.getCellRenderer(row, column), row, column);
                     rowHeight = Math.max(rowHeight, comp.getPreferredSize().height);
                 }
 
                 table.setRowHeight(row, rowHeight);
             }
-        } catch (final ClassCastException ignored) {
+        } catch (@NotNull final ClassCastException ignored) {
         }
     }
 
     /**
      * Thanks to Jeanette for the use of this code found at:
      * <p>
-     * https://jdnc-incubator.dev.java.net/source/browse/jdnc-incubator/src/kleopatra/java/org/jdesktop/swingx/renderer/UIPropertiesViewer.java?rev=1.2&view=markup
+     * https://jdnc-incubator.dev.java.net/source/browse/jdnc-incubator/src/kleopatra/java/org
+     * /jdesktop/swingx/renderer/UIPropertiesViewer.java?rev=1.2&view=markup
      * <p>
      * Some ui-icons misbehave in that they unconditionally class-cast to the component type they
      * are mostly painted on. Consequently they blow up if we are trying to paint them anywhere else
@@ -482,8 +495,20 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
         }
 
         @Override
-        public int getIconHeight() {
-            return wrappee.getIconHeight();
+        public void paintIcon(final Component c, @NotNull final Graphics g, final int x,
+                              final int y) {
+            if (standIn == this) {
+                paintFallback(c, g, x, y);
+            } else if (standIn != null) {
+                standIn.paintIcon(c, g, x, y);
+            } else {
+                try {
+                    wrappee.paintIcon(c, g, x, y);
+                } catch (@NotNull final ClassCastException e) {
+                    createStandIn(e, x, y);
+                    standIn.paintIcon(c, g, x, y);
+                }
+            }
         }
 
         @Override
@@ -492,37 +517,26 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
         }
 
         @Override
-        public void paintIcon(final Component c, @NotNull final Graphics g, final int x, final int y) {
-            if (standIn == this) {
-                paintFallback(c, g, x, y);
-            } else if (standIn != null) {
-                standIn.paintIcon(c, g, x, y);
-            } else {
-                try {
-                    wrappee.paintIcon(c, g, x, y);
-                } catch (final ClassCastException e) {
-                    createStandIn(e, x, y);
-                    standIn.paintIcon(c, g, x, y);
-                }
-            }
+        public int getIconHeight() {
+            return wrappee.getIconHeight();
         }
 
-        /**
-         * @param e
-         */
         private void createStandIn(@NotNull final ClassCastException e, final int x, final int y) {
             try {
                 final Class<?> clazz = getClass(e);
                 final JComponent standInComponent = getSubstitute(clazz);
                 standIn = createImageIcon(standInComponent, x, y);
-            } catch (final Exception e1) {
+            } catch (@NotNull final Exception e1) {
                 // something went wrong - fallback to this painting
                 standIn = this;
             }
         }
 
+        @Contract("_, _, _ -> new")
+        @NotNull
         private Icon createImageIcon(final JComponent standInComponent, final int x, final int y) {
-            final BufferedImage image = new BufferedImage(getIconWidth(), getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+            final BufferedImage image =
+                    new BufferedImage(getIconWidth(), getIconHeight(), BufferedImage.TYPE_INT_ARGB);
             final Graphics g = image.createGraphics();
             try {
                 wrappee.paintIcon(standInComponent, g, 0, 0);
@@ -532,31 +546,31 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
             }
         }
 
-        /**
-         * @param clazz
-         * @throws IllegalAccessException
-         */
-        private JComponent getSubstitute(final Class<?> clazz) throws IllegalAccessException {
-            JComponent standInComponent;
-
+        private JComponent getSubstitute(@NotNull final Class<?> clazz)
+                throws IllegalAccessException {
+            JComponent standInComponent = null;
             try {
-                standInComponent = (JComponent) clazz.newInstance();
-            } catch (final InstantiationException e) {
+                standInComponent = (JComponent) clazz.getDeclaredConstructor().newInstance();
+            } catch (@NotNull final InstantiationException e) {
                 standInComponent = new AbstractButton() {
                 };
                 ((AbstractButton) standInComponent).setModel(new DefaultButtonModel());
+            } catch (NoSuchMethodException | InvocationTargetException e) {
+                e.printStackTrace();
             }
             return standInComponent;
         }
 
-        private Class<?> getClass(final ClassCastException e) throws ClassNotFoundException {
+        private Class<?> getClass(@NotNull final ClassCastException e)
+                throws ClassNotFoundException {
             String className = e.getMessage();
             className = className.substring(className.lastIndexOf(" ") + 1);
             return Class.forName(className);
 
         }
 
-        private void paintFallback(final Component c, final Graphics g, final int x, final int y) {
+        private void paintFallback(final Component c, @NotNull final Graphics g, final int x,
+                                   final int y) {
             g.drawRect(x, y, getIconWidth(), getIconHeight());
             g.drawLine(x, y, x + getIconWidth(), y + getIconHeight());
             g.drawLine(x + getIconWidth(), y, x, y + getIconHeight());
@@ -575,8 +589,10 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
         }
 
         @NotNull
-        public Component getTableCellRendererComponent(
-                final JTable table, final Object sample, final boolean isSelected, final boolean hasFocus, final int row, final int column) {
+        public Component getTableCellRendererComponent(final JTable table, final Object sample,
+                                                       final boolean isSelected,
+                                                       final boolean hasFocus, final int row,
+                                                       final int column) {
             setBackground(null);
             setBorder(null);
             setIcon(null);
@@ -604,7 +620,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
         public void paint(final Graphics g) {
             try {
                 super.paint(g);
-            } catch (final Exception e) {
+            } catch (@NotNull final Exception e) {
                 e.printStackTrace();
             }
         }
@@ -618,7 +634,8 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
         private final UIManagerDefaults defaults;
         private final String laf;
 
-        protected ChangeLookAndFeelAction(final UIManagerDefaults defaults, final String laf, final String name) {
+        protected ChangeLookAndFeelAction(final UIManagerDefaults defaults, final String laf,
+                                          final String name) {
             this.defaults = defaults;
             this.laf = laf;
             putValue(Action.NAME, name);
@@ -648,7 +665,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
                 }
 
                 frame.setVisible(true);
-            } catch (final Exception ex) {
+            } catch (@NotNull final Exception ex) {
                 System.out.println("Failed loading L&F: " + laf);
                 ex.printStackTrace();
             }

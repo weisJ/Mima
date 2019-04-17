@@ -28,6 +28,7 @@ public class CustomDarculaPopupMenuBorder extends AbstractBorder implements UIRe
         g2.drawRect(0, 0, width - 1, height - 1);
     }
 
+    @NotNull
     @Override
     public Insets getBorderInsets(Component c) {
         return new InsetsUIResource(1, 1, 1, 1);

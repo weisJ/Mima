@@ -18,7 +18,7 @@ import java.awt.Rectangle;
  * @author Jannis Weis
  * @since 2018
  */
-public class ZeroWidthSplitPane extends JSplitPane {
+public class SeamlessSplitPane extends JSplitPane {
 
     private static final int DIVIDER_DRAG_SIZE = 9;
     private static final int DIVIDER_DRAG_OFFSET = 4;
@@ -30,7 +30,7 @@ public class ZeroWidthSplitPane extends JSplitPane {
     /**
      * Create new Zero With split pane.
      */
-    public ZeroWidthSplitPane() {
+    public SeamlessSplitPane() {
         this(true);
     }
 
@@ -39,7 +39,7 @@ public class ZeroWidthSplitPane extends JSplitPane {
      *
      * @param showBorder whether to show a split border. default value is true.
      */
-    public ZeroWidthSplitPane(boolean showBorder) {
+    public SeamlessSplitPane(boolean showBorder) {
         this.showBorder = showBorder;
         setDividerSize(showBorder ? 1 : 0);
         setBorder(null);
@@ -67,11 +67,30 @@ public class ZeroWidthSplitPane extends JSplitPane {
         revalidate();
     }
 
+    @NotNull
+    @Override
+    public Dimension getMinimumSize() {
+        if (!isEnabled()) {
+            return new Dimension(0, 0);
+        }
+        var leftSize = getLeftComponent().getMinimumSize();
+        var rightSize = getRightComponent().getMinimumSize();
+        if (orientation == JSplitPane.HORIZONTAL_SPLIT) {
+            return new Dimension(leftSize.width + rightSize.width,
+                                 Math.max(leftSize.height, rightSize.height));
+        } else {
+            return new Dimension(Math.max(leftSize.width, rightSize.width),
+                                 leftSize.height + rightSize.height);
+        }
+    }
+
+    @NotNull
     @Override
     public Insets getInsets() {
         return new Insets(0, 0, 0, 0);
     }
 
+    @NotNull
     @Override
     public Insets getInsets(@NotNull Insets insets) {
         insets.set(0, 0, 0, 0);
@@ -80,14 +99,6 @@ public class ZeroWidthSplitPane extends JSplitPane {
 
     public boolean isResizable() {
         return resizable;
-    }
-
-    public void setResizable(final boolean resizable) {
-        this.resizable = resizable;
-        if (!resizable) {
-            disabledPos = super.getDividerLocation();
-            disabledMax = getMaximumDividerLocation();
-        }
     }
 
     @Override
@@ -120,19 +131,16 @@ public class ZeroWidthSplitPane extends JSplitPane {
         }
     }
 
-    @Override
-    public Dimension getMinimumSize() {
-        if (!isEnabled()) {
-            return new Dimension(0, 0);
-        }
-        var leftSize = getLeftComponent().getMinimumSize();
-        var rightSize = getRightComponent().getMinimumSize();
-        if (orientation == JSplitPane.HORIZONTAL_SPLIT) {
-            return new Dimension(leftSize.width + rightSize.width,
-                                 Math.max(leftSize.height, rightSize.height));
-        } else {
-            return new Dimension(Math.max(leftSize.width, rightSize.width),
-                                 leftSize.height + rightSize.height);
+    /**
+     * Set if the split pane should be able to resize.
+     *
+     * @param resizable true if it should resize.
+     */
+    public void setResizable(final boolean resizable) {
+        this.resizable = resizable;
+        if (!resizable) {
+            disabledPos = super.getDividerLocation();
+            disabledMax = getMaximumDividerLocation();
         }
     }
 
@@ -145,7 +153,7 @@ public class ZeroWidthSplitPane extends JSplitPane {
         }
 
         @Override
-        public int getMaximumDividerLocation(JSplitPane jc) {
+        public int getMaximumDividerLocation(@NotNull JSplitPane jc) {
             return jc.getOrientation() == JSplitPane.HORIZONTAL_SPLIT
                    ? jc.getWidth() : jc.getHeight();
         }

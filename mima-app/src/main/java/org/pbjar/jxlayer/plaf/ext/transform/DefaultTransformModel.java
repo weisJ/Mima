@@ -28,6 +28,7 @@ package org.pbjar.jxlayer.plaf.ext.transform;
  */
 
 import org.jdesktop.jxlayer.JXLayer;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -103,7 +104,13 @@ public class DefaultTransformModel implements TransformModel {
         setValue(Type.PreferredScale, newValue);
     }
 
-    public Point2D getRotationCenter(final Dimension size) {
+    /**
+     * Get the rotation center corresponding to the size.
+     *
+     * @param size the size.
+     * @return center of rotation.
+     */
+    public Point2D getRotationCenter(@Nullable final Dimension size) {
         if (supplier != null) {
             return supplier.apply(size);
         }
@@ -400,6 +407,11 @@ public class DefaultTransformModel implements TransformModel {
         return at;
     }
 
+    /**
+     * Set the supplier for calculating the center of rotation.
+     *
+     * @param supplier the supplier.
+     */
     public void setRotationCenterSupplier(Function<Dimension, Point2D> supplier) {
         {
             this.supplier = supplier;
@@ -409,35 +421,27 @@ public class DefaultTransformModel implements TransformModel {
     /**
      * Enum for internal convenience.
      *
-     * <p>
-     * Describes the values that on change trigger recalculation of the transform. All have a
+     * <p>Describes the values that on change trigger recalculation of the transform. All have a
      * default value, used for initializing arrays.
      *
-     * <p>
-     * These enums are used for two purposes:
+     * <p>These enums are used for two purposes:
      *
-     * <p>
-     * 1: To easily detect a change that requires renewed calculation of the transform (both program
-     * values and user options).
+     * <p>1: To easily detect a change that requires renewed calculation of the transform(both
+     * program values and user options).
      *
-     * <p>
-     * 2: To generalize setters (both program values and user options) and getters (only
+     * <p>2: To generalize setters (both program values and user options) and getters (only
      * userOptions) for the various values.
      *
-     * <p>
-     * There are two groups:
+     * <p>There are two groups:
      *
-     * <p>
-     * 1: Program values that reflect the current size etc. of affected components
+     * <p>1: Program values that reflect the current size etc. of affected components
      *
-     * <p>
-     * 2: User options
+     * <p>2: User options
      */
     protected enum Type {
         /*
          * Program values
          */
-
         LayerWidth(0),
         LayerHeight(0),
         ViewWidth(0),
@@ -456,6 +460,7 @@ public class DefaultTransformModel implements TransformModel {
 
         private final Object defaultValue;
 
+        @Contract(pure = true)
         Type(Object defaultValue) {
             this.defaultValue = defaultValue;
         }

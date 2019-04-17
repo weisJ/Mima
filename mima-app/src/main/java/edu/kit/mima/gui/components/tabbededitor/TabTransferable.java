@@ -12,6 +12,7 @@ import java.awt.datatransfer.Transferable;
  * @since 2018
  */
 public class TabTransferable implements Transferable {
+    @NotNull
     private final TabTransferData transferData;
 
     /**

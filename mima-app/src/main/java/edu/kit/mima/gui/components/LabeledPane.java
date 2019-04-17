@@ -1,5 +1,7 @@
 package edu.kit.mima.gui.components;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -21,7 +23,7 @@ public class LabeledPane extends JPanel {
      * @param panel component
      * @param label label
      */
-    public LabeledPane(JComponent panel, String label) {
+    public LabeledPane(@NotNull JComponent panel, String label) {
         var l = new JLabel(label);
         l.setLabelFor(panel);
         setLayout(new GridBagLayout());

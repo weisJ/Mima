@@ -64,6 +64,19 @@ public class CardPanelItem {
         return addItem(title, true);
     }
 
+
+    /**
+     * Create new item.
+     *
+     * @param title title of item.
+     * @param c     content of item.
+     * @return the parent builder.
+     */
+    @NotNull
+    public CardPanelBuilder addItem(final String title, final JComponent c) {
+        return builder.addItem(title, c);
+    }
+
     /**
      * Add a setting.
      *
@@ -75,10 +88,6 @@ public class CardPanelItem {
     public CardPanelItem addSetting(final String description, final JComponent component) {
         settings.add(new ValueTuple<>(description, component));
         return this;
-    }
-
-    public CardPanelBuilder addItem(final String title, final JComponent c) {
-        return builder.addItem(title, c);
     }
 
     /**

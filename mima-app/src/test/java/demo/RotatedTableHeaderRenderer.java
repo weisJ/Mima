@@ -1,6 +1,7 @@
 package demo;
 
 import org.jdesktop.jxlayer.JXLayer;
+import org.jetbrains.annotations.NotNull;
 import org.pbjar.jxlayer.plaf.ext.TransformUI;
 import org.pbjar.jxlayer.plaf.ext.transform.DefaultTransformModel;
 
@@ -33,14 +34,19 @@ import java.util.List;
 public class RotatedTableHeaderRenderer extends DefaultTableCellRenderer {
 
     private static final long serialVersionUID = 1L;
+    @NotNull
     private final JPanel actualRenderer;
+    @NotNull
     private final JLabel iconLabel;
+    @NotNull
     private final JXLayer<JComponent> layer;
     private final Icon dummyIcon = new Icon() {
 
         @Override
-        public int getIconHeight() {
-            return 16;
+        public void paintIcon(@NotNull Component c, @NotNull Graphics g, int x, int y) {
+            g.setColor(c.getBackground());
+            g.fillRect(x, y, 16, 16);
+
         }
 
         @Override
@@ -49,10 +55,8 @@ public class RotatedTableHeaderRenderer extends DefaultTableCellRenderer {
         }
 
         @Override
-        public void paintIcon(Component c, Graphics g, int x, int y) {
-            g.setColor(c.getBackground());
-            g.fillRect(x, y, 16, 16);
-
+        public int getIconHeight() {
+            return 16;
         }
     };
 
@@ -78,45 +82,47 @@ public class RotatedTableHeaderRenderer extends DefaultTableCellRenderer {
      */
     public static void main(String[] args) {
         TransformUI.prepareForJTextComponent();
-        SwingUtilities.invokeLater(new Runnable() {
+        SwingUtilities.invokeLater(() -> {
 
-            @Override
-            public void run() {
-
-                List<Integer> rowList = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
-                Integer[][] data = new Integer[40][];
-                for (int index = 0; index < data.length; index++) {
-                    Collections.shuffle(rowList);
-                    data[index] = rowList.toArray(new Integer[rowList.size()]);
-                }
-                String[] header = {" Column One  ", " Column Two ",
-                        " Column Three ", " Column Four ", " Column Five ",
-                        " Column Six ", " Column Seven ", " Column Eight ",
-                        " Column Nine ", " Column Ten "};
-                TableModel model = new DefaultTableModel(data, header);
-                JTable table = new JTable(model);
-                table.setAutoCreateRowSorter(true);
-                TableCellRenderer renderer = new RotatedTableHeaderRenderer();
-                TableColumnModel columnModel = table.getColumnModel();
-                for (int index = 0; index < columnModel.getColumnCount(); index++) {
-                    columnModel.getColumn(index).setHeaderRenderer(renderer);
-                }
-                JFrame frame = new JFrame("Test");
-                frame.add(new JScrollPane(table));
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.pack();
-                frame.setLocationRelativeTo(null);
-                frame.setVisible(true);
+            List<Integer> rowList = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+            Integer[][] data = new Integer[40][];
+            for (int index = 0; index < data.length; index++) {
+                Collections.shuffle(rowList);
+                data[index] = rowList.toArray(Integer[]::new);
             }
+            String[] header = {" Column One  ", " Column Two ", " Column Three ", " Column Four ",
+                               " Column Five ", " Column Six ", " Column Seven ", " Column Eight ",
+                               " Column Nine ", " Column Ten "};
+            TableModel model = new DefaultTableModel(data, header);
+            JTable table = new JTable(model);
+            table.setAutoCreateRowSorter(true);
+            TableCellRenderer renderer = new RotatedTableHeaderRenderer();
+            TableColumnModel columnModel = table.getColumnModel();
+            for (int index = 0; index < columnModel.getColumnCount(); index++) {
+                columnModel.getColumn(index).setHeaderRenderer(renderer);
+            }
+            JFrame frame = new JFrame("Test");
+            frame.add(new JScrollPane(table));
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.pack();
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
         });
     }
 
+    @NotNull
     @Override
-    public Component getTableCellRendererComponent(JTable table, Object value,
-                                                   boolean isSelected, boolean hasFocus, int row, int column) {
+    public Component getTableCellRendererComponent(@NotNull JTable table, Object value,
+                                                   boolean isSelected, boolean hasFocus, int row,
+                                                   int column) {
         JTableHeader tableHeader = table.getTableHeader();
-        JComponent preparedRenderer = (JComponent) tableHeader.getDefaultRenderer().getTableCellRendererComponent(table,
-                                                                                                                  value, isSelected, hasFocus, row, column);
+        JComponent preparedRenderer = (JComponent) tableHeader.getDefaultRenderer()
+                                                              .getTableCellRendererComponent(table,
+                                                                                             value,
+                                                                                             isSelected,
+                                                                                             hasFocus,
+                                                                                             row,
+                                                                                             column);
         layer.setView(preparedRenderer);
         actualRenderer.setBackground(preparedRenderer.getBackground());
         if (preparedRenderer instanceof JLabel) {

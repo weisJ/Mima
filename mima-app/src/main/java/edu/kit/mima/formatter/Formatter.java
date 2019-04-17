@@ -1,5 +1,7 @@
 package edu.kit.mima.formatter;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Formatter interface.
  *
@@ -14,5 +16,6 @@ public interface Formatter {
      * @param text text to format.
      * @return formatted text.
      */
+    @NotNull
     String format(String text);
 }

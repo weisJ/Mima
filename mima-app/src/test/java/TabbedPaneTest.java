@@ -2,9 +2,9 @@ import edu.kit.mima.gui.components.editor.Editor;
 import edu.kit.mima.gui.components.tabbededitor.EditorTabbedPane;
 import edu.kit.mima.gui.laf.LafManager;
 
-import java.awt.BorderLayout;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
+import java.awt.BorderLayout;
 
 /**
  * @author Jannis Weis

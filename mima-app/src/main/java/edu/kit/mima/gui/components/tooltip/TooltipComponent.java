@@ -5,13 +5,13 @@ import edu.kit.mima.gui.components.alignment.Alignment;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import java.awt.Dimension;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 /**
  * Tooltip wrapper for handling the display management.
@@ -22,9 +22,14 @@ import javax.swing.SwingUtilities;
 public class TooltipComponent<T extends JComponent & ITooltip>
         extends MouseAdapter implements TooltipConstants {
 
-    /*default*/ final T content;
-    /*default*/ final JComponent container;
+    /*default*/
+    @NotNull
+    final T content;
+    /*default*/
+    @NotNull
+    final JComponent container;
     private final AlignPolicy centerAt;
+    @NotNull
     private final TooltipEventHandler eventHandler;
 
     private boolean installed;

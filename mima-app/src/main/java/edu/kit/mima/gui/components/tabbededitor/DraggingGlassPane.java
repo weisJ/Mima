@@ -27,7 +27,9 @@ import java.awt.event.MouseEvent;
  * @since 2018
  */
 public class DraggingGlassPane extends JPanel {
+    @NotNull
     private final Window cursorWindow;
+    @NotNull
     private final Timer timer;
     private final Point location = new Point(0, 0);
     @Nullable
@@ -44,7 +46,7 @@ public class DraggingGlassPane extends JPanel {
      *
      * @param tabbedPane the tabbed pane
      */
-    public DraggingGlassPane(EditorTabbedPane tabbedPane) {
+    public DraggingGlassPane(@NotNull EditorTabbedPane tabbedPane) {
         setOpaque(false);
 
         final long mask = AWTEvent.MOUSE_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK;
@@ -67,7 +69,7 @@ public class DraggingGlassPane extends JPanel {
 
         cursorWindow = new JWindow() {
             @Override
-            public void paint(final Graphics g) {
+            public void paint(@NotNull final Graphics g) {
                 if (extended) {
                     g.drawImage(extendedImage, 2, 2,
                                 extendedImage.getWidth(this) - 4,
@@ -119,7 +121,7 @@ public class DraggingGlassPane extends JPanel {
      *
      * @param mouseLocation mouse location.
      */
-    public void setMouseLocation(final Point mouseLocation) {
+    public void setMouseLocation(@NotNull final Point mouseLocation) {
         if (draggingGhost != null) {
             var image = extended ? extendedImage : draggingGhost;
             mouseLocation.x -= (image.getWidth(this) / 2);

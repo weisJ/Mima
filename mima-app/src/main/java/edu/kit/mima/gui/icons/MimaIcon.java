@@ -15,6 +15,7 @@ import java.awt.Graphics2D;
  */
 public class MimaIcon implements Icon {
 
+    @NotNull
     private final Icon icon;
     private final int width;
     private final int height;

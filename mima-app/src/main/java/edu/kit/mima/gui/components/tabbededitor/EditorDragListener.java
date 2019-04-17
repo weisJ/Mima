@@ -40,7 +40,7 @@ public class EditorDragListener implements DragSourceListener, DragGestureListen
     }
 
     @Override
-    public void dragOver(final DragSourceDragEvent e) {
+    public void dragOver(@NotNull final DragSourceDragEvent e) {
         checkExit();
         final TabTransferData data = DnDUtil.getTabTransferData(e);
         if (data == null) {
@@ -95,7 +95,7 @@ public class EditorDragListener implements DragSourceListener, DragGestureListen
             dge.startDrag(DragSource.DefaultMoveDrop,
                           new TabTransferable(tabbedPane, dragTabIndex),
                           EditorDragListener.this);
-        } catch (final InvalidDnDOperationException ignored) {
+        } catch (@NotNull final InvalidDnDOperationException ignored) {
         }
     }
 

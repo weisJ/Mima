@@ -10,9 +10,9 @@ import edu.kit.mima.preferences.ColorKey;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
 import edu.kit.mima.preferences.UserPreferenceChangedListener;
-import edu.kit.mima.util.DocumentUtil;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.UIManager;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
@@ -23,8 +23,6 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
@@ -36,7 +34,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 
 /**
  * Editor that supports highlighting and text history. If the instance of an Editor isn't used
@@ -61,6 +58,7 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
     private boolean changeLock;
     private boolean repaint;
     private int currentMark = -1;
+    private Color markColor;
 
     /**
      * Editor that supports highlighting and text history.
@@ -111,6 +109,12 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
                 .setDocumentFilter(new EditorDocumentFilter(this, historyController));
         pane.setBackground(PREF.readColor(ColorKey.EDITOR_BACKGROUND));
         pane.setCaretColor(PREF.readColor(ColorKey.EDITOR_TEXT));
+    }
+
+    @Override
+    public void updateUI() {
+        super.updateUI();
+        markColor = UIManager.getColor("Editor.mark");
     }
 
     /**
@@ -181,24 +185,6 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
         return historyController.canRedo();
     }
 
-    /**
-     * Transform current line in editor.
-     *
-     * @param function Function that takes in the current line and caret position in line
-     * @param index    index in file
-     */
-    public void transformLine(@NotNull final Function<String, String> function, final int index) {
-        final String text = pane.getText();
-        final int lower = text.substring(0, index).lastIndexOf('\n') + 1;
-        final int upper = text.substring(index).indexOf('\n') + index;
-        final String newLine = function.apply(text.substring(lower, upper));
-        try {
-            pane.getDocument().remove(lower, upper - lower);
-            pane.getDocument().insertString(lower, newLine, new SimpleAttributeSet());
-        } catch (@NotNull final BadLocationException e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * Insert String into text.
@@ -227,26 +213,10 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
      */
     public void markLine(final int index) {
         pane.removeMark(currentMark, "debug");
-        pane.markLine(index, "debug", new Color(0x2D71D2)); //Todo decouple colour
+        pane.markLine(index, "debug", markColor);
         currentMark = index;
-        if (index > 0) {
-            try {
-                Rectangle r = pane.modelToView2D(
-                        DocumentUtil.getLineStartOffset(pane, index)).getBounds();
-                var viewport = scrollPane.getViewport();
-                var viewRect = viewport.getViewRect();
-                if (viewRect.y + viewRect.height < r.y || viewRect.y > r.y) {
-                    viewport.setViewPosition(
-                            new Point(0, r.y - (viewRect.height - r.height) / 2));
-                }
-            } catch (BadLocationException e) {
-                e.printStackTrace();
-            }
-        }
+        scrollToIndex(index);
     }
-
-    /*----------Getter-and-Setter----------*/
-
 
     /**
      * Get the current font.
@@ -265,7 +235,6 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
     public void setEditorFont(@NotNull final Font font) {
         pane.setFont(font);
         scrollPane.getVerticalScrollBar().setUnitIncrement(font.getSize());
-        repaint();
     }
 
     /**
@@ -433,6 +402,7 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
      *
      * @return preview image.
      */
+    @NotNull
     public BufferedImage createPreviewImage() {
         var b = pane.getBounds();
         BufferedImage image = new BufferedImage(b.width / 2,

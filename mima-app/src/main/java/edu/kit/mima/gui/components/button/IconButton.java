@@ -111,19 +111,21 @@ public class IconButton extends JButton {
         g2.dispose();
     }
 
+    @NotNull
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension(
-                Math.max(active.getIconWidth(), inactive.getIconWidth()) + 2 * border,
-                Math.max(active.getIconHeight(), inactive.getIconHeight()) + 2 * border
-        );
+        return new Dimension(Math.max(active.getIconWidth(), inactive.getIconWidth()) + 2 * border,
+                             Math.max(active.getIconHeight(), inactive.getIconHeight())
+                             + 2 * border);
     }
 
+    @NotNull
     @Override
     public Dimension getMaximumSize() {
         return getPreferredSize();
     }
 
+    @NotNull
     @Override
     public Dimension getMinimumSize() {
         return getPreferredSize();

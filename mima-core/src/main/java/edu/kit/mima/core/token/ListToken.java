@@ -24,6 +24,7 @@ public class ListToken<T> extends FileObjectAdapter implements Token<List<T>> {
     @NotNull private final String className;
     private final int filePos;
     private final int index;
+    @NotNull
     private final List<T> values;
 
     /**

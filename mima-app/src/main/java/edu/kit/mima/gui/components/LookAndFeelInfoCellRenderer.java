@@ -2,10 +2,10 @@ package edu.kit.mima.gui.components;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Component;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 import javax.swing.UIManager;
+import java.awt.Component;
 
 /**
  * Cell renderer for {@link javax.swing.UIManager.LookAndFeelInfo}.
@@ -21,9 +21,10 @@ public class LookAndFeelInfoCellRenderer extends DefaultListCellRenderer {
                                                   final int index,
                                                   final boolean isSelected,
                                                   final boolean cellHasFocus) {
-        if (value instanceof UIManager.LookAndFeelInfo) {
-            value = ((UIManager.LookAndFeelInfo) value).getName();
+        Object value1 = value;
+        if (value1 instanceof UIManager.LookAndFeelInfo) {
+            value1 = ((UIManager.LookAndFeelInfo) value1).getName();
         }
-        return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+        return super.getListCellRendererComponent(list, value1, index, isSelected, cellHasFocus);
     }
 }

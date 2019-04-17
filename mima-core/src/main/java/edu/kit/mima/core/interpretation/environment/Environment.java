@@ -20,6 +20,7 @@ import java.util.function.Function;
  * @since 2018
  */
 public class Environment {
+    @Nullable
     public static final Environment EMPTY_ENV = new Environment(null, null);
 
     @Nullable private final Environment parent;
@@ -132,8 +133,9 @@ public class Environment {
         return lookup(env -> env.jumps, name);
     }
 
+    @Nullable
     @Contract(pure = true)
-    private <T> Environment lookup(Function<Environment, Map<?, T>> mapFunction,
+    private <T> Environment lookup(@NotNull Function<Environment, Map<?, T>> mapFunction,
                                    String name) {
         Environment scope = this;
         while (scope != null) {
@@ -236,7 +238,7 @@ public class Environment {
      * @param name     name of function
      * @param function function body
      */
-    public void defineFunction(final String name, final Instruction function) {
+    public void defineFunction(@NotNull final String name, final Instruction function) {
         define(name, function, functions, List.of(functions));
 
     }
@@ -247,7 +249,7 @@ public class Environment {
      * @param name  name of variable
      * @param value value
      */
-    public void defineVariable(final String name, final MachineWord value) {
+    public void defineVariable(@NotNull final String name, final MachineWord value) {
         define(name, value, variables, List.of(variables, constants));
     }
 
@@ -257,7 +259,7 @@ public class Environment {
      * @param name  name of variable
      * @param value value
      */
-    public void defineConstant(final String name, final MachineWord value) {
+    public void defineConstant(@NotNull final String name, final MachineWord value) {
         define(name, value, constants, List.of(variables, constants));
     }
 
@@ -267,7 +269,7 @@ public class Environment {
      * @param name  name of jump point
      * @param index index of expression in Environment
      */
-    public void defineJump(final String name, final Integer index) {
+    public void defineJump(@NotNull final String name, final Integer index) {
         define(name, index, jumps, List.of(jumps));
     }
 
@@ -281,7 +283,7 @@ public class Environment {
      * @param <T>       Type of key
      * @param <K>       Type of value.
      */
-    private <T, K> void define(final T key, final K value,
+    private <T, K> void define(@NotNull final T key, final K value,
                                @NotNull final Map<T, K> putMap,
                                @NotNull final List<Map<T, K>> checkMaps) {
         for (var m : checkMaps) {

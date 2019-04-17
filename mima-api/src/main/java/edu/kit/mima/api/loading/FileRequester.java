@@ -5,11 +5,11 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Component;
 import java.io.File;
 import java.util.Optional;
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  * Reader/Writer that takes user input to determine the location the file is saved to.
@@ -54,7 +54,7 @@ public class FileRequester {
                     .peek(manager::onSave)
                     .peek(LambdaUtil.reduceFirst(LambdaUtil.wrap(IoTools::saveFile), text))
                     .forEach(p -> manager.afterSave());
-        } catch (final RuntimeException e) {
+        } catch (@NotNull final RuntimeException e) {
             manager.onFail(e.getMessage());
         }
     }
@@ -77,7 +77,7 @@ public class FileRequester {
                     .peek(manager::onLoad)
                     .map(LambdaUtil.wrap(IoTools::loadFile))
                     .findFirst().orElse(null);
-        } catch (final RuntimeException e) {
+        } catch (@NotNull final RuntimeException e) {
             manager.onFail(e.getMessage());
             return null;
         }

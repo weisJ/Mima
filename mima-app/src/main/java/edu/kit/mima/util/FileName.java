@@ -108,12 +108,12 @@ public final class FileName {
         final String[] metaCharacters = {"\\",
                 "^", "$", "{", "}", "[", "]", "(", ")", ".",
                 "*", "+", "?", "|", "<", ">", "-", "&", "%"};
-
+        String input = inputString;
         for (final String metaCharacter : metaCharacters) {
             if (inputString.contains(metaCharacter)) {
-                inputString = inputString.replace(metaCharacter, "\\" + metaCharacter);
+                input = inputString.replace(metaCharacter, "\\" + metaCharacter);
             }
         }
-        return inputString;
+        return input;
     }
 }

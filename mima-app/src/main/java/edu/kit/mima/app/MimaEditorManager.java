@@ -61,13 +61,14 @@ public class MimaEditorManager implements AutoCloseable {
         return tabbedEditor;
     }
 
+    @NotNull
     private EditorTabbedPane createEditorPane() {
         var pane = new EditorTabbedPane();
         pane.addTabClosedEventHandler(c -> {
             final Editor editor = (Editor) c;
             try {
                 closeEditor(editor);
-            } catch (final IOException e) {
+            } catch (@NotNull final IOException e) {
                 throw new IllegalArgumentException("didn't save", e);
             }
         });
@@ -125,7 +126,7 @@ public class MimaEditorManager implements AutoCloseable {
      * @param editor      editor to open.
      * @param fileManager corresponding file manager.
      */
-    public void openEditor(Editor editor, @NotNull FileManager fileManager) {
+    public void openEditor(@NotNull Editor editor, @NotNull FileManager fileManager) {
         String lastFile = fileManager.getLastFile();
         for (final var entry : fileManagers.entrySet()) {
             if (entry.getValue() != fileManager

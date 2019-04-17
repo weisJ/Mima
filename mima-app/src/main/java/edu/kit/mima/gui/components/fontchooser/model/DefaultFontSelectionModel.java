@@ -23,11 +23,11 @@ package edu.kit.mima.gui.components.fontchooser.model;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.Font;
-import java.util.Objects;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
+import java.awt.Font;
+import java.util.Objects;
 
 
 /**
@@ -51,6 +51,7 @@ public class DefaultFontSelectionModel implements FontSelectionModel {
      */
     private transient ChangeEvent changeEvent;
 
+    @Nullable
     private Font selectedFont;
 
     /**
@@ -69,6 +70,7 @@ public class DefaultFontSelectionModel implements FontSelectionModel {
      *
      * @return the selected {@code Font}
      */
+    @Nullable
     @Override
     public Font getSelectedFont() {
         return selectedFont;

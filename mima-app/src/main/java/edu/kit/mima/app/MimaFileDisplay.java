@@ -26,7 +26,7 @@ public class MimaFileDisplay {
      *
      * @param fileActions the file actions.
      */
-    public MimaFileDisplay(final FileActions fileActions) {
+    public MimaFileDisplay(@NotNull final FileActions fileActions) {
         fileDisplay = new FileDisplay();
         fileDisplay.setHandler(file -> {
             fileDisplay.requestFocus();
@@ -37,7 +37,7 @@ public class MimaFileDisplay {
                 fileActions.openFile(fm -> {
                     try {
                         fm.load(file.getAbsolutePath());
-                    } catch (final IOException e) {
+                    } catch (@NotNull final IOException e) {
                         App.logger.error(e.getMessage());
                     }
                 });
@@ -52,6 +52,7 @@ public class MimaFileDisplay {
      *
      * @return the file display component.
      */
+    @NotNull
     public FileDisplay getDisplay() {
         return fileDisplay;
     }

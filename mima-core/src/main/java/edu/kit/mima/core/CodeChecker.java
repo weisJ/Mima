@@ -50,8 +50,10 @@ public final class CodeChecker {
      *
      * @param token Program token to check
      */
-    @SuppressWarnings("unchecked") /*Construction of tokens guarantees these types*/
-    private static List<String> checkReferenceDuplicates(final ProgramToken token) {
+    @NotNull
+    @SuppressWarnings("unchecked") /*Construction of tokens guarantees these
+    types*/ private static List<String> checkReferenceDuplicates(
+            final ProgramToken token) {
         final List<String> warnings = new ArrayList<>();
         final ProgramQuery query = new ProgramQuery(token);
         final List<String> referencesJump = query
@@ -71,7 +73,8 @@ public final class CodeChecker {
         return warnings;
     }
 
-    private static void addWarnings(final List<String> warnings, final List<String> checkList) {
+    private static void addWarnings(@NotNull final List<String> warnings,
+                                    @NotNull final List<String> checkList) {
         Set<String> duplicates = findDuplicates(checkList);
         if (!duplicates.isEmpty()) {
             final String duplicatesS = String.join(", ", duplicates);

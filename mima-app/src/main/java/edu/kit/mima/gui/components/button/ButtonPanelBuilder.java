@@ -2,22 +2,14 @@ package edu.kit.mima.gui.components.button;
 
 import edu.kit.mima.api.observing.ClassObservable;
 import edu.kit.mima.api.observing.Observable;
-import edu.kit.mima.gui.components.AlignPolicy;
 import edu.kit.mima.gui.components.tooltip.ITooltip;
 import edu.kit.mima.gui.components.tooltip.Tooltip;
-import edu.kit.mima.gui.components.tooltip.TooltipComponent;
+import edu.kit.mima.gui.components.tooltip.TooltipUtil;
 import edu.kit.mima.util.BindingUtil;
 import edu.kit.mima.util.HSLColor;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.GridLayout;
-import java.awt.LayoutManager;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.function.Supplier;
 import javax.swing.Action;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -25,6 +17,13 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.GridLayout;
+import java.awt.LayoutManager;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.function.Supplier;
 
 /**
  * Builder for creating a button panel.
@@ -34,11 +33,9 @@ import javax.swing.UIManager;
  */
 public final class ButtonPanelBuilder {
 
-    private static final int BUTTON_DELAY = 2000;
-    private static final int BUTTON_VANISH_DELAY = 2000;
-
     @NotNull private final JPanel panel;
     @NotNull private final Queue<JButton> buttons;
+    @NotNull
     private final LayoutManager layoutManager;
 
     /**
@@ -322,8 +319,7 @@ public final class ButtonPanelBuilder {
         @NotNull
         public <T extends JComponent & ITooltip> ButtonBuilder setTooltip(
                 @NotNull final T component) {
-            new TooltipComponent<>(button, component, BUTTON_DELAY, BUTTON_VANISH_DELAY,
-                                   AlignPolicy.COMPONENT_BOTH).setActive(true);
+            TooltipUtil.createDefaultTooltip(button, component);
             button.setToolTipText(null);
             return this;
         }

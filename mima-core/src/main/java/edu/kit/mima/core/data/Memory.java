@@ -1,5 +1,7 @@
 package edu.kit.mima.core.data;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Map;
 
 /**
@@ -16,7 +18,7 @@ public interface Memory<T> {
      * @param index index in memory
      * @return memory at index
      */
-    T loadValue(int index);
+    @NotNull T loadValue(int index);
 
     /**
      * Store value to memory.

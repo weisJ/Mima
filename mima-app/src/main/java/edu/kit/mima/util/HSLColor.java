@@ -21,9 +21,10 @@ import java.util.function.Function;
  * <p>In particular the HSL color space makes it easier change the Tone or Shade of a color by
  * adjusting the luminance value.
  */
-@SuppressWarnings("CheckStyle")
 public class HSLColor {
+    @NotNull
     private final Color rgb;
+    @NotNull
     private final float[] hsl;
     private final float alpha;
 
@@ -211,21 +212,22 @@ public class HSLColor {
     }
 
     @Contract(pure = true)
-    private static float hueToRGB(final float p, final float q, float h) {
-        if (h < 0) {
-            h += 1;
+    private static float hueToRGB(final float p, final float q, final float h) {
+        float hue = h;
+        if (hue < 0) {
+            hue += 1;
         }
-        if (h > 1) {
-            h -= 1;
+        if (hue > 1) {
+            hue -= 1;
         }
-        if (6 * h < 1) {
-            return p + ((q - p) * 6 * h);
+        if (6 * hue < 1) {
+            return p + ((q - p) * 6 * hue);
         }
-        if (2 * h < 1) {
+        if (2 * hue < 1) {
             return q;
         }
-        if (3 * h < 2) {
-            return p + ((q - p) * 6 * ((2.0f / 3.0f) - h));
+        if (3 * hue < 2) {
+            return p + ((q - p) * 6 * ((2.0f / 3.0f) - hue));
         }
         return p;
     }
@@ -334,6 +336,7 @@ public class HSLColor {
      *
      * @return the HSL values.
      */
+    @NotNull
     public float[] getHSL() {
         return hsl;
     }
@@ -352,6 +355,7 @@ public class HSLColor {
      *
      * @return the RGB Color object.
      */
+    @NotNull
     public Color getRGB() {
         return rgb;
     }

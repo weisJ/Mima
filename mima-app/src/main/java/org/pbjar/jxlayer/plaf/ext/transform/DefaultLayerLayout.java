@@ -83,7 +83,8 @@ public class DefaultLayerLayout implements LayoutManager, Serializable {
             ret.height += size.height;
         }
         if (ret.width == 0 || ret.height == 0) {
-            ret.width = ret.height = 4;
+            ret.width = 4;
+            ret.height = 4;
         }
         return ret;
     }

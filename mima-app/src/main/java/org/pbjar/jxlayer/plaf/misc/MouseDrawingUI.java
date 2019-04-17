@@ -63,11 +63,14 @@ public class MouseDrawingUI extends GeneralLayerUI<JComponent, MouseDrawingUI.Dr
     private static final long serialVersionUID = 1L;
 
     /**
-     * Returns {@link Action}s for:
+     * Returns {@link Action}s for.
      * <ol>
      * <li>Clear the current drawing.</li>
      * <li>Set the color for the next line to be drawn.</li>
      * </ol>
+     * @param layer the layer
+     *
+     * @return list of actions.
      */
     @NotNull
     public List<Action> getActions(@NotNull final JXLayer<? extends JComponent> layer) {

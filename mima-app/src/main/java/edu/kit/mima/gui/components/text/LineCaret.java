@@ -1,5 +1,8 @@
 package edu.kit.mima.gui.components.text;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.JTextComponent;
@@ -34,7 +37,7 @@ public class LineCaret extends DefaultCaret {
     }
 
     @Override
-    protected synchronized void damage(Rectangle r) {
+    protected synchronized void damage(@Nullable Rectangle r) {
         if (r == null) {
             return;
         }
@@ -46,7 +49,7 @@ public class LineCaret extends DefaultCaret {
     }
 
     @Override
-    public void paint(Graphics g) {
+    public void paint(@NotNull Graphics g) {
         JTextComponent comp = getComponent();
         if (comp == null) {
             return;
@@ -78,10 +81,6 @@ public class LineCaret extends DefaultCaret {
         if (isVisible()) {
             g.setColor(comp.getCaretColor());
             g.fillRect(r.x, r.y, thickness, height);
-//            g.drawLine(r.x, r.y + dist, r.x, r.y + dist + 4); // 5 vertical
-//             pixels
-//            g.drawLine(r.x, r.y + dist + 4, r.x + 4, r.y + dist + 4); // 5 horiz
-//             px
         }
     }
 

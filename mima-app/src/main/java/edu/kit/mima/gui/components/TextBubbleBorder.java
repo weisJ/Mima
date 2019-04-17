@@ -4,6 +4,7 @@ import edu.kit.mima.gui.components.alignment.Alignment;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.border.AbstractBorder;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
@@ -14,7 +15,6 @@ import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.geom.Area;
 import java.awt.geom.RoundRectangle2D;
-import javax.swing.border.AbstractBorder;
 
 /**
  * Border that looks like a Text Bubble.
@@ -25,7 +25,9 @@ import javax.swing.border.AbstractBorder;
 public class TextBubbleBorder extends AbstractBorder {
 
     private static final long serialVersionUID = 1L;
+    @NotNull
     private final RenderingHints hints;
+    @NotNull
     private final Insets insets;
     private Alignment pointerSide = Alignment.NORTH;
     private Color color;
@@ -217,12 +219,14 @@ public class TextBubbleBorder extends AbstractBorder {
         return setPointerSize(pointerSize);
     }
 
+    @NotNull
     @Override
     public Insets getBorderInsets(final Component c) {
         return insets;
     }
 
 
+    @NotNull
     @Override
     public Insets getBorderInsets(final Component c, final Insets insets) {
         return getBorderInsets(c);
@@ -259,7 +263,7 @@ public class TextBubbleBorder extends AbstractBorder {
         switch (pointerSide) {
             case WEST -> {
                 rx += pointerSize;
-                rw -= pointerSize;
+                rw -= pointerSize + thickness;
                 rh -= thickness;
             }
             case EAST -> {
@@ -268,7 +272,7 @@ public class TextBubbleBorder extends AbstractBorder {
             }
             case NORTH, NORTH_WEST, NORTH_EAST -> {
                 ry += pointerSize;
-                rh -= pointerSize;
+                rh -= pointerSize + thickness;
                 rw -= thickness;
             }
             case SOUTH, SOUTH_WEST, SOUTH_EAST -> {
@@ -281,8 +285,9 @@ public class TextBubbleBorder extends AbstractBorder {
         return new RoundRectangle2D.Double(rx, ry, rw, rh, radius, radius);
     }
 
-    private Polygon creatPointerShape(final int width, final int height,
-                                      final int pointerPad, final RoundRectangle2D.Double bubble) {
+    @NotNull
+    private Polygon creatPointerShape(final int width, final int height, final int pointerPad,
+                                      @NotNull final RoundRectangle2D.Double bubble) {
         final int basePad = 2 * pointerSize + thickness + radius + pointerPad;
         final int widthPad = pointerSize / 2;
         final Polygon pointer = new Polygon();

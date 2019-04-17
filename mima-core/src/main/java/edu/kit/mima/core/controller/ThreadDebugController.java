@@ -4,6 +4,7 @@ import edu.kit.mima.core.interpretation.Breakpoint;
 import edu.kit.mima.core.interpretation.SimpleBreakpoint;
 import edu.kit.mima.core.token.Token;
 import edu.kit.mima.core.token.TokenType;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,31 +20,24 @@ import java.util.Optional;
  */
 public class ThreadDebugController implements DebugController {
 
-    private final Object lock = new Object();
+    private final Thread workingThread;
     @Nullable
     private Collection<Breakpoint> breaks;
-    private Thread workingThread;
     private boolean isActive;
     private boolean autoPause;
     private boolean shouldDie;
 
     /**
      * Create new ThreadDebugController.
+     *
+     * @param workingThread the working thread.
      */
-    public ThreadDebugController() {
+    @Contract(pure = true)
+    public ThreadDebugController(final Thread workingThread) {
         isActive = false;
         autoPause = false;
         breaks = new HashSet<>();
-    }
-
-    /**
-     * Set the working thread.
-     *
-     * @param workingThread working thread to control.
-     */
-    public void setWorkingThread(final Thread workingThread) {
         this.workingThread = workingThread;
-        isActive = false;
     }
 
 
@@ -58,10 +52,10 @@ public class ThreadDebugController implements DebugController {
 
     @Override
     public void pause() {
-        synchronized (lock) {
+        synchronized (workingThread) {
             isActive = false;
             try {
-                lock.wait();
+                workingThread.wait();
             } catch (@NotNull final InterruptedException e) {
                 isActive = true;
             }
@@ -73,9 +67,9 @@ public class ThreadDebugController implements DebugController {
         if (workingThread == null) {
             return;
         }
-        synchronized (lock) {
+        synchronized (workingThread) {
             isActive = true;
-            lock.notify();
+            workingThread.interrupt();
         }
     }
 
@@ -95,14 +89,14 @@ public class ThreadDebugController implements DebugController {
         }
         autoPause = false;
         shouldDie = true;
-        synchronized (lock) {
+        synchronized (workingThread) {
             isActive = false;
-        }
-        try {
-            resume();
-            workingThread.join();
-        } catch (@NotNull final InterruptedException ignored) {
-            /*doesn't matter thread should die*/
+            try {
+                workingThread.interrupt();
+                workingThread.join();
+            } catch (@NotNull final InterruptedException ignored) {
+                /*doesn't matter thread should die*/
+            }
         }
         shouldDie = false;
     }

@@ -3,10 +3,14 @@ package edu.kit.mima.gui.components.tooltip;
 import edu.kit.mima.gui.components.ShadowPane;
 import edu.kit.mima.gui.components.TextBubbleBorder;
 import edu.kit.mima.gui.components.alignment.Alignment;
-import edu.kit.mima.util.HSLColor;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.UIManager;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Graphics;
@@ -14,10 +18,6 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.util.Timer;
 import java.util.TimerTask;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
 
 /**
  * Tooltip Component with Shadow.
@@ -28,6 +28,7 @@ import javax.swing.border.EmptyBorder;
 public class Tooltip extends ShadowPane implements ITooltip {
     private final TextBubbleBorder bubbleBorder;
     private final JLabel textLabel;
+    private final JPanel labelPanel;
     private Alignment alignment;
     private float alpha = 0;
 
@@ -43,17 +44,27 @@ public class Tooltip extends ShadowPane implements ITooltip {
         textLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
         setText(text);
 
-        bubbleBorder = new TextBubbleBorder(
-                new HSLColor(textLabel.getBackground()).adjustTone(60)
-                        .getRGB()).setPointerSize(10).setThickness(1);
+        bubbleBorder = new TextBubbleBorder(UIManager.getColor("Tooltip.borderColor"));
+        bubbleBorder.setThickness(1);
 
-        final JPanel labelPanel = new JPanel(new BorderLayout());
+        labelPanel = new JPanel(new BorderLayout());
         labelPanel.setOpaque(false);
         labelPanel.add(textLabel, BorderLayout.CENTER);
         labelPanel.setBorder(bubbleBorder);
-        labelPanel.setBackground(new HSLColor(labelPanel.getBackground()).adjustTone(20).getRGB());
+        labelPanel.setBackground(UIManager.getColor("Tooltip.background"));
 
         add(labelPanel);
+    }
+
+    @Override
+    public void updateUI() {
+        super.updateUI();
+        if (labelPanel != null) {
+            labelPanel.setBackground(UIManager.getColor("Tooltip.background"));
+        }
+        if (bubbleBorder != null) {
+            bubbleBorder.setColor(UIManager.getColor("Tooltip.borderColor"));
+        }
     }
 
     /**
@@ -79,6 +90,7 @@ public class Tooltip extends ShadowPane implements ITooltip {
     /*
      * Apply insets to adjust position
      */
+    @NotNull
     @Contract("_ -> param1")
     private Rectangle adjustAlignment(@NotNull Rectangle bounds) {
         final int pointerSize = bubbleBorder.getPointerSize();
@@ -104,6 +116,7 @@ public class Tooltip extends ShadowPane implements ITooltip {
                 bounds.y += pointerSize / 2;
                 bounds.x += pointerSize;
             }
+            case SOUTH, SOUTH_EAST, SOUTH_WEST -> bounds.height -= 2;
             default -> {
             }
         }
@@ -125,7 +138,6 @@ public class Tooltip extends ShadowPane implements ITooltip {
     @Override
     public void hideTooltip() {
         startFadeTimer(1, 0, -0.05f);
-        setVisible(false);
     }
 
     private void startFadeTimer(final float start, final float end, final float increment) {
@@ -140,6 +152,9 @@ public class Tooltip extends ShadowPane implements ITooltip {
                 alpha = start < end
                         ? Math.min(alpha + increment, end)
                         : Math.max(alpha + increment, end);
+                if (alpha == 0) {
+                    setVisible(false);
+                }
                 repaint();
             }
         };
@@ -149,20 +164,20 @@ public class Tooltip extends ShadowPane implements ITooltip {
     @Override
     protected void paintBorder(final Graphics g) {
         final int pointerSize = bubbleBorder.getPointerSize();
+        final int thickness = bubbleBorder.getThickness();
         final Border border = getBorder();
         //Move shadow according to alignment.
-        //@formatter:off
         Rectangle rect = switch (alignment) {
             case NORTH, NORTH_EAST, NORTH_WEST
                     -> new Rectangle(0, 0, getWidth(), getHeight() - pointerSize);
-            case EAST
-                    -> new Rectangle(pointerSize, 0, getWidth() - pointerSize, getHeight());
+            case EAST -> new Rectangle(pointerSize, 0, getWidth() - pointerSize, getHeight());
             case SOUTH, SOUTH_EAST, SOUTH_WEST
                     -> new Rectangle(0, pointerSize, getWidth(), getHeight() - pointerSize);
             case WEST -> new Rectangle(0, 0, getWidth() - pointerSize, getHeight());
             default -> new Rectangle(0, 0, getWidth(), getHeight());
         };
-        //@formatter:on
+        rect.x += thickness;
+        rect.width -= thickness;
         border.paintBorder(this, g, rect.x, rect.y, rect.width, rect.height);
     }
 
@@ -172,6 +187,5 @@ public class Tooltip extends ShadowPane implements ITooltip {
         g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
         super.paint(g2d);
         g2d.dispose();
-
     }
 }

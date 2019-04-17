@@ -20,14 +20,13 @@ public class RepaintManagerTest {
 
     private final JMenu optionsMenu = new JMenu("Options");
 
-    private final JCheckBoxMenuItem newRmItem = new JCheckBoxMenuItem(
-            "new RepaintManager Hacked");
+    private final JCheckBoxMenuItem newRmItem = new JCheckBoxMenuItem("new RepaintManager Hacked");
 
-    private final JCheckBoxMenuItem newWrappedItem = new JCheckBoxMenuItem(
-            "new WrappedRepaintManager (also hacked)");
+    private final JCheckBoxMenuItem newWrappedItem =
+            new JCheckBoxMenuItem("new WrappedRepaintManager (also hacked)");
 
-    private final JCheckBoxMenuItem doubleBufItem = new JCheckBoxMenuItem(
-            "DoubleBuffering off and on");
+    private final JCheckBoxMenuItem doubleBufItem =
+            new JCheckBoxMenuItem("DoubleBuffering off and on");
 
     private RepaintManager oldManager;
 
@@ -41,8 +40,7 @@ public class RepaintManagerTest {
         optionsMenu.add(newWrappedItem);
         newWrappedItem.addActionListener(e -> SwingUtilities.invokeLater(() -> {
             oldManager = RepaintManager.currentManager(null);
-            RepaintManager newManager = new TransformRPMFallBack(
-                    oldManager);
+            RepaintManager newManager = new TransformRPMFallBack(oldManager);
             RepaintManager.setCurrentManager(newManager);
             newWrappedItem.setEnabled(false);
         }));
@@ -57,11 +55,9 @@ public class RepaintManagerTest {
                      * Ensure that the new RepaintManager has the same
                      * bufferStrategyType as the original.
                      */
-                    Field bufferStrategyType = rpmClass
-                            .getDeclaredField("bufferStrategyType");
+                    Field bufferStrategyType = rpmClass.getDeclaredField("bufferStrategyType");
                     bufferStrategyType.setAccessible(true);
-                    short strategyType = (Short) bufferStrategyType
-                            .get(oldManager);
+                    short strategyType = (Short) bufferStrategyType.get(oldManager);
                     bufferStrategyType.setAccessible(false);
                     switch (strategyType) {
                         case (0) -> System.out
@@ -70,15 +66,14 @@ public class RepaintManagerTest {
                                 .println("bufferStrategyType: BUFFER_STRATEGY_SPECIFIED_ON");
                         case (2) -> System.out
                                 .println("bufferStrategyType: BUFFER_STRATEGY_SPECIFIED_OFF");
-                        default -> System.out.println("bufferStrategyType: "
-                                                      + strategyType);
+                        default -> System.out.println("bufferStrategyType: " + strategyType);
                     }
                     /*
                      * Construct a new RepaintManager with its private
                      * constructor and the same bufferStrategyType.
                      */
-                    Constructor<RepaintManager> constructor = rpmClass
-                            .getDeclaredConstructor(short.class);
+                    Constructor<RepaintManager> constructor =
+                            rpmClass.getDeclaredConstructor(short.class);
                     constructor.setAccessible(true);
                     newManager = constructor.newInstance(strategyType);
                     constructor.setAccessible(false);
@@ -87,15 +82,11 @@ public class RepaintManagerTest {
                      * PaintManager from the original RepaintManager
                      * into the new RepaintManager.
                      */
-                    Field paintManager = rpmClass
-                            .getDeclaredField("paintManager");
+                    Field paintManager = rpmClass.getDeclaredField("paintManager");
                     paintManager.setAccessible(true);
-                    Object paintManagerInstance = paintManager
-                            .get(oldManager);
-                    System.out
-                            .println("PaintManager is of type: "
-                                     + paintManagerInstance.getClass()
-                                             .getName());
+                    Object paintManagerInstance = paintManager.get(oldManager);
+                    System.out.println("PaintManager is of type: " + paintManagerInstance.getClass()
+                                                                                         .getName());
                     paintManager.set(newManager, paintManagerInstance);
                     paintManager.setAccessible(false);
                 } catch (Throwable t) {
@@ -140,8 +131,7 @@ public class RepaintManagerTest {
 
             public void paint(Graphics g) {
                 super.paint(g);
-                String newLine = System.currentTimeMillis()
-                                 + " JFrame.paint()\n";
+                String newLine = System.currentTimeMillis() + " JFrame.paint()\n";
                 textArea.setText(textArea.getText() + newLine);
             }
         };

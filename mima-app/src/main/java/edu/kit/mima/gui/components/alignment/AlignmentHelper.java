@@ -42,9 +42,8 @@ final class AlignmentHelper {
      */
     @NotNull
     @Contract(pure = true)
-    /*default*/ static BiFunction<Dimension, Rectangle, Point> align(
-            Mapper mapperX,
-            Mapper mapperY) {
+    /*default*/ static BiFunction<Dimension, Rectangle, Point> align(@NotNull Mapper mapperX,
+                                                                     @NotNull Mapper mapperY) {
         return (d, p) -> new Point(mapperX.apply(d, p), mapperY.apply(d, p));
     }
 

@@ -80,6 +80,7 @@ public enum Alignment {
      * @param hint        preferred alignment.
      * @return fitting alignment. If none is found wit is defaulted to {@link Alignment#CENTER}.
      */
+    @NotNull
     public static Alignment getAlignment(@NotNull final Point point,
                                          @NotNull final Dimension size,
                                          @NotNull final Rectangle outerBounds,
@@ -118,6 +119,7 @@ public enum Alignment {
         };
     }
 
+    @NotNull
     @Contract(pure = true)
     @SuppressWarnings("Duplicates")
     public Alignment anticlockwise() {
@@ -134,6 +136,7 @@ public enum Alignment {
         };
     }
 
+    @NotNull
     @Contract(pure = true)
     @SuppressWarnings("Duplicates")
     public Alignment clockwise() {
@@ -150,6 +153,7 @@ public enum Alignment {
         };
     }
 
+    @NotNull
     @Contract(pure = true)
     public Insets maskInsets(@NotNull final Insets insets) {
         return switch (this) {

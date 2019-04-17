@@ -20,6 +20,7 @@ public class MimaMenuBar {
 
     private final MimaUserInterface mimaUI;
     private final FileActions fileActions;
+    @NotNull
     private final JMenuBar menuBar;
 
     /**
@@ -68,6 +69,7 @@ public class MimaMenuBar {
      *
      * @return the menu bar.
      */
+    @NotNull
     public JMenuBar getMenuBar() {
         return menuBar;
     }

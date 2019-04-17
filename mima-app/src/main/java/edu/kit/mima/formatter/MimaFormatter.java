@@ -42,6 +42,7 @@ public class MimaFormatter implements Formatter {
      * @param node node to print
      * @return string representation of node
      */
+    @NotNull
     private String printNode(@NotNull final SyntaxNode node) {
         final StringBuilder sb = new StringBuilder();
         String s = "";
@@ -151,16 +152,17 @@ public class MimaFormatter implements Formatter {
     private void maybeJump(@NotNull final Iterator<SyntaxNode> iterator,
                            @NotNull final StringBuilder sb,
                            @NotNull SyntaxNode current) {
-        sb.append(printNode(current));
-        if (current.getType() == NodeType.JUMP) {
+        SyntaxNode current1 = current;
+        sb.append(printNode(current1));
+        if (current1.getType() == NodeType.JUMP) {
             if (iterator.hasNext()) {
-                current = iterator.next();
-                if (current.getType() == NodeType.SCOPE_OPEN) {
-                    sb.append(' ').append(printNode(current));
-                } else if (current.getType() == NodeType.NEW_LINE) {
+                current1 = iterator.next();
+                if (current1.getType() == NodeType.SCOPE_OPEN) {
+                    sb.append(' ').append(printNode(current1));
+                } else if (current1.getType() == NodeType.NEW_LINE) {
                     sb.append("\n").append(TAB);
                 } else {
-                    sb.append("\n").append(TAB).append(printNode(current));
+                    sb.append("\n").append(TAB).append(printNode(current1));
                 }
             }
 
@@ -192,6 +194,7 @@ public class MimaFormatter implements Formatter {
      * @param node node to print
      * @return String representation of node
      */
+    @NotNull
     private String printLeaf(@NotNull final SyntaxNode node) {
         final SyntaxToken token = tokens[node.getBegin()];
         return switch (token.getType()) {

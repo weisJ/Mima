@@ -117,9 +117,7 @@ import java.util.Set;
  * #addRenderingHint(RenderingHints.Key, Object)} and {@link #addRenderingHints(Map)}.</li>
  * </ul>
  *
- * <p>
- * <p/>
- * Known limitations:
+ * <p>Known limitations:
  * <p/>
  * <ol>
  * <li>
@@ -141,8 +139,6 @@ import java.util.Set;
  * on {@link JXLayer}'s parent.</li>
  * </ol>
  *
- * <p>
- * <p/>
  * <b>Note:</b> A {@link TransformUI} instance cannot be shared and can be set
  * to a single {@link JXLayer} instance only.
  *
@@ -150,10 +146,6 @@ import java.util.Set;
  */
 public class TransformUI extends MouseEventUI<JComponent> {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 1L;
     private static final LayoutManager transformLayout = new TransformLayout();
     private static final String KEY_VIEW = "view";
     private static final boolean delegatePossible;
@@ -228,15 +220,15 @@ public class TransformUI extends MouseEventUI<JComponent> {
      * {@link JTextComponent} and its descendants have some caret position problems when used inside
      * a transformed {@link JXLayer}. When you plan to use {@link JTextComponent}(s) inside the
      * hierarchy of a transformed {@link JXLayer}, call this method in an early stage, before
-     * instantiating any {@link JTextComponent} .
-     * <p>
-     * It executes the following method:
+     * instantiating any {@link JTextComponent}.
+     *
+     * <p>It executes the following method:
      *
      * <pre>
      * System.setProperty(&quot;i18n&quot;, Boolean.TRUE.toString());
      * </pre>
-     * <p>
-     * As a result, a {@link GlyphPainter} will be selected that uses floating point instead of
+     *
+     * <p>As a result, a {@link GlyphPainter} will be selected that uses floating point instead of
      * fixed point calculations.
      * </p>
      */
@@ -255,7 +247,7 @@ public class TransformUI extends MouseEventUI<JComponent> {
     }
 
     /**
-     * Add new rendering hints to the currently active rendering hints;
+     * Add new rendering hints to the currently active rendering hints.
      *
      * @param hints the new rendering hints
      */
@@ -311,6 +303,7 @@ public class TransformUI extends MouseEventUI<JComponent> {
      * @param layer the {@link JXLayer}.
      * @return a {@link AffineTransform} instance or {@code null}
      */
+    @NotNull
     public AffineTransform getPreferredTransform(Dimension size,
                                                  JXLayer<? extends JComponent> layer) {
 
@@ -325,7 +318,7 @@ public class TransformUI extends MouseEventUI<JComponent> {
      * @see #uninstallUI(JComponent)
      */
     @Override
-    public void installUI(JComponent component) {
+    public void installUI(@NotNull JComponent component) {
         super.installUI(component);
         JXLayer<? extends JComponent> installedLayer = this.getInstalledLayer();
         originalLayout = installedLayer.getLayout();
@@ -439,12 +432,27 @@ public class TransformUI extends MouseEventUI<JComponent> {
     }
 
     /**
+     * Overridden to restore the original {@link LayoutManager} and remove some listeners.
+     *
+     * @param c the component.
+     */
+    @Override
+    public void uninstallUI(@NotNull JComponent c) {
+        JXLayer<? extends JComponent> installedLayer = this.getInstalledLayer();
+        Objects.requireNonNull(installedLayer)
+               .removePropertyChangeListener(KEY_VIEW, this.viewChangeListener);
+        installedLayer.setLayout(originalLayout);
+        setView(null);
+        super.uninstallUI(c);
+    }
+
+    /**
      * Primarily intended for use by {@link RepaintManager}.
      *
      * @param rect  a rectangle
      * @param layer the layer
      * @return the argument rectangle if no {@link AffineTransform} is available, else a new
-     * rectangle
+     *         rectangle
      */
     public final Rectangle transform(@NotNull Rectangle rect, JXLayer<? extends JComponent> layer) {
         AffineTransform at = getTransform(layer);
@@ -455,19 +463,6 @@ public class TransformUI extends MouseEventUI<JComponent> {
             area.transform(at);
             return area.getBounds();
         }
-    }
-
-    /**
-     * Overridden to restore the original {@link LayoutManager} and remove some listeners.
-     */
-    @Override
-    public void uninstallUI(JComponent c) {
-        JXLayer<? extends JComponent> installedLayer = this.getInstalledLayer();
-        Objects.requireNonNull(installedLayer)
-                .removePropertyChangeListener(KEY_VIEW, this.viewChangeListener);
-        installedLayer.setLayout(originalLayout);
-        setView(null);
-        super.uninstallUI(c);
     }
 
     /**
@@ -507,10 +502,10 @@ public class TransformUI extends MouseEventUI<JComponent> {
      */
     private void setToNoDoubleBuffering(Component component) {
         if (component instanceof JComponent) {
-            JComponent jComp = (JComponent) component;
-            if (jComp.isDoubleBuffered()) {
-                originalDoubleBuffered.add(jComp);
-                jComp.setDoubleBuffered(false);
+            JComponent comp = (JComponent) component;
+            if (comp.isDoubleBuffered()) {
+                originalDoubleBuffered.add(comp);
+                comp.setDoubleBuffered(false);
             }
         }
         if (component instanceof Container) {
@@ -553,18 +548,6 @@ public class TransformUI extends MouseEventUI<JComponent> {
     }
 
     /**
-     * Get the {@link AffineTransform} customized for the {@code layer} argument.
-     * <p>
-     * In {@code enabled} state this method is delegated to the {@link TransformModel} that has been
-     * set. Otherwise {@code null} will be returned.
-     * </p>
-     */
-    @Override
-    protected final AffineTransform getTransform(JXLayer<? extends JComponent> layer) {
-        return transformModel.getTransform(layer);
-    }
-
-    /**
      * If the view of the {@link JXLayer} is (partly) obscured by its parent (this is the case when
      * the size of the view (in component space) is larger than the size of the {@link JXLayer}),
      * the obscured parts will not be painted by the super implementation. Therefore, only under
@@ -597,14 +580,27 @@ public class TransformUI extends MouseEventUI<JComponent> {
                 setToNoDoubleBuffering(view);
                 g2.translate(view.getX(), view.getY());
                 view.paint(g2);
-                for (JComponent jComp : originalDoubleBuffered) {
-                    jComp.setDoubleBuffered(true);
+                for (JComponent comp : originalDoubleBuffered) {
+                    comp.setDoubleBuffered(true);
                 }
                 originalDoubleBuffered.clear();
                 return;
             }
         }
         super.paintLayer(g2, layer);
+    }
+
+    /**
+     * Get the {@link AffineTransform} customized for the {@code layer} argument.
+     * <p>
+     * In {@code enabled} state this method is delegated to the {@link TransformModel} that has been
+     * set. Otherwise {@code null} will be returned.
+     * </p>
+     */
+    @NotNull
+    @Override
+    protected final AffineTransform getTransform(JXLayer<? extends JComponent> layer) {
+        return transformModel.getTransform(layer);
     }
 
     /**
@@ -664,7 +660,6 @@ public class TransformUI extends MouseEventUI<JComponent> {
                     JXLayer.class, c);
             if (layer != null) {
                 LayerUI<?> layerUI = layer.getUI();
-//        if (layer.getUI() instanceof TransformUI) {
                 if (layerUI instanceof TransformUI) {
                     return (JXLayer<? extends JComponent>) layer;
                 } else {

@@ -73,6 +73,7 @@ public class AtomToken<T> extends ValueTuple<T, TokenType> implements Token<T> {
         return getSecond();
     }
 
+    @NotNull
     @Override
     @SuppressWarnings("unchecked")
     public Stream<Token> stream(boolean includeChildren) {

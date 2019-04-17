@@ -250,9 +250,9 @@ public class MouseEventUI<V extends JComponent> extends AbstractLayerUI<V> {
         }
     }
 
+    @SuppressWarnings("Duplicates")
     @Nullable
-    private Component getListeningComponent(@NotNull MouseEvent event,
-                                            @NotNull Component component) {
+    private Component getListeningComponent(@NotNull MouseEvent event, @NotNull Component component) {
         return switch (event.getID()) {
             case (MouseEvent.MOUSE_CLICKED), (MouseEvent.MOUSE_ENTERED), (MouseEvent.MOUSE_EXITED), (MouseEvent.MOUSE_PRESSED), (MouseEvent.MOUSE_RELEASED) -> getMouseListeningComponent(component);
             case (MouseEvent.MOUSE_DRAGGED), (MouseEvent.MOUSE_MOVED) -> getMouseMotionListeningComponent(component);
@@ -275,6 +275,7 @@ public class MouseEventUI<V extends JComponent> extends AbstractLayerUI<V> {
         }
     }
 
+    @SuppressWarnings("Duplicates")
     @Nullable
     private Component getMouseMotionListeningComponent(@NotNull Component component) {
         /*
@@ -323,6 +324,7 @@ public class MouseEventUI<V extends JComponent> extends AbstractLayerUI<V> {
         }
     }
 
+    @SuppressWarnings("Duplicates")
     private void redispatch(@NotNull MouseEvent originalEvent,
                             @NotNull final JXLayer<? extends V> layer) {
         if (layer.getView() != null) {
@@ -339,44 +341,34 @@ public class MouseEventUI<V extends JComponent> extends AbstractLayerUI<V> {
 
             switch (originalEvent.getID()) {
                 case MouseEvent.MOUSE_PRESSED:
-                    newEvent = transformMouseEvent(layer, originalEvent,
-                                                   realTarget, realPoint);
+                    newEvent = transformMouseEvent(layer, originalEvent, realTarget, realPoint);
                     if (newEvent != null) {
                         lastPressedTarget = newEvent.getComponent();
                     }
                     break;
                 case MouseEvent.MOUSE_RELEASED:
-                    newEvent = transformMouseEvent(layer, originalEvent,
-                                                   lastPressedTarget, realPoint);
+                    newEvent =
+                            transformMouseEvent(layer, originalEvent, lastPressedTarget, realPoint);
                     lastPressedTarget = null;
                     break;
                 case MouseEvent.MOUSE_ENTERED:
-                    generateEnterExitEvents(layer, originalEvent, realTarget,
-                                            realPoint);
-                    break;
                 case MouseEvent.MOUSE_EXITED:
-                    generateEnterExitEvents(layer, originalEvent, realTarget,
-                                            realPoint);
+                    generateEnterExitEvents(layer, originalEvent, realTarget, realPoint);
                     break;
                 case MouseEvent.MOUSE_MOVED:
-                    newEvent = transformMouseEvent(layer, originalEvent,
-                                                   realTarget, realPoint);
-                    generateEnterExitEvents(layer, originalEvent, realTarget,
-                                            realPoint);
+                    newEvent = transformMouseEvent(layer, originalEvent, realTarget, realPoint);
+                    generateEnterExitEvents(layer, originalEvent, realTarget, realPoint);
                     break;
                 case MouseEvent.MOUSE_DRAGGED:
-                    newEvent = transformMouseEvent(layer, originalEvent,
-                                                   lastPressedTarget, realPoint);
-                    generateEnterExitEvents(layer, originalEvent, realTarget,
-                                            realPoint);
+                    newEvent =
+                            transformMouseEvent(layer, originalEvent, lastPressedTarget, realPoint);
+                    generateEnterExitEvents(layer, originalEvent, realTarget, realPoint);
                     break;
                 case MouseEvent.MOUSE_CLICKED:
-                    newEvent = transformMouseEvent(layer, originalEvent,
-                                                   realTarget, realPoint);
+                    newEvent = transformMouseEvent(layer, originalEvent, realTarget, realPoint);
                     break;
                 case (MouseEvent.MOUSE_WHEEL):
-                    redispatchMouseWheelEvent((MouseWheelEvent) originalEvent,
-                                              realTarget, layer);
+                    redispatchMouseWheelEvent((MouseWheelEvent) originalEvent, realTarget, layer);
                     break;
             }
             dispatchMouseEvent(newEvent);

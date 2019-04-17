@@ -12,6 +12,7 @@ import javax.swing.Icon;
  */
 public class RunnableIconButton extends IconButton {
 
+    @NotNull
     private final Icon running;
     private boolean isRunning;
 
@@ -29,6 +30,7 @@ public class RunnableIconButton extends IconButton {
         this.running = running;
     }
 
+    @NotNull
     @Override
     protected Icon currentIcon() {
         return isRunning ? running : isEnabled() ? active : inactive;
