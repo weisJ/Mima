@@ -4,6 +4,7 @@ import edu.kit.mima.app.MimaUserInterface;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,16 +46,17 @@ public final class Help extends JFrame {
 
     private static final Dimension SIZE = Toolkit.getDefaultToolkit().getScreenSize();
 
+    @NotNull
     private static Help instance = new Help();
 
     @Nullable
-    private static Thread loadSource;
-    private static boolean loadedFromWeb;
+    private Thread loadSource;
+    private boolean loadedFromWeb;
 
-    private static JEditorPane panel;
-    private static HTMLEditorKit kit;
+    private JEditorPane panel;
+    private HTMLEditorKit kit;
     @Nullable
-    private static String source;
+    private String source;
 
     /*
      * Construct the Help Screen
@@ -89,6 +91,8 @@ public final class Help extends JFrame {
      *
      * @return instance of Help
      */
+    @NotNull
+    @Contract(pure = true)
     public static Help getInstance() {
         return instance;
     }
@@ -111,7 +115,7 @@ public final class Help extends JFrame {
         getInstance().setVisible(false);
     }
 
-    private static void showHtml(final String htmlSource) {
+    private void showHtml(final String htmlSource) {
         SwingUtilities.invokeLater(() -> {
             var doc = kit.createDefaultDocument();
             panel.setDocument(doc);
@@ -122,7 +126,7 @@ public final class Help extends JFrame {
     /**
      * Close the Help Window.
      */
-    public static void close() {
+    public void close() {
         if (loadSource != null) {
             final Thread stop = loadSource;
             loadSource = null;

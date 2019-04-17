@@ -80,7 +80,7 @@ public final class LafManager implements UserPreferenceChangedListener {
         }
     }
 
-    private static void updateLafRecursively(final Window window) {
+    private static void updateLafRecursively(@NotNull final Window window) {
         for (final Window childWindow : window.getOwnedWindows()) {
             updateLafRecursively(childWindow);
         }

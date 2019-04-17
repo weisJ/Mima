@@ -7,6 +7,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
+import javax.swing.text.SimpleAttributeSet;
+import java.util.function.Function;
 
 /**
  * Utility class for Documents.
@@ -60,6 +62,27 @@ public final class DocumentUtil {
         } else {
             final Element lineElem = map.getElement(line);
             return lineElem.getStartOffset();
+        }
+    }
+
+    /**
+     * Transform current line in document.
+     *
+     * @param function Function that takes in the current line and caret position in line
+     * @param index    index in file
+     * @param document the document.
+     */
+    public static void transformLine(@NotNull final Function<String, String> function,
+                                     final int index, @NotNull final Document document) {
+        try {
+            final String text = document.getText(0, document.getLength() - 1);
+            final int lower = text.substring(0, index).lastIndexOf('\n') + 1;
+            final int upper = text.substring(index).indexOf('\n') + index;
+            final String newLine = function.apply(text.substring(lower, upper));
+            document.remove(lower, upper - lower);
+            document.insertString(lower, newLine, new SimpleAttributeSet());
+        } catch (@NotNull final BadLocationException e) {
+            e.printStackTrace();
         }
     }
 }

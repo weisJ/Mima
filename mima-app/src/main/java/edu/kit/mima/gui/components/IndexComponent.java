@@ -1,5 +1,7 @@
 package edu.kit.mima.gui.components;
 
+import org.jetbrains.annotations.Nullable;
+
 import javax.swing.JComponent;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -24,6 +26,7 @@ public class IndexComponent extends JComponent {
         return true;
     }
 
+    @Nullable
     public Color getLineColor() {
         return null;
     }

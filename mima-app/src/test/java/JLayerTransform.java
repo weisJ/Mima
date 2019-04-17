@@ -1,4 +1,5 @@
 import org.jdesktop.jxlayer.JXLayer;
+import org.jetbrains.annotations.NotNull;
 import org.pbjar.jxlayer.plaf.ext.transform.DefaultTransformModel;
 import org.pbjar.jxlayer.plaf.ext.transform.TransformUtils;
 
@@ -20,7 +21,7 @@ public class JLayerTransform {
         EventQueue.invokeLater(() -> {
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+            } catch (@NotNull ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ignore) {
             }
 
             JFrame frame = new JFrame();
@@ -59,7 +60,8 @@ public class JLayerTransform {
                     d -> new Point2D.Double(fieldPane.getX(), fieldPane.getY()));
             transformModel.setRotation(Math.toRadians(0));
             transformModel.setScaleToPreferredSize(true);
-            JXLayer<JComponent> rotatePane = TransformUtils.createTransformJXLayer(fieldPane, transformModel);
+            JXLayer<JComponent> rotatePane =
+                    TransformUtils.createTransformJXLayer(fieldPane, transformModel);
 
             add(slider, BorderLayout.NORTH);
             add(rotatePane);

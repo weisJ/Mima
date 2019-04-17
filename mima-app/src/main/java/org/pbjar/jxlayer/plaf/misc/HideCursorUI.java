@@ -86,7 +86,7 @@ public final class HideCursorUI extends GeneralLayerUI<JComponent, HideCursorUI.
     }
 
     /**
-     * Get {@link Action}s that:
+     * Get {@link Action}s that.
      * <ol>
      * <li>Set the cursor timeout value.<li>
      * </ol>

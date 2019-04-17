@@ -25,6 +25,11 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JPanel;
+import javax.swing.WindowConstants;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog;
@@ -36,11 +41,6 @@ import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ResourceBundle;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-import javax.swing.WindowConstants;
 
 /**
  * A dialog containing a {@code FontChooser} as well as OK and Cancel buttons.
@@ -200,7 +200,7 @@ public class FontDialog extends JDialog {
         return chooser.getSelectedFont();
     }
 
-    private void setSelectedFont(final Font font) {
+    private void setSelectedFont(@NotNull final Font font) {
         chooser.setSelectedFont(font);
     }
 

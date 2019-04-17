@@ -172,7 +172,8 @@ public final class PreProcessor extends Processor<Token, TokenStream> {
         }
     }
 
-    private boolean tryPaths(final String path, final String fullPath, final String extension) {
+    private boolean tryPaths(final String path, @NotNull final String fullPath,
+                             final String extension) {
         final File workingDir = new File(workingDirectory);
         final File homeDir = new File(mimaDirectory);
         return !isHome && workingDir.exists()
@@ -231,6 +232,7 @@ public final class PreProcessor extends Processor<Token, TokenStream> {
         return newPath.toString();
     }
 
+    @Nullable
     @Override
     protected Token parseDelimiter() {
         return input.next();

@@ -10,6 +10,7 @@ import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
 import edu.kit.mima.preferences.UserPreferenceChangedListener;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.Color;
@@ -29,6 +30,10 @@ public final class ConsoleLogger implements Logger {
     @Nullable private Console console;
     private LogLevel level = LogLevel.INFO;
     private boolean locked = false;
+
+    public ConsoleLogger() {
+
+    }
 
     /**
      * Set the output console.
@@ -115,7 +120,8 @@ public final class ConsoleLogger implements Logger {
         print("[ERROR] " + message, LogColor.ERROR, overwriteLast);
     }
 
-    private void print(final String message, final LogColor logColor, final boolean overwriteLast) {
+    private void print(final String message, @NotNull final LogColor logColor,
+                       final boolean overwriteLast) {
         if (console == null) {
             return;
         }

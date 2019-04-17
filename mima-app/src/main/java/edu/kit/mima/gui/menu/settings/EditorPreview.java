@@ -16,6 +16,7 @@ import java.awt.Font;
  */
 public class EditorPreview extends AbstractPreviewPane {
 
+    @NotNull
     private final Editor editor;
 
     /**

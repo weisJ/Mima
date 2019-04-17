@@ -83,8 +83,8 @@ public abstract class Processor<T extends Token, K extends TokenStream> {
 
     private boolean parseDelimited(@NotNull final char[] del,
                                    @NotNull final Supplier<T> parser,
-                                   final List<T> tokenList,
-                                   final List<T> skipList) {
+                                   @NotNull final List<T> tokenList,
+                                   @NotNull final List<T> skipList) {
         if (!isPunctuation(del[1])
                 && (del[2] == CharInputStream.EMPTY_CHAR || isPunctuation(del[2]))) {
             if (del[2] != CharInputStream.EMPTY_CHAR) {
@@ -101,6 +101,7 @@ public abstract class Processor<T extends Token, K extends TokenStream> {
         return true;
     }
 
+    @Nullable
     protected abstract T parseDelimiter();
 
     /**

@@ -3,7 +3,10 @@ package edu.kit.mima.gui.components.tabframe;
 import com.bulenkov.iconloader.util.EmptyIcon;
 import edu.kit.mima.gui.components.IconLabel;
 import edu.kit.mima.gui.components.alignment.Alignment;
+import edu.kit.mima.gui.components.button.ClickAction;
 import edu.kit.mima.gui.components.button.IconButton;
+import edu.kit.mima.gui.components.tooltip.Tooltip;
+import edu.kit.mima.gui.components.tooltip.TooltipUtil;
 import edu.kit.mima.gui.icons.Icons;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,7 +18,9 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -33,11 +38,14 @@ import java.awt.event.MouseEvent;
  */
 public class DefaultPopupComponent extends PopupComponent {
 
+    @NotNull
     private final JPanel header;
+    @NotNull
     private final JComponent content;
+    @NotNull
     private final JButton closeButton;
-    private final Color focusColor;
-    private final Color color;
+    private Color headerFocusBackground;
+    private Color headerBackground;
     private boolean open;
     private boolean locked = true;
 
@@ -57,28 +65,33 @@ public class DefaultPopupComponent extends PopupComponent {
         header.add(label);
         header.add(Box.createGlue());
         closeButton = new IconButton(Icons.COLLAPSE);
-        closeButton.addActionListener(e -> open = false);
         header.add(closeButton);
+
+        closeButton.addActionListener(e -> open = false);
+        var accelerator = "shift pressed ESCAPE";
+        getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                .put(KeyStroke.getKeyStroke(accelerator), accelerator);
+        getActionMap().put(accelerator, new ClickAction(closeButton));
+        TooltipUtil.createDefaultTooltip(closeButton, new Tooltip("Hide (shift ESC)"));
 
         add(header, BorderLayout.NORTH);
         add(content, BorderLayout.CENTER);
 
-        color = header.getBackground();
-        focusColor = new Color(59, 71, 84);
         Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
             private boolean pressed;
 
             @Override
-            public void eventDispatched(AWTEvent event) {
+            public void eventDispatched(@NotNull AWTEvent event) {
                 if (locked) {
+                    requestFocus();
                     locked = false;
                     return;
                 }
                 if (event.getID() == MouseEvent.MOUSE_CLICKED && open) {
                     if (pressed && mouseInside()) {
-                        header.setBackground(focusColor);
+                        header.setBackground(headerFocusBackground);
                     } else {
-                        header.setBackground(color);
+                        header.setBackground(headerBackground);
                     }
                     pressed = false;
                 } else if (event.getID() == MouseEvent.MOUSE_PRESSED) {
@@ -88,13 +101,20 @@ public class DefaultPopupComponent extends PopupComponent {
         }, AWTEvent.MOUSE_EVENT_MASK);
     }
 
+    @Override
+    public void updateUI() {
+        super.updateUI();
+        headerBackground = UIManager.getColor("TabFramePopup.background");
+        headerFocusBackground = UIManager.getColor("TabFramePopup.focus");
+    }
+
     private boolean mouseInside() {
         var mousePos = MouseInfo.getPointerInfo().getLocation();
         SwingUtilities.convertPointFromScreen(mousePos, DefaultPopupComponent.this);
         return contains(mousePos);
     }
 
-    public void setAlignment(final Alignment a, final boolean[] info) {
+    public void setAlignment(@NotNull final Alignment a, final boolean[] info) {
         var insets = getBorderSize(a, info);
         header.setBorder(BorderFactory.createMatteBorder(
                 insets.top, insets.left, 1, insets.right,
@@ -111,7 +131,7 @@ public class DefaultPopupComponent extends PopupComponent {
 
     @Override
     public void open() {
-        header.setBackground(focusColor);
+        header.setBackground(headerFocusBackground);
         open = true;
         /*
          * Lock first mouse event as the opening click would remove the focus
@@ -120,6 +140,7 @@ public class DefaultPopupComponent extends PopupComponent {
         locked = true;
     }
 
+    @NotNull
     private Insets getBorderSize(@NotNull final Alignment a, final boolean[] info) {
         switch (a) {
             case NORTH, NORTH_EAST, SOUTH, SOUTH_WEST -> {

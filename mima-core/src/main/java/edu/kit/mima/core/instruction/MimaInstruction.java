@@ -214,7 +214,7 @@ public enum MimaInstruction implements Instruction {
     protected abstract @Nullable MachineWord applyInternal(List<Value> arguments,
                                                            Environment environment);
 
-    protected @Nullable MachineWord applyAlu(List<Value> arguments,
+    protected @Nullable MachineWord applyAlu(@NotNull List<Value> arguments,
                                              @NotNull BiFunction<MachineWord, MachineWord, MachineWord> func) {
         final var argument = InstructionTools.getMemoryReference(arguments, 0);
         mima.setAccumulator(func.apply(

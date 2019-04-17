@@ -2,7 +2,7 @@ package edu.kit.mima.gui.menu;
 
 import edu.kit.mima.api.util.Tuple;
 import edu.kit.mima.api.util.ValueTuple;
-import edu.kit.mima.gui.components.ZeroWidthSplitPane;
+import edu.kit.mima.gui.components.SeamlessSplitPane;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.BorderFactory;
@@ -81,6 +81,14 @@ public class CardPanelBuilder {
         return new CardPanelItem(title, this, alignLeft);
     }
 
+    /**
+     * Create new Item.
+     *
+     * @param title title of item.
+     * @param c     content of item.
+     * @return this
+     */
+    @NotNull
     public CardPanelBuilder addItem(final String title, final JComponent c) {
         this.panelMap.put(count, new ValueTuple<>(title, c));
         count++;
@@ -130,7 +138,7 @@ public class CardPanelBuilder {
         renderer.setLeafIcon(null);
 
         panelMap.forEach((i, t) -> panel.add(t.getSecond(), t.getFirst()));
-        final JSplitPane cardPanel = new ZeroWidthSplitPane();
+        final JSplitPane cardPanel = new SeamlessSplitPane();
         cardPanel.setDividerLocation(JSplitPane.HORIZONTAL_SPLIT);
 
         final Dimension minDim = new Dimension(minWidth, parent.getHeight());

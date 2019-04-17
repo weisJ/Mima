@@ -54,7 +54,7 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
     }
 
     @Override
-    public void installUI(JComponent c) {
+    public void installUI(@NotNull JComponent c) {
         super.installUI(c);
         tabbedPane = (EditorTabbedPane) c;
     }
@@ -150,7 +150,7 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
     }
 
     @Override
-    protected Rectangle getTabBounds(int tabIndex, Rectangle dest) {
+    protected Rectangle getTabBounds(int tabIndex, @NotNull Rectangle dest) {
         if (tabbedPane.getTabLayoutPolicy() == JTabbedPane.SCROLL_TAB_LAYOUT) {
             return super.getTabBounds(tabIndex, dest);
         }
@@ -195,6 +195,7 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
         return maxIndex;
     }
 
+    @NotNull
     private JMenuItem createStashItem(final int index, @NotNull TabComponent c) {
         var item = new JMenuItem(new AbstractAction() {
             @Override
@@ -248,6 +249,7 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
 
     private class CustomTabbedPaneLayout extends BasicTabbedPaneUI.TabbedPaneLayout {
 
+        @NotNull
         private final PopupListener listener;
         private boolean installed = false;
 
@@ -296,9 +298,8 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
             swapSelected(swapIndex, tabCount, returnAt);
         }
 
-        private boolean calculateRect(final FontMetrics metrics,
-                                      final int i,
-                                      final Point p,
+        private boolean calculateRect(final FontMetrics metrics, final int i,
+                                      @NotNull final Point p,
                                       final int returnAt) {
             final Rectangle rect = rects[i];
             if (i > 0) {
@@ -333,7 +334,7 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
                 JComponent tabContainer = (JComponent) field.get(EditorTabbedPaneUI.this);
                 tabContainer.add(stash);
                 installed = true;
-            } catch (NoSuchFieldException
+            } catch (@NotNull NoSuchFieldException
                     | IllegalAccessException
                     | NullPointerException ignored) {
             }

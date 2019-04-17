@@ -113,7 +113,7 @@ public enum MimaXInstruction implements Instruction {
      *
      * @param mima Mima
      */
-    public static void setMima(final Mima mima) {
+    public static void setMima(@NotNull final Mima mima) {
         MimaXInstruction.mima = mima;
         arithmeticLogicUnit = new ArithmeticLogicUnit(mima.getWordLength());
     }

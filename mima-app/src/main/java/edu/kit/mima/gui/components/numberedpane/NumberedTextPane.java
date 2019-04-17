@@ -16,6 +16,7 @@ import javax.swing.text.BadLocationException;
 import java.awt.BorderLayout;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,9 +30,13 @@ import java.util.List;
  */
 public class NumberedTextPane extends JPanel {
 
+    @NotNull
     protected final HighlightTextPane pane;
+    @NotNull
     protected final JScrollPane scrollPane;
+    @NotNull
     private final NumberingPane numberingPane;
+    @NotNull
     private final List<IndexListener> listenerList;
 
     /**
@@ -78,6 +83,31 @@ public class NumberedTextPane extends JPanel {
                 }
             }
         });
+    }
+
+    public void scrollToIndex(final int index) {
+        if (index > 0) {
+            try {
+                Rectangle r = pane.modelToView2D(DocumentUtil.getLineStartOffset(pane, index))
+                                  .getBounds();
+                var viewport = scrollPane.getViewport();
+                var viewRect = viewport.getViewRect();
+                if (viewRect.y + viewRect.height < r.y || viewRect.y > r.y) {
+                    viewport.setViewPosition(new Point(0, r.y - (viewRect.height - r.height) / 2));
+                }
+            } catch (BadLocationException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Get the text pane.
+     *
+     * @return the text pane.
+     */
+    public JTextPane getTextPane() {
+        return pane;
     }
 
     /**
@@ -133,6 +163,7 @@ public class NumberedTextPane extends JPanel {
      *
      * @return array of components.
      */
+    @NotNull
     public Collection<IndexComponent> getIndexComponents() {
         return numberingPane.getComponentMap().values();
     }

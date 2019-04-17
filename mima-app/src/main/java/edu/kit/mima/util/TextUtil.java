@@ -1,5 +1,7 @@
 package edu.kit.mima.util;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.swing.JTextArea;
 import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
@@ -17,8 +19,7 @@ import java.awt.Rectangle;
  * A collection of static methods that provide added functionality for
  * text components (most notably, JTextArea and JTextPane)
  *
- * <p>
- * See also: javax.swing.text.Utilities
+ * <p>See also: javax.swing.text.Utilities
  */
 public class TextUtil {
     /**
@@ -27,7 +28,7 @@ public class TextUtil {
      *
      * @param component the text component in the scroll pane
      */
-    public static void centerLineInScrollPane(JTextComponent component) {
+    public static void centerLineInScrollPane(@NotNull JTextComponent component) {
         Container container = SwingUtilities.getAncestorOfClass(JViewport.class, component);
 
         if (container == null) {
@@ -51,13 +52,14 @@ public class TextUtil {
     /**
      * Return the column number at the Caret position.
      *
-     * <p>
-     * The column returned will only make sense when using a
+     * <p>The column returned will only make sense when using a
      * Monospaced font.
      *
      * @param component the component.
+     *
+     * @return the column of the caret.
      */
-    public static int getColumnAtCaret(JTextComponent component) {
+    public static int getColumnAtCaret(@NotNull JTextComponent component) {
         //  Since we assume a monospaced font we can use the width of a single
         //  character to represent the width of each character
 
@@ -81,7 +83,7 @@ public class TextUtil {
      * @param component component.
      * @return line at caret.
      */
-    public static int getLineAtCaret(JTextComponent component) {
+    public static int getLineAtCaret(@NotNull JTextComponent component) {
         int caretPosition = component.getCaretPosition();
         Element root = component.getDocument().getDefaultRootElement();
 
@@ -94,7 +96,7 @@ public class TextUtil {
      * @param component the component.
      * @return number of lines.
      */
-    public static int getLines(JTextComponent component) {
+    public static int getLines(@NotNull JTextComponent component) {
         Element root = component.getDocument().getDefaultRootElement();
         return root.getElementCount();
     }
@@ -105,11 +107,11 @@ public class TextUtil {
      * @param component the component.
      * @param line      the line index.
      */
-    public static void gotoStartOfLine(JTextComponent component, int line) {
+    public static void gotoStartOfLine(@NotNull JTextComponent component, int line) {
         Element root = component.getDocument().getDefaultRootElement();
-        line = Math.max(line, 1);
-        line = Math.min(line, root.getElementCount());
-        int startOfLineOffset = root.getElement(line - 1).getStartOffset();
+        int line2 = Math.max(line, 1);
+        int line1 = Math.min(line2, root.getElementCount());
+        int startOfLineOffset = root.getElement(line1 - 1).getStartOffset();
         component.setCaretPosition(startOfLineOffset);
     }
 
@@ -119,7 +121,7 @@ public class TextUtil {
      * @param component the component.
      * @param line      line index.
      */
-    public static void gotoFirstWordOnLine(final JTextComponent component, int line) {
+    public static void gotoFirstWordOnLine(@NotNull final JTextComponent component, int line) {
         gotoStartOfLine(component, line);
 
         //  The following will position the caret at the start of the first word
@@ -138,8 +140,10 @@ public class TextUtil {
      * Return the number of lines of text, including wrapped lines.
      *
      * @param component the component.
+     *
+     * @return the number of all displayed lines.
      */
-    public static int getWrappedLines(JTextArea component) {
+    public static int getWrappedLines(@NotNull JTextArea component) {
         View view = component.getUI().getRootView(component).getView(0);
         int preferredHeight = (int) view.getPreferredSpan(View.Y_AXIS);
         int lineHeight = component.getFontMetrics(component.getFont()).getHeight();
@@ -150,8 +154,10 @@ public class TextUtil {
      * Return the number of lines of text, including wrapped lines.
      *
      * @param component the component.
+     *
+     * @return the number of displayed lines.
      */
-    public static int getWrappedLines(JTextComponent component) {
+    public static int getWrappedLines(@NotNull JTextComponent component) {
         int lines = 0;
 
         View view = component.getUI().getRootView(component).getView(0);

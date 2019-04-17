@@ -75,8 +75,7 @@ public class WrappedRepaintManager extends RepaintManager {
      * @param delegate an existing RepaintManager
      */
     @Contract("null -> fail")
-    public WrappedRepaintManager(@NotNull RepaintManager delegate) {
-        //noinspection ConstantConditions
+    public WrappedRepaintManager(@Nullable RepaintManager delegate) {
         if (delegate == null) {
             throw new NullPointerException();
         }

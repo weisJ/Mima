@@ -27,7 +27,7 @@ public class TabFrameUI extends ComponentUI {
     }
 
     @Override
-    public void installUI(JComponent c) {
+    public void installUI(@NotNull JComponent c) {
         super.installUI(c);
         TabFrame tabFrame = (TabFrame) c;
         layout = new TabFrameLayout(tabFrame);
@@ -35,7 +35,7 @@ public class TabFrameUI extends ComponentUI {
     }
 
     @Override
-    public void paint(Graphics g, JComponent c) {
+    public void paint(@NotNull Graphics g, @NotNull JComponent c) {
         layout.layoutContainer(c);
         super.paint(g, c);
         g.setColor(UIManager.getColor("Border.line1"));
@@ -69,7 +69,7 @@ public class TabFrameUI extends ComponentUI {
 
 
     @Override
-    public int getBaseline(JComponent c, int width, int height) {
+    public int getBaseline(@NotNull JComponent c, int width, int height) {
         super.getBaseline(c, width, height);
         return 0;
     }

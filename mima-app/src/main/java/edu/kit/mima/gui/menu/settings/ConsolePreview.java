@@ -2,6 +2,7 @@ package edu.kit.mima.gui.menu.settings;
 
 import edu.kit.mima.gui.components.console.Console;
 import edu.kit.mima.gui.components.fontchooser.panes.AbstractPreviewPane;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.Dimension;
 import java.awt.Font;
@@ -14,6 +15,7 @@ import java.awt.Font;
  */
 public class ConsolePreview extends AbstractPreviewPane {
 
+    @NotNull
     private final Console console;
 
     /**

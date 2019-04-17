@@ -1,6 +1,6 @@
 package edu.kit.mima.gui.components.tabframe;
 
-import edu.kit.mima.gui.components.ZeroWidthSplitPane;
+import edu.kit.mima.gui.components.SeamlessSplitPane;
 import edu.kit.mima.gui.components.alignment.Alignment;
 import edu.kit.mima.gui.components.listeners.AncestorAdapter;
 import org.apache.poi.sl.usermodel.Insets2D;
@@ -27,15 +27,16 @@ public class TabFrameContent extends JPanel {
     private static final double VERTICAL_PROP = 0.2;
 
 
-    private ZeroWidthSplitPane topSplit;
-    private ZeroWidthSplitPane bottomSplit;
-    private ZeroWidthSplitPane leftSplit;
-    private ZeroWidthSplitPane rightSplit;
-    private ZeroWidthSplitPane leftSplitter;
-    private ZeroWidthSplitPane rightSplitter;
-    private ZeroWidthSplitPane topSplitter;
-    private ZeroWidthSplitPane bottomSplitter;
+    private SeamlessSplitPane topSplit;
+    private SeamlessSplitPane bottomSplit;
+    private SeamlessSplitPane leftSplit;
+    private SeamlessSplitPane rightSplit;
+    private SeamlessSplitPane leftSplitter;
+    private SeamlessSplitPane rightSplitter;
+    private SeamlessSplitPane topSplitter;
+    private SeamlessSplitPane bottomSplitter;
 
+    @NotNull
     private boolean[] enabled = new boolean[8];
 
     private JComponent cont = new JPanel();
@@ -55,29 +56,29 @@ public class TabFrameContent extends JPanel {
         JPanel bottomRightPanel = new PlaceholderComponent();
         JPanel leftTopPanel = new PlaceholderComponent();
 
-        rightSplitter = new ZeroWidthSplitPane(false);
+        rightSplitter = new SeamlessSplitPane(false);
         rightSplitter.setOrientation(JSplitPane.VERTICAL_SPLIT);
         rightSplitter.setTopComponent(rightTopPanel);
         rightSplitter.setBottomComponent(rightBottomPanel);
 
-        leftSplitter = new ZeroWidthSplitPane(false);
+        leftSplitter = new SeamlessSplitPane(false);
         leftSplitter.setOrientation(JSplitPane.VERTICAL_SPLIT);
         leftSplitter.setTopComponent(leftTopPanel);
         leftSplitter.setBottomComponent(leftBottomPanel);
 
-        topSplitter = new ZeroWidthSplitPane(false);
+        topSplitter = new SeamlessSplitPane(false);
         topSplitter.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
         topSplitter.setLeftComponent(topLeftPanel);
         topSplitter.setRightComponent(topRightPanel);
 
-        bottomSplitter = new ZeroWidthSplitPane(false);
+        bottomSplitter = new SeamlessSplitPane(false);
         bottomSplitter.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
         bottomSplitter.setLeftComponent(bottomLeftPanel);
         bottomSplitter.setRightComponent(bottomRightPanel);
 
 
-        topSplit = new ZeroWidthSplitPane(false);
-        bottomSplit = new ZeroWidthSplitPane(false);
+        topSplit = new SeamlessSplitPane(false);
+        bottomSplit = new SeamlessSplitPane(false);
         topSplit.setOrientation(JSplitPane.VERTICAL_SPLIT);
         bottomSplit.setOrientation(JSplitPane.VERTICAL_SPLIT);
 
@@ -85,8 +86,8 @@ public class TabFrameContent extends JPanel {
         topSplit.setBottomComponent(bottomSplit);
         bottomSplit.setBottomComponent(bottomSplitter);
 
-        leftSplit = new ZeroWidthSplitPane(false);
-        rightSplit = new ZeroWidthSplitPane(false);
+        leftSplit = new SeamlessSplitPane(false);
+        rightSplit = new SeamlessSplitPane(false);
         leftSplit.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
         rightSplit.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
 
@@ -106,7 +107,7 @@ public class TabFrameContent extends JPanel {
         setupSplitPanes(JSplitPane::setContinuousLayout, true);
         setupSplitterPanes(JSplitPane::setEnabled, false);
         setupSplitterPanes(JSplitPane::setContinuousLayout, true);
-        setupSplitterPanes(ZeroWidthSplitPane::setResizable, false);
+        setupSplitterPanes(SeamlessSplitPane::setResizable, false);
         add(topSplit, BorderLayout.CENTER);
 
         addAncestorListener(new AncestorAdapter() {
@@ -120,7 +121,7 @@ public class TabFrameContent extends JPanel {
     }
 
     private <T> void setupSplitPanes(
-            @NotNull final BiConsumer<? super ZeroWidthSplitPane, T> consumer,
+            @NotNull final BiConsumer<? super SeamlessSplitPane, T> consumer,
             final T flag) {
         consumer.accept(topSplit, flag);
         consumer.accept(bottomSplit, flag);
@@ -129,7 +130,7 @@ public class TabFrameContent extends JPanel {
     }
 
     private <T> void setupSplitterPanes(
-            @NotNull final BiConsumer<? super ZeroWidthSplitPane, T> consumer,
+            @NotNull final BiConsumer<? super SeamlessSplitPane, T> consumer,
             final T flag) {
         consumer.accept(topSplitter, flag);
         consumer.accept(bottomSplitter, flag);
@@ -297,12 +298,11 @@ public class TabFrameContent extends JPanel {
      *                    disable weight left: split disable weight right: splitter peer disable
      *                    weight
      */
-    private void changeStatus(final boolean enabled,
-                              final Alignment peer,
-                              final ZeroWidthSplitPane split,
-                              final ZeroWidthSplitPane splitter,
-                              final Insets2D proportions,
-                              final Insets2D weights) {
+    private void changeStatus(final boolean enabled, @NotNull final Alignment peer,
+                              @NotNull final SeamlessSplitPane split,
+                              @NotNull final SeamlessSplitPane splitter,
+                              @NotNull final Insets2D proportions,
+                              @NotNull final Insets2D weights) {
         split.setResizable(true);
         splitter.setResizable(true);
         if (enabled) {
@@ -338,6 +338,7 @@ public class TabFrameContent extends JPanel {
      *
      * @return array of status of panels.
      */
+    @NotNull
     public boolean[] getStatus() {
         return enabled;
     }

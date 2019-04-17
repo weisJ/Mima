@@ -41,7 +41,7 @@ public final class FileActions {
         openFile(fm -> {
             try {
                 fm.load(path);
-            } catch (final IOException e) {
+            } catch (@NotNull final IOException e) {
                 App.logger.error("Could not load file: " + e.getMessage());
             }
         });
@@ -61,8 +61,8 @@ public final class FileActions {
             editorManager.openEditor(editor, fm);
             mimaUI.fileChanged();
             App.logger.log("loaded: " + FileName.shorten(fm.getLastFile()));
-        } catch (final IllegalArgumentException ignored) {
-        } catch (final IllegalStateException e) {
+        } catch (@NotNull final IllegalArgumentException ignored) {
+        } catch (@NotNull final IllegalStateException e) {
             App.logger.error(e.getMessage());
         }
     }
@@ -77,7 +77,7 @@ public final class FileActions {
             } else {
                 save();
             }
-        } catch (final IllegalArgumentException ignored) {
+        } catch (@NotNull final IllegalArgumentException ignored) {
         }
     }
 
@@ -91,7 +91,7 @@ public final class FileActions {
             LoadingIndicator.start(fileM, 3);
             editorManager.currentFileManager().save();
             LoadingIndicator.stop(fileM + " (done)");
-        } catch (final IllegalArgumentException | IOException e) {
+        } catch (@NotNull final IllegalArgumentException | IOException e) {
             LoadingIndicator.error("Saving failed: " + e.getMessage());
         }
     }

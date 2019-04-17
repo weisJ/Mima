@@ -1,16 +1,17 @@
 import edu.kit.mima.gui.components.AlignPolicy;
 import edu.kit.mima.gui.components.tooltip.Tooltip;
 import edu.kit.mima.gui.components.tooltip.TooltipComponent;
+import edu.kit.mima.gui.components.tooltip.TooltipConstants;
 import edu.kit.mima.gui.laf.LafManager;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.GridLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.GridLayout;
 
 /**
  * @author Jannis Weis
@@ -35,9 +36,10 @@ public class TooltipPresentation {
                     }
                 };
                 button.setBorder(new LineBorder(Color.RED));
-                new TooltipComponent<>(button,
-                                       new Tooltip("Hallo Laaaaaaaaaaaaaaaaaaaaaanger Text \n Test1 \n Tes 2 \n\n\n\nHoher Text"),
-                                       600, 2000, AlignPolicy.COMPONENT_BOTH).setActive(true);
+                new TooltipComponent<>(button, new Tooltip(
+                        "Hallo Laaaaaaaaaaaaaaaaaaaaaanger " + " \n "
+                        + "Test1 \n Tes 2 \n\n\n\nHoher Text"), 600, TooltipConstants.PERSISTENT,
+                                       AlignPolicy.COMPONENT_BOTH).setActive(true);
                 frame.add(button);
             }
             frame.setBackground(Color.WHITE);

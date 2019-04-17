@@ -83,10 +83,7 @@ menu li p {
 }
 
 menu li {
-    margin-left: 0;
-    margin-right: 0;
-    margin-top: 0;
-    margin-bottom: 0
+    margin: 0;
 }
 
 menu {
@@ -102,10 +99,7 @@ dir li p {
 }
 
 dir li {
-    margin-left: 0;
-    margin-right: 0;
-    margin-top: 0;
-    margin-bottom: 0
+    margin: 0;
 }
 
 dir {
@@ -141,10 +135,7 @@ dl {
 }
 
 ol li {
-    margin-left: 0;
-    margin-right: 0;
-    margin-top: 0;
-    margin-bottom: 0
+    margin: 0;
 }
 
 ol {
@@ -161,10 +152,7 @@ ol li p {
 }
 
 ul li {
-    margin-left: 0;
-    margin-right: 0;
-    margin-top: 0;
-    margin-bottom: 0
+    margin: 0;
 }
 
 ul {
@@ -177,10 +165,7 @@ ul {
 }
 
 ul li ul li {
-    margin-left: 0;
-    margin-right: 0;
-    margin-top: 0;
-    margin-bottom: 0
+    margin: 0;
 }
 
 ul li ul {
@@ -190,10 +175,7 @@ ul li ul {
 }
 
 ul li ul li ul li {
-    margin-left: 0;
-    margin-right: 0;
-    margin-top: 0;
-    margin-bottom: 0
+    margin: 0;
 }
 
 ul li ul li ul {
@@ -311,10 +293,7 @@ tr {
 td {
     border-color: Gray;
     border-style: inset;
-    padding-left: 3;
-    padding-right: 3;
-    padding-top: 3;
-    padding-bottom: 3
+    padding: 3;
 }
 
 th {
@@ -322,17 +301,11 @@ th {
     font-weight: bold;
     border-color: Gray;
     border-style: inset;
-    padding-left: 3;
-    padding-right: 3;
-    padding-top: 3;
-    padding-bottom: 3
+    padding: 3;
 }
 
 blockquote {
-    margin-top: 5;
-    margin-bottom: 5;
-    margin-left: 35;
-    margin-right: 35
+    margin: 5 35;
 }
 
 center {

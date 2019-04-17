@@ -6,13 +6,14 @@ import edu.kit.mima.formatter.MimaFormatter;
 import edu.kit.mima.gui.components.editor.Editor;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
+import edu.kit.mima.util.DocumentUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.text.BadLocationException;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.text.BadLocationException;
 
 /**
  * Hot keys for {@link Editor}.
@@ -25,14 +26,10 @@ public enum EditorHotKeys implements ActionListener {
     COMMENT_TOGGLE("control 7") {
         @Override
         public void actionPerformed(final ActionEvent e) {
-            editor.transformLine(s -> {
+            DocumentUtil.transformLine(s -> {
                 final String comment = String.valueOf(Punctuation.COMMENT);
-                if (s.trim().startsWith(comment)) {
-                    return s.replaceFirst(comment, "");
-                } else {
-                    return comment + s;
-                }
-            }, editor.getCaretPosition());
+                return s.trim().startsWith(comment) ? s.replaceFirst(comment, "") : comment + s;
+            }, editor.getCaretPosition(), editor.getTextPane().getDocument());
         }
     },
     STRING_CREATE("shift NUMBER_SIGN") {

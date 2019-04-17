@@ -32,6 +32,7 @@
 package org.pbjar.jxlayer.plaf.ext.transform;
 
 import org.jdesktop.jxlayer.JXLayer;
+import org.jetbrains.annotations.NotNull;
 import org.pbjar.jxlayer.plaf.ext.TransformUI;
 
 import javax.swing.JComponent;
@@ -70,6 +71,7 @@ public interface TransformModel {
      * @param layer the {@link JXLayer}.
      * @return a {@link AffineTransform} instance or {@code null}
      */
+    @NotNull
     AffineTransform getPreferredTransform(Dimension size,
                                           JXLayer<?> layer);
 
@@ -80,6 +82,7 @@ public interface TransformModel {
      * @param layer the {@link JXLayer}
      * @return a {@link AffineTransform} or {@code null}
      */
+    @NotNull
     AffineTransform getTransform(JXLayer<? extends JComponent> layer);
 
     /**

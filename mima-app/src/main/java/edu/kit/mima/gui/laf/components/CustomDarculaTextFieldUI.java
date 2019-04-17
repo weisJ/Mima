@@ -44,7 +44,7 @@ public class CustomDarculaTextFieldUI extends DarculaTextFieldUI {
             g.setColor(parent.getBackground());
             g.fillRect(0, 0, c.getWidth(), c.getHeight());
         }
-        GraphicsConfig config = new GraphicsConfig(g);
+        final GraphicsConfig config = new GraphicsConfig(g);
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                            RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
@@ -60,7 +60,8 @@ public class CustomDarculaTextFieldUI extends DarculaTextFieldUI {
         config.restore();
     }
 
-    private void paintBorderBackground(final Graphics2D g, final JTextComponent c, final Border b) {
+    private void paintBorderBackground(@NotNull final Graphics2D g, @NotNull final JTextComponent c,
+                                       @NotNull final Border b) {
         if (c.isEnabled() && c.isEditable()) {
             g.setColor(c.getBackground());
         }
@@ -79,7 +80,7 @@ public class CustomDarculaTextFieldUI extends DarculaTextFieldUI {
         }
     }
 
-    private void paintSearchField(final Graphics2D g, final JTextComponent c) {
+    private void paintSearchField(@NotNull final Graphics2D g, @NotNull final JTextComponent c) {
         g.setColor(c.getBackground());
         Rectangle r = this.getDrawingRect();
         int arcSize = 5;

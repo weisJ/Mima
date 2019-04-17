@@ -23,7 +23,9 @@ public class BinaryToken<T, K> extends FileObjectAdapter implements Token<T>, Im
     @NotNull private final TokenType type;
     private final int filePos;
     private final int index;
+    @NotNull
     private final T first;
+    @NotNull
     private final K second;
 
     /**
@@ -71,6 +73,7 @@ public class BinaryToken<T, K> extends FileObjectAdapter implements Token<T>, Im
         return first;
     }
 
+    @NotNull
     @Override
     public K getSecond() {
         return second;
@@ -88,6 +91,7 @@ public class BinaryToken<T, K> extends FileObjectAdapter implements Token<T>, Im
         return type;
     }
 
+    @NotNull
     @Override
     @SuppressWarnings("unchecked")
     public Stream<Token> stream(boolean includeChildren) {

@@ -190,6 +190,7 @@ public class SyntaxParser extends Processor<SyntaxToken, SyntaxTokenStream> {
     /*
      * Parse definition that may or may not be a constant.
      */
+    @NotNull
     private SyntaxToken maybeConstant() {
         final SyntaxToken token = peek();
         final SyntaxToken t;
@@ -207,6 +208,7 @@ public class SyntaxParser extends Processor<SyntaxToken, SyntaxTokenStream> {
     /*
      * Parse definition body and assign given color.
      */
+    @NotNull
     private SyntaxToken parseDefinitionBody(final Color color) {
         final SyntaxToken reference = next();
         if (reference.getType() == TokenType.IDENTIFICATION) {

@@ -49,7 +49,8 @@ public class MimaHighlighter implements Highlighter, FileEventHandler,
     }
 
     @Override
-    public void updateHighlighting(@NotNull final JTextPane textPane, FileHistoryObject fhs) {
+    public void updateHighlighting(@NotNull final JTextPane textPane,
+                                   @NotNull FileHistoryObject fhs) {
         boolean update = !switch (fhs.getType()) {
             case INSERT -> fhs.getText().isBlank();
             case REMOVE -> fhs.getOldText().isBlank();

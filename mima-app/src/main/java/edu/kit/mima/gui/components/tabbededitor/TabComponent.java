@@ -27,6 +27,7 @@ import java.util.function.Consumer;
  */
 public class TabComponent extends JPanel {
 
+    @NotNull
     private final IconLabel iconLabel;
 
     /**

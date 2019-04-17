@@ -29,8 +29,10 @@ public class EditorTabbedPane extends JTabbedPane {
     static final String NAME = "TabTransferData";
     static final DataFlavor FLAVOR = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType, NAME);
 
+    @NotNull
     final DraggingGlassPane glassPane;
     private final List<TabClosedEventHandler> handlerList = new ArrayList<>();
+    @NotNull
     private final EditorDragListener listener;
 
     int dropTargetIndex = -1;
@@ -58,6 +60,7 @@ public class EditorTabbedPane extends JTabbedPane {
                                                             listener);
     }
 
+    @NotNull
     @Override
     public String getUIClassID() {
         return "EditorTabbedPaneUI";
@@ -143,7 +146,7 @@ public class EditorTabbedPane extends JTabbedPane {
      * @param point point given in the drop site component's coordinate
      * @return returns potential index for drop.
      */
-    private int getTargetTabIndex(final Point point) {
+    private int getTargetTabIndex(@NotNull final Point point) {
         if (getTabCount() == 0) {
             return 0;
         }
@@ -166,7 +169,9 @@ public class EditorTabbedPane extends JTabbedPane {
         return r.contains(point) ? getTabCount() : -1;
     }
 
-    /*default*/ Point buildGhostLocation(final Point location) {
+    /*default*/
+    @NotNull
+    Point buildGhostLocation(@NotNull final Point location) {
         Point ghostLocation = new Point(location);
         ghostLocation.y = 0;
         ghostLocation.x -= glassPane.getGhostWidth() / 2;
@@ -179,8 +184,7 @@ public class EditorTabbedPane extends JTabbedPane {
         return ghostLocation;
     }
 
-    /*default*/ void initGlassPane(@NotNull final Component c,
-                                   final Point tabPos,
+    /*default*/ void initGlassPane(@NotNull final Component c, @NotNull final Point tabPos,
                                    final int tabIndex) {
         getRootPane().setGlassPane(glassPane);
         final Rectangle compRect = getComponentAt(tabIndex).getBounds();
@@ -211,7 +215,7 @@ public class EditorTabbedPane extends JTabbedPane {
         return bounds;
     }
 
-    /*default*/ void initTarget(final Point location) {
+    /*default*/ void initTarget(@NotNull final Point location) {
         final int newLocation = getTargetTabIndex(location);
         if (newLocation < 0 && listener.isDragging()) {
             return;

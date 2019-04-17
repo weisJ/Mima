@@ -1,5 +1,7 @@
 package edu.kit.mima.api.lambda;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Function with 3 arguments.
  *
@@ -17,5 +19,5 @@ public interface TriFunction<T, K, R, S> {
      * @param third  third argument.
      * @return return value of function.
      */
-    S apply(T first, K second, R third);
+    @NotNull S apply(T first, K second, R third);
 }

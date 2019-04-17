@@ -51,10 +51,11 @@ public class WrapLayout extends FlowLayout {
      *
      * @param target the component which needs to be laid out
      * @return the preferred dimensions to lay out the
-     * subcomponents of the specified container
+     *         subcomponents of the specified container
      */
+    @NotNull
     @Override
-    public Dimension preferredLayoutSize(Container target) {
+    public Dimension preferredLayoutSize(@NotNull Container target) {
         return layoutSize(target, true);
     }
 
@@ -64,10 +65,11 @@ public class WrapLayout extends FlowLayout {
      *
      * @param target the component which needs to be laid out
      * @return the minimum dimensions to lay out the
-     * subcomponents of the specified container.
+     *         subcomponents of the specified container.
      */
+    @NotNull
     @Override
-    public Dimension minimumLayoutSize(Container target) {
+    public Dimension minimumLayoutSize(@NotNull Container target) {
         Dimension minimum = layoutSize(target, false);
         minimum.width -= (getHgap() + 1);
         return minimum;
@@ -81,6 +83,7 @@ public class WrapLayout extends FlowLayout {
      * @param preferred should preferred size be calculated
      * @return the dimension to layout the target container
      */
+    @NotNull
     private Dimension layoutSize(@NotNull Container target, boolean preferred) {
         synchronized (target.getTreeLock()) {
             //  Each row must fit with the width allocated to the container.
@@ -99,8 +102,8 @@ public class WrapLayout extends FlowLayout {
                 targetWidth = Integer.MAX_VALUE;
             }
 
-            int hgap = getHgap();
-            int vgap = getVgap();
+            final int hgap = getHgap();
+            final int vgap = getVgap();
             Insets insets = target.getInsets();
             int horizontalInsetsAndGap = insets.left + insets.right + (hgap * 2);
             int maxWidth = targetWidth - horizontalInsetsAndGap;

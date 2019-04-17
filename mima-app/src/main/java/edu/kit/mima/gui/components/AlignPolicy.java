@@ -1,5 +1,7 @@
 package edu.kit.mima.gui.components;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.awt.Point;
 
 /**
@@ -10,26 +12,30 @@ import java.awt.Point;
  */
 public enum AlignPolicy {
     MOUSE_BOTH {
+        @NotNull
         @Override
-        public Point calculatePosition(final Point mouse, final Point component) {
+        public Point calculatePosition(@NotNull final Point mouse, final Point component) {
             return new Point(mouse.x, mouse.y);
         }
     },
     COMPONENT_BOTH {
+        @NotNull
         @Override
-        public Point calculatePosition(final Point mouse, final Point component) {
+        public Point calculatePosition(final Point mouse, @NotNull final Point component) {
             return new Point(component.x, component.y);
         }
     },
     COMPONENT_X_MOUSE_Y {
+        @NotNull
         @Override
-        public Point calculatePosition(final Point mouse, final Point component) {
+        public Point calculatePosition(@NotNull final Point mouse, @NotNull final Point component) {
             return new Point(component.x, mouse.y);
         }
     },
     COMPONENT_Y_MOUSE_X {
+        @NotNull
         @Override
-        public Point calculatePosition(final Point mouse, final Point component) {
+        public Point calculatePosition(@NotNull final Point mouse, @NotNull final Point component) {
             return new Point(mouse.x, component.y);
         }
     };
@@ -41,5 +47,6 @@ public enum AlignPolicy {
      * @param component component position.
      * @return position with relative components.
      */
+    @NotNull
     public abstract Point calculatePosition(final Point mouse, final Point component);
 }

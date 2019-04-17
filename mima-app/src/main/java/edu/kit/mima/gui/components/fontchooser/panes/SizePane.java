@@ -1,5 +1,7 @@
 package edu.kit.mima.gui.components.fontchooser.panes;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JFormattedTextField;
@@ -49,7 +51,7 @@ public class SizePane extends JPanel {
     }
 
     @Override
-    public void setPreferredSize(Dimension preferredSize) {
+    public void setPreferredSize(@NotNull Dimension preferredSize) {
         preferredSize.height -= sizeSpinner.getPreferredSize().height + 6;
         sizeScrollPane.setPreferredSize(preferredSize);
     }

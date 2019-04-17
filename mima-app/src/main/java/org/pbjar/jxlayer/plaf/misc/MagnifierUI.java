@@ -69,7 +69,7 @@ public class MagnifierUI extends
             0.5, 0.75, 1.0, 2.0, 4.0, 8.0, 16.0};
 
     /**
-     * Return {@link Action}s that:
+     * Return {@link Action}s that.
      * <ol>
      * <li>Set magnification factor.</li>
      * <li>Set the glass radius.</li>
@@ -178,8 +178,8 @@ public class MagnifierUI extends
         g2.fill(drawGlass);
         g2.setColor(oldColor);
         g2.draw(drawGlass);
-        AffineTransform oldTransform = g2.getTransform();
-        Shape oldClip = g2.getClip();
+        final AffineTransform oldTransform = g2.getTransform();
+        final Shape oldClip = g2.getClip();
         g2.scale(scale, scale);
         g2.clip(clipGlass);
         g2.translate(scaledRadius - point.getX(), scaledRadius - point.getY());

@@ -35,6 +35,7 @@ class NumberingPane extends JPanel {
 
     private static final Dimension NUMBER_SIZE = new Dimension(30, 30);
     private static final int OFFSET_MULTIPLIER = 5;
+    @NotNull
     private final TreeMap<Integer, IndexComponent> componentMap;
     private final JTextPane pane;
     private final JScrollPane scrollPane;
@@ -221,6 +222,7 @@ class NumberingPane extends JPanel {
      *
      * @return the horizontal offset relative to the left side of this panel.
      */
+    @NotNull
     public Rectangle getActionArea() {
         return new Rectangle(actionThresholdX, 0,
                              getWidth() - actionThresholdX, getHeight());

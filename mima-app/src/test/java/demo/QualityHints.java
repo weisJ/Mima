@@ -42,14 +42,13 @@ public class QualityHints extends HashMap<RenderingHints.Key, Object> {
 
         put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        put(RenderingHints.KEY_COLOR_RENDERING,
-            RenderingHints.VALUE_COLOR_RENDER_QUALITY);
+        put(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
 
         put(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE);
 
         put(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
-//		put(RenderingHints.KEY_TEXT_ANTIALIASING,
-//				RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        //		put(RenderingHints.KEY_TEXT_ANTIALIASING,
+        //				RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
     }
 }

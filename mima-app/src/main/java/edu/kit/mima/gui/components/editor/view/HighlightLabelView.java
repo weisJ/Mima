@@ -120,7 +120,7 @@ public class HighlightLabelView extends LabelView {
                         int w = Math.min(x2 - x, 10);
                         clip.width = x2 - x;
                         g.setClip(clip);
-                        x = x + (x2 - x - w) / 2;
+                        x += (x2 - x - w) / 2;
                         g.drawLine(r.x + x, r.y + r.height / 2,
                                    r.x + x + w, r.y + r.height / 2);
                         g.drawLine(r.x + x + w, r.y + r.height / 2,
@@ -132,7 +132,7 @@ public class HighlightLabelView extends LabelView {
                         int w = 2;
                         clip.width = 2 * w;
                         g.setClip(clip);
-                        x = x + (x2 - x - w) / 2;
+                        x += (x2 - x - w) / 2;
                         g.drawLine(r.x + x, r.y + r.height / 2,
                                    r.x + x + w, r.y + r.height / 2);
                         g.drawLine(r.x + x, r.y + r.height / 2 + 1,

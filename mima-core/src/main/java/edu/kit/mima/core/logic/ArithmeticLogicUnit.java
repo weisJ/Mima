@@ -143,7 +143,7 @@ public class ArithmeticLogicUnit {
     /*
      * Check if the arguments have the necessary number of bits
      */
-    private void checkWord(final MachineWord... var) {
+    private void checkWord(@NotNull final MachineWord... var) {
         for (final MachineWord w : var) {
             if (w.getWordLength() != machineWordLength) {
                 throw new IllegalArgumentException("machine words must match mima word length");

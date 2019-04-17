@@ -1,5 +1,7 @@
 package edu.kit.mima.api.lambda;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Function that may throws an exception.
  *
@@ -10,6 +12,6 @@ package edu.kit.mima.api.lambda;
 @FunctionalInterface
 public interface CheckedFunction<T, R> {
 
-    R apply(T t) throws Exception;
+    @NotNull R apply(T t) throws Exception;
 
 }

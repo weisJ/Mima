@@ -28,6 +28,7 @@ public class BorderlessScrollPane extends JLayeredPane {
 
     @NotNull
     protected final JScrollPane scrollPane;
+    @NotNull
     private final ControlPanel controlPanel;
     private Insets barInsets;
 
@@ -56,18 +57,18 @@ public class BorderlessScrollPane extends JLayeredPane {
     }
 
     /**
-     * Creates a <code>JScrollIndicator</code> that displays the view component
+     * Creates a JScrollIndicator that displays the view component
      * in a viewport whose view position can be controlled with a pair of
      * scrollbars.
      * The scrollbar policies specify when the scrollbars are displayed,
-     * For example, if <code>vsbPolicy</code> is
-     * <code>JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED</code>
+     * For example, if vsbPolicy is
+     * JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
      * then the vertical scrollbar only appears if the view doesn't fit
      * vertically. The available policy settings are listed at
-     * {@link JScrollPane#setVerticalScrollBarPolicy(int) and
+     * {@link JScrollPane#setVerticalScrollBarPolicy(int)} and
      * {@link JScrollPane#setHorizontalScrollBarPolicy}.
      *
-     * @param view      the component to display in the scrollpanes viewport
+     * @param view the view of the component.
      * @param vsbPolicy an integer that specifies the vertical scrollbar policy
      * @param hsbPolicy an integer that specifies the horizontal scrollbar policy
      */
@@ -160,7 +161,9 @@ public class BorderlessScrollPane extends JLayeredPane {
 
     private class ControlPanel extends JPanel {
 
+        @NotNull
         private final JMyScrollBar verticalScrollBar;
+        @NotNull
         private final JMyScrollBar horizontalScrollBar;
         private boolean showVertical;
         private boolean showHorizontal;
@@ -204,22 +207,20 @@ public class BorderlessScrollPane extends JLayeredPane {
             horizontalScrollBar.setVisible(false);
         }
 
+        @NotNull
         private Rectangle getVerticalBounds() {
             var bounds = getBounds();
             var verticalSize = verticalScrollBar.getPreferredSize();
-            return new Rectangle(bounds.width - verticalSize.width,
-                                 0,
-                                 verticalSize.width,
+            return new Rectangle(bounds.width - verticalSize.width, 0, verticalSize.width,
                                  bounds.height);
         }
 
+        @NotNull
         private Rectangle getHorizontalBounds() {
             var bounds = getBounds();
             var horizontalSize = horizontalScrollBar.getPreferredSize();
-            return new Rectangle(0,
-                                 bounds.height - horizontalSize.height,
-                                 bounds.width - horizontalSize.width,
-                                 horizontalSize.height);
+            return new Rectangle(0, bounds.height - horizontalSize.height,
+                                 bounds.width - horizontalSize.width, horizontalSize.height);
         }
     }
 
@@ -239,7 +240,7 @@ public class BorderlessScrollPane extends JLayeredPane {
         }
 
         @Override
-        public void repaint(Rectangle r) {
+        public void repaint(@NotNull Rectangle r) {
             BorderlessScrollPane pane = BorderlessScrollPane.this;
             Rectangle rect = SwingUtilities.convertRectangle(this, r, pane);
             rect.grow(1, 1);

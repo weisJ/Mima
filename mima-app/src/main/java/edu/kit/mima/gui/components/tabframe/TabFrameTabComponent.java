@@ -3,8 +3,10 @@ package edu.kit.mima.gui.components.tabframe;
 import edu.kit.mima.gui.components.IconLabel;
 import edu.kit.mima.gui.components.alignment.Alignment;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
+import javax.swing.UIManager;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.MouseAdapter;
@@ -26,6 +28,9 @@ public class TabFrameTabComponent extends IconLabel {
     private Alignment alignment;
     private int index;
 
+    private Color selectedColor;
+    private Color hoverColor;
+
     /**
      * Create new TabComponent for the frame of {@link TabFrame}.
      *
@@ -36,8 +41,7 @@ public class TabFrameTabComponent extends IconLabel {
      * @param parent    the parent layout manager.
      */
     public TabFrameTabComponent(final String title, final Icon icon, final Alignment alignment,
-                                final int index,
-                                final TabFrameLayout parent) {
+                                final int index, @NotNull final TabFrameLayout parent) {
         super(icon, title, CENTER, 20);
         this.alignment = alignment;
         this.title = title;
@@ -125,9 +129,16 @@ public class TabFrameTabComponent extends IconLabel {
 
     @Override
     public Color getBackground() {
-        return selected ? new Color(45, 47, 48)
-                        : hover ? new Color(53, 55, 57)
-                                : super.getBackground();
+        return selected && selectedColor != null
+               ? selectedColor
+               : hover && hoverColor != null ? hoverColor : super.getBackground();
+    }
+
+    @Override
+    public void updateUI() {
+        super.updateUI();
+        selectedColor = UIManager.getColor("TabFrameTab.selected");
+        hoverColor = UIManager.getColor("TabFrameTab.hover");
     }
 
     /**
@@ -154,7 +165,7 @@ public class TabFrameTabComponent extends IconLabel {
      *
      * @param title the title
      */
-    public void setTitle(String title) {
+    public void setTitle(@Nullable String title) {
         this.title = title == null ? "" : title;
         updateLabel();
     }

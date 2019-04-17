@@ -46,7 +46,7 @@ public final class LambdaUtil {
      */
     @NotNull
     @Contract(pure = true)
-    public static <T, R> Function<T, R> wrap(final CheckedFunction<T, R> checkedFunction) {
+    public static <T, R> Function<T, R> wrap(@NotNull final CheckedFunction<T, R> checkedFunction) {
         return t -> {
             try {
                 return checkedFunction.apply(t);
@@ -65,7 +65,7 @@ public final class LambdaUtil {
      */
     @NotNull
     @Contract(pure = true)
-    public static <T> Consumer<T> wrap(final CheckedConsumer<T> checkedFunction) {
+    public static <T> Consumer<T> wrap(@NotNull final CheckedConsumer<T> checkedFunction) {
         return t -> {
             try {
                 checkedFunction.accept(t);
@@ -85,7 +85,8 @@ public final class LambdaUtil {
      */
     @NotNull
     @Contract(pure = true)
-    public static <T, K> BiConsumer<T, K> wrap(final CheckedBiConsumer<T, K> checkedFunction) {
+    public static <T, K> BiConsumer<T, K> wrap(
+            @NotNull final CheckedBiConsumer<T, K> checkedFunction) {
         return (t, k) -> {
             try {
                 checkedFunction.accept(t, k);
@@ -97,25 +98,27 @@ public final class LambdaUtil {
 
     @NotNull
     @Contract(pure = true)
-    public static <T, K> Consumer<K> reduceFirst(final BiConsumer<T, K> cons, final T first) {
+    public static <T, K> Consumer<K> reduceFirst(@NotNull final BiConsumer<T, K> cons,
+                                                 final T first) {
         return (K k) -> cons.accept(first, k);
     }
 
     @NotNull
     @Contract(pure = true)
-    public static <T, K> Consumer<T> reduceSecond(final BiConsumer<T, K> cons, final K second) {
+    public static <T, K> Consumer<T> reduceSecond(@NotNull final BiConsumer<T, K> cons,
+                                                  final K second) {
         return (T t) -> cons.accept(t, second);
     }
 
     @NotNull
     @Contract(pure = true)
-    public static <T, K> BiConsumer<T, K> liftFirst(final Consumer<K> cons) {
+    public static <T, K> BiConsumer<T, K> liftFirst(@NotNull final Consumer<K> cons) {
         return (T t, K k) -> cons.accept(k);
     }
 
     @NotNull
     @Contract(pure = true)
-    public static <T, K> BiConsumer<T, K> liftSecond(final Consumer<T> cons) {
+    public static <T, K> BiConsumer<T, K> liftSecond(@NotNull final Consumer<T> cons) {
         return (T t, K k) -> cons.accept(t);
     }
 

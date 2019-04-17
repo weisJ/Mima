@@ -2,6 +2,7 @@ package edu.kit.mima.gui.components;
 
 import com.bulenkov.iconloader.util.EmptyIcon;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
 import javax.swing.JLabel;
@@ -24,6 +25,7 @@ public class IconLabel extends JPanel {
     public static final int CENTER = 1;
     public static final int RIGHT = 2;
 
+    @NotNull
     protected final JLabel label;
     protected IconPanel iconPanel;
     private int alignment;
@@ -37,7 +39,8 @@ public class IconLabel extends JPanel {
      * @param alignment     the alignment. one of {@link #LEFT},{@link #CENTER} or {@link #RIGHT}
      * @param horizontalGap the horizontal gap before and after the label.
      */
-    public IconLabel(final Icon icon, final String title, int alignment, int horizontalGap) {
+    public IconLabel(@Nullable final Icon icon, final String title, int alignment,
+                     int horizontalGap) {
         label = new JLabel(title);
         iconPanel = new IconPanel(icon == null ? new EmptyIcon(0, 0) : icon);
 
@@ -76,6 +79,7 @@ public class IconLabel extends JPanel {
      *
      * @return the icon
      */
+    @NotNull
     public Icon getIcon() {
         return iconPanel.getIcon();
     }
@@ -137,6 +141,7 @@ public class IconLabel extends JPanel {
         public void removeLayoutComponent(Component comp) {
         }
 
+        @NotNull
         @Override
         public Dimension preferredLayoutSize(Container parent) {
             var lm = label.getPreferredSize();
@@ -145,6 +150,7 @@ public class IconLabel extends JPanel {
                                  Math.max(lm.height, im.height) + 1);
         }
 
+        @NotNull
         @Override
         public Dimension minimumLayoutSize(Container parent) {
             var lm = label.getMinimumSize();
@@ -154,8 +160,7 @@ public class IconLabel extends JPanel {
                 case CENTER -> 2 * horizontalGap;
                 default -> 0;
             };
-            return new Dimension(lm.width + im.width + gap,
-                                 Math.max(lm.height, im.height) + 1);
+            return new Dimension(lm.width + im.width + gap, Math.max(lm.height, im.height) + 1);
         }
 
         @Override

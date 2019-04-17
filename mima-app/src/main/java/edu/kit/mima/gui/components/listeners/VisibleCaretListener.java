@@ -1,5 +1,7 @@
 package edu.kit.mima.gui.components.listeners;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.swing.SwingUtilities;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
@@ -13,8 +15,7 @@ import java.awt.Rectangle;
  * text pane will result in the caret not being visible when adding text
  * to the right edge of the viewport.
  *
- * <p>
- * In general, this class can be used any time you wish to increase the number
+ * <p>In general, this class can be used any time you wish to increase the number
  * of visible pixels after the caret on the right edge of a scroll pane.
  */
 public class VisibleCaretListener implements CaretListener {
@@ -57,7 +58,7 @@ public class VisibleCaretListener implements CaretListener {
     }
 
     @Override
-    public void caretUpdate(final CaretEvent e) {
+    public void caretUpdate(@NotNull final CaretEvent e) {
         //  Attempt to scroll the viewport to make sure Caret is visible
         SwingUtilities.invokeLater(() -> {
             try {

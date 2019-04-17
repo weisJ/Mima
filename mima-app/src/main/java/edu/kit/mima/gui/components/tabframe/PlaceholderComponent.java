@@ -1,6 +1,7 @@
 package edu.kit.mima.gui.components.tabframe;
 
 import edu.kit.mima.gui.components.alignment.Alignment;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Action;
 import java.awt.Dimension;
@@ -25,16 +26,19 @@ public class PlaceholderComponent extends PopupComponent {
     public void open() {
     }
 
+    @NotNull
     @Override
     public Dimension getMaximumSize() {
         return new Dimension(0, 0);
     }
 
+    @NotNull
     @Override
     protected Dimension getMinimumSizeImpl() {
         return new Dimension(0, 0);
     }
 
+    @NotNull
     @Override
     protected Dimension getPreferredSizeImpl() {
         return getMinimumSizeImpl();

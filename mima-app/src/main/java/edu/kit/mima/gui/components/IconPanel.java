@@ -3,6 +3,7 @@ package edu.kit.mima.gui.components;
 import edu.kit.mima.gui.components.alignment.Alignment;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
 import javax.swing.JComponent;
@@ -56,6 +57,7 @@ public class IconPanel extends JComponent {
         icon.paintIcon(this, g2, 0, 0);
     }
 
+    @NotNull
     @Override
     public Color getBackground() {
         return new Color(0, 0, 0, 0);
@@ -75,6 +77,7 @@ public class IconPanel extends JComponent {
         });
     }
 
+    @NotNull
     @Override
     public Dimension getPreferredSize() {
         return getMaximumSize();
@@ -95,7 +98,7 @@ public class IconPanel extends JComponent {
      *
      * @param alignment the alignment.
      */
-    public void setAlignment(Alignment alignment) {
+    public void setAlignment(@Nullable Alignment alignment) {
         this.alignment = alignment == null ? Alignment.NORTH : alignment;
     }
 }

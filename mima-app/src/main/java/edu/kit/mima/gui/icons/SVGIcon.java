@@ -20,7 +20,6 @@ import java.awt.image.BufferedImage;
  *
  * @author <a href="mailto:cam%40mcc%2eid%2eau">Cameron McCormack</a>
  */
-@SuppressWarnings("CheckStyle")
 public class SVGIcon extends UserAgentAdapter implements Icon {
 
     /**

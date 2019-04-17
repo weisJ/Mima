@@ -90,6 +90,7 @@ public class GeneralLayerUI<V extends JComponent, S> extends AbstractLayerUI<V> 
      * @param layer the JXLayer
      * @return a list of applicable actions
      */
+    @NotNull
     public List<Action> getActions(JXLayer<? extends V> layer) {
         return new ArrayList<>();
     }

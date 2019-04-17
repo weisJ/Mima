@@ -17,15 +17,25 @@ import java.awt.image.BufferedImage;
  */
 public final class ImageUtil {
 
+    /**
+     * The scaling factor.
+     */
     public static final int SCALE = 1;
 
     @Contract(pure = true)
     private ImageUtil() {}
 
+    /**
+     * Create image from component.
+     *
+     * @param c      the component.
+     * @param bounds the bounds inside the component to capture.
+     * @return image containing the captured area.
+     */
+    @NotNull
     public static Image imageFromComponent(@NotNull final Component c,
                                            @NotNull final Rectangle bounds) {
-        BufferedImage image = new BufferedImage(SCALE * bounds.width,
-                                                SCALE * bounds.height,
+        BufferedImage image = new BufferedImage(SCALE * bounds.width, SCALE * bounds.height,
                                                 BufferedImage.TYPE_INT_RGB);
         final Graphics2D g2d = (Graphics2D) image.getGraphics();
         g2d.scale(SCALE, SCALE);

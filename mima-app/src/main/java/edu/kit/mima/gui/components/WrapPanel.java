@@ -1,6 +1,7 @@
 package edu.kit.mima.gui.components;
 
 import edu.kit.mima.gui.layout.WrapLayout;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Box;
 import javax.swing.JPanel;
@@ -17,6 +18,7 @@ import java.util.Map;
 
 public class WrapPanel extends JScrollPane {
 
+    @NotNull
     private final Box box;
     private int width = 0;
     private Map<Integer, CPanel> panelList;
@@ -44,6 +46,7 @@ public class WrapPanel extends JScrollPane {
         });
     }
 
+    @NotNull
     @Override
     public Insets getInsets() {
         return new Insets(0, 0, 0, 0);
@@ -128,6 +131,7 @@ public class WrapPanel extends JScrollPane {
             revalidate();
         }
 
+        @NotNull
         @Override
         public Component.BaselineResizeBehavior getBaselineResizeBehavior() {
             return Component.BaselineResizeBehavior.CONSTANT_ASCENT;

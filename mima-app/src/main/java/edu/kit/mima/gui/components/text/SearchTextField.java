@@ -1,20 +1,22 @@
+/* Copyright 2000-2017 JetBrains s.r.o.
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ */
+
 package edu.kit.mima.gui.components.text;
-// Copyright 2000-2017 JetBrains s.r.o.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 
 import com.bulenkov.iconloader.util.JBInsets;
 import com.intellij.util.ui.UIUtil;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -29,6 +31,7 @@ import java.awt.event.KeyListener;
  * A TextField with search field appearance.
  */
 public class SearchTextField extends JPanel {
+    @NotNull
     private final JTextField myTextField;
 
     /**
@@ -102,6 +105,7 @@ public class SearchTextField extends JPanel {
      *
      * @return the text field.
      */
+    @NotNull
     public JTextField getTextEditor() {
         return myTextField;
     }

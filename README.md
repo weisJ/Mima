@@ -1,7 +1,7 @@
 <img src="https://user-images.githubusercontent.com/31143295/40985489-8630f3be-68e4-11e8-8eae-c1adc6bf9ade.png" width="100" height="100" align="right">
 
 # Mima
-Simple environment for writing Mima-Code (see http://gbi.ira.uka.de/ chapter 10)
+Simple environment for writing Mima-Code (see <http://gbi.ira.uka.de/> chapter 10)
 <img src="https://raw.githubusercontent.com/weisJ/Mima/master/images/Mima_Preview.png" align="center">
 
 This mima runs on 24bit machine words in memory and 20 bits addresses / constants
@@ -77,7 +77,7 @@ __MimaX:__
 - Arguments are passed within parenthesis (e.g. ```STV(5)```, ```LDVR(1,SP()```)
 - ```SP``` is a function call, so it has to be used by typing ```SP()``` and **not** ```SP```.
 - You can use scopes ```{ ... }``` for variable shadowing.
-  Variables are lost outisde the scope except they explicitly define a memory cell.
+  Variables are lost outside the scope except they explicitly define a memory cell.
   Constants are lost indefinitely.
 - Variables must be defined before they can be used. Jumps are the only exception for this.
 - You can **not** jump into an inner scope. Jumps can only occur within the same or an outer scope.

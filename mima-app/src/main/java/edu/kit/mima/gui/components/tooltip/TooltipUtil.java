@@ -5,11 +5,11 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.JComponent;
+import javax.swing.JFrame;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Window;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
 
 /**
  * Utility class for showing tooltips.
@@ -19,9 +19,18 @@ import javax.swing.JFrame;
  */
 public final class TooltipUtil {
 
+    private static final int DELAY = 1000;
+    private static final int VANISH_DELAY = 2000;
+
     @Contract(" -> fail")
     private TooltipUtil() {
         assert false : "utility class constructor";
+    }
+
+    public static <T extends JComponent & ITooltip> void createDefaultTooltip(final JComponent c,
+                                                                              final T tooltip) {
+        new TooltipComponent<>(c, tooltip, DELAY, VANISH_DELAY, AlignPolicy.COMPONENT_BOTH)
+                .setActive(true);
     }
 
     /**

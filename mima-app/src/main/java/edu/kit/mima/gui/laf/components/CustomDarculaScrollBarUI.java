@@ -39,6 +39,7 @@ public class CustomDarculaScrollBarUI extends DarculaScrollBarUI {
     private float alpha;
     private boolean inside;
     private boolean dragging;
+    @NotNull
     private MouseListener listener = new MouseAdapter() {
 
         @Override
@@ -69,9 +70,10 @@ public class CustomDarculaScrollBarUI extends DarculaScrollBarUI {
         }
     };
 
+    @NotNull
     private AdjustmentListener adjustmentListener = new AdjustmentListener() {
         @Override
-        public void adjustmentValueChanged(AdjustmentEvent e) {
+        public void adjustmentValueChanged(@NotNull AdjustmentEvent e) {
             if (getThumbBounds().isEmpty()) {
                 return;
             }
@@ -85,6 +87,7 @@ public class CustomDarculaScrollBarUI extends DarculaScrollBarUI {
         }
     };
 
+    @NotNull
     private MouseWheelListener wheelListener = e -> {
         if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
             scrollbar.setValueIsAdjusting(true);
@@ -140,7 +143,8 @@ public class CustomDarculaScrollBarUI extends DarculaScrollBarUI {
         this.scrollbar.removeMouseWheelListener(wheelListener);
     }
 
-    protected void paintTrack(@NotNull Graphics g, @NotNull JComponent c, @NotNull Rectangle bounds) {
+    protected void paintTrack(@NotNull Graphics g, @NotNull JComponent c,
+                              @NotNull Rectangle bounds) {
         if (c.getClientProperty("scrollBar.updateBackground") != Boolean.FALSE) {
             g.setColor(scrollbar.getBackground());
             g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
@@ -156,6 +160,25 @@ public class CustomDarculaScrollBarUI extends DarculaScrollBarUI {
         g2.dispose();
     }
 
+    protected void paintThumb(@NotNull Graphics g, JComponent c, @NotNull Rectangle thumbBounds) {
+        if (!thumbBounds.isEmpty() && this.scrollbar.isEnabled()) {
+            g.translate(thumbBounds.x, thumbBounds.y);
+            this.paintMaxiThumb((Graphics2D) g, thumbBounds);
+            g.translate(-thumbBounds.x, -thumbBounds.y);
+        }
+    }
+
+    @NotNull
+    @Contract(value = " -> new", pure = true)
+    protected Color getTrackColor() {
+        return new Color(99, 104, 105);
+    }
+
+    protected boolean isThin() {
+        return scrollbar.getClientProperty("ScrollBar.thin") == Boolean.TRUE;
+    }
+
+    @NotNull
     private Dimension calculateGaps() {
         boolean vertical = this.isVertical();
         int horizontalGap = vertical ? 2 : 1;
@@ -172,28 +195,10 @@ public class CustomDarculaScrollBarUI extends DarculaScrollBarUI {
         return new Dimension(horizontalGap, verticalGap);
     }
 
-    @NotNull
-    @Contract(value = " -> new", pure = true)
-    protected Color getTrackColor() {
-        return new Color(99, 104, 105);
-    }
-
-    protected boolean isThin() {
-        return scrollbar.getClientProperty("ScrollBar.thin") == Boolean.TRUE;
-    }
-
-    protected void paintThumb(Graphics g, JComponent c, @NotNull Rectangle thumbBounds) {
-        if (!thumbBounds.isEmpty() && this.scrollbar.isEnabled()) {
-            g.translate(thumbBounds.x, thumbBounds.y);
-            this.paintMaxiThumb((Graphics2D) g, thumbBounds);
-            g.translate(-thumbBounds.x, -thumbBounds.y);
-        }
-    }
-
     private void paintMaxiThumb(@NotNull Graphics2D g, @NotNull Rectangle thumbBounds) {
         boolean vertical = this.isVertical();
         boolean thin = this.isThin();
-        var c = g.getComposite();
+        final var c = g.getComposite();
         g.setComposite(composite.derive(THUMB_ALPHA));
         int horizontalGap = vertical ? 2 : 1;
         int verticalGap = vertical ? 1 : 2;

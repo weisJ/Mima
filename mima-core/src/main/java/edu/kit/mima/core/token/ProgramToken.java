@@ -27,7 +27,9 @@ public class ProgramToken extends FileObjectAdapter implements Token<Token[]> {
     private static final Pattern INDENT = Pattern.compile("\n");
     private static final String INDENT_REPLACEMENT = "\n\t";
     private final int filePos;
+    @NotNull
     private final Map<Token, Integer> jumpMap;
+    @NotNull
     private final Token[] program;
 
     /**
@@ -59,6 +61,7 @@ public class ProgramToken extends FileObjectAdapter implements Token<Token[]> {
      *
      * @return Map that with tokens as key and their program index as value
      */
+    @NotNull
     public Map<Token, Integer> getJumps() {
         return jumpMap;
     }
@@ -105,7 +108,7 @@ public class ProgramToken extends FileObjectAdapter implements Token<Token[]> {
         return print(Token::simpleName, "");
     }
 
-    private String print(Function<Token, String> mapping, String prefix) {
+    private String print(@NotNull Function<Token, String> mapping, String prefix) {
         return Arrays.stream(program)
                 .map(t -> '\t' + INDENT.matcher(mapping.apply(t))
                         .replaceAll(INDENT_REPLACEMENT) + '\n')

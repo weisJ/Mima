@@ -79,15 +79,6 @@ import java.awt.geom.Rectangle2D;
 public class TransformLayout extends DefaultLayerLayout {
 
     /**
-     *
-     */
-    private static final long serialVersionUID = 1L;
-
-    public TransformLayout() {
-
-    }
-
-    /**
      * Overridden to apply a different layout when the {@link LayerUI} is an instance of {@link
      * TransformUI}. If this is not the case, the super implementation will be invoked.
      */

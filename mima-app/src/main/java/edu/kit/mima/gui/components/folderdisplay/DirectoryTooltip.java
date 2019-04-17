@@ -72,7 +72,7 @@ public class DirectoryTooltip extends ScrollPopupMenu {
             try {
                 final Robot robot = new Robot();
                 robot.mouseMove(point.x + c.getWidth() / 3, point.y + c.getHeight() / 2);
-            } catch (final AWTException ignored) {
+            } catch (@NotNull final AWTException ignored) {
             }
         });
     }
