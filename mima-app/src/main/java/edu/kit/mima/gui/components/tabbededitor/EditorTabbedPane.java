@@ -45,7 +45,6 @@ public class EditorTabbedPane extends JTabbedPane {
      */
     public EditorTabbedPane() {
         glassPane = new DraggingGlassPane(this);
-        setBorder(null);
         setFocusable(false); //Prevent focus dotted line from appearing
         super.setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
         addChangeListener(e -> {

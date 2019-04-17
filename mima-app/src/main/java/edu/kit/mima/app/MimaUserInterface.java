@@ -27,10 +27,8 @@ import edu.kit.mima.util.FileName;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -200,8 +198,6 @@ public final class MimaUserInterface extends JFrame {
                 controlPanel.getMinimumSize().height));
         controlPanel.addComponentListener((ComponentResizeListener) e -> resizeAction.run());
         BindingUtil.bind(debugger, resizeAction, Debugger.RUNNING_PROPERTY);
-        tabbedEditor.setBorder(BorderFactory.createMatteBorder(
-                1, 0, 0, 0, UIManager.getColor("Border.line1")));
 
         add(controlPanel, BorderLayout.NORTH);
         var tabFrame = new TabFrame();

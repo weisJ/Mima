@@ -7,6 +7,7 @@ import edu.kit.mima.gui.icons.Icons;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JTabbedPane;
@@ -42,7 +43,7 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
     protected Color selectedColor;
     protected Color tabBorderColor;
     protected Color selectedBackground;
-    private EditorTabbedPane tabbedPane;
+    protected EditorTabbedPane tabbedPane;
     private int xoff = 0;
     private int swappedSelectedTabIndex = -1;
 
@@ -57,40 +58,10 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
     public void installUI(@NotNull JComponent c) {
         super.installUI(c);
         tabbedPane = (EditorTabbedPane) c;
+        tabbedPane.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, tabBorderColor));
     }
 
     protected abstract void setupColors();
-
-    private void drawTab(@NotNull final Graphics g, final int index, final boolean isSelected) {
-        Graphics2D g2 = (Graphics2D) g;
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        int ind = isSelected
-                  ? swappedSelectedTabIndex >= 0
-                    ? tabbedPane.getSelectedIndex()
-                    : index
-                  : index;
-        final var bounds = tabbedPane.getBoundsAt(ind);
-        final int yOff = bounds.height / 6;
-        if (isSelected) {
-            g2.setColor(selectedBackground);
-            g2.fillRect(0 - 1, bounds.y, bounds.width, bounds.height);
-        } else {
-            g2.setColor(tabbedPane.getBackground());
-            g2.fillRect(0, bounds.y, bounds.width, bounds.height);
-        }
-        g2.setColor(tabBorderColor);
-        //Bottom
-        g2.drawLine(-1, bounds.height - 2, bounds.width - 1, bounds.height - 2);
-        //Left
-        g2.drawLine(-1, 0, -1, bounds.height - 1);
-        //Top
-        g2.drawLine(bounds.width - 1, 0, bounds.width - 1, bounds.height - 1);
-        if (isSelected) {
-            g2.setColor(selectedColor);
-            g2.fillRect(0, bounds.y + bounds.height - yOff, bounds.width - 1, yOff - 1);
-        }
-        g.translate(bounds.width, 0);
-    }
 
     /**
      * Invoked by <code>installUI</code> to create a layout manager object to manage the
@@ -147,6 +118,35 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
             ((CustomTabbedPaneLayout) tabbedPane.getLayout()).layoutTabComponents();
         }
         g.dispose();
+    }
+
+    protected void drawTab(@NotNull final Graphics g, final int index, final boolean isSelected) {
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        int ind = isSelected
+                  ? swappedSelectedTabIndex >= 0 ? tabbedPane.getSelectedIndex() : index
+                  : index;
+        final var bounds = tabbedPane.getBoundsAt(ind);
+        final int yOff = bounds.height / 6;
+        if (isSelected) {
+            g2.setColor(selectedBackground);
+            g2.fillRect(0 - 1, bounds.y, bounds.width, bounds.height);
+        } else {
+            g2.setColor(tabbedPane.getBackground());
+            g2.fillRect(0, bounds.y, bounds.width, bounds.height);
+        }
+        g2.setColor(tabBorderColor);
+        //Bottom
+        g2.drawLine(-1, bounds.height - 2, bounds.width - 1, bounds.height - 2);
+        //Left
+        g2.drawLine(-1, 0, -1, bounds.height - 1);
+        //Right
+        g2.drawLine(bounds.width - 1, 0, bounds.width - 1, bounds.height - 1);
+        if (isSelected) {
+            g2.setColor(selectedColor);
+            g2.fillRect(0, bounds.y + bounds.height - yOff, bounds.width - 1, yOff - 1);
+        }
+        g.translate(bounds.width, 0);
     }
 
     @Override

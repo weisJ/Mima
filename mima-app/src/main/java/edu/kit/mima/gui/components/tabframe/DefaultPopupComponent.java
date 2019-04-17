@@ -46,6 +46,7 @@ public class DefaultPopupComponent extends PopupComponent {
     private final JButton closeButton;
     private Color headerFocusBackground;
     private Color headerBackground;
+    private Color borderColor;
     private boolean open;
     private boolean locked = true;
 
@@ -106,6 +107,7 @@ public class DefaultPopupComponent extends PopupComponent {
         super.updateUI();
         headerBackground = UIManager.getColor("TabFramePopup.background");
         headerFocusBackground = UIManager.getColor("TabFramePopup.focus");
+        borderColor = UIManager.getColor("TabFramePopup.borderColor");
     }
 
     private boolean mouseInside() {
@@ -116,12 +118,10 @@ public class DefaultPopupComponent extends PopupComponent {
 
     public void setAlignment(@NotNull final Alignment a, final boolean[] info) {
         var insets = getBorderSize(a, info);
-        header.setBorder(BorderFactory.createMatteBorder(
-                insets.top, insets.left, 1, insets.right,
-                new Color(50, 50, 50)));
-        content.setBorder(BorderFactory.createMatteBorder(
-                0, insets.left, insets.bottom, insets.right,
-                new Color(50, 50, 50)));
+        header.setBorder(BorderFactory.createMatteBorder(insets.top, insets.left, 1, insets.right,
+                                                         borderColor));
+        content.setBorder(BorderFactory.createMatteBorder(0, insets.left, insets.bottom,
+                                                          insets.right, borderColor));
     }
 
     @Override

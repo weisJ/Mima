@@ -24,7 +24,7 @@ public class TooltipComponent<T extends JComponent & ITooltip>
 
     /*default*/
     @NotNull
-    final T content;
+    final T tooltip;
     /*default*/
     @NotNull
     final JComponent container;
@@ -41,23 +41,21 @@ public class TooltipComponent<T extends JComponent & ITooltip>
      * Register a tooltip component.
      *
      * @param container      container to attach tooltip to.
-     * @param content        content of tooltip. Must be of type {@link JComponent} and implement
+     * @param tooltip        tooltip of tooltip. Must be of type {@link JComponent} and implement
      *                       the {@link ITooltip} interface.
      * @param delay          display delay
      * @param vanishingDelay vanishing delay or {@link TooltipConstants#PERSISTENT}.
      * @param centerAt       one of {@link AlignPolicy}.
      */
-    public TooltipComponent(
-            @NotNull final JComponent container,
-            @NotNull final T content,
-            final int delay,
-            final int vanishingDelay,
-            final AlignPolicy centerAt) {
+    public TooltipComponent(@NotNull final JComponent container, @NotNull final T tooltip,
+                            final int delay,
+                            final int vanishingDelay,
+                            final AlignPolicy centerAt) {
         this.centerAt = centerAt;
         this.container = container;
-        this.content = content;
+        this.tooltip = tooltip;
         eventHandler = new TooltipEventHandler(this, delay, vanishingDelay);
-        content.setOpaque(false);
+        tooltip.setOpaque(false);
     }
 
     /**
@@ -79,7 +77,7 @@ public class TooltipComponent<T extends JComponent & ITooltip>
             layer.setLayout(null);
             layer.setPreferredSize(size);
         }
-        layer.add(content);
+        layer.add(tooltip);
         installed = true;
     }
 
@@ -89,9 +87,9 @@ public class TooltipComponent<T extends JComponent & ITooltip>
     public void uninstall() {
         final var root = container.getRootPane();
         final JPanel layer = (JPanel) root.getGlassPane();
-        content.setVisible(false);
+        tooltip.setVisible(false);
         container.removeMouseListener(this);
-        layer.remove(content);
+        layer.remove(tooltip);
         layer.revalidate();
         layer.repaint();
         installed = false;
@@ -130,7 +128,7 @@ public class TooltipComponent<T extends JComponent & ITooltip>
             showOnce = false;
             eventHandler.setActive(false);
         }
-        content.hideTooltip();
+        tooltip.hideTooltip();
         container.repaint();
     }
 
@@ -144,14 +142,21 @@ public class TooltipComponent<T extends JComponent & ITooltip>
         }
         final var root = container.getRootPane();
         final JPanel layer = (JPanel) root.getGlassPane();
-        final var size = content.getPreferredSize();
-        final var p = calculatePositionIn(layer, size, mousePos);
-        content.showTooltip();
-        content.setBounds(p.x, p.y, size.width, size.height);
-        content.revalidate();
-        content.repaint();
         layer.setVisible(true);
-        layer.repaint();
+        /*
+         * Working out the correct size of a component before it is displayed isn't that easy
+         * so we the tooltip twice as the size might not be correctly calculated
+         * in the first time. The second time the component now now the size it would have
+         * were it visible and decides that this isn't optimal and corrects itself.
+         */
+        for (int i = 0; i < 2; i++) {
+            var size = tooltip.getPreferredSize();
+            var p = calculatePositionIn(layer, size, mousePos);
+            tooltip.setBounds(p.x, p.y, size.width, size.height);
+            tooltip.repaint();
+            layer.repaint();
+        }
+        tooltip.showTooltip();
         container.repaint();
     }
 
@@ -170,7 +175,7 @@ public class TooltipComponent<T extends JComponent & ITooltip>
         SwingUtilities.convertPointFromScreen(mousePos, layer);
         var pos = centerAt.calculatePosition(mousePos, containerPos);
         Alignment alignment = Alignment.getAlignment(pos, size, layer.getBounds(), Alignment.SOUTH);
-        content.setAlignment(alignment);
+        tooltip.setAlignment(alignment);
         return alignment.relativePos(size, pos);
     }
 }

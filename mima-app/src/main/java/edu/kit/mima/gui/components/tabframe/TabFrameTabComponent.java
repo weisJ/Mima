@@ -21,6 +21,7 @@ import java.awt.event.MouseEvent;
 public class TabFrameTabComponent extends IconLabel {
 
     private final Color defaultFontColor;
+    private Color selectedFontColor;
     private String title;
     private boolean selected;
     private boolean hover;
@@ -139,6 +140,7 @@ public class TabFrameTabComponent extends IconLabel {
         super.updateUI();
         selectedColor = UIManager.getColor("TabFrameTab.selected");
         hoverColor = UIManager.getColor("TabFrameTab.hover");
+        selectedFontColor = UIManager.getColor("TabFrameTab.selectedFontColor");
     }
 
     /**
@@ -157,7 +159,7 @@ public class TabFrameTabComponent extends IconLabel {
      */
     public void setSelected(boolean selected) {
         this.selected = selected;
-        label.setForeground(selected ? Color.WHITE : defaultFontColor);
+        label.setForeground(selected ? selectedFontColor : defaultFontColor);
     }
 
     /**
@@ -173,6 +175,10 @@ public class TabFrameTabComponent extends IconLabel {
     private void updateLabel() {
         if (accelerator >= 0 && accelerator <= 9) {
             label.setText(accelerator + ':' + title);
+            label.setDisplayedMnemonicIndex(0);
+        } else {
+            label.setText(title);
+            label.setDisplayedMnemonicIndex(1);
         }
     }
 }

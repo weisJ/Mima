@@ -34,6 +34,7 @@ public class TextBubbleBorder extends AbstractBorder {
     private int thickness;
     private int radius;
     private int pointerSize;
+    private int pointerWidth;
     private BasicStroke stroke;
     private double pointerPadPercent = 0.5;
 
@@ -63,6 +64,7 @@ public class TextBubbleBorder extends AbstractBorder {
         this.thickness = thickness;
         this.radius = radius;
         this.pointerSize = pointerSize;
+        this.pointerWidth = pointerSize;
 
         hints = new RenderingHints(RenderingHints.KEY_ANTIALIASING,
                                    RenderingHints.VALUE_ANTIALIAS_ON);
@@ -88,6 +90,26 @@ public class TextBubbleBorder extends AbstractBorder {
     @NotNull
     public TextBubbleBorder setColor(final Color color) {
         this.color = color;
+        return this;
+    }
+
+    /**
+     * Get the width of the pointer base.
+     *
+     * @return the width of the base.
+     */
+    public int getPointerWidth() {
+        return pointerWidth;
+    }
+
+    /**
+     * Set the with of the pointer base.
+     *
+     * @param pointerWidth the width of the pointer base.
+     * @return this
+     */
+    public TextBubbleBorder setPointerWidth(int pointerWidth) {
+        this.pointerWidth = pointerWidth;
         return this;
     }
 
@@ -168,7 +190,7 @@ public class TextBubbleBorder extends AbstractBorder {
     }
 
     /**
-     * Set the pointer size Clips at 1.
+     * Set the pointer size Clips at 0.
      *
      * @param size size of pointer.
      * @return this
@@ -289,7 +311,7 @@ public class TextBubbleBorder extends AbstractBorder {
     private Polygon creatPointerShape(final int width, final int height, final int pointerPad,
                                       @NotNull final RoundRectangle2D.Double bubble) {
         final int basePad = 2 * pointerSize + thickness + radius + pointerPad;
-        final int widthPad = pointerSize / 2;
+        final int widthPad = pointerWidth / 2;
         final Polygon pointer = new Polygon();
         switch (pointerSide) {
             case WEST -> {

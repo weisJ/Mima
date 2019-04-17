@@ -45,7 +45,7 @@ public class Tooltip extends ShadowPane implements ITooltip {
         setText(text);
 
         bubbleBorder = new TextBubbleBorder(UIManager.getColor("Tooltip.borderColor"));
-        bubbleBorder.setThickness(1);
+        bubbleBorder.setThickness(1).setPointerSize(10).setPointerWidth(8);
 
         labelPanel = new JPanel(new BorderLayout());
         labelPanel.setOpaque(false);
@@ -73,7 +73,11 @@ public class Tooltip extends ShadowPane implements ITooltip {
      * @param text tooltip text
      */
     public void setText(@NotNull final String text) {
-        textLabel.setText("<html>" + text.replaceAll("\n", "<\\br>") + "</html>");
+        if (text.contains("\n")) {
+            textLabel.setText("<html>" + text.replaceAll("\n", "<\\br>") + "</html>");
+        } else {
+            textLabel.setText("<html><body><nobr>" + text + "</nobr></body></html>");
+        }
     }
 
     @Override
@@ -177,7 +181,8 @@ public class Tooltip extends ShadowPane implements ITooltip {
             default -> new Rectangle(0, 0, getWidth(), getHeight());
         };
         rect.x += thickness;
-        rect.width -= thickness;
+        rect.y -= thickness;
+        rect.width -= 2 * thickness;
         border.paintBorder(this, g, rect.x, rect.y, rect.width, rect.height);
     }
 
