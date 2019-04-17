@@ -35,6 +35,7 @@ public class TooltipPresentation {
                         g.fillRect(getWidth() / 2, getHeight() / 2, 1, 1);
                     }
                 };
+                button.setBackground(Color.WHITE);
                 button.setBorder(new LineBorder(Color.RED));
                 new TooltipComponent<>(button, new Tooltip(
                         "Hallo Laaaaaaaaaaaaaaaaaaaaaanger " + " \n "

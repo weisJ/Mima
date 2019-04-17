@@ -232,7 +232,7 @@ public class TabFrameLayout implements LayoutManager {
             var bounds = new Rectangle(0, 0, 0, 0);
             var prefSize = tabComps[i].getMinimumSize();
             bounds.width = prefSize.width;
-            bounds.height = size - 1;
+            bounds.height = size;
             if (forward) {
                 bounds.x = x;
                 bounds.y = y;
@@ -258,7 +258,7 @@ public class TabFrameLayout implements LayoutManager {
             var prefSize = tabComps[i].getMinimumSize();
             //noinspection SuspiciousNameCombination
             bounds.height = prefSize.width;
-            bounds.width = size - 1;
+            bounds.width = size;
             if (downwards) {
                 bounds.x = x;
                 bounds.y = y;

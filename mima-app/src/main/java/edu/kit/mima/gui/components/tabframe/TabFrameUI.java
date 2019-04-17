@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.JComponent;
 import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
+import java.awt.Color;
 import java.awt.Graphics;
 
 /**
@@ -17,6 +18,7 @@ import java.awt.Graphics;
  */
 public class TabFrameUI extends ComponentUI {
 
+    private Color lineColor;
     private TabFrameLayout layout;
 
     @NotNull
@@ -32,13 +34,14 @@ public class TabFrameUI extends ComponentUI {
         TabFrame tabFrame = (TabFrame) c;
         layout = new TabFrameLayout(tabFrame);
         c.setLayout(layout);
+        lineColor = UIManager.getColor("TabFrame.line");
     }
 
     @Override
     public void paint(@NotNull Graphics g, @NotNull JComponent c) {
         layout.layoutContainer(c);
         super.paint(g, c);
-        g.setColor(UIManager.getColor("Border.line1"));
+        g.setColor(lineColor);
         //Bottom
         var bottomRect = layout.bottomRect;
         g.drawLine(bottomRect.x, bottomRect.y,

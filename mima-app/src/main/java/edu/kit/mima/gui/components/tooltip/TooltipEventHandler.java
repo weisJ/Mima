@@ -46,7 +46,7 @@ public class TooltipEventHandler extends MouseAdapter {
         this.vanishingDelay = vanishingDelay;
         tooltipComponent.container.addMouseListener(this);
         tooltipComponent.container.addMouseMotionListener(this);
-        tooltipComponent.content.addMouseMotionListener(new MouseMotionAdapter() {
+        tooltipComponent.tooltip.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(@NotNull final MouseEvent e) {
                 contentMouseMovedEvent(e);
@@ -55,7 +55,7 @@ public class TooltipEventHandler extends MouseAdapter {
         this.propagator = new EventPropagator();
         Toolkit.getDefaultToolkit().addAWTEventListener(this::atAwtEvent,
                                                         AWTEvent.MOUSE_EVENT_MASK);
-        tooltipComponent.content.addMouseListener(propagator);
+        tooltipComponent.tooltip.addMouseListener(propagator);
     }
 
     /**
@@ -186,7 +186,7 @@ public class TooltipEventHandler extends MouseAdapter {
 
     private void contentMouseMovedEvent(@NotNull final MouseEvent e) {
         if (overContainer) {
-            mouseExited(SwingUtilities.convertMouseEvent(tooltipComponent.content, e,
+            mouseExited(SwingUtilities.convertMouseEvent(tooltipComponent.tooltip, e,
                                                          tooltipComponent.container));
         }
     }

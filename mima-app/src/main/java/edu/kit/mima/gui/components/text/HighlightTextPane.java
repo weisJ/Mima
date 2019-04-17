@@ -71,7 +71,7 @@ public class HighlightTextPane extends NonWrappingTextPane implements ChangeList
     public void updateUI() {
         super.updateUI();
         selectedBackground = UIManager.getColor("Editor.selectedBackground");
-        vertLineColor = UIManager.getColor("Border.line1");
+        vertLineColor = UIManager.getColor("Editor.vertLine");
         selectionColor = UIManager.getColor("Editor.selection");
     }
 
