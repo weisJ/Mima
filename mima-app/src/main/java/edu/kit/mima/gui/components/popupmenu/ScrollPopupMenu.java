@@ -3,11 +3,6 @@ package edu.kit.mima.gui.components.popupmenu;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Window;
-import java.lang.reflect.Field;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -19,6 +14,12 @@ import javax.swing.JWindow;
 import javax.swing.MenuElement;
 import javax.swing.MenuSelectionManager;
 import javax.swing.border.Border;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Window;
+import java.awt.event.MouseWheelEvent;
+import java.lang.reflect.Field;
 
 
 /**
@@ -144,7 +145,7 @@ public class ScrollPopupMenu extends JPopupMenu {
             setBounds(0, 0, prefSize.width, prefSize.height);
             popWin.setSize(prefSize.width, prefSize.height);
         } else {
-            final int sbWidth = 12;
+            final int sbWidth = 8;
             if (scrollPane == null) {
                 final JPanel view = new JPanel(new BorderLayout());
                 view.add(this, BorderLayout.CENTER);
@@ -155,15 +156,21 @@ public class ScrollPopupMenu extends JPopupMenu {
                 super.setBorder(null);
                 final JScrollBar bar = scrollPane.getVerticalScrollBar();
                 if (bar != null) {
+                    bar.putClientProperty("ScrollBar.thin", Boolean.TRUE);
                     final Dimension d = bar.getPreferredSize();
                     d.width = sbWidth;
                     bar.setPreferredSize(d);
                     int increment = 21;
                     if (getComponentCount() > 0) {
-                        increment = Math.max(1, getComponent(0).getPreferredSize().height / 3);
+                        increment = Math.max(1, getComponent(0).getPreferredSize().height / 10);
                     }
                     bar.setUnitIncrement(increment);
                     doNotCancelPopupHack(bar);
+                    scrollPane.addMouseWheelListener(e -> {
+                        if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
+                            bar.setValue(bar.getValue() + e.getUnitsToScroll());
+                        }
+                    });
                 }
                 popWin.getContentPane().add(scrollPane, BorderLayout.CENTER);
             }

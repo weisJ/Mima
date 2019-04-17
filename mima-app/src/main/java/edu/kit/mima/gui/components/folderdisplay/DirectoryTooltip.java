@@ -3,7 +3,7 @@ package edu.kit.mima.gui.components.folderdisplay;
 import edu.kit.mima.core.MimaConstants;
 import edu.kit.mima.gui.components.listeners.FilePopupActionHandler;
 import edu.kit.mima.gui.components.popupmenu.ScrollPopupMenu;
-import edu.kit.mima.gui.laf.icons.Icons;
+import edu.kit.mima.gui.icons.Icons;
 import edu.kit.mima.util.FileName;
 import edu.kit.mima.util.HSLColor;
 import org.jetbrains.annotations.NotNull;

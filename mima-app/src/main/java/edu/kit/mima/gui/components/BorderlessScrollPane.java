@@ -11,6 +11,7 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.plaf.ScrollPaneUI;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Rectangle;
@@ -118,6 +119,11 @@ public class BorderlessScrollPane extends JLayeredPane {
     @NotNull
     public JScrollPane getScrollPane() {
         return scrollPane;
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return scrollPane.getPreferredSize();
     }
 
     /**

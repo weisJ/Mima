@@ -2,6 +2,7 @@ package edu.kit.mima.gui.laf.components;
 
 import com.bulenkov.darcula.ui.DarculaScrollBarUI;
 import com.bulenkov.darcula.util.Animator;
+import edu.kit.mima.api.annotations.ReflectionCall;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,6 +11,8 @@ import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -92,14 +95,25 @@ public class CustomDarculaScrollBarUI extends DarculaScrollBarUI {
 
     @NotNull
     @Contract(" -> new")
+    @ReflectionCall
     public static BasicScrollBarUI createNormal() {
         return new CustomDarculaScrollBarUI();
     }
 
     @NotNull
     @Contract("_ -> new")
+    @ReflectionCall
     public static ComponentUI createUI(JComponent c) {
         return new CustomDarculaScrollBarUI();
+    }
+
+    @Override
+    public Dimension getPreferredSize(JComponent c) {
+        var size = super.getPreferredSize(c);
+        var gaps = calculateGaps();
+        size.width -= gaps.width;
+        size.height -= gaps.height;
+        return size;
     }
 
     @Override
@@ -135,9 +149,17 @@ public class CustomDarculaScrollBarUI extends DarculaScrollBarUI {
                 ((Runnable) c.getClientProperty("scrollBar.updateAction")).run();
             }
         }
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setColor(getTrackColor());
+        g2.setComposite(composite.derive(alpha));
+        g2.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+        g2.dispose();
+    }
+
+    private Dimension calculateGaps() {
         boolean vertical = this.isVertical();
-        int horizontalGap = vertical ? 2 : 0;
-        int verticalGap = vertical ? 0 : 2;
+        int horizontalGap = vertical ? 2 : 1;
+        int verticalGap = vertical ? 1 : 2;
         if (isThin()) {
             horizontalGap *= 1.5;
             verticalGap *= 1.5;
@@ -147,13 +169,7 @@ public class CustomDarculaScrollBarUI extends DarculaScrollBarUI {
                 verticalGap += 2;
             }
         }
-        Graphics2D g2 = (Graphics2D) g.create();
-        g2.setColor(getTrackColor());
-        g2.setComposite(composite.derive(alpha));
-        g2.translate(bounds.x, bounds.y);
-        g2.fillRect(horizontalGap, verticalGap,
-                    bounds.width - horizontalGap, bounds.height - verticalGap);
-        g2.dispose();
+        return new Dimension(horizontalGap, verticalGap);
     }
 
     @NotNull
@@ -176,30 +192,46 @@ public class CustomDarculaScrollBarUI extends DarculaScrollBarUI {
 
     private void paintMaxiThumb(@NotNull Graphics2D g, @NotNull Rectangle thumbBounds) {
         boolean vertical = this.isVertical();
+        boolean thin = this.isThin();
         var c = g.getComposite();
         g.setComposite(composite.derive(THUMB_ALPHA));
-        boolean thin = isThin();
         int horizontalGap = vertical ? 2 : 1;
         int verticalGap = vertical ? 1 : 2;
-        int w = this.adjustThumbWidth(thumbBounds.width - horizontalGap * 2);
-        int h = thumbBounds.height - verticalGap * 2;
-        int offset = thin ? 0 : 1;
-        if (vertical) {
-            --h;
-        } else {
-            --w;
-        }
         if (thin) {
-            horizontalGap *= 1.5;
-            verticalGap *= 1.5;
             if (vertical) {
-                horizontalGap += 2;
+                horizontalGap = 0;
             } else {
-                verticalGap += 2;
+                verticalGap = 0;
             }
         }
-        g.setColor(this.adjustColor(getGradientLightColor()));
-        g.fillRect(horizontalGap + offset, verticalGap + offset, w - offset, h - offset);
+        int w = this.adjustThumbWidth(thumbBounds.width - horizontalGap * 2);
+        int h = thumbBounds.height - verticalGap * 2;
+        if (vertical) {
+            --h;
+            if (!thin) {
+                ++w;
+            } else {
+                --w;
+            }
+        } else {
+            --w;
+            if (!thin) {
+                ++h;
+            } else {
+                --h;
+            }
+        }
+        Color start = this.adjustColor(getGradientLightColor());
+        Color end = this.adjustColor(getGradientDarkColor());
+        GradientPaint paint;
+        if (vertical) {
+            paint = new GradientPaint(1.0F, 0.0F, start, (float) (w + 1), 0.0F, end);
+        } else {
+            paint = new GradientPaint(0.0F, 1.0F, start, 0.0F, (float) (h + 1), end);
+        }
+
+        g.setPaint(paint);
+        g.fillRect(horizontalGap, verticalGap, w, h);
         g.setComposite(c);
     }
 

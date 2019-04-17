@@ -3,7 +3,7 @@ package edu.kit.mima.gui.components.folderdisplay;
 import com.intellij.openapi.util.io.FileUtil;
 import edu.kit.mima.gui.components.IconPanel;
 import edu.kit.mima.gui.components.listeners.FilePopupActionHandler;
-import edu.kit.mima.gui.laf.icons.Icons;
+import edu.kit.mima.gui.icons.Icons;
 import edu.kit.mima.util.FileName;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,7 +41,7 @@ public class FileDisplay extends JPanel {
     public FileDisplay() {
         this.handler = f -> {};
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-        root = add(new IconPanel(Icons.FOLDER_ROOT));
+        root = add(new IconPanel(Icons.FOLDER_ROOT), 0);
         dirComps = new Component[0];
     }
 
@@ -145,7 +145,7 @@ public class FileDisplay extends JPanel {
             firstVisible = length;
             updateRoot(file.getPath().split(SEPARATOR), length);
         }
-        revalidate();
+        invalidate();
     }
 
     /**

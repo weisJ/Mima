@@ -14,6 +14,11 @@
     <artifactId>mima.app</artifactId>
     <dependencies>
         <dependency>
+            <groupId>org.swinglabs</groupId>
+            <artifactId>jxlayer</artifactId>
+            <version>3.0.4</version>
+        </dependency>
+        <dependency>
             <groupId>edu.kit.weisj</groupId>
             <artifactId>mima.core</artifactId>
             <version>1.0-SNAPSHOT</version>

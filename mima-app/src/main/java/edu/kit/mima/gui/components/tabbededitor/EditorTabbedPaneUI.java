@@ -3,7 +3,7 @@ package edu.kit.mima.gui.components.tabbededitor;
 import edu.kit.mima.gui.components.button.IconButton;
 import edu.kit.mima.gui.components.listeners.PopupListener;
 import edu.kit.mima.gui.components.popupmenu.ScrollPopupMenu;
-import edu.kit.mima.gui.laf.icons.Icons;
+import edu.kit.mima.gui.icons.Icons;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.AbstractAction;
@@ -153,6 +153,9 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
     protected Rectangle getTabBounds(int tabIndex, Rectangle dest) {
         if (tabbedPane.getTabLayoutPolicy() == JTabbedPane.SCROLL_TAB_LAYOUT) {
             return super.getTabBounds(tabIndex, dest);
+        }
+        if (rects.length == 0) {
+            return new Rectangle(0, 0, 0, 0);
         }
         dest.width = rects[tabIndex].width;
         dest.height = rects[tabIndex].height;

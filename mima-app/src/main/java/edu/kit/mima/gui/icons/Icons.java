@@ -1,4 +1,4 @@
-package edu.kit.mima.gui.laf.icons;
+package edu.kit.mima.gui.icons;
 
 import edu.kit.mima.core.MimaConstants;
 import org.apache.batik.transcoder.TranscoderException;
@@ -53,11 +53,15 @@ public final class Icons {
     public static final Icon UNDO = loadIcon("undo.svg");
     public static final Icon UNDO_INACTIVE = loadIcon("undo_inactive.svg");
 
+    public static final Icon MEMORY = loadIcon("memory.svg");
+    public static final Icon CONSOLE = loadIcon("console.svg");
+
     public static final Icon SEARCH = loadIcon("search.svg");
     public static final Icon SEARCH_WITH_HISTORY = loadIcon("searchWithHistory.svg");
     public static final Icon CLOSE = loadIcon("close.svg");
     public static final Icon CLOSE_HOVER = loadIcon("closeHovered.svg");
     public static final Icon CLEAR = loadIcon("clear.svg", 12, 12);
+    public static final Icon COLLAPSE = loadIcon("collapse.svg");
 
     private Icons() {
     }
@@ -73,7 +77,7 @@ public final class Icons {
         try {
             return new MimaIcon(new SVGIcon(Objects.requireNonNull(
                     instance.getClass()
-                            .getResource(name)).toURI().toString(), 4 * w, 4 * h), w, h);
+                            .getResource(name)).toURI().toString(), w, h), w, h);
         } catch (@NotNull final TranscoderException | URISyntaxException e) {
             e.printStackTrace();
         }

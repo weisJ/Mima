@@ -20,12 +20,15 @@ import javax.swing.text.StyledDocument;
 import javax.swing.text.StyledEditorKit;
 import javax.swing.text.ViewFactory;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.FocusListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
@@ -64,17 +67,17 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
      */
     public Editor() {
         Preferences.registerUserPreferenceChangedListener(this);
-        final Font font = PREF.readFont(PropertyKey.EDITOR_FONT);
 
+        final Font font = PREF.readFont(PropertyKey.EDITOR_FONT);
         breakpoints = new HashSet<>();
         addIndexListener(index -> {
             if (hasComponentAt(index)) {
-                pane.unmarkLine(index);
+                pane.removeMark(index, "break");
                 removeComponentAt(index);
                 breakpoints.remove(new SimpleBreakpoint(index));
             } else {
                 var comp = new BreakpointComponent(index);
-                pane.markLine(index, comp.getLineColor());
+                pane.markLine(index, "break", comp.getLineColor());
                 addComponentAt(comp, index);
                 breakpoints.add(new SimpleBreakpoint(index));
             }
@@ -87,7 +90,17 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
                 return new HighlightViewFactory();
             }
         });
+        pane.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
+            }
 
+            @Override
+            public void mouseExited(MouseEvent e) {
+                setCursor(Cursor.getDefaultCursor());
+            }
+        });
         historyController = new TextHistoryController(pane, 0);
         historyController.setActive(false);
         editEventHandlers = new ArrayList<>();
@@ -213,8 +226,8 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
      * @param index index of line
      */
     public void markLine(final int index) {
-        pane.unmarkLine(currentMark);
-        pane.markLine(index, new Color(0x2D71D2)); //Todo decouple colour
+        pane.removeMark(currentMark, "debug");
+        pane.markLine(index, "debug", new Color(0x2D71D2)); //Todo decouple colour
         currentMark = index;
         if (index > 0) {
             try {
@@ -251,7 +264,7 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
      */
     public void setEditorFont(@NotNull final Font font) {
         pane.setFont(font);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(font.getSize() / 2);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(font.getSize());
         repaint();
     }
 

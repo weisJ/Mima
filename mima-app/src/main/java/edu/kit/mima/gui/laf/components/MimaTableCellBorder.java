@@ -7,6 +7,7 @@ import java.awt.Insets;
 
 /**
  * Table cell border.
+ * Prevents content to be shifted when selected.
  *
  * @author Jannis Weis
  * @since 2018
@@ -14,6 +15,9 @@ import java.awt.Insets;
 public class MimaTableCellBorder extends LineBorder {
 
 
+    /**
+     * Create new Cell border.
+     */
     public MimaTableCellBorder() {
         super(UIManager.getColor("Border.line1"));
     }

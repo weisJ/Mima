@@ -7,11 +7,15 @@ import edu.kit.mima.core.MimaRunner;
 import edu.kit.mima.core.token.Token;
 import edu.kit.mima.gui.EditorHotKeys;
 import edu.kit.mima.gui.components.FixedScrollTable;
-import edu.kit.mima.gui.components.ZeroWidthSplitPane;
+import edu.kit.mima.gui.components.alignment.Alignment;
 import edu.kit.mima.gui.components.console.Console;
 import edu.kit.mima.gui.components.editor.Editor;
 import edu.kit.mima.gui.components.folderdisplay.FileDisplay;
+import edu.kit.mima.gui.components.listeners.ComponentResizeListener;
 import edu.kit.mima.gui.components.tabbededitor.EditorTabbedPane;
+import edu.kit.mima.gui.components.tabframe.DefaultPopupComponent;
+import edu.kit.mima.gui.components.tabframe.TabFrame;
+import edu.kit.mima.gui.icons.Icons;
 import edu.kit.mima.gui.menu.Help;
 import edu.kit.mima.gui.menu.settings.Settings;
 import edu.kit.mima.gui.view.MemoryTableView;
@@ -22,18 +26,15 @@ import edu.kit.mima.util.BindingUtil;
 import edu.kit.mima.util.FileName;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JSplitPane;
 import javax.swing.UIManager;
-import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.MatteBorder;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.Toolkit;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -73,7 +74,8 @@ public final class MimaUserInterface extends JFrame {
         fileDisplay = new MimaFileDisplay(fileActions).getDisplay();
         tabbedEditor = editorManager.getTabbedEditor();
         console = new Console();
-        memoryTable = new FixedScrollTable(new String[]{"Address", "Value"}, 100);
+        memoryTable = new FixedScrollTable(new String[]{"Address", "Value"}, 100,
+                                           new Insets(0, 5, 0, 0));
         memoryView = new MemoryTableView(mimaRunner, memoryTable);
 
         App.logger.setConsole(console);
@@ -97,7 +99,8 @@ public final class MimaUserInterface extends JFrame {
                          MimaRunner.RUNNING_PROPERTY);
         BindingUtil.bind(debugger, () -> currentEditor().markLine(-1),
                          Debugger.RUNNING_PROPERTY);
-        tabbedEditor.addChangeListener(e -> Optional.ofNullable((Editor) tabbedEditor.getSelectedComponent())
+        tabbedEditor.addChangeListener(e -> Optional
+                .ofNullable((Editor) tabbedEditor.getSelectedComponent())
                 .ifPresent(editor -> {
                     var file = new File(Optional.ofNullable(editorManager.managerForEditor(editor))
                                                 .map(FileManager::getLastFile)
@@ -176,46 +179,34 @@ public final class MimaUserInterface extends JFrame {
     }
 
     private void setupComponents() {
-        final JSplitPane memoryConsole = new ZeroWidthSplitPane();
-        memoryConsole.setOrientation(JSplitPane.VERTICAL_SPLIT);
-        memoryConsole.setTopComponent(memoryTable);
-        memoryConsole.setBottomComponent(console);
-        memoryConsole.setContinuousLayout(true);
-
-
-        final JSplitPane splitPane = new ZeroWidthSplitPane();
-        splitPane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
-        splitPane.setLeftComponent(memoryConsole);
-        splitPane.setRightComponent(tabbedEditor);
 
         final JPanel controlPanel = new JPanel(new BorderLayout());
         controlPanel.add(fileDisplay, BorderLayout.WEST);
         var buttonArea = new MimaButtonArea(this, tabbedEditor, runActions).getPane();
 
         controlPanel.add(buttonArea, BorderLayout.EAST);
-        controlPanel.setBorder(new CompoundBorder(
-                new MatteBorder(0, 0, 1, 0,
-                                UIManager.getColor("Border.line1")),
-                new EmptyBorder(2, 2, 2, 2)));
+        controlPanel.setBorder(new EmptyBorder(2, 2, 2, 2));
         controlPanel.setComponentZOrder(fileDisplay, 1);
         controlPanel.setComponentZOrder(buttonArea, 0);
-        controlPanel.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                fileDisplay.setMaximumSize(new Dimension(
-                        buttonArea.getX() - fileDisplay.getX(),
-                        controlPanel.getMinimumSize().height));
-            }
-        });
 
+        Runnable resizeAction = () -> fileDisplay.setMaximumSize(new Dimension(
+                buttonArea.getX() - fileDisplay.getX(),
+                controlPanel.getMinimumSize().height));
+        controlPanel.addComponentListener((ComponentResizeListener) e -> resizeAction.run());
+        BindingUtil.bind(debugger, resizeAction, Debugger.RUNNING_PROPERTY);
+        tabbedEditor.setBorder(BorderFactory.createMatteBorder(
+                1, 0, 0, 0, UIManager.getColor("Border.line1")));
 
         add(controlPanel, BorderLayout.NORTH);
-        add(splitPane, BorderLayout.CENTER);
+        var tabFrame = new TabFrame();
+        tabFrame.setContentPane(tabbedEditor);
+        tabFrame.addTab(new DefaultPopupComponent("Memory", Icons.MEMORY, memoryTable),
+                        "Memory", Icons.MEMORY, Alignment.NORTH_WEST);
+        tabFrame.addTab(new DefaultPopupComponent("Console", Icons.CONSOLE, console),
+                        "Console", Icons.CONSOLE, Alignment.SOUTH_WEST);
 
+        add(tabFrame, BorderLayout.CENTER);
         pack();
-        memoryConsole.setDividerLocation(0.5);
-        splitPane.setDividerLocation(0.4);
-        splitPane.setContinuousLayout(true);
         setJMenuBar(new MimaMenuBar(this, fileActions).getMenuBar());
     }
 

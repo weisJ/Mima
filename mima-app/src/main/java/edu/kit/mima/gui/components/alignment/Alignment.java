@@ -19,42 +19,56 @@ import static edu.kit.mima.gui.components.alignment.AlignmentHelper.*;
  */
 public enum Alignment {
     NORTH(AlignmentHelper.align(HOR_CENTER_INSIDE, VERT_TOP_INSIDE),
-          AlignmentHelper.align(HOR_CENTER_OUTSIDE, VERT_TOP_OUTSIDE)
+          AlignmentHelper.align(HOR_CENTER_OUTSIDE, VERT_TOP_OUTSIDE), 0
     ),
     SOUTH(AlignmentHelper.align(HOR_CENTER_INSIDE, VERT_BOTTOM_INSIDE),
-          AlignmentHelper.align(HOR_CENTER_OUTSIDE, VERT_BOTTOM_OUTSIDE)
+          AlignmentHelper.align(HOR_CENTER_OUTSIDE, VERT_BOTTOM_OUTSIDE), 1
     ),
     EAST(AlignmentHelper.align(HOR_RIGHT_INSIDE, VERT_CENTER_INSIDE),
-         AlignmentHelper.align(HOR_RIGHT_OUTSIDE, VERT_CENTER_OUTSIDE)
+         AlignmentHelper.align(HOR_RIGHT_OUTSIDE, VERT_CENTER_OUTSIDE), 2
     ),
     WEST(AlignmentHelper.align(HOR_LEFT_INSIDE, VERT_CENTER_INSIDE),
-         AlignmentHelper.align(HOR_LEFT_OUTSIDE, VERT_CENTER_OUTSIDE)
+         AlignmentHelper.align(HOR_LEFT_OUTSIDE, VERT_CENTER_OUTSIDE), 3
     ),
     NORTH_EAST(AlignmentHelper.align(HOR_RIGHT_INSIDE, VERT_TOP_INSIDE),
-               AlignmentHelper.align(HOR_RIGHT_OUTSIDE, VERT_TOP_OUTSIDE)
+               AlignmentHelper.align(HOR_RIGHT_OUTSIDE, VERT_TOP_OUTSIDE), 4
     ),
     NORTH_WEST(AlignmentHelper.align(HOR_LEFT_INSIDE, VERT_TOP_INSIDE),
-               AlignmentHelper.align(HOR_LEFT_OUTSIDE, VERT_TOP_OUTSIDE)
+               AlignmentHelper.align(HOR_LEFT_OUTSIDE, VERT_TOP_OUTSIDE), 5
     ),
     SOUTH_EAST(AlignmentHelper.align(HOR_RIGHT_INSIDE, VERT_BOTTOM_INSIDE),
-               AlignmentHelper.align(HOR_RIGHT_OUTSIDE, VERT_BOTTOM_OUTSIDE)
+               AlignmentHelper.align(HOR_RIGHT_OUTSIDE, VERT_BOTTOM_OUTSIDE), 6
     ),
     SOUTH_WEST(AlignmentHelper.align(HOR_LEFT_INSIDE, VERT_BOTTOM_INSIDE),
-               AlignmentHelper.align(HOR_LEFT_OUTSIDE, VERT_BOTTOM_OUTSIDE)
+               AlignmentHelper.align(HOR_LEFT_OUTSIDE, VERT_BOTTOM_OUTSIDE), 7
     ),
     CENTER(AlignmentHelper.align(HOR_CENTER_INSIDE, VERT_CENTER_INSIDE),
-           AlignmentHelper.align(HOR_CENTER_OUTSIDE, VERT_CENTER_OUTSIDE)
+           AlignmentHelper.align(HOR_CENTER_OUTSIDE, VERT_CENTER_OUTSIDE), 8
     );
 
 
     private final BiFunction<Dimension, Rectangle, Point> alignInside;
     private final BiFunction<Dimension, Rectangle, Point> alignOutside;
+    private final int index;
 
     @Contract(pure = true)
     Alignment(BiFunction<Dimension, Rectangle, Point> alignInside,
-              BiFunction<Dimension, Rectangle, Point> alignOutside) {
+              BiFunction<Dimension, Rectangle, Point> alignOutside,
+              int index) {
+        this.index = index;
         this.alignInside = alignInside;
         this.alignOutside = alignOutside;
+    }
+
+    /**
+     * Get the index of the alignment. This function is for utility purposes where one might save
+     * settings based on alignment in an array.
+     *
+     * @return the index.
+     */
+    @Contract(pure = true)
+    public int getIndex() {
+        return index;
     }
 
     /**
@@ -89,6 +103,7 @@ public enum Alignment {
      */
     @Contract(pure = true)
     @NotNull
+    @SuppressWarnings("Duplicates")
     public Alignment opposite() {
         return switch (this) {
             case NORTH -> SOUTH;
@@ -99,6 +114,38 @@ public enum Alignment {
             case SOUTH_WEST -> NORTH_EAST;
             case WEST -> EAST;
             case NORTH_WEST -> SOUTH_EAST;
+            case CENTER -> CENTER;
+        };
+    }
+
+    @Contract(pure = true)
+    @SuppressWarnings("Duplicates")
+    public Alignment anticlockwise() {
+        return switch (this) {
+            case NORTH -> NORTH_WEST;
+            case NORTH_EAST -> NORTH;
+            case EAST -> NORTH_EAST;
+            case SOUTH_EAST -> EAST;
+            case SOUTH -> SOUTH_EAST;
+            case SOUTH_WEST -> SOUTH;
+            case WEST -> SOUTH_WEST;
+            case NORTH_WEST -> WEST;
+            case CENTER -> CENTER;
+        };
+    }
+
+    @Contract(pure = true)
+    @SuppressWarnings("Duplicates")
+    public Alignment clockwise() {
+        return switch (this) {
+            case NORTH -> NORTH_EAST;
+            case NORTH_EAST -> EAST;
+            case EAST -> SOUTH_EAST;
+            case SOUTH_EAST -> SOUTH;
+            case SOUTH -> SOUTH_WEST;
+            case SOUTH_WEST -> WEST;
+            case WEST -> NORTH_WEST;
+            case NORTH_WEST -> NORTH;
             case CENTER -> CENTER;
         };
     }

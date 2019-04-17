@@ -3,6 +3,7 @@ package edu.kit.mima.gui.components;
 import edu.kit.mima.gui.laf.components.MimaTableCellBorder;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.BorderFactory;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
@@ -38,7 +39,8 @@ public class FixedScrollTable extends BorderlessScrollPane {
      * @param tableHeader    header of table
      * @param initialEntries number of initial entries
      */
-    public FixedScrollTable(@NotNull final String[] tableHeader, final int initialEntries) {
+    public FixedScrollTable(@NotNull final String[] tableHeader, final int initialEntries,
+                            final Insets cellInsets) {
         this.tableHeader = tableHeader;
         table = new JTable(new DefaultTableModel(tableHeader, 0)) {
             @Override
@@ -52,7 +54,8 @@ public class FixedScrollTable extends BorderlessScrollPane {
                 if (isRowSelected(row)) {
                     c.setBorder(new SelectedBorder());
                 } else {
-                    c.setBorder(null);
+                    c.setBorder(BorderFactory.createEmptyBorder(
+                            cellInsets.top, cellInsets.left, cellInsets.bottom, cellInsets.right));
                 }
                 return c;
             }
@@ -63,7 +66,8 @@ public class FixedScrollTable extends BorderlessScrollPane {
                 if (isRowSelected(row)) {
                     c.setBorder(new SelectedBorder());
                 } else {
-                    c.setBorder(null);
+                    c.setBorder(BorderFactory.createEmptyBorder(
+                            cellInsets.top, cellInsets.left, cellInsets.bottom, cellInsets.right));
                 }
                 return c;
             }
@@ -80,6 +84,7 @@ public class FixedScrollTable extends BorderlessScrollPane {
         scrollPane.setViewportView(table);
         setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.getVerticalScrollBar().putClientProperty("ScrollBar.thin", Boolean.TRUE);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(table.getRowHeight());
 
         final Object[][] data = new Object[initialEntries][tableHeader.length - 1];
         setContent(data);

@@ -3,6 +3,8 @@ package edu.kit.mima.gui.components.numberedpane;
 import edu.kit.mima.gui.components.BorderlessScrollPane;
 import edu.kit.mima.gui.components.IndexComponent;
 import edu.kit.mima.gui.components.listeners.IndexListener;
+import edu.kit.mima.gui.components.listeners.MouseClickListener;
+import edu.kit.mima.gui.components.listeners.VisibleCaretListener;
 import edu.kit.mima.gui.components.text.HighlightTextPane;
 import edu.kit.mima.util.DocumentUtil;
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +16,6 @@ import javax.swing.text.BadLocationException;
 import java.awt.BorderLayout;
 import java.awt.Graphics;
 import java.awt.Point;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -49,29 +50,31 @@ public class NumberedTextPane extends JPanel {
         };
         var borderedPane = new BorderlessScrollPane(pane);
         scrollPane = borderedPane.getScrollPane();
+        scrollPane.getVerticalScrollBar().setUnitIncrement(getFont().getSize());
         numberingPane = new NumberingPane(pane, scrollPane);
+        pane.addCaretListener(
+                new VisibleCaretListener(scrollPane.getVerticalScrollBar().getWidth()));
+
         add(numberingPane, BorderLayout.LINE_START);
         add(borderedPane, BorderLayout.CENTER);
 
-        numberingPane.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(@NotNull final MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON1) {
-                    final Point p = e.getPoint();
-                    try {
-                        final int index = DocumentUtil.getLineOfOffset(pane, pane.viewToModel2D(p));
-                        if (numberingPane.getActionArea().contains(p)) {
-                            for (final var listener : listenerList) {
-                                if (listener != null) {
-                                    listener.indexClicked(index);
-                                }
-                                repaint();
+
+        numberingPane.addMouseListener((MouseClickListener) e -> {
+            if (e.getButton() == MouseEvent.BUTTON1) {
+                final Point p = e.getPoint();
+                try {
+                    final int index = DocumentUtil.getLineOfOffset(pane, pane.viewToModel2D(p));
+                    if (numberingPane.getActionArea().contains(p)) {
+                        for (final var listener : listenerList) {
+                            if (listener != null) {
+                                listener.indexClicked(index);
                             }
-                        } else {
-                            pane.selectLine(index);
+                            repaint();
                         }
-                    } catch (@NotNull final BadLocationException ignored) {
+                    } else {
+                        pane.selectLine(index);
                     }
+                } catch (@NotNull final BadLocationException ignored) {
                 }
             }
         });

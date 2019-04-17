@@ -7,7 +7,7 @@ import edu.kit.mima.gui.components.button.ButtonPanelBuilder;
 import edu.kit.mima.gui.components.button.IconButton;
 import edu.kit.mima.gui.components.button.RunnableIconButton;
 import edu.kit.mima.gui.components.tabbededitor.EditorTabbedPane;
-import edu.kit.mima.gui.laf.icons.Icons;
+import edu.kit.mima.gui.icons.Icons;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.JPanel;
