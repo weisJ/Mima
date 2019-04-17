@@ -31,6 +31,7 @@ public class Tooltip extends ShadowPane implements ITooltip {
     private final JPanel labelPanel;
     private Alignment alignment;
     private float alpha = 0;
+    private boolean optimized = false;
 
     /**
      * Create new Tooltip.
@@ -142,6 +143,16 @@ public class Tooltip extends ShadowPane implements ITooltip {
     @Override
     public void hideTooltip() {
         startFadeTimer(1, 0, -0.05f);
+    }
+
+    @Override
+    public boolean isOptimized() {
+        return optimized;
+    }
+
+    @Override
+    public void setOptimized(boolean optimized) {
+        this.optimized = optimized;
     }
 
     private void startFadeTimer(final float start, final float end, final float increment) {
