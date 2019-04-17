@@ -54,6 +54,7 @@ public class TooltipComponent<T extends JComponent & ITooltip>
         this.centerAt = centerAt;
         this.container = container;
         this.tooltip = tooltip;
+        tooltip.setOptimized(false);
         eventHandler = new TooltipEventHandler(this, delay, vanishingDelay);
         tooltip.setOpaque(false);
     }
@@ -148,14 +149,17 @@ public class TooltipComponent<T extends JComponent & ITooltip>
          * so we the tooltip twice as the size might not be correctly calculated
          * in the first time. The second time the component now now the size it would have
          * were it visible and decides that this isn't optimal and corrects itself.
+         * After the first time this only needs to be done once.
          */
-        for (int i = 0; i < 2; i++) {
+        int runs = tooltip.isOptimized() ? 1 : 2;
+        for (int i = 0; i < runs; i++) {
             var size = tooltip.getPreferredSize();
             var p = calculatePositionIn(layer, size, mousePos);
             tooltip.setBounds(p.x, p.y, size.width, size.height);
             tooltip.repaint();
             layer.repaint();
         }
+        tooltip.setOptimized(true);
         tooltip.showTooltip();
         container.repaint();
     }

@@ -8,7 +8,9 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionAdapter;
+import java.util.function.BiConsumer;
 
 /**
  * Event handler for Tooltip display management.
@@ -191,38 +193,41 @@ public class TooltipEventHandler extends MouseAdapter {
         }
     }
 
-    private class EventPropagator extends MouseAdapter {
+    private class EventPropagator implements MouseListener {
+        private final BiConsumer<BiConsumer<MouseListener, MouseEvent>, MouseEvent> propagate =
+                (c, e) -> {
+                    if (overContainer) {
+                        for (final var ml : tooltipComponent.container.getMouseListeners()) {
+                            if (ml != TooltipEventHandler.this && ml != null) {
+                                c.accept(ml, e);
+                            }
+                        }
+                    }
+                };
+
         @Override
         public void mouseClicked(final MouseEvent e) {
-            if (overContainer) {
-                for (final var ml : tooltipComponent.container.getMouseListeners()) {
-                    if (ml != TooltipEventHandler.this) {
-                        ml.mouseClicked(e);
-                    }
-                }
-            }
+            propagate.accept(MouseListener::mouseClicked, e);
         }
 
         @Override
         public void mousePressed(final MouseEvent e) {
-            if (overContainer) {
-                for (final var ml : tooltipComponent.container.getMouseListeners()) {
-                    if (ml != TooltipEventHandler.this) {
-                        ml.mousePressed(e);
-                    }
-                }
-            }
+            propagate.accept(MouseListener::mousePressed, e);
         }
 
         @Override
         public void mouseReleased(final MouseEvent e) {
-            if (overContainer) {
-                for (final var ml : tooltipComponent.container.getMouseListeners()) {
-                    if (ml != TooltipEventHandler.this) {
-                        ml.mouseReleased(e);
-                    }
-                }
-            }
+            propagate.accept(MouseListener::mouseReleased, e);
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            propagate.accept(MouseListener::mouseEntered, e);
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            propagate.accept(MouseListener::mouseExited, e);
         }
     }
 }
