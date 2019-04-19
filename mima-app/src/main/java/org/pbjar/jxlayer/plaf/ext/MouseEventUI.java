@@ -61,11 +61,6 @@ import java.awt.geom.NoninvertibleTransformException;
  */
 public class MouseEventUI<V extends JComponent> extends AbstractLayerUI<V> {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 1L;
-
     static {
         /*
          * The instantiating of a JInternalFrame before a MouseEventUI is set to

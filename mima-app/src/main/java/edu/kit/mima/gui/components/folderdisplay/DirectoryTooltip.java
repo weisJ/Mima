@@ -20,7 +20,7 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 
 /**
- * Tooltip Menu for Displaying directories and files.
+ * DefaultTooltipWindow Menu for Displaying directories and files.
  *
  * @author Jannis Weis
  * @since 2018
@@ -28,7 +28,7 @@ import java.io.File;
 public class DirectoryTooltip extends ScrollPopupMenu {
 
     /**
-     * Tooltip menu for displaying directories.
+     * DefaultTooltipWindow menu for displaying directories.
      *
      * @param directory parent directory
      * @param handler   action handler.

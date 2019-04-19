@@ -20,16 +20,13 @@ public class Test extends JScrollPane {
         var p = new TabFrame();
         for (var o : Alignment.values()) {
             if (o != Alignment.CENTER) {
-                var pcc = new JPanel();
-                var pc1 = new DefaultPopupComponent(o.toString() + "1", pcc);
-                pcc.add(new JLabel(o.toString() + "1 Popup"));
+                for (int i = 0; i < 3; i++) {
+                    var pcc = new JPanel();
+                    var pc1 = new DefaultPopupComponent(o.toString() + i, pcc);
+                    pcc.add(new JLabel(o.toString() + i + " Popup"));
 
-                var pcc2 = new JPanel();
-                var pc2 = new DefaultPopupComponent(o.toString() + "2", pcc2);
-                pcc2.add(new JLabel(o.toString() + "2 Popup"));
-
-                p.addTab(pc1, o.toString() + "1", Icons.FOLDER, o);
-                p.addTab(pc2, o.toString() + "2", Icons.TEXT_FILE, o);
+                    p.addTab(pc1, o.toString() + i, Icons.FOLDER, o);
+                }
             }
         }
         var c = new JPanel(new BorderLayout());

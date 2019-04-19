@@ -1,4 +1,4 @@
-package edu.kit.mima.gui.components;
+package edu.kit.mima.gui.components.border;
 
 import edu.kit.mima.gui.components.alignment.Alignment;
 import org.jetbrains.annotations.Contract;

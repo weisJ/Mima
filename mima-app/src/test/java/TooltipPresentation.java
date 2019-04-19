@@ -1,5 +1,5 @@
 import edu.kit.mima.gui.components.AlignPolicy;
-import edu.kit.mima.gui.components.tooltip.Tooltip;
+import edu.kit.mima.gui.components.tooltip.DefaultTooltipWindow;
 import edu.kit.mima.gui.components.tooltip.TooltipComponent;
 import edu.kit.mima.gui.components.tooltip.TooltipConstants;
 import edu.kit.mima.gui.laf.LafManager;
@@ -23,7 +23,8 @@ public class TooltipPresentation {
         SwingUtilities.invokeLater(() -> {
             LafManager.setDefaultTheme(true);
             final var frame = new JFrame();
-            frame.setSize(1000, 1000);
+            frame.setSize(500, 500);
+            frame.setLocationRelativeTo(null);
             frame.setLayout(new GridLayout(8, 8));
             for (int i = 0; i < 64; i++) {
                 final JPanel button = new JPanel() {
@@ -37,7 +38,7 @@ public class TooltipPresentation {
                 };
                 button.setBackground(Color.WHITE);
                 button.setBorder(new LineBorder(Color.RED));
-                new TooltipComponent<>(button, new Tooltip(
+                new TooltipComponent<>(button, new DefaultTooltipWindow(
                         "Hallo Laaaaaaaaaaaaaaaaaaaaaanger " + " \n "
                         + "Test1 \n Tes 2 \n\n\n\nHoher Text"), 600, TooltipConstants.PERSISTENT,
                                        AlignPolicy.COMPONENT_BOTH).setActive(true);

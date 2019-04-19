@@ -60,6 +60,7 @@ public class RepaintManagerUtils {
      */
     private static final boolean swingX = isSwingXAvalable();
 
+    @Contract(pure = true)
     private RepaintManagerUtils() {
 
     }

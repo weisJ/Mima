@@ -5,7 +5,7 @@ import edu.kit.mima.gui.components.IconLabel;
 import edu.kit.mima.gui.components.alignment.Alignment;
 import edu.kit.mima.gui.components.button.ClickAction;
 import edu.kit.mima.gui.components.button.IconButton;
-import edu.kit.mima.gui.components.tooltip.Tooltip;
+import edu.kit.mima.gui.components.tooltip.DefaultTooltipWindow;
 import edu.kit.mima.gui.components.tooltip.TooltipUtil;
 import edu.kit.mima.gui.icons.Icons;
 import org.jetbrains.annotations.NotNull;
@@ -41,7 +41,7 @@ public class DefaultPopupComponent extends PopupComponent {
     @NotNull
     private final JPanel header;
     @NotNull
-    private final JComponent content;
+    private final JPanel content;
     @NotNull
     private final JButton closeButton;
     private Color headerFocusBackground;
@@ -57,11 +57,10 @@ public class DefaultPopupComponent extends PopupComponent {
     public DefaultPopupComponent(final String title, final Icon icon,
                                  @NotNull final JComponent content) {
         setLayout(new BorderLayout());
-        this.content = content;
 
         header = new JPanel();
         header.setLayout(new BoxLayout(header, BoxLayout.X_AXIS));
-        var label = new IconLabel(icon, title, IconLabel.LEFT, 8);
+        var label = new IconLabel(icon, title, IconLabel.LEFT, 8, 2);
         label.setOpaque(false);
         header.add(label);
         header.add(Box.createGlue());
@@ -73,10 +72,13 @@ public class DefaultPopupComponent extends PopupComponent {
         getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(accelerator), accelerator);
         getActionMap().put(accelerator, new ClickAction(closeButton));
-        TooltipUtil.createDefaultTooltip(closeButton, new Tooltip("Hide (shift ESC)"));
+        TooltipUtil.createDefaultTooltip(closeButton, new DefaultTooltipWindow("Hide (shift ESC)"));
+
+        this.content = new JPanel(new BorderLayout());
+        this.content.add(content, BorderLayout.CENTER);
 
         add(header, BorderLayout.NORTH);
-        add(content, BorderLayout.CENTER);
+        add(this.content, BorderLayout.CENTER);
 
         Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
             private boolean pressed;
@@ -150,6 +152,9 @@ public class DefaultPopupComponent extends PopupComponent {
                 }
                 if (a == Alignment.SOUTH_WEST && info[Alignment.SOUTH.getIndex()]) {
                     insets.right = 1;
+                }
+                if (a == Alignment.SOUTH || a == Alignment.SOUTH_WEST) {
+                    insets.bottom = 0;
                 }
                 return insets;
             }

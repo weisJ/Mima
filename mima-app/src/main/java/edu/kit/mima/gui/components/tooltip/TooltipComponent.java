@@ -6,20 +6,20 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.JComponent;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 
 /**
- * Tooltip wrapper for handling the display management.
+ * DefaultTooltipWindow wrapper for handling the display management.
  *
  * @author Jannis Weis
  * @since 2018
  */
-public class TooltipComponent<T extends JComponent & ITooltip>
+public class TooltipComponent<T extends TooltipWindow>
         extends MouseAdapter implements TooltipConstants {
 
     /*default*/
@@ -29,10 +29,9 @@ public class TooltipComponent<T extends JComponent & ITooltip>
     @NotNull
     final JComponent container;
     private final AlignPolicy centerAt;
+
     @NotNull
     private final TooltipEventHandler eventHandler;
-
-    private boolean installed;
     private boolean showOnce;
 
     private Point mousePos = new Point(0, 0);
@@ -54,9 +53,7 @@ public class TooltipComponent<T extends JComponent & ITooltip>
         this.centerAt = centerAt;
         this.container = container;
         this.tooltip = tooltip;
-        tooltip.setOptimized(false);
         eventHandler = new TooltipEventHandler(this, delay, vanishingDelay);
-        tooltip.setOpaque(false);
     }
 
     /**
@@ -68,32 +65,11 @@ public class TooltipComponent<T extends JComponent & ITooltip>
         this.eventHandler.setActive(active);
     }
 
-    /*
-     * Install tooltip
-     */
-    private void install() {
-        final JPanel layer = (JPanel) container.getRootPane().getGlassPane();
-        final Dimension size = container.getRootPane().getSize();
-        if (layer.getLayout() != null) {
-            layer.setLayout(null);
-            layer.setPreferredSize(size);
-        }
-        layer.add(tooltip);
-        installed = true;
-    }
-
     /**
-     * Uninstall the Tooltip.
+     * Uninstall the DefaultTooltipWindow.
      */
     public void uninstall() {
-        final var root = container.getRootPane();
-        final JPanel layer = (JPanel) root.getGlassPane();
-        tooltip.setVisible(false);
         container.removeMouseListener(this);
-        layer.remove(tooltip);
-        layer.revalidate();
-        layer.repaint();
-        installed = false;
         eventHandler.setActive(false);
     }
 
@@ -111,7 +87,7 @@ public class TooltipComponent<T extends JComponent & ITooltip>
     }
 
     /**
-     * Show Tooltip at mousePosition.
+     * Show DefaultTooltipWindow at mousePosition.
      */
     public void showTooltip() {
         if (!showOnce) {
@@ -130,38 +106,21 @@ public class TooltipComponent<T extends JComponent & ITooltip>
             eventHandler.setActive(false);
         }
         tooltip.hideTooltip();
-        container.repaint();
+        tooltip.setVisible(false); //Ensure it's hidden
     }
 
     /*
      * Make the tooltip visible.
      */
     private void showTooltipInternal() {
+        tooltip.setVisible(true);
         eventHandler.setActive(true);
-        if (!installed) {
-            install();
-        }
-        final var root = container.getRootPane();
-        final JPanel layer = (JPanel) root.getGlassPane();
-        layer.setVisible(true);
-        /*
-         * Working out the correct size of a component before it is displayed isn't that easy
-         * so we the tooltip twice as the size might not be correctly calculated
-         * in the first time. The second time the component now now the size it would have
-         * were it visible and decides that this isn't optimal and corrects itself.
-         * After the first time this only needs to be done once.
-         */
-        int runs = tooltip.isOptimized() ? 1 : 2;
-        for (int i = 0; i < runs; i++) {
-            var size = tooltip.getPreferredSize();
-            var p = calculatePositionIn(layer, size, mousePos);
-            tooltip.setBounds(p.x, p.y, size.width, size.height);
-            tooltip.repaint();
-            layer.repaint();
-        }
-        tooltip.setOptimized(true);
+        var size = tooltip.getPreferredSize();
+        var p = calculatePositionIn(container.getRootPane(), size, mousePos);
+        var pos = new Point(p.x, p.y);
+        SwingUtilities.convertPointToScreen(pos, container.getRootPane());
+        tooltip.setBounds(pos.x, pos.y, size.width, size.height);
         tooltip.showTooltip();
-        container.repaint();
     }
 
     /*
@@ -169,16 +128,14 @@ public class TooltipComponent<T extends JComponent & ITooltip>
      */
     @NotNull
     @Contract("_, _, _ -> new")
-    private Point calculatePositionIn(@NotNull final JComponent layer,
-                                      @NotNull final Dimension size,
+    private Point calculatePositionIn(@NotNull Component c, @NotNull final Dimension size,
                                       @NotNull final Point mousePos) {
         final var containerPos = SwingUtilities
                 .convertPoint(container,
-                              new Point(container.getWidth() / 2, container.getHeight() / 2),
-                              layer);
-        SwingUtilities.convertPointFromScreen(mousePos, layer);
+                              new Point(container.getWidth() / 2, container.getHeight() / 2), c);
+        SwingUtilities.convertPointFromScreen(mousePos, c);
         var pos = centerAt.calculatePosition(mousePos, containerPos);
-        Alignment alignment = Alignment.getAlignment(pos, size, layer.getBounds(), Alignment.SOUTH);
+        Alignment alignment = Alignment.getAlignment(pos, size, c.getBounds(), Alignment.SOUTH);
         tooltip.setAlignment(alignment);
         return alignment.relativePos(size, pos);
     }

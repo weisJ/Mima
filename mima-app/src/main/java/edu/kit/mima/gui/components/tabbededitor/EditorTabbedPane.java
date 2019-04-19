@@ -1,20 +1,12 @@
 package edu.kit.mima.gui.components.tabbededitor;
 
-import edu.kit.mima.gui.components.editor.Editor;
-import edu.kit.mima.util.ImageUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;
 import javax.swing.JTabbedPane;
-import javax.swing.SwingUtilities;
 import java.awt.Component;
-import java.awt.Image;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DragSource;
-import java.awt.dnd.DropTarget;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,15 +20,9 @@ public class EditorTabbedPane extends JTabbedPane {
     public static final String SELECTED_TAB_PROPERTY = "selectedTab";
     static final String NAME = "TabTransferData";
     static final DataFlavor FLAVOR = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType, NAME);
+    private final EditorDragSupport dragSupport;
 
-    @NotNull
-    final DraggingGlassPane glassPane;
     private final List<TabClosedEventHandler> handlerList = new ArrayList<>();
-    @NotNull
-    private final EditorDragListener listener;
-
-    int dropTargetIndex = -1;
-    int dropSourceIndex = -1;
     private int selectedTab;
     private TabAcceptor tabAcceptor = (component, index) -> true;
 
@@ -44,19 +30,13 @@ public class EditorTabbedPane extends JTabbedPane {
      * Create new Editor Tabbed Pane.
      */
     public EditorTabbedPane() {
-        glassPane = new DraggingGlassPane(this);
         setFocusable(false); //Prevent focus dotted line from appearing
         super.setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
         addChangeListener(e -> {
             firePropertyChange(SELECTED_TAB_PROPERTY, selectedTab, getSelectedIndex());
             selectedTab = getSelectedIndex();
         });
-        listener = new EditorDragListener(this);
-        var dropTargetListener = new CDropTargetListener(this);
-        new DropTarget(this, DnDConstants.ACTION_COPY_OR_MOVE, dropTargetListener, true);
-        new DragSource().createDefaultDragGestureRecognizer(this,
-                                                            DnDConstants.ACTION_COPY_OR_MOVE,
-                                                            listener);
+        dragSupport = new EditorDragSupport(this);
     }
 
     @NotNull
@@ -64,6 +44,7 @@ public class EditorTabbedPane extends JTabbedPane {
     public String getUIClassID() {
         return "EditorTabbedPaneUI";
     }
+
 
     @Override
     public void insertTab(final String title, final Icon icon,
@@ -111,6 +92,15 @@ public class EditorTabbedPane extends JTabbedPane {
     }
 
     /**
+     * Get the EditorDragSupport.
+     *
+     * @return the drag support.
+     */
+    public EditorDragSupport getDragSupport() {
+        return dragSupport;
+    }
+
+    /**
      * Get the {@link TabAcceptor}.
      *
      * @return current {@link TabAcceptor}
@@ -137,88 +127,5 @@ public class EditorTabbedPane extends JTabbedPane {
     public Rectangle getTabAreaBound() {
         final Rectangle firstTab = getUI().getTabBounds(this, 0);
         return new Rectangle(0, 0, getWidth(), firstTab.y + firstTab.height);
-    }
-
-    /**
-     * returns potential index for drop.
-     *
-     * @param point point given in the drop site component's coordinate
-     * @return returns potential index for drop.
-     */
-    private int getTargetTabIndex(@NotNull final Point point) {
-        if (getTabCount() == 0) {
-            return 0;
-        }
-        Rectangle rect;
-        for (int i = 0; i < dropSourceIndex; i++) {
-            rect = getBoundsAt(i);
-            if (rect.contains(point)) {
-                return i;
-            }
-        }
-        for (int i = dropSourceIndex; i < getTabCount(); i++) {
-            rect = getBoundsAt(i);
-            rect.x -= rect.width / 2;
-            if (rect.contains(point)) {
-                return i;
-            }
-        }
-        final Rectangle r = getBoundsAt(getTabCount() - 1);
-        r.setRect(r.x + r.width / 2, r.y, getWidth() - r.x, r.height);
-        return r.contains(point) ? getTabCount() : -1;
-    }
-
-    /*default*/
-    @NotNull
-    Point buildGhostLocation(@NotNull final Point location) {
-        Point ghostLocation = new Point(location);
-        ghostLocation.y = 0;
-        ghostLocation.x -= glassPane.getGhostWidth() / 2;
-        ghostLocation = SwingUtilities
-                .convertPoint(EditorTabbedPane.this, ghostLocation, glassPane);
-        ghostLocation.x = Math.min(Math.max(getX(), ghostLocation.x),
-                                   getX() + getWidth() - glassPane.getGhostWidth());
-        ghostLocation.y = Math.min(Math.max(getY(), ghostLocation.y),
-                                   getY() + getHeight() - glassPane.getGhostHeight());
-        return ghostLocation;
-    }
-
-    /*default*/ void initGlassPane(@NotNull final Component c, @NotNull final Point tabPos,
-                                   final int tabIndex) {
-        getRootPane().setGlassPane(glassPane);
-        final Rectangle compRect = getComponentAt(tabIndex).getBounds();
-        final var comp = getComponentAt(tabIndex);
-        Image compImage;
-        Image tabImage = ImageUtil.imageFromComponent(c, getBoundsAt(tabIndex));
-        if (comp instanceof Editor) {
-            compImage = ((Editor) comp).createPreviewImage();
-        } else {
-            compImage = ImageUtil.imageFromComponent(
-                    c, new Rectangle(compRect.x, compRect.y, Math.max(compRect.width, 200),
-                                     Math.max(compRect.height, 400)));
-        }
-        glassPane.setImage(tabImage);
-        glassPane.setExtendedImage(compImage);
-        dropSourceIndex = tabIndex;
-        dropTargetIndex = tabIndex;
-        getTabComponentAt(tabIndex).setVisible(false);
-        glassPane.setPoint(buildGhostLocation(tabPos));
-        glassPane.setVisible(true);
-    }
-
-    @Override
-    public Rectangle getBoundsAt(int index) {
-        var bounds = super.getBoundsAt(index);
-        bounds.width += 1;
-        bounds.height += 1;
-        return bounds;
-    }
-
-    /*default*/ void initTarget(@NotNull final Point location) {
-        final int newLocation = getTargetTabIndex(location);
-        if (newLocation < 0 && listener.isDragging()) {
-            return;
-        }
-        dropTargetIndex = newLocation;
     }
 }

@@ -5,7 +5,9 @@ import edu.kit.mima.core.Debugger;
 import edu.kit.mima.core.MimaCompiler;
 import edu.kit.mima.core.MimaConstants;
 import edu.kit.mima.core.MimaRunner;
+import edu.kit.mima.core.MimaRuntimeException;
 import edu.kit.mima.core.Program;
+import edu.kit.mima.core.interpretation.InterpreterException;
 import edu.kit.mima.logger.LoadingIndicator;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
@@ -73,8 +75,6 @@ public class RunActions {
     }
 
     private void executionAction(final boolean debug) {
-        Thread.currentThread().setUncaughtExceptionHandler(
-                (t, e) -> LoadingIndicator.error("Execution failed: " + e.getMessage()));
         runThread = new Thread(() -> {
             String file = mimaUI.currentFileManager().getLastFile();
             App.logger.log("Executing program: " + FileName.shorten(file));
@@ -93,6 +93,18 @@ public class RunActions {
                 mimaRunner.start(v -> LoadingIndicator.stop("Executing (done)"));
             }
         });
+        final Thread.UncaughtExceptionHandler exceptionHandler = (t, e) -> {
+            if (e instanceof MimaRuntimeException || e instanceof InterpreterException) {
+                LoadingIndicator.error("Execution " + "failed: " + e.getMessage());
+            } else {
+                throw new RuntimeException(e);
+            }
+        };
+        /*
+         * Register exception handler for the AWT event thread and for the execution thread.
+         */
+        Thread.currentThread().setUncaughtExceptionHandler(exceptionHandler);
+        runThread.setUncaughtExceptionHandler(exceptionHandler);
         runThread.start();
     }
 

@@ -5,10 +5,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.JComponent;
-import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
-import java.awt.Color;
-import java.awt.Graphics;
 
 /**
  * UI class for {@link TabFrame}.
@@ -17,9 +14,6 @@ import java.awt.Graphics;
  * @since 2018
  */
 public class TabFrameUI extends ComponentUI {
-
-    private Color lineColor;
-    private TabFrameLayout layout;
 
     @NotNull
     @Contract("_ -> new")
@@ -32,44 +26,9 @@ public class TabFrameUI extends ComponentUI {
     public void installUI(@NotNull JComponent c) {
         super.installUI(c);
         TabFrame tabFrame = (TabFrame) c;
-        layout = new TabFrameLayout(tabFrame);
+        var layout = new TabFrameLayout(tabFrame);
         c.setLayout(layout);
-        lineColor = UIManager.getColor("TabFrame.line");
     }
-
-    @Override
-    public void paint(@NotNull Graphics g, @NotNull JComponent c) {
-        layout.layoutContainer(c);
-        super.paint(g, c);
-        g.setColor(lineColor);
-        //Bottom
-        var bottomRect = layout.bottomRect;
-        g.drawLine(bottomRect.x, bottomRect.y,
-                   bottomRect.x + bottomRect.width - 1, bottomRect.y);
-        //Top
-        var topRect = layout.topRect;
-        g.drawLine(topRect.x, topRect.y + topRect.height - 1,
-                   topRect.x + topRect.width - 1, topRect.y + topRect.height - 1);
-        //Left
-        var leftRect = layout.leftRect;
-        g.drawLine(leftRect.x + leftRect.width - 1, leftRect.y,
-                   leftRect.x + leftRect.width - 1, leftRect.y + leftRect.height - 1);
-        //Right
-        var rightRect = layout.rightRect;
-        g.drawLine(rightRect.x, rightRect.y, rightRect.x, rightRect.y + rightRect.height - 1);
-
-        if (topRect.height == 0) {
-            g.drawLine(leftRect.x, leftRect.y, leftRect.x + leftRect.width, leftRect.y);
-            g.drawLine(rightRect.x, rightRect.y, rightRect.x + rightRect.width, rightRect.y);
-        }
-        if (bottomRect.height == 0) {
-            g.drawLine(leftRect.x, leftRect.y + leftRect.height - 1,
-                       leftRect.x + leftRect.width, leftRect.y + leftRect.height - 1);
-            g.drawLine(rightRect.x, rightRect.y + rightRect.height - 1,
-                       rightRect.x + rightRect.width, rightRect.y + rightRect.height - 1);
-        }
-    }
-
 
     @Override
     public int getBaseline(@NotNull JComponent c, int width, int height) {
