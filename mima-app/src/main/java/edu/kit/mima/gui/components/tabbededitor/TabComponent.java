@@ -49,7 +49,7 @@ public class TabComponent extends JPanel {
         final ButtonTab button = new ButtonTab();
         button.addMouseListener((MouseClickListener) e -> onClick.accept(TabComponent.this));
         add(button);
-        setBorder(new EmptyBorder(3, 0, 2, 0));
+        setBorder(new EmptyBorder(3, 0, 2, 5));
         setOpaque(false);
     }
 

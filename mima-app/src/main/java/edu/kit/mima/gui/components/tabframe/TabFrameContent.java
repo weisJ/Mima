@@ -342,4 +342,11 @@ public class TabFrameContent extends JPanel {
     public boolean[] getStatus() {
         return enabled;
     }
+
+    public void updateSizes() {
+        setupSplitPanes((s, o) -> s.setDividerLocation(
+                Math.max(s.getDividerLocation(), s.getMinimumDividerLocation())), null);
+        setupSplitterPanes((s, o) -> s.setDividerLocation(
+                Math.max(s.getDividerLocation(), s.getMinimumDividerLocation())), null);
+    }
 }

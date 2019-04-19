@@ -307,8 +307,7 @@ public class TransformUI extends MouseEventUI<JComponent> {
     public AffineTransform getPreferredTransform(Dimension size,
                                                  JXLayer<? extends JComponent> layer) {
 
-        return this.transformModel.getPreferredTransform(
-                size, layer);
+        return this.transformModel.getPreferredTransform(size, layer);
     }
 
     /**
@@ -525,8 +524,7 @@ public class TransformUI extends MouseEventUI<JComponent> {
         this.view = view;
         if (delegatePossible) {
             if (this.view != null) {
-                SwingUtilities3.setDelegateRepaintManager(this.view,
-                                                          wrappedManager);
+                SwingUtilities3.setDelegateRepaintManager(this.view, wrappedManager);
             }
         }
         setDirty(true);
@@ -576,6 +574,10 @@ public class TransformUI extends MouseEventUI<JComponent> {
                                     @NotNull JXLayer<? extends JComponent> layer) {
         JComponent view = layer.getView();
         if (view != null) {
+            if (layer.isOpaque()) {
+                g2.setColor(view.getBackground());
+                g2.fillRect(0, 0, layer.getWidth(), layer.getHeight());
+            }
             if (view.getX() < 0 || view.getY() < 0) {
                 setToNoDoubleBuffering(view);
                 g2.translate(view.getX(), view.getY());

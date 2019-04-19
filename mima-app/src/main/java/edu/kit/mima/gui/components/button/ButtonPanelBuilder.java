@@ -2,9 +2,9 @@ package edu.kit.mima.gui.components.button;
 
 import edu.kit.mima.api.observing.ClassObservable;
 import edu.kit.mima.api.observing.Observable;
-import edu.kit.mima.gui.components.tooltip.ITooltip;
-import edu.kit.mima.gui.components.tooltip.Tooltip;
+import edu.kit.mima.gui.components.tooltip.DefaultTooltipWindow;
 import edu.kit.mima.gui.components.tooltip.TooltipUtil;
+import edu.kit.mima.gui.components.tooltip.TooltipWindow;
 import edu.kit.mima.util.BindingUtil;
 import edu.kit.mima.util.HSLColor;
 import org.jetbrains.annotations.Contract;
@@ -312,12 +312,12 @@ public final class ButtonPanelBuilder {
          * Set tooltip component.
          *
          * @param component component for tooltip
-         * @param <T>       component bust be of type {@link JComponent} and {@link ITooltip}.
+         * @param <T>       DefaultTooltipWindow type.
          * @return this
          */
         @Contract("_ -> this")
         @NotNull
-        public <T extends JComponent & ITooltip> ButtonBuilder setTooltip(
+        public <T extends TooltipWindow> ButtonBuilder setTooltip(
                 @NotNull final T component) {
             TooltipUtil.createDefaultTooltip(button, component);
             button.setToolTipText(null);
@@ -332,7 +332,7 @@ public final class ButtonPanelBuilder {
          */
         @NotNull
         public ButtonBuilder setTooltip(@NotNull final String text) {
-            return setTooltip(new Tooltip(text));
+            return setTooltip(new DefaultTooltipWindow(text));
         }
 
         /**

@@ -27,8 +27,8 @@ public final class TooltipUtil {
         assert false : "utility class constructor";
     }
 
-    public static <T extends JComponent & ITooltip> void createDefaultTooltip(final JComponent c,
-                                                                              final T tooltip) {
+    public static <T extends TooltipWindow> void createDefaultTooltip(final JComponent c,
+                                                                      final T tooltip) {
         new TooltipComponent<>(c, tooltip, DELAY, VANISH_DELAY, AlignPolicy.COMPONENT_BOTH)
                 .setActive(true);
     }
@@ -36,10 +36,10 @@ public final class TooltipUtil {
     /**
      * Show tooltip at given current mouse position.
      *
-     * @param tooltip Tooltip to show.
-     * @param <T>     Tooltip must be of type {@link JComponent} and implement {@link ITooltip}.
+     * @param tooltip DefaultTooltipWindow to show.
+     * @param <T>     DefaultTooltipWindow type.
      */
-    public static <T extends JComponent & ITooltip> void showTooltip(@NotNull final T tooltip) {
+    public static <T extends TooltipWindow> void showTooltip(@NotNull final T tooltip) {
         final Window window = findWindow();
         if (window instanceof JFrame) {
             final Point p = MouseInfo.getPointerInfo().getLocation();
@@ -51,12 +51,12 @@ public final class TooltipUtil {
     /**
      * Show tooltip at given position.
      *
-     * @param tooltip Tooltip to show.
+     * @param tooltip DefaultTooltipWindow to show.
      * @param p       position to show at.
-     * @param <T>     Tooltip must be of type {@link JComponent} and implement {@link ITooltip}.
+     * @param <T>     DefaultTooltipWindow type.
      */
-    public static <T extends JComponent & ITooltip> void showTooltip(@NotNull final T tooltip,
-                                                                     final Point p) {
+    public static <T extends TooltipWindow> void showTooltip(@NotNull final T tooltip,
+                                                             final Point p) {
         final Window window = findWindow();
         if (window instanceof JFrame) {
             showTooltip(tooltip, ((JFrame) window).getRootPane(), p, AlignPolicy.MOUSE_BOTH);
@@ -66,14 +66,14 @@ public final class TooltipUtil {
     /**
      * Show the given tooltip once.
      *
-     * @param tooltip   Tooltip to show.
+     * @param tooltip   DefaultTooltipWindow to show.
      * @param container container to tooltip should be hooked to.
      * @param p         position to show at. Choosing a alignment relative to the component may
      *                  ignore the x or y value of the point.
      * @param alignAt   alignment of tooltip relative to mouse/component.
-     * @param <T>       Tooltip must be of type {@link JComponent} and implement {@link ITooltip}.
+     * @param <T>       DefaultTooltipWindow type.
      */
-    public static <T extends JComponent & ITooltip> void showTooltip(
+    public static <T extends TooltipWindow> void showTooltip(
             @NotNull final T tooltip,
             @NotNull final JComponent container,
             final Point p,

@@ -22,7 +22,7 @@ public class TabbedPaneTest extends JFrame {
             for (int i = 0; i < 10; i++) {
                 var editor = new Editor();
                 editor.setText("Test".repeat(i + 1));
-                tabbedPane.addTab("Test".repeat(i + 1), editor);
+                tabbedPane.addTab("Test".repeat(i + 1) + " " + i, editor);
             }
             frame.add(tabbedPane);
             frame.setLocationRelativeTo(null);

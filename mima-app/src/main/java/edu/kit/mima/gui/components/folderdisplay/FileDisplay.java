@@ -33,7 +33,6 @@ public class FileDisplay extends JPanel {
     private File file;
     private FilePopupActionHandler handler;
     private Component[] dirComps;
-    @Nullable
     private Component root;
     private int firstVisible;
 
@@ -87,7 +86,8 @@ public class FileDisplay extends JPanel {
         if (root != null) {
             remove(root);
         }
-        final int beginIndex = Math.max(directories.length - max, 0);
+        final int beginIndex = Math.min(Math.max(directories.length - max, 0),
+                                        directories.length - 1);
         final StringBuilder sb = new StringBuilder();
         int index = 0;
         for (int i = 0; i < beginIndex; i++) {
@@ -105,7 +105,9 @@ public class FileDisplay extends JPanel {
         } else {
             root = new FolderDisplay(null, new File(sb.toString()), Icons.FOLDER_ROOT, handler);
         }
-        add(root, 0);
+        if (max > 0) {
+            add(root, 0);
+        }
     }
 
     /**

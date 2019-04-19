@@ -151,17 +151,6 @@ public class SeamlessSplitPane extends JSplitPane {
         public BasicSplitPaneDivider createDefaultDivider() {
             return new ZeroSizeDivider(this);
         }
-
-        @Override
-        public int getMaximumDividerLocation(@NotNull JSplitPane jc) {
-            return jc.getOrientation() == JSplitPane.HORIZONTAL_SPLIT
-                   ? jc.getWidth() : jc.getHeight();
-        }
-
-        @Override
-        public int getMinimumDividerLocation(JSplitPane jc) {
-            return 0;
-        }
     }
 
     private class ZeroSizeDivider extends BasicSplitPaneDivider {

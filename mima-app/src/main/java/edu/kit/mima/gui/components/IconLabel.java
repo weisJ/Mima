@@ -30,6 +30,7 @@ public class IconLabel extends JPanel {
     protected IconPanel iconPanel;
     private int alignment;
     private int horizontalGap;
+    private int iconGap;
 
     /**
      * Create new Icon label.
@@ -39,11 +40,11 @@ public class IconLabel extends JPanel {
      * @param alignment     the alignment. one of {@link #LEFT},{@link #CENTER} or {@link #RIGHT}
      * @param horizontalGap the horizontal gap before and after the label.
      */
-    public IconLabel(@Nullable final Icon icon, final String title, int alignment,
-                     int horizontalGap) {
+    public IconLabel(@Nullable final Icon icon, final String title, final int alignment,
+                     final int horizontalGap, final int iconGap) {
         label = new JLabel(title);
         iconPanel = new IconPanel(icon == null ? new EmptyIcon(0, 0) : icon);
-
+        this.iconGap = iconGap;
         label.setOpaque(false);
         iconPanel.setOpaque(false);
         this.alignment = alignment;
@@ -61,7 +62,7 @@ public class IconLabel extends JPanel {
      * @param alignment the alignment. one of {@link #LEFT},{@link #CENTER} or {@link #RIGHT}
      */
     public IconLabel(final Icon icon, final String title, int alignment) {
-        this(icon, title, alignment, 5);
+        this(icon, title, alignment, 5, 5);
     }
 
     /**
@@ -71,7 +72,13 @@ public class IconLabel extends JPanel {
      * @param title the label text.
      */
     public IconLabel(final Icon icon, final String title) {
-        this(icon, title, CENTER, 5);
+        this(icon, title, CENTER, 5, 5);
+    }
+
+    @Override
+    public void paint(Graphics g) {
+        getLayout().layoutContainer(this);
+        super.paint(g);
     }
 
     /**
@@ -100,12 +107,6 @@ public class IconLabel extends JPanel {
      */
     public void setTitle(final String title) {
         label.setText(title);
-    }
-
-    @Override
-    public void paint(Graphics g) {
-        getLayout().layoutContainer(this);
-        super.paint(g);
     }
 
     /**
@@ -144,10 +145,7 @@ public class IconLabel extends JPanel {
         @NotNull
         @Override
         public Dimension preferredLayoutSize(Container parent) {
-            var lm = label.getPreferredSize();
-            var im = iconPanel.getPreferredSize();
-            return new Dimension(lm.width + im.width + 2 * horizontalGap,
-                                 Math.max(lm.height, im.height) + 1);
+            return minimumLayoutSize(parent);
         }
 
         @NotNull
@@ -160,7 +158,8 @@ public class IconLabel extends JPanel {
                 case CENTER -> 2 * horizontalGap;
                 default -> 0;
             };
-            return new Dimension(lm.width + im.width + gap, Math.max(lm.height, im.height) + 1);
+            return new Dimension(lm.width + im.width + gap + iconGap,
+                                 Math.max(lm.height, im.height) + 1);
         }
 
         @Override
@@ -172,10 +171,10 @@ public class IconLabel extends JPanel {
                 case RIGHT -> parent.getWidth() - b.width - ib.width - horizontalGap;
                 default -> parent.getWidth() / 2 - (b.width + ib.width) / 2;
             };
-            int y = parent.getHeight() - b.height - 2;
-            int iy = parent.getHeight() - ib.height - 2;
+            int y = (parent.getHeight() - b.height) / 2;
+            int iy = (parent.getHeight() - ib.height) / 2;
             iconPanel.setBounds(x, iy, ib.width, ib.height);
-            label.setBounds(x + ib.width + 1, y, b.width, b.height);
+            label.setBounds(x + ib.width + iconGap, y, b.width, b.height);
         }
     }
 }

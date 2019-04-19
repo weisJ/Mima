@@ -8,7 +8,6 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.Icon;
 import javax.swing.UIManager;
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -43,7 +42,7 @@ public class TabFrameTabComponent extends IconLabel {
      */
     public TabFrameTabComponent(final String title, final Icon icon, final Alignment alignment,
                                 final int index, @NotNull final TabFrameLayout parent) {
-        super(icon, title, CENTER, 20);
+        super(icon, title, CENTER, 20, 2);
         this.alignment = alignment;
         this.title = title;
         this.index = index;
@@ -59,11 +58,13 @@ public class TabFrameTabComponent extends IconLabel {
             @Override
             public void mouseEntered(MouseEvent e) {
                 hover = true;
+                repaint();
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
                 hover = false;
+                repaint();
             }
         });
         setOrientation(Alignment.WEST);
@@ -80,14 +81,6 @@ public class TabFrameTabComponent extends IconLabel {
      */
     public Alignment getAlignment() {
         return alignment;
-    }
-
-    @Override
-    public void paint(@NotNull Graphics g) {
-        getLayout().layoutContainer(this);
-        g.setColor(getBackground());
-        g.fillRect(0, 0, getWidth() - 1, getHeight() - 1);
-        super.paint(g);
     }
 
     /**
@@ -160,6 +153,7 @@ public class TabFrameTabComponent extends IconLabel {
     public void setSelected(boolean selected) {
         this.selected = selected;
         label.setForeground(selected ? selectedFontColor : defaultFontColor);
+        repaint();
     }
 
     /**

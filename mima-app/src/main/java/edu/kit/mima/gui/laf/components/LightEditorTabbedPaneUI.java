@@ -40,20 +40,19 @@ public class LightEditorTabbedPaneUI extends EditorTabbedPaneUI {
     }
 
     @Override
-    protected void paintTabArea(@NotNull Graphics graphics, int tabPlacement, int selectedIndex) {
-        super.paintTabArea(graphics, tabPlacement, selectedIndex);
+    protected void paintTabArea(@NotNull Graphics g, int tabPlacement, int selectedIndex) {
+        super.paintTabArea(g, tabPlacement, selectedIndex);
         if (selectedIndex >= 0) {
             var bounds = tabbedPane.getTabAreaBound();
             var selectedBounds = tabbedPane.getBoundsAt(selectedIndex);
             int height = bounds.height / 5;
             int yOff = bounds.height - height;
-            graphics.setColor(selectedBackground);
-            graphics.fillRect(0, yOff, bounds.width - 1, height);
-            graphics.setColor(tabBorderColor);
-            graphics.drawLine(-1, yOff, selectedBounds.x - 1, yOff);
-            graphics.drawLine(selectedBounds.x + selectedBounds.width - 1, yOff, bounds.width,
-                              yOff);
-            graphics.drawLine(0, bounds.height - 1, bounds.width, bounds.height - 1);
+            g.setColor(selectedBackground);
+            g.fillRect(0, yOff, bounds.width - 1, height);
+            g.setColor(tabBorderColor);
+            g.drawLine(-1, yOff, selectedBounds.x - 1, yOff);
+            g.drawLine(selectedBounds.x + selectedBounds.width - 1, yOff, bounds.width, yOff);
+            g.drawLine(0, bounds.height - 1, bounds.width, bounds.height - 1);
 
         }
     }

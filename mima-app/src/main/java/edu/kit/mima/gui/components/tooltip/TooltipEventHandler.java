@@ -13,7 +13,7 @@ import java.awt.event.MouseMotionAdapter;
 import java.util.function.BiConsumer;
 
 /**
- * Event handler for Tooltip display management.
+ * Event handler for DefaultTooltipWindow display management.
  *
  * @author Jannis Weis
  * @since 2018

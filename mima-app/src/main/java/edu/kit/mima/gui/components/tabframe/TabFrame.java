@@ -55,8 +55,8 @@ public class TabFrame extends JComponent {
 
     @Override
     public void paint(Graphics g) {
-        super.paint(g);
-        getUI().paint(g, this);
+        paintChildren(g);
+        //        getUI().paint(g, this);
     }
 
     public void insertTab(@NotNull final PopupComponent c, final String title, final Icon icon,

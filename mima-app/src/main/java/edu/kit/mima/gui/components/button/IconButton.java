@@ -99,7 +99,7 @@ public class IconButton extends JButton {
     protected void paintComponent(@NotNull final Graphics g) {
         final Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        if (isEnabled() && hover) {
+        if (isEnabled() && isRolloverEnabled() && hover) {
             if (clicking) {
                 g2.setColor(highlightClick);
             } else {
