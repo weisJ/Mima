@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.JPopupMenu;
 import java.awt.Component;
+import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -20,6 +21,7 @@ public class PopupListener extends MouseAdapter {
     private final boolean attachToComponent;
     private final boolean rightAlign;
     private JPopupMenu popupMenu;
+    private boolean useAbsolutePos;
 
     /**
      * Create new PopupListener.
@@ -56,8 +58,18 @@ public class PopupListener extends MouseAdapter {
         this.popupMenu = menu;
     }
 
+    /**
+     * If set to true the popup menus position will be will not be dependent of the components
+     * coordinate system.
+     *
+     * @param useAbsolutePos true if position should be use from position on screen.
+     */
+    public void setUseAbsolutePos(boolean useAbsolutePos) {
+        this.useAbsolutePos = useAbsolutePos;
+    }
+
     @Override
-    public void mouseReleased(@NotNull final MouseEvent e) {
+    public void mouseClicked(@NotNull final MouseEvent e) {
         maybeShowPopup(e);
     }
 
@@ -71,8 +83,16 @@ public class PopupListener extends MouseAdapter {
             return;
         }
         if (e.getButton() == mouseButton) {
-            var p = calculatePos(e.getPoint(), e.getComponent());
-            popupMenu.show(e.getComponent(), p.x, p.y);
+            var pos = new Point();
+            if (useAbsolutePos) {
+                pos = calculatePos(MouseInfo.getPointerInfo().getLocation(), e.getComponent());
+                popupMenu.setInvoker(e.getComponent());
+                popupMenu.setLocation(pos.x, pos.y);
+                popupMenu.setVisible(true);
+            } else {
+                pos = calculatePos(e.getPoint(), e.getComponent());
+                popupMenu.show(e.getComponent(), pos.x, pos.y);
+            }
         }
     }
 

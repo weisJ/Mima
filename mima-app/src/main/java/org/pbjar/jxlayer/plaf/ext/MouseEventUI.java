@@ -34,6 +34,7 @@ package org.pbjar.jxlayer.plaf.ext;
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
 import org.jdesktop.jxlayer.plaf.LayerUI;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -223,6 +224,7 @@ public class MouseEventUI<V extends JComponent> extends AbstractLayerUI<V> {
         }
     }
 
+    @Contract("null -> null")
     @Nullable
     private Component findWheelListenerComponent(@Nullable Component target) {
         if (target == null) {
@@ -249,7 +251,10 @@ public class MouseEventUI<V extends JComponent> extends AbstractLayerUI<V> {
     @Nullable
     private Component getListeningComponent(@NotNull MouseEvent event, @NotNull Component component) {
         return switch (event.getID()) {
-            case (MouseEvent.MOUSE_CLICKED), (MouseEvent.MOUSE_ENTERED), (MouseEvent.MOUSE_EXITED), (MouseEvent.MOUSE_PRESSED), (MouseEvent.MOUSE_RELEASED) -> getMouseListeningComponent(component);
+            case (MouseEvent.MOUSE_CLICKED), (MouseEvent.MOUSE_ENTERED),
+                    (MouseEvent.MOUSE_EXITED), (MouseEvent.MOUSE_PRESSED),
+                    (MouseEvent.MOUSE_RELEASED) -> getMouseListeningComponent(
+                    component);
             case (MouseEvent.MOUSE_DRAGGED), (MouseEvent.MOUSE_MOVED) -> getMouseMotionListeningComponent(component);
             case (MouseEvent.MOUSE_WHEEL) -> getMouseWheelListeningComponent(component);
             default -> null;
@@ -340,6 +345,7 @@ public class MouseEventUI<V extends JComponent> extends AbstractLayerUI<V> {
                     if (newEvent != null) {
                         lastPressedTarget = newEvent.getComponent();
                     }
+                    System.out.println(originalEvent);
                     break;
                 case MouseEvent.MOUSE_RELEASED:
                     newEvent =

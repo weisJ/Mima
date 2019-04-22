@@ -262,6 +262,7 @@ public class TransformUI extends MouseEventUI<JComponent> {
      * @return the {@link TransformModel}
      * @see #setModel(TransformModel)
      */
+    @Contract(pure = true)
     @Nullable
     public final TransformModel getModel() {
         return transformModel;
