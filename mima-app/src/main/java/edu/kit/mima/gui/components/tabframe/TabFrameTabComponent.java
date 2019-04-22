@@ -2,12 +2,18 @@ package edu.kit.mima.gui.components.tabframe;
 
 import edu.kit.mima.gui.components.IconLabel;
 import edu.kit.mima.gui.components.alignment.Alignment;
+import edu.kit.mima.gui.components.listeners.PopupListener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.AbstractAction;
 import javax.swing.Icon;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import java.awt.Color;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -51,8 +57,10 @@ public class TabFrameTabComponent extends IconLabel {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                setSelected(!selected);
-                parent.notifySelectChange(TabFrameTabComponent.this);
+                if (SwingUtilities.isLeftMouseButton(e)) {
+                    setSelected(!selected);
+                    parent.notifySelectChange(TabFrameTabComponent.this);
+                }
             }
 
             @Override
@@ -67,11 +75,37 @@ public class TabFrameTabComponent extends IconLabel {
                 repaint();
             }
         });
+        var menu = new JPopupMenu();
+        var remove = new JMenuItem();
+        remove.setAction(new AbstractAction("Remove from Sidebar") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                parent.removeTab(alignment, TabFrameTabComponent.this.index);
+            }
+        });
+        menu.add(remove);
+        var hide = new JMenuItem();
+        hide.setAction(new AbstractAction("Hide") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setSelected(false);
+                parent.notifySelectChange(TabFrameTabComponent.this);
+            }
+        });
+        menu.addSeparator();
+        menu.add(hide);
+        var listener = new PopupListener(menu);
+        addMouseListener(listener);
+
         setOrientation(Alignment.WEST);
     }
 
     public int getIndex() {
         return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
     }
 
     /**

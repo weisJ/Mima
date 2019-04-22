@@ -9,7 +9,7 @@ import java.awt.BorderLayout;
  * @author Jannis Weis
  * @since 2018
  */
-public class ButtonTest {
+public class SearchFieldDemo {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

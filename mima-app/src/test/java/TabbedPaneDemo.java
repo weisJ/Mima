@@ -10,7 +10,7 @@ import java.awt.BorderLayout;
  * @author Jannis Weis
  * @since 2018
  */
-public class TabbedPaneTest extends JFrame {
+public class TabbedPaneDemo extends JFrame {
 
     public static void main(final String[] args) {
         SwingUtilities.invokeLater(() -> {
@@ -21,8 +21,8 @@ public class TabbedPaneTest extends JFrame {
             final var tabbedPane = new EditorTabbedPane();
             for (int i = 0; i < 10; i++) {
                 var editor = new Editor();
-                editor.setText("Test".repeat(i + 1));
-                tabbedPane.addTab("Test".repeat(i + 1) + " " + i, editor);
+                editor.setText("TabFrameDemo".repeat(i + 1));
+                tabbedPane.addTab("TabFrameDemo".repeat(i + 1) + " " + i, editor);
             }
             frame.add(tabbedPane);
             frame.setLocationRelativeTo(null);

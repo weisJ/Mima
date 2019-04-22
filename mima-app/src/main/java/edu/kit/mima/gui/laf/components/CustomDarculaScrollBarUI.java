@@ -91,7 +91,9 @@ public class CustomDarculaScrollBarUI extends DarculaScrollBarUI {
     private MouseWheelListener wheelListener = e -> {
         if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
             scrollbar.setValueIsAdjusting(true);
-            scrollbar.setValue(scrollbar.getValue() + e.getUnitsToScroll());
+            scrollbar.setValue(scrollbar.getValue()
+                               + Integer.signum(e.getUnitsToScroll())
+                                 * scrollbar.getUnitIncrement());
             scrollbar.setValueIsAdjusting(false);
         }
     };

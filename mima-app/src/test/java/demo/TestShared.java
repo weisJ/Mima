@@ -24,6 +24,7 @@
 package demo;
 
 import org.jdesktop.jxlayer.JXLayer;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.pbjar.jxlayer.plaf.misc.GeneralLayerUI;
 import org.pbjar.jxlayer.plaf.misc.HideCursorUI;
@@ -104,6 +105,7 @@ public class TestShared {
 
             private static final long serialVersionUID = 1L;
 
+            @Contract(pure = true)
             @Override
             public boolean getScrollableTracksViewportWidth() {
                 return true;

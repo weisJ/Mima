@@ -58,6 +58,16 @@
             <artifactId>batik-transcoder</artifactId>
             <version>1.11</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>batik-dom</artifactId>
+            <version>1.11</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>batik-svg-dom</artifactId>
+            <version>1.11</version>
+        </dependency>
     </dependencies>
 
     <build>

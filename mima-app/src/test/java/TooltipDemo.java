@@ -17,7 +17,7 @@ import java.awt.GridLayout;
  * @author Jannis Weis
  * @since 2018
  */
-public class TooltipPresentation {
+public class TooltipDemo {
 
     public static void main(final String[] args) {
         SwingUtilities.invokeLater(() -> {

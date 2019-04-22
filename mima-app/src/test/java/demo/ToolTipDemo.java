@@ -60,7 +60,7 @@ public class ToolTipDemo extends JTextPane {
     public static void main(String[] args) {
         TransformUI.prepareForJTextComponent();
         SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Test tool tip");
+            JFrame frame = new JFrame("TabFrameDemo tool tip");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             JPanel content = new JPanel(new GridLayout(0, 3));
             for (int index = 0; index < 9; index++) {

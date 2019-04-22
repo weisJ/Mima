@@ -1,190 +1,125 @@
 package edu.kit.mima.gui.icons;
 
+import org.apache.batik.anim.dom.SAXSVGDocumentFactory;
+import org.apache.batik.bridge.BridgeContext;
+import org.apache.batik.bridge.DocumentLoader;
+import org.apache.batik.bridge.GVTBuilder;
+import org.apache.batik.bridge.UserAgent;
 import org.apache.batik.bridge.UserAgentAdapter;
-import org.apache.batik.transcoder.TranscoderException;
-import org.apache.batik.transcoder.TranscoderInput;
-import org.apache.batik.transcoder.TranscoderOutput;
-import org.apache.batik.transcoder.image.ImageTranscoder;
+import org.apache.batik.dom.svg.SVGDocumentFactory;
+import org.apache.batik.gvt.GraphicsNode;
+import org.apache.batik.util.XMLResourceDescriptor;
 import org.jetbrains.annotations.NotNull;
-import org.w3c.dom.Document;
+import org.w3c.dom.svg.SVGDocument;
 
 import javax.swing.Icon;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.geom.Dimension2D;
-import java.awt.image.BufferedImage;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Arrays;
 
 /**
- * A Swing Icon that draws an SVG image.
+ * Icon from SVG image.
  *
- * @author <a href="mailto:cam%40mcc%2eid%2eau">Cameron McCormack</a>
+ * @author Jannis Weis
+ * @since 2019
  */
-public class SVGIcon extends UserAgentAdapter implements Icon {
+public class SVGIcon implements Icon {
+
+    private final int width;
+    private final int height;
+
+    private final int displayWidth;
+    private final int displayHeight;
+    private GraphicsNode svgIcon;
 
     /**
-     * The BufferedImage generated from the SVG document.
-     */
-    protected BufferedImage bufferedImage;
-
-    /**
-     * The width of the rendered image.
-     */
-    protected int width;
-
-    /**
-     * The height of the rendered image.
-     */
-    protected int height;
-
-    /**
-     * Create a new SVGIcon object.
+     * Method to fetch the SVG icon from a url.
      *
-     * @param uri The URI to read the SVG document from.
-     * @throws TranscoderException if file cannot be transcoded.
+     * @param url the url from which to fetch the SVG icon.
+     * @param displayWidth display width of icon.
+     * @param displayHeight display height of icon.
+     * @throws IOException if url can't be fetched.
      */
-    public SVGIcon(final String uri) throws TranscoderException {
-        this(uri, 0, 0);
-    }
+    public SVGIcon(@NotNull final URL url, final int displayWidth, final int displayHeight)
+            throws IOException {
+        this.displayHeight = displayHeight;
+        this.displayWidth = displayWidth;
 
-    /**
-     * Create a new SVGIcon object.
-     *
-     * @param uri The URI to read the SVG document from.
-     * @param w   The width of the icon.
-     * @param h   The height of the icon.
-     * @throws TranscoderException if file cannot be transcoded.
-     */
-    public SVGIcon(final String uri, final int w, final int h) throws TranscoderException {
-        generateBufferedImage(new TranscoderInput(uri), w, h);
-    }
+        String xmlParser = XMLResourceDescriptor.getXMLParserClassName();
+        SVGDocumentFactory documentFactory = new SAXSVGDocumentFactory(xmlParser);
+        SVGDocument doc = documentFactory.createSVGDocument(url.toString());
 
-    /**
-     * Create a new SVGIcon object.
-     *
-     * @param doc The SVG document.
-     * @throws TranscoderException if file cannot be transcoded.
-     */
-    public SVGIcon(final Document doc) throws TranscoderException {
-        this(doc, 0, 0);
-    }
+        var element = doc.getDocumentElement();
 
-    /**
-     * Create a new SVGIcon object.
-     *
-     * @param doc The SVG document.
-     * @param w   The width of the icon.
-     * @param h   The height of the icon.
-     * @throws TranscoderException if file cannot be transcoded.
-     */
-    public SVGIcon(final Document doc, final int w, final int h) throws TranscoderException {
-        generateBufferedImage(new TranscoderInput(doc), w, h);
-    }
 
-    /**
-     * Generate the BufferedImage.
-     */
-    protected void generateBufferedImage(@NotNull final TranscoderInput in,
-                                         final int w, final int h)
-            throws TranscoderException {
-        final BufferedImageTranscoder t = new BufferedImageTranscoder();
-        if (w != 0 && h != 0) {
-            t.setDimensions(w, h);
+        UserAgent userAgent = new UserAgentAdapter();
+        DocumentLoader loader = new DocumentLoader(userAgent);
+
+        BridgeContext bridgeContext = new BridgeContext(userAgent, loader);
+        bridgeContext.setDynamicState(BridgeContext.STATIC);
+
+        GVTBuilder builder = new GVTBuilder();
+        this.svgIcon = builder.build(bridgeContext, doc);
+        if (!element.hasAttribute("viewBox")) {
+            width = (int) svgIcon.getPrimitiveBounds().getWidth();
+            height = (int) svgIcon.getPrimitiveBounds().getHeight();
+        } else {
+            var viewBox = element.getAttribute("viewBox");
+            int[] bounds = Arrays.stream(viewBox.split(" ", 4)).mapToInt(
+                    Integer::parseInt).toArray();
+            width = bounds[2] - bounds[0];
+            height = bounds[3] - bounds[1];
         }
-        t.transcode(in, null);
-        bufferedImage = t.getBufferedImage();
-        width = bufferedImage.getWidth();
-        height = bufferedImage.getHeight();
+    }
+
+    private void renderIcon(@NotNull Graphics2D gc, int width, int height, double angleRadians) {
+        gc.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        double scaleX = (double) width / this.width;
+        double scaleY = (double) height / this.height;
+
+        AffineTransform affineTransform = new AffineTransform();
+        affineTransform.translate(-width / 2.0, -height / 2.0);
+        affineTransform.scale(scaleX, scaleY);
+        affineTransform.translate((width / scaleX) / 2.0, (height / scaleY) / 2.0);
+        if (angleRadians != 0) {
+            affineTransform.rotate(angleRadians, (width / scaleX) / 2.0, (height / scaleY) / 2.0);
+        }
+        svgIcon.setTransform(affineTransform);
+        svgIcon.paint(gc);
     }
 
     /**
-     * Returns the icon's width.
+     *   Paint the icon with rotation.
      *
-     * @return icon width
+     * @param c the parent component.
+     * @param g the graphics object.
+     * @param x the x coordinate
+     * @param y the y coordinate
+     * @param rotation the rotation in radians.
      */
+    public void paintIcon(final Component c, @NotNull final Graphics g, int x, int y,
+                          double rotation) {
+        g.translate(x, y);
+        renderIcon((Graphics2D) g.create(), displayWidth, displayHeight, rotation);
+    }
+
+    @Override
+    public void paintIcon(final Component c, final Graphics g, int x, int y) {
+        paintIcon(c, g, x, y, 0);
+    }
+
+    @Override
     public int getIconWidth() {
-        return width;
+        return displayWidth;
     }
 
-    // Icon //////////////////////////////////////////////////////////////////
-
-    /**
-     * Returns the icon's height.
-     *
-     * @return icon height
-     */
+    @Override
     public int getIconHeight() {
-        return height;
-    }
-
-    /**
-     * Draw the icon at the specified location.
-     *
-     * @param c component
-     * @param g graphics object
-     * @param x x position
-     * @param y x position
-     */
-    public void paintIcon(final Component c, @NotNull final Graphics g, final int x, final int y) {
-        g.drawImage(bufferedImage, x, y, null);
-    }
-
-    /**
-     * Returns the default size of this user agent.
-     *
-     * @return the size of the user agent.
-     */
-    @NotNull
-    public Dimension2D getViewportSize() {
-        return new Dimension(width, height);
-    }
-
-    // UserAgent /////////////////////////////////////////////////////////////
-
-    /**
-     * A transcoder that generates a BufferedImage.
-     */
-    protected class BufferedImageTranscoder extends ImageTranscoder {
-
-        /**
-         * The BufferedImage generated from the SVG document.
-         */
-        protected BufferedImage bufferedImage;
-
-        /**
-         * Creates a new ARGB image with the specified dimension.
-         *
-         * @param width  the image width in pixels
-         * @param height the image height in pixels
-         */
-        @NotNull
-        public BufferedImage createImage(final int width, final int height) {
-            return new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        }
-
-        /**
-         * Writes the specified image to the specified output.
-         *
-         * @param img    the image to write
-         * @param output the output where to store the image
-         */
-        public void writeImage(final BufferedImage img, final TranscoderOutput output) {
-            bufferedImage = img;
-        }
-
-        /**
-         * Returns the BufferedImage generated from the SVG document.
-         */
-        public BufferedImage getBufferedImage() {
-            return bufferedImage;
-        }
-
-        /**
-         * Set the dimensions to be used for the image.
-         */
-        public void setDimensions(final int w, final int h) {
-            hints.put(KEY_WIDTH, (float) w);
-            hints.put(KEY_HEIGHT, (float) h);
-        }
+        return displayHeight;
     }
 }

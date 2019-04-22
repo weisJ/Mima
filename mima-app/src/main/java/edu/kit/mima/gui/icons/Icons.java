@@ -1,15 +1,13 @@
 package edu.kit.mima.gui.icons;
 
+import com.bulenkov.iconloader.util.EmptyIcon;
 import edu.kit.mima.core.MimaConstants;
-import org.apache.batik.transcoder.TranscoderException;
-import org.jdesktop.swingx.icon.EmptyIcon;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.Objects;
 
@@ -21,7 +19,7 @@ import java.util.Objects;
  */
 public final class Icons {
     private static final Icons instance = new Icons();
-    public static final Icon BREAKPOINT = loadIcon("breakpoint.svg", 12, 12);
+    public static final Icon BREAKPOINT = loadIcon("breakpoint.svg");
 
     public static final Icon DEBUG_INACTIVE = loadIcon("debug_inactive.svg");
     public static final Icon DEBUG = loadIcon("debug.svg");
@@ -75,13 +73,11 @@ public final class Icons {
     @Contract("_, _, _ -> new")
     private static Icon loadIcon(@NotNull final String name, final int w, final int h) {
         try {
-            return new MimaIcon(new SVGIcon(Objects.requireNonNull(
-                    instance.getClass()
-                            .getResource(name)).toURI().toString(), w, h), w, h);
-        } catch (@NotNull final TranscoderException | URISyntaxException e) {
+            return new SVGIcon(Objects.requireNonNull(instance.getClass().getResource(name)), w, h);
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        return new EmptyIcon();
+        return new EmptyIcon(0, 0);
     }
 
     public static void loadIcons() {

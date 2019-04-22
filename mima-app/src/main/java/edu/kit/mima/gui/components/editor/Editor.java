@@ -234,7 +234,7 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
      */
     public void setEditorFont(@NotNull final Font font) {
         pane.setFont(font);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(font.getSize());
+        scrollPane.getVerticalScrollBar().setUnitIncrement(2 * font.getSize());
     }
 
     /**

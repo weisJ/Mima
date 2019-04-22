@@ -14,19 +14,23 @@ import javax.swing.JWindow;
 import javax.swing.MenuElement;
 import javax.swing.MenuSelectionManager;
 import javax.swing.border.Border;
+import javax.swing.plaf.basic.BasicPopupMenuUI;
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Window;
 import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.lang.reflect.Field;
 
 
 /**
  * Hacked JPopupMenu(Plus) - displayed in JScrollPane if too long.
  */
-public class ScrollPopupMenu extends JPopupMenu {
+public class ScrollPopupMenu extends JPopupMenu implements MouseWheelListener {
 
+    private static final int SB_WIDTH = 8;
     private final int maxHeight;
     @Nullable private JWindow popWin;
     @Nullable private JScrollPane scrollPane;
@@ -41,13 +45,18 @@ public class ScrollPopupMenu extends JPopupMenu {
      */
     public ScrollPopupMenu(final int maxH) {
         maxHeight = maxH;
-        this.addMouseWheelListener(e -> {
-            if (scrollPane != null) {
-                for (final var wl : scrollPane.getMouseWheelListeners()) {
-                    wl.mouseWheelMoved(e);
-                }
+        addMouseWheelListener(this);
+    }
+
+    @Override
+    public void mouseWheelMoved(MouseWheelEvent e) {
+        if (scrollPane != null) {
+            if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
+                var bar = scrollPane.getVerticalScrollBar();
+                bar.setValue(bar.getValue()
+                             + Integer.signum(e.getUnitsToScroll()) * bar.getUnitIncrement());
             }
-        });
+        }
     }
 
     /*
@@ -145,39 +154,36 @@ public class ScrollPopupMenu extends JPopupMenu {
             setBounds(0, 0, prefSize.width, prefSize.height);
             popWin.setSize(prefSize.width, prefSize.height);
         } else {
-            final int sbWidth = 8;
             if (scrollPane == null) {
-                final JPanel view = new JPanel(new BorderLayout());
-                view.add(this, BorderLayout.CENTER);
-
-                scrollPane = new JScrollPane(view);
-                scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-                scrollPane.setBorder(border);
-                super.setBorder(null);
-                final JScrollBar bar = scrollPane.getVerticalScrollBar();
-                if (bar != null) {
-                    bar.putClientProperty("ScrollBar.thin", Boolean.TRUE);
-                    final Dimension d = bar.getPreferredSize();
-                    d.width = sbWidth;
-                    bar.setPreferredSize(d);
-                    int increment = 21;
-                    if (getComponentCount() > 0) {
-                        increment = Math.max(1, getComponent(0).getPreferredSize().height / 10);
-                    }
-                    bar.setUnitIncrement(increment);
-                    doNotCancelPopupHack(bar);
-                    scrollPane.addMouseWheelListener(e -> {
-                        if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
-                            bar.setValue(bar.getValue() + e.getUnitsToScroll());
-                        }
-                    });
-                }
-                popWin.getContentPane().add(scrollPane, BorderLayout.CENTER);
+                setupScrollPane();
             }
             popWin.pack();
-            popWin.setSize(popWin.getSize().width + sbWidth, maxHeight);
+            popWin.setSize(popWin.getSize().width + SB_WIDTH, maxHeight);
             requestFocus();
         }
+    }
+
+    private void setupScrollPane() {
+        final JPanel view = new JPanel(new BorderLayout());
+        view.add(this, BorderLayout.CENTER);
+
+        scrollPane = new PopupScrollPane(view);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(border);
+        super.setBorder(null);
+        final JScrollBar bar = scrollPane.getVerticalScrollBar();
+        if (bar != null) {
+            bar.putClientProperty("ScrollBar.thin", Boolean.TRUE);
+            final Dimension d = bar.getPreferredSize();
+            d.width = SB_WIDTH;
+            bar.setPreferredSize(d);
+            final int increment = getComponentCount() > 0 ? Math.max(1, getComponent(
+                    0).getPreferredSize().height / 2) : 1;
+            bar.setUnitIncrement(increment);
+            doNotCancelPopupHack(bar);
+        }
+        assert popWin != null;
+        popWin.getContentPane().add(scrollPane, BorderLayout.CENTER);
     }
 
     /**
@@ -204,5 +210,36 @@ public class ScrollPopupMenu extends JPopupMenu {
     public void setBorder(final Border border) {
         this.border = border;
         super.setBorder(border);
+    }
+
+    private class PopupScrollPane extends JScrollPane {
+
+        public PopupScrollPane(final JComponent view) {
+            super(view);
+        }
+
+        @Override
+        public JScrollBar createVerticalScrollBar() {
+            return new JScrollBar(ScrollBar.VERTICAL) {
+                @Override
+                public Container getParent() {
+                    /*
+                     * Check if the caller class is a subclass of BasicPopupMenuUI to check if
+                     * the caller is BasicPopupMenuUI.MouseGrabber which is package private inside
+                     * BasicPopupMenuUI. This way we can trick the MouseGrabber to think
+                     * this scroll bar is in fact the child of a popupMenu and won't cancel it
+                     * when scrolled.
+                     */
+                    StackWalker walker = StackWalker.getInstance(
+                            StackWalker.Option.RETAIN_CLASS_REFERENCE);
+                    Class<?> callerClass = walker.getCallerClass();
+                    if (BasicPopupMenuUI.class.equals(callerClass.getEnclosingClass())) {
+                        return ScrollPopupMenu.this;
+                    } else {
+                        return super.getParent();
+                    }
+                }
+            };
+        }
     }
 }

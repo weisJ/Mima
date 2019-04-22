@@ -57,6 +57,11 @@ class NumberingPane extends JPanel {
         this.pane = pane;
         this.scrollPane = scrollPane;
         componentMap = new TreeMap<>();
+        this.addMouseWheelListener(ev -> {
+            var bar = scrollPane.getVerticalScrollBar();
+            bar.setValue(bar.getValue()
+                         + Integer.signum(ev.getUnitsToScroll()) * bar.getUnitIncrement());
+        });
     }
 
     @Override
@@ -201,6 +206,7 @@ class NumberingPane extends JPanel {
         final int yPos = p.y + (paneMetrics.getDescent()
                                 - paneMetrics.getAscent()) / 2 - dim.height / 2;
         component.setVisible(true);
+        component.setBounds(xPos, yPos, dim.width, dim.height);
         component.paint(g.create(xPos, yPos, dim.width, dim.height));
     }
 

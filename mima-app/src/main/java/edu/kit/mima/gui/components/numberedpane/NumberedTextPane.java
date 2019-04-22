@@ -55,7 +55,7 @@ public class NumberedTextPane extends JPanel {
         };
         var borderedPane = new BorderlessScrollPane(pane);
         scrollPane = borderedPane.getScrollPane();
-        scrollPane.getVerticalScrollBar().setUnitIncrement(getFont().getSize());
+        scrollPane.getVerticalScrollBar().setUnitIncrement(2 * getFont().getSize());
         numberingPane = new NumberingPane(pane, scrollPane);
         pane.addCaretListener(
                 new VisibleCaretListener(scrollPane.getVerticalScrollBar().getWidth()));
@@ -68,8 +68,9 @@ public class NumberedTextPane extends JPanel {
             if (e.getButton() == MouseEvent.BUTTON1) {
                 final Point p = e.getPoint();
                 try {
+                    p.y += scrollPane.getViewport().getViewPosition().getY();
                     final int index = DocumentUtil.getLineOfOffset(pane, pane.viewToModel2D(p));
-                    if (numberingPane.getActionArea().contains(p)) {
+                    if (numberingPane.getActionArea().contains(e.getPoint())) {
                         for (final var listener : listenerList) {
                             if (listener != null) {
                                 listener.indexClicked(index);
