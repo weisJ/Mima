@@ -58,9 +58,6 @@ import java.util.List;
  */
 public class TestShared {
 
-    private TestShared() {
-
-    }
 
     /**
      * Runs the program.

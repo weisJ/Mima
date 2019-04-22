@@ -95,6 +95,7 @@ public class TabFrameTabComponent extends IconLabel {
         menu.addSeparator();
         menu.add(hide);
         var listener = new PopupListener(menu);
+        listener.setUseAbsolutePos(true);
         addMouseListener(listener);
 
         setOrientation(Alignment.WEST);

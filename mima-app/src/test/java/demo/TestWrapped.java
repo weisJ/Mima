@@ -53,8 +53,6 @@ import java.util.List;
  */
 public class TestWrapped {
 
-    private TestWrapped() {
-    }
 
     /**
      * Run the progtam.

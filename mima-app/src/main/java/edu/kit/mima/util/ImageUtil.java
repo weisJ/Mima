@@ -38,7 +38,6 @@ public final class ImageUtil {
                                            @NotNull final Rectangle bounds) {
         BufferedImage image = new BufferedImage(SCALE * bounds.width, SCALE * bounds.height,
                                                 BufferedImage.TYPE_INT_RGB);
-        System.out.println("here");
         final Graphics2D g2d = (Graphics2D) image.getGraphics();
         g2d.setRenderingHint(RenderingHintsKeyExt.KEY_BUFFERED_IMAGE, image);
         g2d.scale(SCALE, SCALE);
