@@ -101,7 +101,7 @@ public class RotatedTableHeaderRenderer extends DefaultTableCellRenderer {
             for (int index = 0; index < columnModel.getColumnCount(); index++) {
                 columnModel.getColumn(index).setHeaderRenderer(renderer);
             }
-            JFrame frame = new JFrame("Test");
+            JFrame frame = new JFrame("TabFrameDemo");
             frame.add(new JScrollPane(table));
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.pack();

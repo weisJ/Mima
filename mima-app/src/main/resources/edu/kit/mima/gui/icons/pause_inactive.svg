@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-    <g transform="translate(4 2.5)">
+    <g transform="translate(4 2.5)" fill-opacity=".7">
         <rect y="0" width="3" height="11" fill="#5A5B5B"/>
         <rect x="5" y="0" width="3" height="11" fill="#5A5B5B"/>
     </g>

@@ -4,7 +4,6 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.JComponent;
 import java.awt.Color;
-import java.awt.Graphics;
 
 /**
  * Component to draw at line index.
@@ -29,13 +28,5 @@ public class IndexComponent extends JComponent {
     @Nullable
     public Color getLineColor() {
         return null;
-    }
-
-    @Override
-    public void paint(final Graphics g) {
-        for (final var c : getComponents()) {
-            c.paint(g);
-        }
-        super.paint(g);
     }
 }

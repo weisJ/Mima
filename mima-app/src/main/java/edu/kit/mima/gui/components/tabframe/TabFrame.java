@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import java.awt.Graphics;
 import java.awt.Insets;
 
 /**
@@ -53,11 +52,6 @@ public class TabFrame extends JComponent {
         return insets;
     }
 
-    @Override
-    public void paint(Graphics g) {
-        paintChildren(g);
-        //        getUI().paint(g, this);
-    }
 
     public void insertTab(@NotNull final PopupComponent c, final String title, final Icon icon,
                           final Alignment a, final int index) {
@@ -87,5 +81,4 @@ public class TabFrame extends JComponent {
     public void addTab(final PopupComponent c, final Alignment a) {
         addTab(c, "", a);
     }
-
 }

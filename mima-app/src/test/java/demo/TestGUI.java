@@ -24,7 +24,7 @@
 package demo;
 
 /**
- * Describes a Test application.
+ * Describes a TabFrameDemo application.
  *
  * @author Piet Blok
  */

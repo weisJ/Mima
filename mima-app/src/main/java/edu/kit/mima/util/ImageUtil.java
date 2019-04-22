@@ -1,5 +1,6 @@
 package edu.kit.mima.util;
 
+import org.apache.batik.ext.awt.RenderingHintsKeyExt;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,7 +38,9 @@ public final class ImageUtil {
                                            @NotNull final Rectangle bounds) {
         BufferedImage image = new BufferedImage(SCALE * bounds.width, SCALE * bounds.height,
                                                 BufferedImage.TYPE_INT_RGB);
+        System.out.println("here");
         final Graphics2D g2d = (Graphics2D) image.getGraphics();
+        g2d.setRenderingHint(RenderingHintsKeyExt.KEY_BUFFERED_IMAGE, image);
         g2d.scale(SCALE, SCALE);
         g2d.translate(-bounds.x, -bounds.y);
         c.printAll(g2d);

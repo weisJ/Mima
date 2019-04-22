@@ -11,6 +11,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.Rectangle;
@@ -123,8 +124,8 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
         final var sourceBounds = dropSourceIndex >= 0 ? rects[dropSourceIndex]
                                  : new Rectangle(0, 0, 0, 0);
         for (int i = minVisible; i <= maxVisible; i++) {
-            if (i != dropSourceIndex) {
-                drawTab(g, i, i == selectedIndex);
+            if (i != dropSourceIndex && i != selectedIndex) {
+                drawTab((Graphics2D) g.create(), i, false);
             }
         }
         if (dropTargetIndex >= 0) {
@@ -137,8 +138,14 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
                 g.fillRect(b.x + b.width, b.y, sourceBounds.width, sourceBounds.height);
             }
         }
-        g.setColor(tabBorderColor);
-        g.drawLine(0, maxTabHeight, tabbedPane.getWidth() - 1, maxTabHeight);
+        var g2 = (Graphics2D) g.create();
+        g2.translate(0, -0.5);
+        g2.setColor(tabBorderColor);
+        g2.drawLine(0, maxTabHeight + 1, tabbedPane.getWidth() - 1, maxTabHeight + 1);
+        g2.dispose();
+        if (dropSourceIndex != selectedIndex) {
+            drawTab((Graphics2D) g.create(), selectedIndex, true);
+        }
 
         if (tabContainer.getStash().isVisible()) {
             drawStash(g);
@@ -168,23 +175,26 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
         g.drawLine(bounds.x, 0, bounds.x, maxTabHeight);
     }
 
-    protected void drawTab(@NotNull final Graphics g, final int index, final boolean isSelected) {
+    protected void drawTab(@NotNull final Graphics2D g, final int index, final boolean isSelected) {
         final var bounds = rects[index];
-        final int yOff = bounds.height / 6;
+        final int yOff = bounds.height / 8;
+        g.translate(1, 0);
         if (isSelected) {
             g.setColor(selectedBackground);
-            g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+            g.fillRect(bounds.x, bounds.y, bounds.width - 1, bounds.height);
         } else {
             g.setColor(tabbedPane.getBackground());
-            g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+            g.fillRect(bounds.x, bounds.y, bounds.width - 1, bounds.height);
         }
-        g.setColor(tabBorderColor);
-        g.drawLine(bounds.x + bounds.width - 1, bounds.y, bounds.x + bounds.width - 1,
-                   bounds.y + bounds.height - 1);
         if (isSelected) {
             g.setColor(selectedColor);
-            g.fillRect(bounds.x, bounds.y + bounds.height - yOff, bounds.width - 1, yOff - 1);
+            g.fillRect(bounds.x, bounds.y + bounds.height - yOff + 1, bounds.width - 1, yOff);
         }
+        g.translate(-0.5, 0);
+        g.setColor(tabBorderColor);
+        g.drawLine(bounds.x + bounds.width - 1, bounds.y, bounds.x + bounds.width - 1,
+                   bounds.y + bounds.height);
+        g.dispose();
     }
 
     private class CustomTabbedPaneLayout extends BasicTabbedPaneUI.TabbedPaneLayout {

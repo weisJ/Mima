@@ -6,6 +6,8 @@ import edu.kit.mima.gui.icons.Icons;
 
 import javax.swing.UIManager;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
 
 /**
  * BreakpointComponent to display in {@link NumberedTextPane}.
@@ -25,10 +27,12 @@ public class BreakpointComponent extends IndexComponent implements Breakpoint {
      */
     public BreakpointComponent(final int lineIndex) {
         this.lineIndex = lineIndex;
-        final IconPanel iconPanel = new IconPanel(Icons.BREAKPOINT);
-        setPreferredSize(iconPanel.getPreferredSize());
-        add(iconPanel);
         updateUI();
+    }
+
+    @Override
+    public void paint(Graphics g) {
+        Icons.BREAKPOINT.paintIcon(this, g, 0, 0);
     }
 
     @Override
@@ -40,6 +44,11 @@ public class BreakpointComponent extends IndexComponent implements Breakpoint {
     @Override
     public Color getLineColor() {
         return color;
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(Icons.BREAKPOINT.getIconWidth(), Icons.BREAKPOINT.getIconHeight());
     }
 
     /**

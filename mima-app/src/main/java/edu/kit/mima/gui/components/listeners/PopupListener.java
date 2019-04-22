@@ -44,7 +44,7 @@ public class PopupListener extends MouseAdapter {
 
 
     public PopupListener(final JPopupMenu popupMenu) {
-        this(popupMenu, MouseEvent.BUTTON2, false);
+        this(popupMenu, MouseEvent.BUTTON3, false);
     }
 
     /**
@@ -79,15 +79,14 @@ public class PopupListener extends MouseAdapter {
     @NotNull
     @Contract("_, _ -> new")
     private Point calculatePos(@NotNull final Point p, @NotNull final Component c) {
-        var x = 0;
-        var y = 0;
+        var x = p.x;
+        var y = p.y;
         if (attachToComponent && rightAlign) {
             y = c.getHeight();
             x = c.getWidth() - popupMenu.getPreferredSize().width;
         } else if (attachToComponent) {
             y = c.getHeight();
-        } else {
-            x = p.x;
+            x = 0;
         }
         return new Point(x, y);
     }

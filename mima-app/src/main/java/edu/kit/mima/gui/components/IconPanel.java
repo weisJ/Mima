@@ -1,6 +1,7 @@
 package edu.kit.mima.gui.components;
 
 import edu.kit.mima.gui.components.alignment.Alignment;
+import edu.kit.mima.gui.icons.SVGIcon;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -49,12 +50,15 @@ public class IconPanel extends JComponent {
     @Override
     public void paint(@NotNull final Graphics g) {
         super.paint(g);
-        Graphics2D g2 = (Graphics2D) g.create();
-        g2.setClip(0, 0, icon.getIconWidth(), icon.getIconHeight());
-        AffineTransform transform = new AffineTransform();
-        transform.rotate(getAngle(), getWidth() / 2, getHeight() / 2);
-        g2.transform(transform);
-        icon.paintIcon(this, g2, 0, 0);
+        if (icon instanceof SVGIcon) {
+            ((SVGIcon) icon).paintIcon(this, g, 0, 0, getAngle());
+        } else {
+            Graphics2D g2 = (Graphics2D) g.create();
+            AffineTransform transform = new AffineTransform();
+            transform.rotate(getAngle(), getWidth() / 2, getHeight() / 2);
+            g2.transform(transform);
+            icon.paintIcon(this, g2, 0, 0);
+        }
     }
 
     @NotNull
@@ -75,6 +79,11 @@ public class IconPanel extends JComponent {
             case SOUTH_EAST -> 135.0;
             case SOUTH_WEST -> 225.0;
         });
+    }
+
+    @Override
+    public Dimension getMinimumSize() {
+        return getMaximumSize();
     }
 
     @NotNull

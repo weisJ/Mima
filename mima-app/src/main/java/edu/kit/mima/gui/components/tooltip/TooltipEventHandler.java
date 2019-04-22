@@ -199,7 +199,13 @@ public class TooltipEventHandler extends MouseAdapter {
                     if (overContainer) {
                         for (final var ml : tooltipComponent.container.getMouseListeners()) {
                             if (ml != TooltipEventHandler.this && ml != null) {
-                                c.accept(ml, e);
+                                try {
+                                    c.accept(ml, e);
+                                } catch (ClassCastException ignored) {
+                                    /*
+                                     * The listener can't handle the event.
+                                     */
+                                }
                             }
                         }
                     }

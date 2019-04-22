@@ -26,6 +26,10 @@ public class PlaceholderComponent extends PopupComponent {
     public void open() {
     }
 
+    @Override
+    public void close() {
+    }
+
     @NotNull
     @Override
     public Dimension getMaximumSize() {

@@ -69,6 +69,7 @@ public class DefaultTransformModel implements TransformModel {
 
     private Point2D rotationCenter;
     private Function<Dimension, Point2D> supplier;
+    private boolean valid = false;
 
     @Override
     public void addChangeListener(ChangeListener listener) {
@@ -239,7 +240,7 @@ public class DefaultTransformModel implements TransformModel {
         /*
          * If any change to previous values, recompute the transform.
          */
-        if (!Arrays.equals(prevValues, values)) {
+        if (!Arrays.equals(prevValues, values) || !valid) {
             System.arraycopy(values, 0, prevValues, 0, values.length);
             transform.setToIdentity();
             if (view != null) {
@@ -247,8 +248,7 @@ public class DefaultTransformModel implements TransformModel {
                 double centerX = p.getX();
                 double centerY = p.getY();
 
-                AffineTransform nonScaledTransform = transformNoScale(centerX,
-                                                                      centerY);
+                AffineTransform nonScaledTransform = transformNoScale(centerX, centerY);
 
                 double scaleX;
                 double scaleY;
@@ -272,15 +272,15 @@ public class DefaultTransformModel implements TransformModel {
                 }
 
                 transform.translate(centerX, centerY);
-                transform.scale(getValue(Type.Mirror) ? -scaleX : scaleX,
-                                scaleY);
+                transform.scale(getValue(Type.Mirror) ? -scaleX : scaleX, scaleY);
                 transform.translate(-centerX, -centerY);
-
                 transform.concatenate(nonScaledTransform);
             }
         }
+        valid = true;
         return transform;
     }
+
 
     /**
      * Get the mirror property. <p> The default value is {@code false}. </p>
@@ -416,6 +416,13 @@ public class DefaultTransformModel implements TransformModel {
         {
             this.supplier = supplier;
         }
+    }
+
+    /**
+     * Force the translation to be recalculated the next time it is needed.
+     */
+    public void invalidate() {
+        valid = false;
     }
 
     /**

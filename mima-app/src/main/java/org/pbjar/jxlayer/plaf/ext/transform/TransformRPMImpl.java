@@ -92,7 +92,6 @@ public class TransformRPMImpl {
             JXLayer<?> layer = findJXLayer(aComponent);
             if (layer != null) {
                 LayerUI<?> layerUI = layer.getUI();
-//      TransformUI ui = (TransformUI) layer.getUI();
                 TransformUI ui = (TransformUI) layerUI;
                 Point point = aComponent.getLocationOnScreen();
                 SwingUtilities.convertPointFromScreen(point, layer);

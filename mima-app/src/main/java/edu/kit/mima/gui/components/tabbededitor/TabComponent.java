@@ -2,6 +2,8 @@ package edu.kit.mima.gui.components.tabbededitor;
 
 import edu.kit.mima.gui.components.IconLabel;
 import edu.kit.mima.gui.components.listeners.MouseClickListener;
+import edu.kit.mima.gui.components.tooltip.DefaultTooltipWindow;
+import edu.kit.mima.gui.components.tooltip.TooltipUtil;
 import edu.kit.mima.gui.icons.Icons;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,12 +43,13 @@ public class TabComponent extends JPanel {
                         @Nullable final Icon icon,
                         @NotNull final Consumer<TabComponent> onClick) {
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-        iconLabel = new IconLabel(icon, title, IconLabel.LEFT);
+        iconLabel = new IconLabel(icon, title, IconLabel.LEFT, 5, 3);
         iconLabel.setOpaque(false);
         add(iconLabel);
+        add(Box.createRigidArea(new Dimension(5, 0)));
         add(Box.createGlue());
 
-        final ButtonTab button = new ButtonTab();
+        var button = new ButtonTab();
         button.addMouseListener((MouseClickListener) e -> onClick.accept(TabComponent.this));
         add(button);
         setBorder(new EmptyBorder(3, 0, 2, 5));
@@ -86,9 +89,9 @@ public class TabComponent extends JPanel {
          * Close Button for Tab.
          */
         private ButtonTab() {
-            final int size = 13;
+            final int size = Icons.CLOSE.getIconWidth();
             setPreferredSize(new Dimension(size, size));
-            setToolTipText("Close");
+            TooltipUtil.createDefaultTooltip(this, new DefaultTooltipWindow("Close"));
 
             setUI(new BasicButtonUI());
 

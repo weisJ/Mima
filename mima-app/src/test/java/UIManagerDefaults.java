@@ -99,7 +99,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
      *  A menu can also be added which provides the ability to switch
      *  between different LAF's.
      */
-    public JMenuBar getMenuBar() {
+    private JMenuBar getMenuBar() {
         if (menuBar == null) {
             menuBar = createMenuBar();
         }
@@ -161,7 +161,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
     /*
      *  When the LAF is changed we need to reset the content pane
      */
-    public void resetComponents() {
+    private void resetComponents() {
         items.clear();
         models.clear();
         ((DefaultTableModel) table.getModel()).setRowCount(0);
@@ -192,29 +192,20 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
     @NotNull
     private TreeMap buildItemsMap() {
         final UIDefaults defaults = UIManager.getLookAndFeelDefaults();
-
         //  Build of Map of items and a Map of attributes for each item
-
         for (final Object key : new HashSet<>(defaults.keySet())) {
             final Object value = defaults.get(key);
-
             final String itemName = getItemName(key.toString(), value);
-
             if (itemName == null) {
                 continue;
             }
-
             //  Get the attribute map for this componenent, or
             //  create a map when one is not found
-
             final TreeMap<String, Object> attributeMap =
                     items.computeIfAbsent(itemName, k -> new TreeMap<>());
-
             //  Add the attribute to the map for this componenent
-
             attributeMap.put(key.toString(), value);
         }
-
         return items;
     }
 
@@ -224,11 +215,9 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
     @Nullable
     private String getItemName(@NotNull final String key, final Object value) {
         //  Seems like this is an old check required for JDK1.4.2
-
         if (key.startsWith("class") || key.startsWith("javax")) {
             return null;
         }
-
         if (byComponent.isSelected()) {
             return getComponentName(key, value);
         } else {
@@ -241,11 +230,8 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
         //  "componentName.componentProperty", or
         //  "componentNameUI", or
         //  "someOtherString"
-
         String componentName;
-
         final int pos = componentNameEndOffset(key);
-
         if (pos != -1) {
             componentName = key.substring(0, pos);
         } else if (key.endsWith("UI")) {
@@ -255,41 +241,30 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
         } else {
             componentName = "Miscellaneous";
         }
-
         //  Fix inconsistency
-
         if (componentName.equals("Checkbox")) {
             componentName = "CheckBox";
         }
-
         return componentName;
     }
 
     private int componentNameEndOffset(@NotNull final String key) {
         //  Handle Nimbus properties first
-
         //  "ComboBox.scrollPane", "Table.editor" and "Tree.cellEditor"
         //  have different format even within the Nimbus properties.
         //  (the component name is specified in quotes)
-
         if (key.startsWith("\"")) {
             return key.indexOf("\"", 1) + 1;
         }
-
         int pos = key.indexOf(":");
-
         if (pos != -1) {
             return pos;
         }
-
         pos = key.indexOf("[");
-
         if (pos != -1) {
             return pos;
         }
-
         //  Handle normal properties
-
         return key.indexOf(".");
     }
 
@@ -332,10 +307,8 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
     @NotNull
     private JMenuBar createMenuBar() {
         final JMenuBar menuBar = new JMenuBar();
-
         menuBar.add(createFileMenu());
         menuBar.add(createLAFMenu());
-
         return menuBar;
     }
 
@@ -346,10 +319,8 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
     private JMenu createFileMenu() {
         final JMenu menu = new JMenu("Application");
         menu.setMnemonic('A');
-
         menu.addSeparator();
         menu.add(new ExitAction());
-
         return menu;
     }
 
@@ -359,27 +330,22 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
     @NotNull
     private JMenu createLAFMenu() {
         final ButtonGroup bg = new ButtonGroup();
-
         final JMenu menu = new JMenu("Look & Feel");
         menu.setMnemonic('L');
-
         final String lafId = UIManager.getLookAndFeel().getID();
         final UIManager.LookAndFeelInfo[] lafInfo = UIManager.getInstalledLookAndFeels();
 
         for (final UIManager.LookAndFeelInfo lookAndFeelInfo : lafInfo) {
             final String laf = lookAndFeelInfo.getClassName();
             final String name = lookAndFeelInfo.getName();
-
             final Action action = new ChangeLookAndFeelAction(this, laf, name);
             final JRadioButtonMenuItem mi = new JRadioButtonMenuItem(action);
             menu.add(mi);
             bg.add(mi);
-
             if (name.equals(lafId)) {
                 mi.setSelected(true);
             }
         }
-
         return menu;
     }
 
@@ -403,47 +369,36 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
     }
 
     /*
-     *  Change the TabelModel in the table for the selected item
+     *  Change the TableModel in the table for the selected item
      */
     private void changeTableModel(final String itemName) {
         //  The model has been created previously so just use it
-
         DefaultTableModel model = models.get(itemName);
-
         if (model != null) {
             table.setModel(model);
             return;
         }
-
         //  Create a new model for the requested item
         //  and add the attributes of the item to the model
-
         model = new DefaultTableModel(COLUMN_NAMES, 0);
         final Map attributes = items.get(itemName);
-
         for (final Object o : attributes.keySet()) {
             final String attribute = (String) o;
             Object value = attributes.get(attribute);
-
             final Vector<Object> row = new Vector<>(3);
             row.add(attribute);
-
             if (value != null) {
                 row.add(value.toString());
-
                 if (value instanceof Icon) {
                     value = new SafeIcon((Icon) value);
                 }
-
                 row.add(value);
             } else {
                 row.add("null");
                 row.add("");
             }
-
             model.addRow(row);
         }
-
         table.setModel(model);
         models.put(itemName, model);
     }
@@ -462,7 +417,6 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
                             table.prepareRenderer(table.getCellRenderer(row, column), row, column);
                     rowHeight = Math.max(rowHeight, comp.getPreferredSize().height);
                 }
-
                 table.setRowHeight(row, rowHeight);
             }
         } catch (@NotNull final ClassCastException ignored) {
@@ -486,11 +440,12 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
      * into the graphics of a bufferedImage and create an ImageIcon from it. In subsequent calls the
      * ImageIcon is used.
      */
-    public static class SafeIcon implements Icon {
+    private static class SafeIcon implements Icon {
         private final Icon wrappee;
         private Icon standIn;
 
-        public SafeIcon(final Icon wrappee) {
+        @Contract(pure = true)
+        private SafeIcon(final Icon wrappee) {
             this.wrappee = wrappee;
         }
 
@@ -566,7 +521,6 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
             String className = e.getMessage();
             className = className.substring(className.lastIndexOf(" ") + 1);
             return Class.forName(className);
-
         }
 
         private void paintFallback(final Component c, @NotNull final Graphics g, final int x,
@@ -575,14 +529,13 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
             g.drawLine(x, y, x + getIconWidth(), y + getIconHeight());
             g.drawLine(x + getIconWidth(), y, x, y + getIconHeight());
         }
-
     }
 
     /*
      *  Render the value based on its class.
      */
-    class SampleRenderer extends JLabel implements TableCellRenderer {
-        public SampleRenderer() {
+    private class SampleRenderer extends JLabel implements TableCellRenderer {
+        private SampleRenderer() {
             super();
             setHorizontalAlignment(SwingConstants.CENTER);
             setOpaque(true);
@@ -608,7 +561,6 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
             } else if (sample instanceof Icon) {
                 setIcon((Icon) sample);
             }
-
             return this;
         }
 
@@ -630,12 +582,12 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
      *  Change the LAF and recreate the UIManagerDefaults so that the properties
      *  of the new LAF are correctly displayed.
      */
-    class ChangeLookAndFeelAction extends AbstractAction {
+    private class ChangeLookAndFeelAction extends AbstractAction {
         private final UIManagerDefaults defaults;
         private final String laf;
 
-        protected ChangeLookAndFeelAction(final UIManagerDefaults defaults, final String laf,
-                                          final String name) {
+        private ChangeLookAndFeelAction(final UIManagerDefaults defaults, final String laf,
+                                        final String name) {
             this.defaults = defaults;
             this.laf = laf;
             putValue(Action.NAME, name);
@@ -651,9 +603,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
                 final JPopupMenu popup = (JPopupMenu) mi.getParent();
                 final JRootPane rootPane = SwingUtilities.getRootPane(popup.getInvoker());
                 SwingUtilities.updateComponentTreeUI(rootPane);
-
                 //  Use custom decorations when supported by the LAF
-
                 final JFrame frame = (JFrame) SwingUtilities.windowForComponent(rootPane);
                 frame.dispose();
 
@@ -663,7 +613,6 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
                 } else {
                     frame.setUndecorated(false);
                 }
-
                 frame.setVisible(true);
             } catch (@NotNull final Exception ex) {
                 System.out.println("Failed loading L&F: " + laf);
@@ -675,13 +624,12 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
     /*
      *	Close the frame
      */
-    class ExitAction extends AbstractAction {
-        public ExitAction() {
+    private class ExitAction extends AbstractAction {
+        private ExitAction() {
             putValue(Action.NAME, "Exit");
             putValue(Action.SHORT_DESCRIPTION, getValue(Action.NAME));
             putValue(Action.MNEMONIC_KEY, KeyEvent.VK_X);
         }
-
         public void actionPerformed(final ActionEvent e) {
             System.exit(0);
         }

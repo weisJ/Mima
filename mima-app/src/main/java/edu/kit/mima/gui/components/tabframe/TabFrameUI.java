@@ -5,7 +5,10 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.JComponent;
+import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 
 /**
  * UI class for {@link TabFrame}.
@@ -22,18 +25,28 @@ public class TabFrameUI extends ComponentUI {
         return new TabFrameUI();
     }
 
+    private TabFrameLayout layout;
+
     @Override
     public void installUI(@NotNull JComponent c) {
         super.installUI(c);
-        TabFrame tabFrame = (TabFrame) c;
-        var layout = new TabFrameLayout(tabFrame);
-        c.setLayout(layout);
+        if (!(c.getLayout() instanceof TabFrameLayout)) {
+            TabFrame tabFrame = (TabFrame) c;
+            var layout = new TabFrameLayout(tabFrame);
+            c.setLayout(layout);
+        }
+        layout = (TabFrameLayout) c.getLayout();
+        layout.setLineColor(UIManager.getColor("TabFrame.line"));
     }
 
     @Override
     public int getBaseline(@NotNull JComponent c, int width, int height) {
         super.getBaseline(c, width, height);
         return 0;
+    }
+
+    private void drawRect(Graphics g, Rectangle rect) {
+        g.drawRect(rect.x, rect.y, rect.width, rect.height);
     }
 
 }

@@ -42,7 +42,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Test the wrapping of JXLayer's into one another.
+ * TabFrameDemo the wrapping of JXLayer's into one another.
  *
  * <p> Run a web start demo: <a
  * href="http://www.pbjar.org/blogs/jxlayer/jxlayer40/WrappingDemo.jnlp"> <IMG style="CLEAR: right"

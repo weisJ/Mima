@@ -53,4 +53,6 @@ public abstract class PopupComponent extends JPanel {
     public abstract void setCloseAction(Action action);
 
     public abstract void open();
+
+    public abstract void close();
 }

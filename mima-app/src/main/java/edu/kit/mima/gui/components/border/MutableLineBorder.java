@@ -1,5 +1,7 @@
 package edu.kit.mima.gui.components.border;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.swing.border.EmptyBorder;
 import java.awt.Color;
 import java.awt.Component;
@@ -13,7 +15,7 @@ import java.awt.Graphics;
  */
 public class MutableLineBorder extends EmptyBorder {
 
-    private final Color color;
+    private Color color;
 
     public MutableLineBorder(final int top, final int left, final int bottom, final int right,
                              final Color color) {
@@ -22,7 +24,7 @@ public class MutableLineBorder extends EmptyBorder {
     }
 
     @Override
-    public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+    public void paintBorder(Component c, @NotNull Graphics g, int x, int y, int width, int height) {
         g.setColor(color);
         var insets = getBorderInsets();
         g.fillRect(0, 0, width - insets.right, insets.top);
@@ -45,5 +47,14 @@ public class MutableLineBorder extends EmptyBorder {
 
     public void setBottom(final int bottom) {
         this.bottom = bottom;
+    }
+
+    @Override
+    public boolean isBorderOpaque() {
+        return true;
+    }
+
+    public void setColor(final Color color) {
+        this.color = color;
     }
 }

@@ -35,6 +35,7 @@ import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.AbstractBufferedLayerUI;
 import org.jdesktop.jxlayer.plaf.LayerUI;
 import org.jdesktop.swingx.ForwardingRepaintManager;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.pbjar.jxlayer.plaf.ext.transform.DefaultTransformModel;
@@ -273,6 +274,7 @@ public class TransformUI extends MouseEventUI<JComponent> {
      * @throws NullPointerException if transformModel is {@code null}
      * @see #getModel()
      */
+    @Contract("null -> fail")
     public final void setModel(@Nullable TransformModel transformModel)
             throws NullPointerException {
         if (transformModel == null) {
@@ -574,10 +576,6 @@ public class TransformUI extends MouseEventUI<JComponent> {
                                     @NotNull JXLayer<? extends JComponent> layer) {
         JComponent view = layer.getView();
         if (view != null) {
-            if (layer.isOpaque()) {
-                g2.setColor(view.getBackground());
-                g2.fillRect(0, 0, layer.getWidth(), layer.getHeight());
-            }
             if (view.getX() < 0 || view.getY() < 0) {
                 setToNoDoubleBuffering(view);
                 g2.translate(view.getX(), view.getY());

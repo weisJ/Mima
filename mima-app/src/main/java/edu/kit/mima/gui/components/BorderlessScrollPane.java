@@ -1,5 +1,6 @@
 package edu.kit.mima.gui.components;
 
+import edu.kit.mima.gui.components.listeners.ComponentResizeListener;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.BorderFactory;
@@ -15,8 +16,6 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Rectangle;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 
 /**
  * Scroll pane without border.
@@ -85,7 +84,6 @@ public class BorderlessScrollPane extends JLayeredPane {
                     if (component != null) {
                         getViewport().setBackground(component.getBackground());
                     }
-
                 });
             }
         };
@@ -95,16 +93,13 @@ public class BorderlessScrollPane extends JLayeredPane {
         controlPanel = new ControlPanel(scrollPane);
         add(controlPanel, JLayeredPane.PALETTE_LAYER);
 
-        addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                // listen to changes of JLayeredPane size
-                scrollPane.setSize(getSize());
-                scrollPane.getViewport().revalidate();
-                controlPanel.setSize(getSize());
-                updateInsets();
-                controlPanel.revalidate();
-            }
+        addComponentListener((ComponentResizeListener) e -> {
+            // listen to changes of JLayeredPane size
+            scrollPane.setSize(getSize());
+            scrollPane.getViewport().revalidate();
+            controlPanel.setSize(getSize());
+            updateInsets();
+            controlPanel.revalidate();
         });
         setBarInsets(new Insets(0, 0, 0, 0));
     }

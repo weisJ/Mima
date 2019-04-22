@@ -9,10 +9,11 @@ import org.pbjar.jxlayer.plaf.ext.transform.DefaultTransformModel;
 import org.pbjar.jxlayer.plaf.ext.transform.TransformUtils;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import javax.swing.UIManager;
+import javax.swing.Timer;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -22,7 +23,9 @@ import java.awt.LayoutManager;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
+import java.awt.geom.Point2D;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 /**
@@ -31,82 +34,108 @@ import java.util.Map;
  */
 public class TabFrameLayout implements LayoutManager {
 
-    private final TabArea bottomTabs = new TabArea();
+    private static final Action EMPTY_ACTION = new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+        }
+    };
+    final TabArea bottomTabs = new TabArea();
+    final TabArea topTabs = new TabArea();
     private final TabArea leftTabs = new TabArea();
     private final TabArea rightTabs = new TabArea();
-    private final TabArea topTabs = new TabArea();
+    final JXLayer<JComponent> rotatePaneLeft;
+    final JXLayer<JComponent> rotatePaneRight;
+    private final TabFrame tabFrame;
 
     private final MutableLineBorder leftBorder;
+    private final MutableLineBorder topBorder;
+    private final MutableLineBorder bottomBorder;
     private final MutableLineBorder rightBorder;
 
-    public TabFrameLayout(@NotNull final TabFrame tabFrame) {
-        tabFrame.setBackground(Color.ORANGE);
-        tabFrame.add(content);
-        tabFrame.add(topTabs);
-        tabFrame.add(bottomTabs);
-        tabFrame.add(leftTabs);
-        tabFrame.add(rightTabs);
-
-        var lineColor = UIManager.getColor("TabFrame.line");
-        topTabs.setBorder(new MutableLineBorder(0, 0, 1, 0, lineColor));
-        bottomTabs.setBorder(new MutableLineBorder(1, 0, 0, 0, lineColor));
-        rightBorder = new MutableLineBorder(0, 1, 0, 0, lineColor);
-        leftBorder = new MutableLineBorder(0, 0, 0, 1, lineColor);
-
-        rightTabs.setBorder(rightBorder);
-        leftTabs.setBorder(leftBorder);
-    }
-
-    public JPanel getTopTabs() {
-        return topTabs;
-    }
-
-    public JPanel getBottomTabs() {
-        return bottomTabs;
-    }
-
-    public JPanel getLeftTabs() {
-        return leftTabs;
-    }
-
-    public JPanel getRightTabs() {
-        return rightTabs;
-    }
+    private final DefaultTransformModel leftTransformModel;
+    private final DefaultTransformModel rightTransformModel;
 
     /**
      * The width/height of the frame.
      */
-    private final int size = 23;
+    private final int size = 24;
     /**
      * The increase in capacity if arrays are full.
      */
-    private final int increase = 10;
     private final TabFrameContent content = new TabFrameContent();
+    private final Map<Alignment, LinkedList<TabFrameTabComponent>> tabsMap;
+    private final Map<Alignment, LinkedList<PopupComponent>> compsMap;
+    private Color lineColor = Color.BLACK;
 
-    private final Map<TabFrameTabComponent, DefaultTransformModel>
-            transformModelMap = new HashMap<>();
-    private final Map<TabFrameTabComponent, JXLayer<JComponent>>
-            rotationPanelMap = new HashMap<>();
-    private final TabFrameTabComponent[][] tabMap = new TabFrameTabComponent[8][];
-    private final PopupComponent[][] compMap = new PopupComponent[8][];
-    private final int[] sizes = new int[8];
+    public TabFrameLayout(@NotNull final TabFrame tabFrame) {
+        this.tabFrame = tabFrame;
+
+        rightTransformModel = new DefaultTransformModel();
+        rightTransformModel.setQuadrantRotation(1);
+        rightTransformModel.setScaleToPreferredSize(false);
+        rotatePaneRight = TransformUtils.createTransformJXLayer(rightTabs, rightTransformModel);
+
+        leftTransformModel = new DefaultTransformModel();
+        leftTransformModel.setQuadrantRotation(3);
+        leftTransformModel.setScaleToPreferredSize(false);
+        rotatePaneLeft = TransformUtils.createTransformJXLayer(leftTabs, leftTransformModel);
+
+        tabFrame.add(content);
+        tabFrame.add(topTabs);
+        tabFrame.add(bottomTabs);
+        tabFrame.add(rotatePaneLeft);
+        tabFrame.add(rotatePaneRight);
+
+
+        topBorder = new MutableLineBorder(0, 0, 1, 0, lineColor);
+        bottomBorder = new MutableLineBorder(1, 0, 0, 0, lineColor);
+        rightBorder = new MutableLineBorder(0, 0, 1, 0, lineColor);
+        leftBorder = new MutableLineBorder(0, 0, 1, 0, lineColor);
+
+        topTabs.setBorder(topBorder);
+        bottomTabs.setBorder(bottomBorder);
+        rightTabs.setBorder(rightBorder);
+        leftTabs.setBorder(leftBorder);
+
+        tabsMap = new HashMap<>();
+        compsMap = new HashMap<>();
+
+        new Timer(100, e -> {
+            //            transformModel2.setRotation(transformModel2.getRotation() + 0.1);
+            rotatePaneLeft.repaint();
+            System.out.println(rotatePaneLeft.getBounds());
+            System.out.println(leftTabs.getBounds());
+        });//.start();
+    }
+
+    public void setLineColor(final Color lineColor) {
+        this.lineColor = lineColor;
+        topBorder.setColor(this.lineColor);
+        bottomBorder.setColor(this.lineColor);
+        leftBorder.setColor(this.lineColor);
+        rightBorder.setColor(this.lineColor);
+    }
 
     public void insertTab(@NotNull final PopupComponent c, final String title, final Icon icon,
                           @NotNull final Alignment a, final int index) {
-        indexForAlignment(a); //Check alignment
+        if (a == Alignment.CENTER) {
+            return;
+        }
         var tabComponent = new TabFrameTabComponent(title, icon, a, index, this);
-        var transformModel = new DefaultTransformModel();
-        transformModel.setQuadrantRotation(getAngle(a));
-        JXLayer<JComponent> rotatePane = TransformUtils
-                .createTransformJXLayer(tabComponent, transformModel);
-        rotatePane.setOpaque(true);
-        getTab(a).add(rotatePane);
-
-        transformModelMap.put(tabComponent, transformModel);
-        rotationPanelMap.put(tabComponent, rotatePane);
         tabComponent.setOrientation(a);
-        componentsForAlignment(a)[index] = c;
-        tabsForAlignment(a)[index] = tabComponent;
+        getTab(a).add(tabComponent);
+
+        compsForAlignment(a).add(index, c);
+
+        var tabs = tabsForAlignment(a);
+        //Adjust indices for tabs.
+        var iterator = tabs.listIterator(index);
+        while (iterator.hasNext()) {
+            var tab = iterator.next();
+            tab.setIndex(tab.getIndex() + 1);
+        }
+        tabs.add(index, tabComponent);
+
         c.setCloseAction(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -117,29 +146,45 @@ public class TabFrameLayout implements LayoutManager {
         c.setEnabled(false);
     }
 
+    public void removeTab(final Alignment a, final int index) {
+        try {
+            compsForAlignment(a).get(index).close();
+            var tabs = tabsForAlignment(a);
+            //Adjust indices for tabs.
+            var iterator = tabs.listIterator(index);
+            while (iterator.hasNext()) {
+                var tab = iterator.next();
+                tab.setIndex(tab.getIndex() - 1);
+            }
+            var tab = tabs.remove(index);
+            getTab(a).remove(tab);
+            getTab(a).repaint();
 
-    protected PopupComponent[] componentsForAlignment(@NotNull final Alignment a) {
-        int index = indexForAlignment(a);
-        if (compMap[index] == null) {
-            compMap[index] = new PopupComponent[increase];
+            var comp = compsForAlignment(a).remove(index);
+            comp.setCloseAction(EMPTY_ACTION);
+            layoutContainer(tabFrame);
+        } catch (IndexOutOfBoundsException e) {
+            e.printStackTrace();
         }
-        return compMap[index];
     }
 
-    protected TabFrameTabComponent[] tabsForAlignment(@NotNull final Alignment a) {
-        int index = indexForAlignment(a);
-        if (tabMap[index] == null) {
-            tabMap[index] = new TabFrameTabComponent[increase];
-        }
-        return tabMap[index];
+    public void addTab(@NotNull final PopupComponent c, final String title, final Icon icon,
+                       @NotNull final Alignment a) {
+        insertTab(c, title, icon, a, tabsForAlignment(a).size());
     }
 
-    protected int indexForAlignment(@NotNull final Alignment a) {
-        if (a == Alignment.CENTER) {
-            throw new IllegalArgumentException("invalid alignment: " + a);
-        } else {
-            return a.getIndex();
+    private LinkedList<PopupComponent> compsForAlignment(final Alignment a) {
+        if (!compsMap.containsKey(a)) {
+            compsMap.put(a, new LinkedList<>());
         }
+        return compsMap.get(a);
+    }
+
+    private LinkedList<TabFrameTabComponent> tabsForAlignment(final Alignment a) {
+        if (!tabsMap.containsKey(a)) {
+            tabsMap.put(a, new LinkedList<>());
+        }
+        return tabsMap.get(a);
     }
 
     @Contract(pure = true)
@@ -161,21 +206,6 @@ public class TabFrameLayout implements LayoutManager {
                              topTabs.getHeight() + bottomTabs.getHeight() + b.height);
     }
 
-    //    public void removeTab(final Alignment a, final int index) {
-    //        var tc = tabsForAlignment(a)[index];
-    //        tabFrame.remove(tc);
-    //        tabsForAlignment(a)[index] = null;
-    //        transformModelMap.remove(tc);
-    //        rotationPanelMap.remove(tc);
-    //    }
-
-    public void addTab(@NotNull final PopupComponent c, final String title, final Icon icon,
-                       @NotNull final Alignment a) {
-        indexForAlignment(a); //Check alignment
-        ensureSize(a);
-        insertTab(c, title, icon, a, sizes[indexForAlignment(a)]);
-        sizes[indexForAlignment(a)] += 1;
-    }
 
     @NotNull
     @Override
@@ -183,20 +213,6 @@ public class TabFrameLayout implements LayoutManager {
         var b = content.getMinimumSize();
         return new Dimension(leftTabs.getWidth() + rightTabs.getWidth() + b.width,
                              topTabs.getHeight() + bottomTabs.getHeight() + b.height);
-    }
-
-    private void ensureSize(@NotNull Alignment a) {
-        int size = sizes[indexForAlignment(a)];
-        int oldSize = tabsForAlignment(a).length;
-        if (size == oldSize) {
-            PopupComponent[] newComp = new PopupComponent[oldSize + increase];
-            System.arraycopy(componentsForAlignment(a), 0, newComp, 0, oldSize);
-            compMap[indexForAlignment(a)] = newComp;
-
-            TabFrameTabComponent[] newTab = new TabFrameTabComponent[oldSize + increase];
-            System.arraycopy(tabsForAlignment(a), 0, newTab, 0, oldSize);
-            tabMap[indexForAlignment(a)] = newTab;
-        }
     }
 
     @Override
@@ -209,50 +225,51 @@ public class TabFrameLayout implements LayoutManager {
 
     @Override
     public void layoutContainer(@NotNull Container parent) {
-        var dim = parent.getSize();
-        int topSize = sizes[indexForAlignment(Alignment.NORTH)] + sizes[indexForAlignment(
-                Alignment.NORTH_EAST)];
-        int bottomSize = sizes[indexForAlignment(Alignment.SOUTH)] + sizes[indexForAlignment(
-                Alignment.SOUTH_WEST)];
-        int leftSize = sizes[indexForAlignment(Alignment.WEST)] + sizes[indexForAlignment(
-                Alignment.NORTH_WEST)];
-        int rightSize = sizes[indexForAlignment(Alignment.EAST)] + sizes[indexForAlignment(
-                Alignment.SOUTH_EAST)];
+        var dim = parent.getBounds().getSize();
+        int topSize = tabsForAlignment(Alignment.NORTH).size() + tabsForAlignment(
+                Alignment.NORTH_EAST).size();
+        int bottomSize = tabsForAlignment(Alignment.SOUTH).size() + tabsForAlignment(
+                Alignment.SOUTH_WEST).size();
+        int leftSize = tabsForAlignment(Alignment.WEST).size() + tabsForAlignment(
+                Alignment.NORTH_WEST).size();
+        int rightSize = tabsForAlignment(Alignment.EAST).size() + tabsForAlignment(
+                Alignment.SOUTH_EAST).size();
         layoutTopTab(dim, topSize, leftSize, rightSize);
         layoutBottomTab(dim, bottomSize, leftSize, rightSize);
         layoutLeftTab(dim, leftSize);
         layoutRightTab(dim, rightSize);
 
-        leftBorder.setTop(topSize > 0 ? 0 : 1);
-        leftBorder.setBottom(bottomSize > 0 ? 0 : 1);
-        rightBorder.setBottom(bottomSize > 0 ? 0 : 1);
-        rightBorder.setTop(topSize > 0 ? 0 : 1);
+        /*
+         * In case the dimensions are uneven we need to shift the rotation center to prevent the
+         * rotated pane from being shifted over half a unit. Usually this wouldn't be a major
+         * problem but it made the line borders look too thin compared to the top and bottom ones.
+         *
+         * I only partly understand why the offsets need to be different for the left and right
+         * panel, but it already took far too long to figure out what was causing the issue, so I
+         *  won't be looking into this any further.
+         */
+        double d = rightTabs.getWidth() % 2 == 1 ? 1 : 0;
+        rightTransformModel.setRotationCenter(
+                new Point2D.Double(rightTabs.getHeight() / 2.0, (rightTabs.getWidth() + d) / 2.0));
+        rightTransformModel.invalidate();
+        leftTransformModel.setRotationCenter(
+                new Point2D.Double((leftTabs.getHeight() + d) / 2.0, leftTabs.getWidth() / 2.0));
+        leftTransformModel.invalidate();
 
-        content.setBounds(leftTabs.getWidth(), topTabs.getHeight(),
-                          dim.width - leftTabs.getWidth() - rightTabs.getWidth() - 1,
-                          dim.height - topTabs.getHeight() - bottomTabs.getHeight() - 1);
-    }
+        leftBorder.setRight(topSize > 0 ? 0 : 1);
+        leftBorder.setLeft(bottomSize > 0 ? 0 : 1);
+        rightBorder.setRight(bottomSize > 0 ? 0 : 1);
+        rightBorder.setLeft(topSize > 0 ? 0 : 1);
 
-    @Contract(pure = true)
-    private int getAngle(final Alignment alignment) {
-        return switch (alignment) {
-            case EAST, SOUTH_EAST -> 1;
-            case WEST, NORTH_WEST -> 3;
-            default -> 0;
-        };
+        content.setBounds(rotatePaneLeft.getWidth(), topTabs.getHeight(),
+                          dim.width - rotatePaneLeft.getWidth() - rotatePaneRight.getWidth(),
+                          dim.height - topTabs.getHeight() - bottomTabs.getHeight());
     }
 
     private void layoutTopTab(Dimension dim, int topSize, int leftSize, int rightSize) {
         if (topSize > 0) {
             topTabs.setBounds(0, 0, dim.width, size);
-
-            var start = new Point(leftSize > 0 ? size : 0, 0);
-            int topLeftEnd = layoutHorizontalTab(start, Alignment.NORTH, true);
-            start.x = rightSize > 0 ? dim.width - 1 - size : dim.width - 1;
-            var rightEnd = layoutHorizontalTab(start, Alignment.NORTH_EAST, false);
-            if (rightEnd < topLeftEnd) {
-                shiftHorizontal(topLeftEnd - rightEnd, Alignment.NORTH_EAST);
-            }
+            layoutHorizontal(dim, Alignment.NORTH, Alignment.NORTH_EAST, 0, leftSize, rightSize);
         } else {
             topTabs.setBounds(0, 0, 0, 0);
         }
@@ -260,84 +277,82 @@ public class TabFrameLayout implements LayoutManager {
 
     private void layoutBottomTab(Dimension dim, int bottomSize, int leftSize, int rightSize) {
         if (bottomSize > 0) {
-            bottomTabs.setBounds(0, dim.height - 1 - size, dim.width, size);
-
-            var start = new Point(leftSize > 0 ? size : 0, 1);
-            int bottomLeftEnd = layoutHorizontalTab(start, Alignment.SOUTH_WEST, true);
-            start.x = rightSize > 0 ? dim.width - 1 - size : dim.width - 1;
-            var rightEnd = layoutHorizontalTab(start, Alignment.SOUTH, false);
-            if (rightEnd < bottomLeftEnd) {
-                shiftHorizontal(bottomLeftEnd - rightEnd, Alignment.SOUTH);
-            }
+            bottomTabs.setBounds(0, dim.height - size, dim.width, size);
+            layoutHorizontal(dim, Alignment.SOUTH_WEST, Alignment.SOUTH, 1, leftSize, rightSize);
         } else {
             bottomTabs.setBounds(0, 0, 0, 0);
         }
     }
 
+    private void layoutHorizontal(final Dimension dim, final Alignment left, final Alignment right,
+                                  final int yOff, final int leftSize, final int rightSize) {
+        var start = new Point(leftSize > 0 ? size : 0, yOff);
+        int leftEnd = layoutTabArea(start, left, true, size - 1);
+        start.x = rightSize > 0 ? dim.width - size : dim.width;
+        int rightStart = layoutTabArea(start, right, false, size - 1);
+        if (rightStart < leftEnd) {
+            shift(leftEnd - rightStart, right);
+        }
+    }
+
     private void layoutLeftTab(Dimension dim, int leftSize) {
         if (leftSize > 0) {
-            leftTabs.setBounds(0, topTabs.getHeight(), size,
-                               dim.height - topTabs.getHeight() - bottomTabs.getHeight());
-            var start = new Point(0, leftTabs.getY());
-            int leftTopEnd = layoutVerticalTab(start, Alignment.NORTH_WEST, true);
-            start.y += leftTabs.getHeight() - 1;
-            var bottomEnd = layoutVerticalTab(start, Alignment.WEST, false);
-            if (bottomEnd < leftTopEnd) {
-                shiftVertical(leftTopEnd - bottomEnd, Alignment.WEST);
+            rotatePaneLeft.setBounds(0, topTabs.getHeight(), size,
+                                     dim.height - topTabs.getHeight() - bottomTabs.getHeight() + 1);
+            leftTabs.setPreferredSize(
+                    new Dimension(rotatePaneLeft.getHeight(), rotatePaneLeft.getWidth()));
+            leftTabs.setSize(leftTabs.getPreferredSize());
+            var start = new Point(rotatePaneLeft.getHeight(), 0);
+            int topStart = layoutTabArea(start, Alignment.NORTH_WEST, false, size - 1);
+            start.x = 0;
+            int bottomEnd = layoutTabArea(start, Alignment.WEST, true, size - 1);
+            if (bottomEnd > topStart) {
+                shift(topStart - bottomEnd, Alignment.WEST);
             }
         } else {
             leftTabs.setBounds(0, 0, 0, 0);
+            rotatePaneLeft.setBounds(0, 0, 0, 0);
         }
     }
 
     private void layoutRightTab(Dimension dim, int rightSize) {
         if (rightSize > 0) {
-            rightTabs.setBounds(dim.width - 1 - size, topTabs.getHeight(), size,
-                                dim.height - topTabs.getHeight() - bottomTabs.getHeight());
-
-            var start = new Point(1, rightTabs.getY());
-            int rightTopEnd = layoutVerticalTab(start, Alignment.EAST, true);
-            start.y += rightTabs.getHeight() - 1;
-            var bottomEnd = layoutVerticalTab(start, Alignment.SOUTH_EAST, false);
-            if (bottomEnd < rightTopEnd) {
-                shiftVertical(rightTopEnd - bottomEnd, Alignment.SOUTH_EAST);
+            rotatePaneRight.setBounds(dim.width - size, topTabs.getHeight() - 1, size,
+                                      dim.height - topTabs.getHeight() - bottomTabs.getHeight()
+                                      + 2);
+            rightTabs.setPreferredSize(
+                    new Dimension(rotatePaneRight.getHeight(), rotatePaneRight.getWidth()));
+            rightTabs.setSize(rightTabs.getPreferredSize());
+            var start = new Point(0, 0);
+            int topEnd = layoutTabArea(start, Alignment.EAST, true, size - 1);
+            start.x = rightTabs.getWidth() - 1;
+            var bottomStart = layoutTabArea(start, Alignment.SOUTH_EAST, false, size - 1);
+            if (bottomStart < topEnd) {
+                shift(topEnd - bottomStart, Alignment.SOUTH_EAST);
             }
         } else {
             rightTabs.setBounds(0, 0, 0, 0);
+            rotatePaneRight.setBounds(0, 0, 0, 0);
         }
     }
 
-    private void shiftHorizontal(final int shift, final Alignment a) {
-        int length = sizes[indexForAlignment(a)];
-        var tabComps = tabsForAlignment(a);
-        for (int i = 0; i < length; i++) {
-            var pos = rotationPanelMap.get(tabComps[i]).getLocation();
+    private void shift(final int shift, final Alignment a) {
+        for (var c : tabsForAlignment(a)) {
+            var pos = c.getLocation();
             pos.x += shift;
-            rotationPanelMap.get(tabComps[i]).setLocation(pos);
+            c.setLocation(pos);
         }
     }
 
-    private void shiftVertical(final int shift, final Alignment a) {
-        int length = sizes[indexForAlignment(a)];
-        var tabComps = tabsForAlignment(a);
-        for (int i = 0; i < length; i++) {
-            var pos = rotationPanelMap.get(tabComps[i]).getLocation();
-            pos.y += shift;
-            rotationPanelMap.get(tabComps[i]).setLocation(pos);
-        }
-    }
-
-    protected int layoutHorizontalTab(@NotNull final Point start, @NotNull final Alignment a,
-                                       final boolean forward) {
-        int length = sizes[indexForAlignment(a)];
-        var tabComps = tabsForAlignment(a);
+    protected int layoutTabArea(@NotNull final Point start, @NotNull final Alignment a,
+                                final boolean forward, final int size) {
         int x = start.x;
         int y = start.y;
         var bounds = new Rectangle(0, 0, 0, 0);
-        for (int i = 0; i < length; i++) {
-            var prefSize = tabComps[i].getMinimumSize();
+        for (var c : tabsForAlignment(a)) {
+            var prefSize = c.getMinimumSize();
             bounds.width = prefSize.width;
-            bounds.height = size - 1;
+            bounds.height = size;
             if (forward) {
                 bounds.x = x;
                 bounds.y = y;
@@ -347,46 +362,19 @@ public class TabFrameLayout implements LayoutManager {
                 bounds.x = x;
                 bounds.y = y;
             }
-            tabComps[i].setPreferredSize(bounds.getSize());
-            rotationPanelMap.get(tabComps[i]).setBounds(bounds);
+            c.setBounds(bounds);
         }
         return x;
-    }
-
-    protected int layoutVerticalTab(@NotNull final Point start, @NotNull final Alignment a,
-                                    final boolean downwards) {
-        int length = sizes[indexForAlignment(a)];
-        var tabComps = tabsForAlignment(a);
-        int x = start.x;
-        int y = start.y - topTabs.getHeight();
-        var bounds = new Rectangle(0, 0, 0, 0);
-        for (int i = 0; i < length; i++) {
-            var prefSize = tabComps[i].getMinimumSize();
-            //noinspection SuspiciousNameCombination
-            bounds.height = prefSize.width;
-            bounds.width = size - 1;
-            if (downwards) {
-                bounds.x = x;
-                bounds.y = y;
-                y += bounds.height;
-            } else {
-                y -= bounds.height;
-                bounds.x = x;
-                bounds.y = y;
-            }
-            //noinspection SuspiciousNameCombination
-            tabComps[i].setPreferredSize(new Dimension(bounds.height, bounds.width));
-            rotationPanelMap.get(tabComps[i]).setBounds(bounds);
-        }
-        return y;
     }
 
     private void setCompVisibility(@NotNull final TabFrameTabComponent tabComponent,
                                    final boolean selected) {
         var a = tabComponent.getAlignment();
-        var c = componentsForAlignment(a)[tabComponent.getIndex()];
+        var c = compsForAlignment(a).get(tabComponent.getIndex());
         c.setEnabled(selected);
-        c.open();
+        if (selected) {
+            c.open();
+        }
         content.setPopupComponent(a, c);
         content.setEnabled(a, selected);
         content.updateSizes();
@@ -407,7 +395,7 @@ public class TabFrameLayout implements LayoutManager {
     private void updateAlignments() {
         for (var a : Alignment.values()) {
             if (a != Alignment.CENTER) {
-                for (var c : componentsForAlignment(a)) {
+                for (var c : compsForAlignment(a)) {
                     if (c != null) {
                         c.setAlignment(a, content.getStatus());
                     }
@@ -420,14 +408,15 @@ public class TabFrameLayout implements LayoutManager {
 
         private TabArea() {
             setLayout(null);
-            setOpaque(false);
+            setOpaque(true);
         }
 
         @Override
         public void paint(@NotNull Graphics g) {
             g.setColor(getBackground());
-            g.fillRect(0, 0, getWidth(), getHeight());
-            super.paint(g);
+            g.fillRect(0, 0, getWidth() - 1, getHeight() - 1);
+            paintChildren(g);
+            paintBorder(g);
         }
     }
 

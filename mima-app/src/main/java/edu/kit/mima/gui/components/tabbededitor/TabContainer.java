@@ -86,7 +86,6 @@ public class TabContainer extends JPanel implements UIResource {
             g.translate(b.x, b.y);
             stash.paint(g);
         }
-
     }
 
     @Override

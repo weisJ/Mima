@@ -151,7 +151,7 @@ public class IconLabel extends JPanel {
         @NotNull
         @Override
         public Dimension minimumLayoutSize(Container parent) {
-            var lm = label.getMinimumSize();
+            var lm = label.getPreferredSize();
             var im = iconPanel.getMinimumSize();
             int gap = switch (alignment) {
                 case LEFT, RIGHT -> horizontalGap;

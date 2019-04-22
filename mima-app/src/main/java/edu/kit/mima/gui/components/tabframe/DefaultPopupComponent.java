@@ -142,6 +142,11 @@ public class DefaultPopupComponent extends PopupComponent {
         locked = true;
     }
 
+    @Override
+    public void close() {
+        closeButton.doClick();
+    }
+
     @NotNull
     private Insets getBorderSize(@NotNull final Alignment a, final boolean[] info) {
         switch (a) {
