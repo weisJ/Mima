@@ -32,6 +32,9 @@ public final class App {
      */
     public static void main(@Nullable final String[] args) {
         SplashScreen.getSplashScreen();
+
+        System.setProperty("org.apache.batik.warn_destination", "false");
+
         SwingUtilities.invokeLater(() -> {
             LafManager.setDefaultTheme(true);
             final String filePath = args != null && args.length >= 1 ? args[0] : null;

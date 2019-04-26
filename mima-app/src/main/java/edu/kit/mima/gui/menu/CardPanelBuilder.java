@@ -3,6 +3,7 @@ package edu.kit.mima.gui.menu;
 import edu.kit.mima.api.util.Tuple;
 import edu.kit.mima.api.util.ValueTuple;
 import edu.kit.mima.gui.components.SeamlessSplitPane;
+import org.jdesktop.swingx.JXTree;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.BorderFactory;
@@ -10,9 +11,8 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTree;
 import javax.swing.UIManager;
-import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.TreeCellRenderer;
 import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Container;
@@ -106,11 +106,11 @@ public class CardPanelBuilder {
     }
 
     /**
-     * Add the panel to the given container.
+     * Create the panel.
      *
      * @param parent container to add this to
      */
-    /*default*/ void addToComponent(@NotNull final Container parent) {
+    /*default*/ JComponent create(@NotNull final Container parent) {
         final String[] items = panelMap.values().stream()
                 .map(Tuple::getFirst).toArray(String[]::new);
         final Optional<String> maxElement = Arrays.stream(items)
@@ -123,7 +123,7 @@ public class CardPanelBuilder {
             final Rectangle2D bounds = metrics.getStringBounds(maxElement.get(), null);
             minWidth = Math.max(minWidth, (int) bounds.getWidth());
         }
-        final var sidebar = new JTree(items) {
+        final var sidebar = new JXTree(items) {
             @Override
             public void updateUI() {
                 super.updateUI();
@@ -131,10 +131,17 @@ public class CardPanelBuilder {
                 setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1,
                                                           UIManager.getColor("Border.line1")));
             }
+
+            @Override
+            public TreeCellRenderer getCellRenderer() {
+                var renderer = super.getCellRenderer();
+                ((JXTree.DelegatingRenderer) renderer).setLeafIcon(null);
+                return renderer;
+            }
         };
-        sidebar.setDragEnabled(false);
+        sidebar.setBorder(null);
         sidebar.putClientProperty("TreeTableTree", Boolean.TRUE);
-        DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) sidebar.getCellRenderer();
+        var renderer = (JXTree.DelegatingRenderer) sidebar.getCellRenderer();
         renderer.setLeafIcon(null);
 
         panelMap.forEach((i, t) -> panel.add(t.getSecond(), t.getFirst()));
@@ -152,12 +159,11 @@ public class CardPanelBuilder {
                                                minDim.height));
         });
 
-
         final JScrollPane sideBarPane = new JScrollPane();
+        sideBarPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         sideBarPane.setViewportView(sidebar);
-
-
         sideBarPane.setMinimumSize(minDim);
+        sideBarPane.setBorder(null);
 
         cardPanel.setLeftComponent(sideBarPane);
         cardPanel.setRightComponent(panel);
@@ -166,7 +172,7 @@ public class CardPanelBuilder {
         sideBarPane.revalidate();
         panel.revalidate();
         cardPanel.setDividerLocation(-1);
-        parent.add(cardPanel);
+        return cardPanel;
     }
 
     private int calcMinWidth() {

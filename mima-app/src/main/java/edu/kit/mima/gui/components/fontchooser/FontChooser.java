@@ -106,6 +106,7 @@ public class FontChooser extends WrapPanel implements FontContainer {
         initPanes();
         previewPane.setPreviewFont(selectionModel.getSelectedFont());
         setBorder(null);
+        setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
     }
 
     @Override

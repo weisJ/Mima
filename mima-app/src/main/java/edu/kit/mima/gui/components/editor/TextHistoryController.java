@@ -178,9 +178,10 @@ public class TextHistoryController {
 
     /**
      * Reset the History.
+     * @param initial the initial text.
      */
-    public void reset() {
-        history.reset();
+    public void reset(final String initial) {
+        history.reset(new FileHistoryObject(editorPane, 0, initial, "", ChangeType.INSERT));
     }
 
     /**

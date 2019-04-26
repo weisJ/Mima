@@ -1,14 +1,15 @@
 package edu.kit.mima.app;
 
 import edu.kit.mima.App;
+import edu.kit.mima.api.lambda.CheckedConsumer;
 import edu.kit.mima.gui.components.editor.Editor;
 import edu.kit.mima.loading.FileManager;
 import edu.kit.mima.logger.LoadingIndicator;
 import edu.kit.mima.util.FileName;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.function.Consumer;
 
 /**
  * Actions for file management.
@@ -27,6 +28,7 @@ public final class FileActions {
      * @param mimaUI        parent app.
      * @param editorManager editor manager of app.
      */
+    @Contract(pure = true)
     public FileActions(final MimaUserInterface mimaUI, final MimaEditorManager editorManager) {
         this.mimaUI = mimaUI;
         this.editorManager = editorManager;
@@ -38,13 +40,7 @@ public final class FileActions {
      * @param path file path.
      */
     public void openFile(@NotNull final String path) {
-        openFile(fm -> {
-            try {
-                fm.load(path);
-            } catch (@NotNull final IOException e) {
-                App.logger.error("Could not load file: " + e.getMessage());
-            }
-        });
+        openFile(fm -> fm.load(path));
     }
 
     /**
@@ -52,7 +48,7 @@ public final class FileActions {
      *
      * @param loadAction function that loads the new file
      */
-    public void openFile(@NotNull final Consumer<FileManager> loadAction) {
+    public void openFile(@NotNull final CheckedConsumer<FileManager, IOException> loadAction) {
         try {
             final var pair = editorManager.createEditor();
             final Editor editor = pair.getFirst();
@@ -61,9 +57,8 @@ public final class FileActions {
             editorManager.openEditor(editor, fm);
             mimaUI.fileChanged();
             App.logger.log("loaded: " + FileName.shorten(fm.getLastFile()));
-        } catch (@NotNull final IllegalArgumentException ignored) {
-        } catch (@NotNull final IllegalStateException e) {
-            App.logger.error(e.getMessage());
+        } catch (@NotNull final IOException | IllegalStateException e) {
+            App.logger.error("Could not load file: " + e.getMessage());
         }
     }
 

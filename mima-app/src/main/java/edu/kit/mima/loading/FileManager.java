@@ -8,6 +8,7 @@ import edu.kit.mima.preferences.PropertyKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.JOptionPane;
 import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
@@ -15,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
-import javax.swing.JOptionPane;
 
 /**
  * Responsible for saving/loading/creating files.
@@ -84,10 +84,14 @@ public class FileManager implements AutoCloseable {
 
     /**
      * Load file from path user specifies.
+     *
+     * @throws IOException if no file was chosen or file could not be loaded.
      */
-    public void load() {
-        text = fileRequester.requestLoad(directory, extensions, () -> {/*Do nothing*/});
-        assert text != null;
+    public void load() throws IOException {
+        text = fileRequester.requestLoad(directory, extensions, () -> {});
+        if (text == null) {
+            throw new IOException("no file given");
+        }
         fileHash = text.hashCode();
         isNewFile = false;
         notifyHandlers(e -> e.fileLoadedEvent(lastFile));
@@ -101,7 +105,6 @@ public class FileManager implements AutoCloseable {
      */
     public void load(@NotNull final String filePath) throws IOException {
         text = IoTools.loadFile(filePath);
-        assert text != null;
         fileHash = text.hashCode();
         lastFile = filePath;
         updateReferences(filePath);

@@ -10,8 +10,8 @@ import org.jetbrains.annotations.NotNull;
  */
 
 @FunctionalInterface
-public interface CheckedFunction<T, R> {
+public interface CheckedFunction<T, R, E extends Exception> {
 
-    @NotNull R apply(T t) throws Exception;
+    @NotNull R apply(T t) throws E;
 
 }

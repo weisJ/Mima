@@ -1,7 +1,7 @@
 package edu.kit.mima.gui.laf.components;
 
-import javax.swing.UIManager;
-import javax.swing.border.LineBorder;
+import edu.kit.mima.gui.components.border.AdaptiveLineBorder;
+
 import java.awt.Component;
 import java.awt.Insets;
 
@@ -12,14 +12,14 @@ import java.awt.Insets;
  * @author Jannis Weis
  * @since 2018
  */
-public class MimaTableCellBorder extends LineBorder {
+public class MimaTableCellBorder extends AdaptiveLineBorder {
 
 
     /**
      * Create new Cell border.
      */
     public MimaTableCellBorder() {
-        super(UIManager.getColor("Border.line1"));
+        super(1, 1, 1, 1, "Border.line1");
     }
 
     @Override

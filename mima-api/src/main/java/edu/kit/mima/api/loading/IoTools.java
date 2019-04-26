@@ -35,6 +35,7 @@ public final class IoTools {
      * @return content of file
      * @throws IOException may throw IOException during loading process if the file does not exist
      */
+    @NotNull
     public static String loadFile(@NotNull final String path) throws IOException {
         final var charSet = CHARSET_DETECTOR.setText(
                 new BufferedInputStream(new FileInputStream(path))).detect().getName();

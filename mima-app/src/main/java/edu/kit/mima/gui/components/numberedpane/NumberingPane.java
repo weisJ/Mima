@@ -7,11 +7,11 @@ import kotlin.Triple;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.UIManager;
+import javax.swing.border.MatteBorder;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import java.awt.Color;
@@ -72,8 +72,7 @@ class NumberingPane extends JPanel {
         currentBackground = UIManager.getColor("Numbering.selectedBackground");
         font = UIManager.getFont("Numbering.font");
         setBackground(UIManager.getColor("Numbering.background"));
-        setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1,
-                                                  UIManager.getColor("Border.line1")));
+        setBorder(new MatteBorder(0, 0, 0, 1, UIManager.getColor("Border.line1")));
         setupSizes();
     }
 

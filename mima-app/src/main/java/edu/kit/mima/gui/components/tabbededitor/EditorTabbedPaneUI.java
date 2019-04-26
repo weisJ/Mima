@@ -123,7 +123,7 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
         }
         final var sourceBounds = dropSourceIndex >= 0 ? rects[dropSourceIndex]
                                  : new Rectangle(0, 0, 0, 0);
-        for (int i = minVisible; i <= maxVisible; i++) {
+        for (int i = minVisible; i <= maxVisible && i < rects.length; i++) {
             if (i != dropSourceIndex && i != selectedIndex) {
                 drawTab((Graphics2D) g.create(), i, false);
             }
@@ -139,9 +139,8 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
             }
         }
         var g2 = (Graphics2D) g.create();
-        g2.translate(0, -0.5);
         g2.setColor(tabBorderColor);
-        g2.drawLine(0, maxTabHeight + 1, tabbedPane.getWidth() - 1, maxTabHeight + 1);
+        g2.drawLine(0, maxTabHeight, tabbedPane.getWidth() - 1, maxTabHeight);
         g2.dispose();
         if (dropSourceIndex != selectedIndex) {
             drawTab((Graphics2D) g.create(), selectedIndex, true);
@@ -157,7 +156,11 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
         if (tabbedPane.getTabLayoutPolicy() == JTabbedPane.SCROLL_TAB_LAYOUT) {
             return super.getTabBounds(tabIndex, dest);
         }
-        dest.setBounds(rects[tabIndex]);
+        if (rects.length == 0) {
+            dest.setBounds(0, 0, 0, 0);
+        } else {
+            dest.setBounds(rects[tabIndex]);
+        }
         return dest;
     }
 
@@ -181,18 +184,18 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
         g.translate(1, 0);
         if (isSelected) {
             g.setColor(selectedBackground);
-            g.fillRect(bounds.x, bounds.y, bounds.width - 1, bounds.height);
+            g.fillRect(bounds.x - 1, bounds.y, bounds.width - 1, bounds.height);
         } else {
             g.setColor(tabbedPane.getBackground());
-            g.fillRect(bounds.x, bounds.y, bounds.width - 1, bounds.height);
+            g.fillRect(bounds.x - 1, bounds.y, bounds.width - 1, bounds.height);
         }
         if (isSelected) {
             g.setColor(selectedColor);
-            g.fillRect(bounds.x, bounds.y + bounds.height - yOff + 1, bounds.width - 1, yOff);
+            g.fillRect(bounds.x - 1, bounds.y + bounds.height - yOff + 1, bounds.width - 1, yOff);
         }
         g.translate(-0.5, 0);
         g.setColor(tabBorderColor);
-        g.drawLine(bounds.x + bounds.width - 1, bounds.y, bounds.x + bounds.width - 1,
+        g.drawLine(bounds.x + bounds.width - 2, bounds.y, bounds.x + bounds.width - 2,
                    bounds.y + bounds.height);
         g.dispose();
     }
@@ -300,8 +303,8 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
             maxVisible = tabCount - 1;
             for (int i = 0; i < tabCount; i++) {
                 rects[i].x += shift;
-                if (rects[i].x + rects[i].width < 0 || rects[i].x >= returnAt) {
-                    maxVisible = firstVisible ? i - 1 : maxVisible;
+                if (rects[i].x + rects[i].width < 0 || rects[i].x >= returnAt && firstVisible) {
+                    maxVisible = i - 1;
                 } else if (!firstVisible) {
                     firstVisible = true;
                     minVisible = i;

@@ -157,8 +157,8 @@ public class SeamlessSplitPane extends JSplitPane {
 
         private ZeroSizeDivider(@NotNull final BasicSplitPaneUI ui) {
             super(ui);
-            setBackground(UIManager.getColor("Border.line1"));
         }
+
 
         @Override
         public void setBorder(final Border border) {
@@ -168,7 +168,7 @@ public class SeamlessSplitPane extends JSplitPane {
         @Override
         public void paint(@NotNull final Graphics g) {
             if (showBorder) {
-                g.setColor(getBackground());
+                g.setColor(UIManager.getColor("Border.line1"));
                 if (orientation == HORIZONTAL_SPLIT) {
                     g.drawLine(DIVIDER_DRAG_OFFSET, 0, DIVIDER_DRAG_OFFSET, getHeight() - 1);
                 } else {

@@ -1,9 +1,9 @@
 #Compute the Factorial of a number.
 #Works up to val = 10.
 §define const val = 5;
-§define x = 5, const y = 7, const w = 25;
+§define x = 5, const y = 7, z, u, const w = 25;
 
-LDC();
+LDC(val);
 CALL(FACTORIAL);
 Stop :
     HALT();
@@ -12,40 +12,46 @@ Stop :
 #Parameter is stored in the accu.
 FACTORIAL : {
     #Init
+    §define test1, test2;
+    STV(test1);
+    STV(test2);
     §define argument = 0; #argument variable
     §define comp = 1; # 0
     §define neg_one = 2; # -1
     §define tmp = 3; #temporary variable
 
-    STV();
+    STV(argument);
     LDC(0);
-    STV();
+    STV(comp);
     LDC(-1);
-    STV();
+    STV(neg_one);
     LDC(1);
     STSP();
     #end init
 
-    LDV();
+    LDV(argument);
     JMN(Stop); #Only positive numbers are valid
 
     CALL(COMPUTE_FAC);
     RET();
 
     COMPUTE_FAC : {
+        §define test4, test3;
+        STV(test3);
+        STV(test4);
         #Check for base case
-        EQL();
+        EQL(comp);
         JMN(BASE_FAC);
 
         CALL(INCREASE_STACK);
 
         #Compute factorial
-        LDV();
+        LDV(argument);
         STVR(0, SP()); #store x
 
         LDC(-1);
-        ADD();
-        STV();
+        ADD(argument);
+        STV(argument);
         CALL(COMPUTE_FAC); #compute (x-1)! =: y
 
         STVR(1, SP()); #store y
@@ -64,15 +70,15 @@ FACTORIAL : {
     #Multiply two numbers x and y
     MULT : {
         LDVR(0, SP());
-        EQL();
+        EQL(comp);
         JMN(MULT_RET);
         LDVR(2, SP());
-        STV();
+        STV(tmp);
         LDVR(1, SP());
-        ADD();
+        ADD(tmp);
         STVR(2, SP());
         LDVR(0, SP());
-        ADD();
+        ADD(neg_one);
         STVR(0, SP());
         JMP(MULT);
 
@@ -95,15 +101,14 @@ FACTORIAL : {
         RET();
     }
 
-    #Decrease factorial recursion stack.
-    #Does not affect
+    #Decrease factorial recursion stack. Does not affect
     #accumulator value
     DECREASE_STACK : {
-        STV();
+        STV(tmp);
         LDSP();
         ADC(-3);
         STSP();
-        LDV();
+        LDV(tmp);
         RET();
     }
 }
