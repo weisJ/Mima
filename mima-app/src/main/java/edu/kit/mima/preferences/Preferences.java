@@ -48,6 +48,12 @@ public class Preferences {
         notify = true;
     }
 
+    private Preferences(@NotNull final Properties options, @NotNull final Properties colorStyle) {
+        this.options = (Properties) options.clone();
+        this.colorStyle = (Properties) colorStyle.clone();
+        notify = true;
+    }
+
     @Contract(pure = true)
     @NotNull
     public static Preferences getInstance() {
@@ -73,6 +79,11 @@ public class Preferences {
                 listener.notifyUserPreferenceChanged(key);
             }
         }
+    }
+
+    @Override
+    public Preferences clone() {
+        return new Preferences(options, colorStyle);
     }
 
     /**
@@ -216,6 +227,17 @@ public class Preferences {
             return new Font(decode[0], Integer.parseInt(decode[1]), Integer.parseInt(decode[2]));
         } catch (@NotNull final Exception e) {
             return new Font("Monospaced", Font.PLAIN, 12);
+        }
+    }
+
+    /**
+     * Save existing preferences to this one.
+     *
+     * @param pref preferences to save.
+     */
+    public void save(@NotNull final Preferences pref) {
+        for (var key : PropertyKey.values()) {
+            saveValue(key.getType(), key, pref.options.getProperty(key.toString()));
         }
     }
 }

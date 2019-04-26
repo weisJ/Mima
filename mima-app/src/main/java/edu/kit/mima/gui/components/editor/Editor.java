@@ -1,11 +1,12 @@
 package edu.kit.mima.gui.components.editor;
 
+import edu.kit.mima.api.history.FileHistoryObject;
 import edu.kit.mima.core.interpretation.Breakpoint;
 import edu.kit.mima.core.interpretation.SimpleBreakpoint;
 import edu.kit.mima.gui.components.BreakpointComponent;
-import edu.kit.mima.gui.components.editor.highlighter.Highlighter;
 import edu.kit.mima.gui.components.editor.view.HighlightViewFactory;
 import edu.kit.mima.gui.components.numberedpane.NumberedTextPane;
+import edu.kit.mima.highlighter.Highlighter;
 import edu.kit.mima.preferences.ColorKey;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
@@ -99,8 +100,7 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
                 setCursor(Cursor.getDefaultCursor());
             }
         });
-        historyController = new TextHistoryController(pane, 0);
-        historyController.setActive(false);
+        historyController = new TextHistoryController(pane, 100);
         editEventHandlers = new ArrayList<>();
         repaint = true;
 
@@ -143,7 +143,10 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
         historyController.setActive(false);
         final int caret = pane.getCaretPosition();
         if (highlighter != null) {
-            var fhs = historyController.getHistory().getCurrent();
+            var fhs = historyController.isActive()
+                      ? historyController.getHistory().getCurrent()
+                      : new FileHistoryObject(getPane(), 0, getText(), "",
+                                              FileHistoryObject.ChangeType.INSERT);
             highlighter.updateHighlighting(pane, fhs);
         }
         setCaretPosition(caret);
@@ -293,6 +296,9 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
      * @param text text to set
      */
     public void setText(@NotNull final String text) {
+        if (getText().equals(text)) {
+            return;
+        }
         final int pos = getCaretPosition();
         try {
             historyController.addReplaceHistory(0,
@@ -362,7 +368,7 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
      * @param capacity   capacity of history
      */
     public void useHistory(final boolean useHistory, final int capacity) {
-        historyController.reset();
+        historyController.reset(getText());
         historyController.setActive(useHistory);
         historyController.setCapacity(capacity);
     }

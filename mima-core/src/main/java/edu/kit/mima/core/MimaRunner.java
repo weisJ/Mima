@@ -1,5 +1,7 @@
 package edu.kit.mima.core;
 
+import edu.kit.mima.api.event.SubscriptionManager;
+import edu.kit.mima.api.event.SubscriptionService;
 import edu.kit.mima.api.observing.AbstractObservable;
 import edu.kit.mima.core.controller.ThreadDebugController;
 import edu.kit.mima.core.instruction.InstructionSet;
@@ -33,6 +35,8 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
     public static final String RUNNING_PROPERTY = "running";
     @NotNull private final AtomicReference<Exception> sharedException;
     @NotNull private final MimaDebugger debugger;
+    @NotNull
+    private final SubscriptionService<Boolean> subscriptionService;
 
     private ThreadDebugController threadDebugController;
     @NotNull private Interpreter interpreter;
@@ -44,6 +48,10 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
      * Create new MimaRunner.
      */
     public MimaRunner() {
+        subscriptionService = new SubscriptionService<>(MimaRunner.class);
+        SubscriptionManager.getCurrentManager().offerSubscription(subscriptionService,
+                                                                  RUNNING_PROPERTY,
+                                                                  MimaDebugger.PAUSE_PROPERTY);
         debugger = new MimaDebugger();
         interpreter = new Interpreter(0, null, null);
         sharedException = new AtomicReference<>();
@@ -77,6 +85,7 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
         debugger.active = false;
         Optional.ofNullable(threadDebugController).ifPresent(ThreadDebugController::stop);
         interpreter.setRunning(false);
+        subscriptionService.notifyEvent(RUNNING_PROPERTY, false, this);
         getPropertyChangeSupport().firePropertyChange(RUNNING_PROPERTY, running, false);
     }
 
@@ -205,10 +214,12 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
             } while (threadDebugController.isActive() && isRunning());
             if (!threadDebugController.isActive()) {
                 paused = true;
+                subscriptionService.notifyEvent(PAUSE_PROPERTY, true, this);
                 getPropertyChangeSupport().firePropertyChange(Debugger.PAUSE_PROPERTY, false, true);
             }
             if (!isRunning()) {
                 active = false;
+                subscriptionService.notifyEvent(RUNNING_PROPERTY, false, this);
                 getPropertyChangeSupport().firePropertyChange(RUNNING_PROPERTY, true, false);
             }
         }
@@ -218,12 +229,18 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
                           @NotNull final Collection<Breakpoint> breakpoints) {
             active = true;
             paused = false;
+
+            subscriptionService.notifyEvent(PAUSE_PROPERTY, true, this);
             getPropertyChangeSupport().firePropertyChange(Debugger.PAUSE_PROPERTY, false, true);
+
             mima.reset();
             setupInterpreter(callback);
             threadDebugController.setBreaks(breakpoints);
             threadDebugController.start();
+
+            subscriptionService.notifyEvent(RUNNING_PROPERTY, true, this);
             getPropertyChangeSupport().firePropertyChange(RUNNING_PROPERTY, false, true);
+
             continueExecution();
         }
 
@@ -231,6 +248,8 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
         public void pause() {
             paused = true;
             threadDebugController.pause();
+
+            subscriptionService.notifyEvent(PAUSE_PROPERTY, true, this);
             getPropertyChangeSupport().firePropertyChange(Debugger.PAUSE_PROPERTY, false, true);
         }
 
@@ -245,6 +264,9 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
         public void step() {
             paused = true;
             threadDebugController.setAutoPause(true);
+
+
+            subscriptionService.notifyEvent(PAUSE_PROPERTY, false, this);
             getPropertyChangeSupport().firePropertyChange(Debugger.PAUSE_PROPERTY, true, false);
             continueExecution();
         }

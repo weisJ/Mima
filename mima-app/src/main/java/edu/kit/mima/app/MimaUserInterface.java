@@ -1,6 +1,8 @@
 package edu.kit.mima.app;
 
 import edu.kit.mima.App;
+import edu.kit.mima.api.event.SubscriptionManager;
+import edu.kit.mima.api.observing.BindingUtil;
 import edu.kit.mima.core.Debugger;
 import edu.kit.mima.core.MimaCompiler;
 import edu.kit.mima.core.MimaRunner;
@@ -22,7 +24,6 @@ import edu.kit.mima.gui.view.MemoryTableView;
 import edu.kit.mima.loading.FileManager;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
-import edu.kit.mima.util.BindingUtil;
 import edu.kit.mima.util.FileName;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -91,6 +92,37 @@ public final class MimaUserInterface extends JFrame {
     }
 
     private void createBinding() {
+        final var subscriptionManager = SubscriptionManager.getCurrentManager();
+
+        /*subscriptionManager.subscribe(new AbstractSubscriber(debugger) {
+            @Override
+            public <T> void notifySubscription(String identifier, T value) {
+                int index = Optional.ofNullable(mimaRunner.getCurrentStatement())
+                                    .map(Token::getOffset)
+                                    .orElse(-1);
+
+                editorManager.currentEditor().markLine(index);
+                memoryView.updateView();
+            }
+        }, Debugger.PAUSE_PROPERTY);
+
+        subscriptionManager.subscribe(new AbstractSubscriber(mimaRunner) {
+            @Override
+            public <T> void notifySubscription(String identifier, T value) {
+
+            }
+        }, MimaRunner.RUNNING_PROPERTY);
+
+        subscriptionManager.subscribe(new AbstractSubscriber(debugger) {
+            @Override
+            public <T> void notifySubscription(String identifier, T value) {
+                currentEditor().markLine(-1);
+                memoryView.updateView();
+            }
+        }, MimaRunner.RUNNING_PROPERTY);
+        */
+
+
         BindingUtil.bind(debugger, () -> {
             int index = Optional.ofNullable(mimaRunner.getCurrentStatement())
                     .map(Token::getOffset)
@@ -99,6 +131,7 @@ public final class MimaUserInterface extends JFrame {
             editorManager.currentEditor().markLine(index);
             memoryView.updateView();
         }, Debugger.PAUSE_PROPERTY);
+
         BindingUtil.bind(mimaRunner, memoryView::updateView,
                          MimaRunner.RUNNING_PROPERTY);
         BindingUtil.bind(debugger, () -> currentEditor().markLine(-1),
@@ -198,6 +231,17 @@ public final class MimaUserInterface extends JFrame {
                 controlPanel.getMinimumSize().height));
         controlPanel.addComponentListener((ComponentResizeListener) e -> resizeAction.run());
         BindingUtil.bind(debugger, resizeAction, Debugger.RUNNING_PROPERTY);
+
+        /*
+        var subscriptionManager = SubscriptionManager.getCurrentManager();
+        subscriptionManager.subscribe(new AbstractSubscriber(debugger) {
+            @Override
+            public <T> void notifySubscription(String identifier, T value) {
+                fileDisplay.setMaximumSize(new Dimension(buttonArea.getX() - fileDisplay.getX(),
+                                                         controlPanel.getMinimumSize().height));
+            }
+        }, Debugger.RUNNING_PROPERTY);
+        */
 
         add(controlPanel, BorderLayout.NORTH);
         var tabFrame = new TabFrame();

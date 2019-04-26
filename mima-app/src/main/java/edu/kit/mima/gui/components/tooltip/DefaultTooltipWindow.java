@@ -62,6 +62,14 @@ public class DefaultTooltipWindow extends TooltipWindow {
         tooltipPanel.add(labelPanel);
         add(tooltipPanel);
     }
+
+    @Override
+    public void setVisible(boolean b) {
+        labelPanel.setBackground(UIManager.getColor("Tooltip.background"));
+        bubbleBorder.setColor(UIManager.getColor("Tooltip.borderColor"));
+        super.setVisible(b);
+    }
+
     /**
      * Set the display text for the DefaultTooltipWindow.
      *

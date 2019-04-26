@@ -1,11 +1,11 @@
 package edu.kit.mima.gui.components.button;
 
+import edu.kit.mima.api.observing.BindingUtil;
 import edu.kit.mima.api.observing.ClassObservable;
 import edu.kit.mima.api.observing.Observable;
 import edu.kit.mima.gui.components.tooltip.DefaultTooltipWindow;
 import edu.kit.mima.gui.components.tooltip.TooltipUtil;
 import edu.kit.mima.gui.components.tooltip.TooltipWindow;
-import edu.kit.mima.util.BindingUtil;
 import edu.kit.mima.util.HSLColor;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;

@@ -1,5 +1,7 @@
 package edu.kit.mima.app;
 
+import edu.kit.mima.api.event.SimpleSubscriber;
+import edu.kit.mima.api.event.SubscriptionManager;
 import edu.kit.mima.api.history.History;
 import edu.kit.mima.core.Debugger;
 import edu.kit.mima.core.MimaRunner;
@@ -52,6 +54,19 @@ public class MimaButtonArea {
                                                                       Icons.DEBUG_ACTIVE);
         var debugger = runActions.getDebugger();
         var mimaRunner = runActions.getMimaRunner();
+        var sm = SubscriptionManager.getCurrentManager();
+        var undo = new IconButton(Icons.UNDO_INACTIVE, Icons.UNDO);
+        var redo = new IconButton(Icons.REDO_INACTIVE, Icons.REDO);
+        sm.subscribe(new SimpleSubscriber(((identifier, value) -> {
+                         var editor = mimaUI.currentEditor();
+                         undo.setEnabled(editor != null && editor.canUndo());
+                     })), History.POSITION_PROPERTY, History.LENGTH_PROPERTY,
+                     EditorTabbedPane.SELECTED_TAB_PROPERTY);
+        sm.subscribe(new SimpleSubscriber(((identifier, value) -> {
+                         var editor = mimaUI.currentEditor();
+                         redo.setEnabled(editor != null && editor.canRedo());
+                     })), History.POSITION_PROPERTY, History.LENGTH_PROPERTY,
+                     EditorTabbedPane.SELECTED_TAB_PROPERTY);
         return new ButtonPanelBuilder()
                 //Pause
                 .addButton(new IconButton(Icons.PAUSE_INACTIVE, Icons.PAUSE))
@@ -100,20 +115,12 @@ public class MimaButtonArea {
                 .bindEnabled(mimaRunner, mimaRunner::isRunning, MimaRunner.RUNNING_PROPERTY)
                 .addSpace()
                 //Undo
-                .addButton(new IconButton(Icons.UNDO_INACTIVE, Icons.UNDO))
+                .addButton(undo)
                 .addAction(() -> mimaUI.currentEditor().undo()).setTooltip("Redo (Ctrl+Z)")
-                .bindClassEnabled(History.class, () -> mimaUI.currentEditor().canUndo(),
-                                  History.LENGTH_PROPERTY, History.POSITION_PROPERTY)
-                .bindEnabled(tabbedPane, () -> mimaUI.currentEditor().canUndo(),
-                             EditorTabbedPane.SELECTED_TAB_PROPERTY)
                 .setEnabled(false)
                 //Redo
-                .addButton(new IconButton(Icons.REDO_INACTIVE, Icons.REDO))
+                .addButton(redo)
                 .addAction(() -> mimaUI.currentEditor().redo()).setTooltip("Redo (Ctrl+Shift+Z)")
-                .bindClassEnabled(History.class, () -> mimaUI.currentEditor().canRedo(),
-                                  History.LENGTH_PROPERTY, History.POSITION_PROPERTY)
-                .bindEnabled(tabbedPane, () -> mimaUI.currentEditor().canRedo(),
-                             EditorTabbedPane.SELECTED_TAB_PROPERTY)
                 .setEnabled(false)
                 .addSpace()
                 .get();

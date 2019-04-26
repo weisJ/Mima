@@ -1,5 +1,7 @@
 package edu.kit.mima.gui.components.tabbededitor;
 
+import edu.kit.mima.api.event.SubscriptionManager;
+import edu.kit.mima.api.event.SubscriptionService;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;
@@ -18,6 +20,15 @@ import java.util.List;
  */
 public class EditorTabbedPane extends JTabbedPane {
     public static final String SELECTED_TAB_PROPERTY = "selectedTab";
+    private static final SubscriptionService<Integer> SUBSCRIPTION_SERVICE =
+            new SubscriptionService<>(
+            EditorTabbedPane.class);
+
+    static {
+        SubscriptionManager.getCurrentManager().offerSubscription(SUBSCRIPTION_SERVICE,
+                                                                  SELECTED_TAB_PROPERTY);
+    }
+
     static final String NAME = "TabTransferData";
     static final DataFlavor FLAVOR = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType, NAME);
     private final EditorDragSupport dragSupport;
@@ -34,6 +45,8 @@ public class EditorTabbedPane extends JTabbedPane {
         super.setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
         addChangeListener(e -> {
             firePropertyChange(SELECTED_TAB_PROPERTY, selectedTab, getSelectedIndex());
+            SUBSCRIPTION_SERVICE.notifyEvent(SELECTED_TAB_PROPERTY, getSelectedIndex(),
+                                             EditorTabbedPane.this);
             selectedTab = getSelectedIndex();
         });
         dragSupport = new EditorDragSupport(this);

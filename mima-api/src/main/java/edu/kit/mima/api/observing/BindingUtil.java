@@ -1,7 +1,5 @@
-package edu.kit.mima.util;
+package edu.kit.mima.api.observing;
 
-import edu.kit.mima.api.observing.ClassObservable;
-import edu.kit.mima.api.observing.Observable;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 

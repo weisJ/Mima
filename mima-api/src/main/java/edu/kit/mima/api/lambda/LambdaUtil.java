@@ -42,11 +42,13 @@ public final class LambdaUtil {
      * @param checkedFunction checked function to wrap.
      * @param <T>             First type argument of function.
      * @param <R>             Second type argument of function.
+     * @param <E>             exception type
      * @return wrapped function.
      */
     @NotNull
     @Contract(pure = true)
-    public static <T, R> Function<T, R> wrap(@NotNull final CheckedFunction<T, R> checkedFunction) {
+    public static <T, R, E extends Exception> Function<T, R> wrap(
+            @NotNull final CheckedFunction<T, R, E> checkedFunction) {
         return t -> {
             try {
                 return checkedFunction.apply(t);
@@ -61,11 +63,13 @@ public final class LambdaUtil {
      *
      * @param checkedFunction checked consumer to wrap.
      * @param <T>             type argument of consumer.
+     * @param <K>             type of expected exception.
      * @return wrapped function.
      */
     @NotNull
     @Contract(pure = true)
-    public static <T> Consumer<T> wrap(@NotNull final CheckedConsumer<T> checkedFunction) {
+    public static <T, K extends Exception> Consumer<T> wrap(
+            @NotNull final CheckedConsumer<T, K> checkedFunction) {
         return t -> {
             try {
                 checkedFunction.accept(t);
@@ -81,12 +85,13 @@ public final class LambdaUtil {
      * @param checkedFunction checked consumer to wrap.
      * @param <T>             first type argument of consumer.
      * @param <K>             second type argument of consumer.
+     * @param <E>             exception type
      * @return wrapped function.
      */
     @NotNull
     @Contract(pure = true)
-    public static <T, K> BiConsumer<T, K> wrap(
-            @NotNull final CheckedBiConsumer<T, K> checkedFunction) {
+    public static <T, K, E extends Exception> BiConsumer<T, K> wrap(
+            @NotNull final CheckedBiConsumer<T, K, E> checkedFunction) {
         return (t, k) -> {
             try {
                 checkedFunction.accept(t, k);

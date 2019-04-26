@@ -25,7 +25,7 @@ public class MutableLineBorder extends EmptyBorder {
 
     @Override
     public void paintBorder(Component c, @NotNull Graphics g, int x, int y, int width, int height) {
-        g.setColor(color);
+        g.setColor(getColor());
         var insets = getBorderInsets();
         g.fillRect(0, 0, width - insets.right, insets.top);
         g.fillRect(0, insets.top, insets.left, height - insets.top);
@@ -56,5 +56,9 @@ public class MutableLineBorder extends EmptyBorder {
 
     public void setColor(final Color color) {
         this.color = color;
+    }
+
+    protected Color getColor() {
+        return color;
     }
 }

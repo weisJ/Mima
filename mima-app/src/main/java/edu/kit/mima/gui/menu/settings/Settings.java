@@ -1,35 +1,31 @@
 package edu.kit.mima.gui.menu.settings;
 
-import edu.kit.mima.gui.components.LookAndFeelInfoCellRenderer;
+import edu.kit.mima.gui.components.border.AdaptiveLineBorder;
 import edu.kit.mima.gui.components.fontchooser.FontChooser;
 import edu.kit.mima.gui.components.fontchooser.model.FontSelectionModel;
 import edu.kit.mima.gui.components.fontchooser.panes.AbstractPreviewPane;
-import edu.kit.mima.gui.laf.DarkLafInfo;
-import edu.kit.mima.gui.laf.LafManager;
-import edu.kit.mima.gui.laf.LightLafInfo;
 import edu.kit.mima.gui.menu.CardPanelBuilder;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.UIManager;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Toolkit;
-import java.awt.event.ItemEvent;
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Setting Dialog for Mima App.
@@ -42,6 +38,7 @@ public final class Settings extends JDialog {
     private static final Dimension SIZE = Toolkit.getDefaultToolkit().getScreenSize();
     private static Settings instance;
     private Component parent;
+    private Preferences backup;
 
     private Settings() {
         setIconImage(Toolkit.getDefaultToolkit().getImage(
@@ -83,6 +80,7 @@ public final class Settings extends JDialog {
         s.setVisible(true);
         parent.setEnabled(false);
         s.parent = parent;
+        s.backup = Preferences.getInstance().clone();
     }
 
     /**
@@ -118,17 +116,49 @@ public final class Settings extends JDialog {
 
 
     private void initializeComponents() {
-        new CardPanelBuilder()
+        setLayout(new BorderLayout());
+        var buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        var cancel = new JButton();
+        var apply = new JButton();
+        var ok = new JButton();
+        ok.setDefaultCapable(true);
+        cancel.setAction(new AbstractAction("Cancel") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                hideWindow();
+            }
+        });
+        apply.setAction(new AbstractAction("Apply") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Preferences.getInstance().save(backup);
+            }
+        });
+        ok.setAction(new AbstractAction("Ok") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                apply.doClick();
+                hideWindow();
+            }
+        });
+        buttonPanel.setBorder(new AdaptiveLineBorder(1, 0, 0, 0, "Border.line1"));
+        buttonPanel.add(ok);
+        buttonPanel.add(cancel);
+        buttonPanel.add(apply);
+
+        var content = new CardPanelBuilder()
                 .addItem("General")
                 .addItem("Theme")
                 .addSetting("Editor:", new JComboBox<>(new String[]{"Light", "Dark"}))
                 .addItem("Editor",
                          createFontChooserPanel(PropertyKey.EDITOR_FONT, new EditorPreview()))
                 .addItem("Console",
-                         createFontChooserPanel(PropertyKey.CONSOLE_FONT, new ConsolePreview()))
-                .addItem("View")
-                .addSetting("Show Binary:", new JCheckBox())
-                .addToComponent(this);
+                         createFontChooserPanel(PropertyKey.CONSOLE_FONT, new ConsolePreview())).addItem(
+                        "View").addSetting("Show Binary:", new JCheckBox()).create(this);
+        add(content, BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.SOUTH);
+
+        ok.getRootPane().setDefaultButton(ok);
     }
 
     @NotNull
@@ -139,44 +169,8 @@ public final class Settings extends JDialog {
         fontChooser.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         fontChooser.addChangeListener(event -> {
             final FontSelectionModel model = (FontSelectionModel) event.getSource();
-            Preferences.getInstance().saveFont(key, model.getSelectedFont());
+            backup.saveFont(key, model.getSelectedFont());
         });
         return fontChooser;
-    }
-
-    @NotNull
-    private JComponent createThemeChooser() {
-        final UIManager.LookAndFeelInfo[] plaf = UIManager.getInstalledLookAndFeels();
-        final List<UIManager.LookAndFeelInfo> loafs = new ArrayList<>();
-        loafs.add(new LightLafInfo());
-        loafs.add(new DarkLafInfo());
-        loafs.addAll(Arrays.asList(plaf));
-        final JComboBox<UIManager.LookAndFeelInfo> comboBox =
-                new JComboBox<>(loafs.toArray(UIManager.LookAndFeelInfo[]::new));
-        comboBox.setEditable(false);
-        comboBox.setRenderer(new LookAndFeelInfoCellRenderer());
-        comboBox.addItemListener(e -> {
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-                final UIManager.LookAndFeelInfo info = (UIManager.LookAndFeelInfo) e.getItem();
-                final var pref = Preferences.getInstance();
-                pref.saveString(PropertyKey.THEME, info.getName());
-                pref.saveString(PropertyKey.THEME_PATH, info.getClassName());
-            }
-        });
-        int index = 0;
-        for (final UIManager.LookAndFeelInfo info : loafs) {
-            if (info.getName().equals(LafManager.getCurrentLaf())) {
-                break;
-            }
-            index++;
-        }
-        comboBox.setSelectedIndex(index);
-        return comboBox;
-    }
-
-    @Nullable
-    @Contract(pure = true)
-    private JComponent createSyntaxChooser() {
-        return null; //Todo
     }
 }

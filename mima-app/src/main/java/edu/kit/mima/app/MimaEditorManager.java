@@ -5,9 +5,9 @@ import edu.kit.mima.api.util.ValueTuple;
 import edu.kit.mima.core.MimaConstants;
 import edu.kit.mima.gui.EditorHotKeys;
 import edu.kit.mima.gui.components.editor.Editor;
-import edu.kit.mima.gui.components.editor.highlighter.MimaHighlighter;
 import edu.kit.mima.gui.components.tabbededitor.EditorTabbedPane;
 import edu.kit.mima.gui.icons.Icons;
+import edu.kit.mima.highlighter.MimaHighlighter;
 import edu.kit.mima.loading.FileManager;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
@@ -88,6 +88,7 @@ public class MimaEditorManager implements AutoCloseable {
         }
         fm.close();
         editor.close();
+        fileManagers.remove(editor);
     }
 
     /**
@@ -111,8 +112,6 @@ public class MimaEditorManager implements AutoCloseable {
         });
         editor.addEditEventHandler(() -> fm
                 .setText(editor.getText().replaceAll(String.format("%n"), "\n")));
-        editor.useHistory(true,
-                          Preferences.getInstance().readInteger(PropertyKey.EDITOR_HISTORY_SIZE));
         editor.showCharacterLimit(80); //Todo Preference
         editor.setText(fm.getText());
         setupHotKeys(editor);

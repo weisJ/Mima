@@ -8,7 +8,7 @@ package edu.kit.mima.api.lambda;
  */
 
 @FunctionalInterface
-public interface CheckedBiConsumer<T, K> {
+public interface CheckedBiConsumer<T, K, E extends Exception> {
 
-    void accept(T t, K k) throws Exception;
+    void accept(T t, K k) throws E;
 }

@@ -1,5 +1,6 @@
 package edu.kit.mima.app;
 
+import edu.kit.mima.gui.components.border.AdaptiveLineBorder;
 import edu.kit.mima.gui.menu.Help;
 import edu.kit.mima.gui.menu.MenuBuilder;
 import edu.kit.mima.gui.menu.settings.Settings;
@@ -7,8 +8,6 @@ import edu.kit.mima.loading.FileManager;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.JMenuBar;
-import javax.swing.UIManager;
-import javax.swing.border.MatteBorder;
 
 /**
  * MenuBar for Mima App.
@@ -59,8 +58,7 @@ public class MimaMenuBar {
                 .addMenu("Help").setMnemonic('H')
                 .addItem("Show Help", () -> Help.showWindow(mimaUI))
                 .get();
-        menu.setBorder(new MatteBorder(0, 0, 1, 0,
-                                       UIManager.getColor("Border.line1")));
+        menu.setBorder(new AdaptiveLineBorder(0, 0, 1, 0, "Border.line1"));
         return menu;
     }
 

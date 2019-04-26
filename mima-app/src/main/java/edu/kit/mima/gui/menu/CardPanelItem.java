@@ -120,14 +120,14 @@ public class CardPanelItem {
     }
 
     /**
-     * Add the CardPanel to the given component.
+     * create the component.
      *
      * @param parent component to add to.
      */
-    public void addToComponent(@NotNull final Container parent) {
+    public JComponent create(@NotNull final Container parent) {
         complete();
         builder.nextItem("Last", this, true);
-        builder.addToComponent(parent);
+        return builder.create(parent);
     }
 
     /**

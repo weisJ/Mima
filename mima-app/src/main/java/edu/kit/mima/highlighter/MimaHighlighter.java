@@ -1,4 +1,4 @@
-package edu.kit.mima.gui.components.editor.highlighter;
+package edu.kit.mima.highlighter;
 
 import edu.kit.mima.api.history.FileHistoryObject;
 import edu.kit.mima.api.loading.FileEventHandler;

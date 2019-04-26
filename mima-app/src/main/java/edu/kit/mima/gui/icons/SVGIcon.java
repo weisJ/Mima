@@ -104,8 +104,10 @@ public class SVGIcon implements Icon {
      */
     public void paintIcon(final Component c, @NotNull final Graphics g, int x, int y,
                           double rotation) {
-        g.translate(x, y);
-        renderIcon((Graphics2D) g.create(), displayWidth, displayHeight, rotation);
+        var g2 = (Graphics2D) g.create();
+        g2.translate(x, y);
+        renderIcon(g2, displayWidth, displayHeight, rotation);
+        g2.dispose();
     }
 
     @Override
