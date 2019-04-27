@@ -23,12 +23,12 @@ public abstract class SubscriberAdapter implements Subscriber {
     }
 
     @Override
-    public Class getOwnerFilter() {
+    public Class getOwnerFilter(final String ident) {
         return null;
     }
 
     @Override
-    public Object getInvokerFilter() {
+    public Object getInvokerFilter(final String ident) {
         return null;
     }
 }

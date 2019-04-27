@@ -15,13 +15,13 @@ import java.awt.Color;
  * @author Jannis Weis
  * @since 2019
  */
-public class CustomDarculaButtonUI extends DarculaButtonUI {
+public class DarkButtonUI extends DarculaButtonUI {
 
     @NotNull
     @Contract(value = "_ -> new", pure = true)
     @ReflectionCall
     public static ComponentUI createUI(JComponent c) {
-        return new CustomDarculaButtonUI();
+        return new DarkButtonUI();
     }
 
     @Override

@@ -48,12 +48,12 @@ public abstract class AbstractSubscriber implements Subscriber {
     }
 
     @Override
-    public Class getOwnerFilter() {
+    public Class getOwnerFilter(final String identification) {
         return classFilter;
     }
 
     @Override
-    public Object getInvokerFilter() {
+    public Object getInvokerFilter(final String identification) {
         return invokerFilter;
     }
 }

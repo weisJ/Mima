@@ -20,7 +20,7 @@ import java.awt.RenderingHints;
  * @author Jannis Weis
  * @since 2019
  */
-public class CustomButtonPainter extends DarculaButtonPainter {
+public class DarkButtonPainter extends DarculaButtonPainter {
 
     @Override
     public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {

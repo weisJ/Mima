@@ -6,6 +6,8 @@ import edu.kit.mima.core.MimaCoreDefaults;
 import edu.kit.mima.gui.icons.Icons;
 import edu.kit.mima.gui.laf.LafManager;
 import edu.kit.mima.logger.ConsoleLogger;
+import edu.kit.mima.preferences.Preferences;
+import edu.kit.mima.preferences.PropertyKey;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,7 +38,8 @@ public final class App {
         System.setProperty("org.apache.batik.warn_destination", "false");
 
         SwingUtilities.invokeLater(() -> {
-            LafManager.setDefaultTheme(true);
+            LafManager.setDefaultTheme(
+                    Preferences.getInstance().readString(PropertyKey.THEME).equals("Dark"));
             final String filePath = args != null && args.length >= 1 ? args[0] : null;
             frame = new MimaUserInterface(filePath);
             logger.setLevel(LogLevel.INFO);

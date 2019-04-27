@@ -3,6 +3,7 @@ package edu.kit.mima.gui.components.tabframe;
 import com.bulenkov.iconloader.util.EmptyIcon;
 import edu.kit.mima.gui.components.IconLabel;
 import edu.kit.mima.gui.components.alignment.Alignment;
+import edu.kit.mima.gui.components.border.AdaptiveLineBorder;
 import edu.kit.mima.gui.components.button.ClickAction;
 import edu.kit.mima.gui.components.button.IconButton;
 import edu.kit.mima.gui.components.tooltip.DefaultTooltipWindow;
@@ -11,7 +12,6 @@ import edu.kit.mima.gui.icons.Icons;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Action;
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
@@ -109,7 +109,6 @@ public class DefaultPopupComponent extends PopupComponent {
         super.updateUI();
         headerBackground = UIManager.getColor("TabFramePopup.background");
         headerFocusBackground = UIManager.getColor("TabFramePopup.focus");
-        borderColor = UIManager.getColor("TabFramePopup.borderColor");
     }
 
     private boolean mouseInside() {
@@ -120,10 +119,10 @@ public class DefaultPopupComponent extends PopupComponent {
 
     public void setAlignment(@NotNull final Alignment a, final boolean[] info) {
         var insets = getBorderSize(a, info);
-        header.setBorder(BorderFactory.createMatteBorder(insets.top, insets.left, 1, insets.right,
-                                                         borderColor));
-        content.setBorder(BorderFactory.createMatteBorder(0, insets.left, insets.bottom,
-                                                          insets.right, borderColor));
+        header.setBorder(new AdaptiveLineBorder(insets.top, insets.left, 1, insets.right,
+                                                "TabFramePopup.borderColor"));
+        content.setBorder(new AdaptiveLineBorder(0, insets.left, insets.bottom, insets.right,
+                                                 "TabFramePopup.borderColor"));
     }
 
     @Override

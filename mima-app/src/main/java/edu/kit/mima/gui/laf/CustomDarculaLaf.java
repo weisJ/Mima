@@ -1,6 +1,5 @@
 package edu.kit.mima.gui.laf;
 
-import com.bulenkov.darcula.DarculaLaf;
 import com.bulenkov.darcula.DarculaMetalTheme;
 import com.bulenkov.iconloader.IconLoader;
 import com.bulenkov.iconloader.util.ColorUtil;
@@ -9,7 +8,6 @@ import com.bulenkov.iconloader.util.StringUtil;
 import com.bulenkov.iconloader.util.SystemInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import sun.awt.AppContext;
 
 import javax.swing.InputMap;
 import javax.swing.KeyStroke;
@@ -21,21 +19,14 @@ import javax.swing.plaf.InsetsUIResource;
 import javax.swing.plaf.basic.BasicLookAndFeel;
 import javax.swing.plaf.metal.MetalLookAndFeel;
 import javax.swing.text.DefaultEditorKit;
-import javax.swing.text.html.HTMLEditorKit;
-import javax.swing.text.html.StyleSheet;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -74,23 +65,6 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
         defaults.remove("ComboBox.actionMap");
         defaults.put("ComboBox.ancestorInputMap", metalDefaults.get("ComboBox.ancestorInputMap"));
         defaults.put("ComboBox.actionMap", metalDefaults.get("ComboBox.actionMap"));
-    }
-
-    private static void patchStyledEditorKit() {
-        try {
-            final StyleSheet defaultStyles = new StyleSheet();
-            final InputStream is = DarculaLaf.class.getResourceAsStream("darcula.css");
-            final Reader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-            defaultStyles.loadRules(r, null);
-            r.close();
-            final Field keyField = HTMLEditorKit.class.getDeclaredField("DEFAULT_STYLES_KEY");
-            keyField.setAccessible(true);
-            final Object key = keyField.get(null);
-            AppContext.getAppContext().put(key, defaultStyles);
-            is.close();
-        } catch (@NotNull final Throwable e) {
-            LOGGER.log(Level.SEVERE, e.toString(), e);
-        }
     }
 
     @Nullable
@@ -239,7 +213,6 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
             final UIDefaults defaults = (UIDefaults) superMethod.invoke(base);
             initInputMapDefaults(defaults);
             initIdeaDefaults(defaults);
-            patchStyledEditorKit();
             patchComboBox(metalDefaults, defaults);
             defaults.remove("Spinner.arrowButtonBorder");
             defaults.put("Spinner.arrowButtonSize", new Dimension(16, 5));
@@ -385,7 +358,7 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
 
             //CustomUI classes.
             defaults.put("EditorTabbedPane",
-                         "edu.kit.mima.gui.laf.components.DarculaEditorTabbedPaneUI");
+                         "edu.kit.mima.gui.laf.components.DarkEditorTabbedPaneUI");
         } catch (@NotNull final IOException e) {
             LOGGER.log(Level.SEVERE, e.toString(), e);
         }

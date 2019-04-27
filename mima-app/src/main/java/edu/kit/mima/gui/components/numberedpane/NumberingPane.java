@@ -1,7 +1,7 @@
 package edu.kit.mima.gui.components.numberedpane;
 
 import edu.kit.mima.gui.components.IndexComponent;
-import edu.kit.mima.util.DocumentUtil;
+import edu.kit.mima.gui.components.text.HighlightTextPane;
 import kotlin.Pair;
 import kotlin.Triple;
 import org.jetbrains.annotations.Contract;
@@ -37,7 +37,7 @@ class NumberingPane extends JPanel {
     private static final int OFFSET_MULTIPLIER = 5;
     @NotNull
     private final TreeMap<Integer, IndexComponent> componentMap;
-    private final JTextPane pane;
+    private final HighlightTextPane pane;
     private final JScrollPane scrollPane;
 
     private Font font;
@@ -45,7 +45,6 @@ class NumberingPane extends JPanel {
     private Color currentNumberColor;
     private Color currentBackground;
     private int actionThresholdX;
-    private boolean onceFocused = false;
 
     /**
      * Create new Numbering pane.
@@ -53,7 +52,7 @@ class NumberingPane extends JPanel {
      * @param pane       the text pane to number.
      * @param scrollPane the scroll pane wrapping the pane.
      */
-    public NumberingPane(final JTextPane pane, JScrollPane scrollPane) {
+    public NumberingPane(final HighlightTextPane pane, JScrollPane scrollPane) {
         this.pane = pane;
         this.scrollPane = scrollPane;
         componentMap = new TreeMap<>();
@@ -86,23 +85,6 @@ class NumberingPane extends JPanel {
         setPreferredSize(NUMBER_SIZE);
         setPreferredSize(new Dimension(size, size));
         actionThresholdX = xOff + (int) bounds.getWidth();
-    }
-
-    /**
-     * Get the current line index.
-     *
-     * @return index of line the caret is currently in.
-     */
-    public int currentLineIndex() {
-        int currentLineIndex = -1;
-        if (onceFocused || pane.hasFocus()) {
-            onceFocused = true;
-            try {
-                currentLineIndex = DocumentUtil.getLineOfOffset(pane, pane.getCaretPosition());
-            } catch (@NotNull final BadLocationException ignored) {
-            }
-        }
-        return currentLineIndex;
     }
 
     /**
@@ -182,7 +164,7 @@ class NumberingPane extends JPanel {
         final String number = Integer.toString(line + 1);
         final int padding = (int) metrics.getFirst()
                 .getStringBounds("0".repeat(digits - number.length()), g).getWidth();
-        if (line == currentLineIndex()) {
+        if (line == pane.currentLineIndex()) {
             g.setColor(currentBackground);
             int y = p.y + metrics.getSecond().getDescent() - metrics.getSecond().getHeight();
             g.fillRect(0, y, getWidth() - 1, metrics.getSecond().getHeight());
