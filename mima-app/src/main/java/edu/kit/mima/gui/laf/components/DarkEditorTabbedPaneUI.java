@@ -15,7 +15,7 @@ import javax.swing.plaf.ComponentUI;
  * @author Jannis Weis
  * @since 2018
  */
-public class DarculaEditorTabbedPaneUI extends EditorTabbedPaneUI {
+public class DarkEditorTabbedPaneUI extends EditorTabbedPaneUI {
 
     /**
      * Create a UI.
@@ -27,7 +27,7 @@ public class DarculaEditorTabbedPaneUI extends EditorTabbedPaneUI {
     @Contract("_ -> new")
     @ReflectionCall
     public static ComponentUI createUI(JComponent c) {
-        return new DarculaEditorTabbedPaneUI();
+        return new DarkEditorTabbedPaneUI();
     }
 
     @Override

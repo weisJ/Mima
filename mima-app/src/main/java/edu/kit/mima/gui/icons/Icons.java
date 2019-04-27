@@ -19,59 +19,69 @@ import java.util.Objects;
  */
 public final class Icons {
     private static final Icons instance = new Icons();
-    public static final Icon BREAKPOINT = loadIcon("breakpoint.svg");
+    public static final Icon BREAKPOINT = create("breakpoint.svg");
 
-    public static final Icon DEBUG_INACTIVE = loadIcon("debug_inactive.svg");
-    public static final Icon DEBUG = loadIcon("debug.svg");
-    public static final Icon DEBUG_ACTIVE = loadIcon("debug_active.svg");
+    public static final Icon DEBUG_INACTIVE = create("debug_inactive.svg");
+    public static final Icon DEBUG = create("debug.svg");
+    public static final Icon DEBUG_ACTIVE = create("debug_active.svg");
 
-    public static final Icon RUN_INACTIVE = loadIcon("run_inactive.svg");
-    public static final Icon RUN = loadIcon("run.svg");
-    public static final Icon RUN_ACTIVE = loadIcon("run_active.svg");
+    public static final Icon RUN_INACTIVE = create("run_inactive.svg");
+    public static final Icon RUN = create("run.svg");
+    public static final Icon RUN_ACTIVE = create("run_active.svg");
 
-    public static final Icon PAUSE = loadIcon("pause.svg");
-    public static final Icon PAUSE_INACTIVE = loadIcon("pause_inactive.svg");
-    public static final Icon RESUME = loadIcon("resume.svg");
-    public static final Icon RESUME_INACTIVE = loadIcon("resume_inactive.svg");
-    public static final Icon STOP = loadIcon("stop.svg");
-    public static final Icon STOP_INACTIVE = loadIcon("stop_inactive.svg");
+    public static final Icon PAUSE = create("pause.svg");
+    public static final Icon PAUSE_INACTIVE = create("pause_inactive.svg");
+    public static final Icon RESUME = create("resume.svg");
+    public static final Icon RESUME_INACTIVE = create("resume_inactive.svg");
+    public static final Icon STOP = create("stop.svg");
+    public static final Icon STOP_INACTIVE = create("stop_inactive.svg");
 
-    public static final Icon DIVIDER = loadIcon("divider.svg");
-    public static final Icon FOLDER = loadIcon("folder.svg");
-    public static final Icon FOLDER_ROOT = loadIcon("folder_root.svg");
-    public static final Icon MIMA = loadIcon("class.svg");
-    public static final Icon MIMA_X = loadIcon("class.svg");
-    public static final Icon TEXT_FILE = loadIcon("text.svg");
-    public static final Icon UNKNOWN_FILE = loadIcon("unknown.svg");
+    public static final Icon DIVIDER = create("divider.svg");
+    public static final Icon FOLDER = create("folder.svg");
+    public static final Icon FOLDER_ROOT = create("folder_root.svg");
+    public static final Icon MIMA = create("class.svg");
+    public static final Icon MIMA_X = create("class.svg");
+    public static final Icon TEXT_FILE = create("text.svg");
+    public static final Icon UNKNOWN_FILE = create("unknown.svg");
 
     public static final Icon MORE_TABS = loadIcon("moreTabs.svg", 20, 20);
 
-    public static final Icon REDO = loadIcon("redo.svg");
-    public static final Icon REDO_INACTIVE = loadIcon("redo_inactive.svg");
-    public static final Icon UNDO = loadIcon("undo.svg");
-    public static final Icon UNDO_INACTIVE = loadIcon("undo_inactive.svg");
+    public static final Icon REDO = create("redo.svg");
+    public static final Icon REDO_INACTIVE = create("redo_inactive.svg");
+    public static final Icon UNDO = create("undo.svg");
+    public static final Icon UNDO_INACTIVE = create("undo_inactive.svg");
 
-    public static final Icon MEMORY = loadIcon("memory.svg");
-    public static final Icon CONSOLE = loadIcon("console.svg");
+    public static final Icon MEMORY = create("memory.svg");
+    public static final Icon CONSOLE = create("console.svg");
 
-    public static final Icon SEARCH = loadIcon("search.svg");
-    public static final Icon SEARCH_WITH_HISTORY = loadIcon("searchWithHistory.svg");
-    public static final Icon CLOSE = loadIcon("close.svg");
-    public static final Icon CLOSE_HOVER = loadIcon("closeHovered.svg");
+    public static final Icon SEARCH = create("search.svg");
+    public static final Icon SEARCH_WITH_HISTORY = create("searchWithHistory.svg");
+    public static final Icon CLOSE = create("close.svg");
+    public static final Icon CLOSE_HOVER = create("closeHovered.svg");
     public static final Icon CLEAR = loadIcon("clear.svg", 12, 12);
-    public static final Icon COLLAPSE = loadIcon("collapse.svg");
+    public static final Icon COLLAPSE = create("collapse.svg");
 
+    @Contract(pure = true)
     private Icons() {
     }
 
+    /*
+     * Helper method to create the icons.
+     */
     @NotNull
-    private static Icon loadIcon(@NotNull final String name) {
+    @Contract(value = "_ -> new", pure = true)
+    private static Icon create(@NotNull final String name) {
+        return new UIAwareIcon(name, "light/" + name);
+    }
+
+    @NotNull
+    public static Icon loadIcon(@NotNull final String name) {
         return loadIcon(name, 16, 16);
     }
 
     @NotNull
     @Contract("_, _, _ -> new")
-    private static Icon loadIcon(@NotNull final String name, final int w, final int h) {
+    public static Icon loadIcon(@NotNull final String name, final int w, final int h) {
         try {
             return new SVGIcon(Objects.requireNonNull(instance.getClass().getResource(name)), w, h);
         } catch (IOException e) {

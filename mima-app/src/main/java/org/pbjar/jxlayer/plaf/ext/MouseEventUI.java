@@ -345,7 +345,6 @@ public class MouseEventUI<V extends JComponent> extends AbstractLayerUI<V> {
                     if (newEvent != null) {
                         lastPressedTarget = newEvent.getComponent();
                     }
-                    System.out.println(originalEvent);
                     break;
                 case MouseEvent.MOUSE_RELEASED:
                     newEvent =

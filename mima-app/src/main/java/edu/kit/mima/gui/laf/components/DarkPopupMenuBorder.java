@@ -18,7 +18,7 @@ import java.awt.RenderingHints;
  * @author Jannis Weis
  * @since 2018
  */
-public class CustomDarculaPopupMenuBorder extends AbstractBorder implements UIResource {
+public class DarkPopupMenuBorder extends AbstractBorder implements UIResource {
 
     @Override
     public void paintBorder(Component c, @NotNull Graphics g, int x, int y, int width, int height) {

@@ -25,14 +25,14 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 
-public class CustomDarculaTextFieldUI extends DarculaTextFieldUI {
+public class DarkTextFieldUI extends DarculaTextFieldUI {
 
 
     @NotNull
     @Contract("_ -> new")
     @ReflectionCall
     public static ComponentUI createUI(JComponent c) {
-        return new CustomDarculaTextFieldUI();
+        return new DarkTextFieldUI();
     }
 
     protected void paintBackground(Graphics graphics) {

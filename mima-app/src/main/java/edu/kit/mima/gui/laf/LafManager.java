@@ -23,8 +23,8 @@ import java.awt.Window;
  */
 public final class LafManager implements UserPreferenceChangedListener {
 
-    private static final String DARK_NAME = "Dark";
-    private static final String LIGHT_NAME = "Light";
+    public static final String DARK = "Dark";
+    public static final String LIGHT = "Light";
     private static final LafManager instance = new LafManager();
     private static String currentLaf;
 
@@ -47,8 +47,10 @@ public final class LafManager implements UserPreferenceChangedListener {
         try {
             if (dark) {
                 UIManager.setLookAndFeel(CustomDarculaLaf.class.getCanonicalName());
+                currentLaf = DARK;
             } else {
                 UIManager.setLookAndFeel(CustomDarculaLightLaf.class.getCanonicalName());
+                currentLaf = LIGHT;
             }
             updateLaf();
         } catch (@NotNull final ClassNotFoundException
@@ -100,9 +102,9 @@ public final class LafManager implements UserPreferenceChangedListener {
             final var pref = Preferences.getInstance();
             final String name = pref.readString(PropertyKey.THEME);
             currentLaf = name;
-            if (name.equals(DARK_NAME)) {
+            if (name.equals(DARK)) {
                 setDefaultTheme(true);
-            } else if (name.equals(LIGHT_NAME)) {
+            } else if (name.equals(LIGHT)) {
                 setDefaultTheme(false);
             } else {
                 setTheme(pref.readString(PropertyKey.THEME_PATH));

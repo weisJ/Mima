@@ -52,8 +52,7 @@ public class LightEditorTabbedPaneUI extends EditorTabbedPaneUI {
             g.setColor(tabBorderColor);
             g.drawLine(-1, yOff, selectedBounds.x - 1, yOff);
             g.drawLine(selectedBounds.x + selectedBounds.width - 1, yOff, bounds.width, yOff);
-            g.drawLine(0, bounds.height - 1, bounds.width, bounds.height - 1);
-
+            g.drawLine(0, bounds.height, bounds.width, bounds.height);
         }
     }
 }

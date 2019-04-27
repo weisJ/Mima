@@ -74,7 +74,8 @@ public class CardPanelItem {
      */
     @NotNull
     public CardPanelBuilder addItem(final String title, final JComponent c) {
-        return builder.addItem(title, c);
+        complete();
+        return builder.addItem(title, c, this);
     }
 
     /**

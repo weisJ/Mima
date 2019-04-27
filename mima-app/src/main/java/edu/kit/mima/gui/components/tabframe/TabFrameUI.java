@@ -1,14 +1,14 @@
 package edu.kit.mima.gui.components.tabframe;
 
 import edu.kit.mima.api.annotations.ReflectionCall;
+import edu.kit.mima.gui.components.alignment.Alignment;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.JComponent;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
-import java.awt.Graphics;
-import java.awt.Rectangle;
 
 /**
  * UI class for {@link TabFrame}.
@@ -45,8 +45,21 @@ public class TabFrameUI extends ComponentUI {
         return 0;
     }
 
-    private void drawRect(Graphics g, Rectangle rect) {
-        g.drawRect(rect.x, rect.y, rect.width, rect.height);
+    /**
+     * Update the ui.
+     */
+    public void updateUI() {
+        layout.setLineColor(UIManager.getColor("TabFrame.line"));
+        var compMap = layout.getPopupComponents();
+        for (var a : Alignment.values()) {
+            var list = compMap.get(a);
+            if (list != null) {
+                for (var pc : compMap.get(a)) {
+                    if (pc != null) {
+                        SwingUtilities.updateComponentTreeUI(pc);
+                    }
+                }
+            }
+        }
     }
-
 }

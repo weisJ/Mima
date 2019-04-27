@@ -2,6 +2,7 @@ package edu.kit.mima.gui.laf.components;
 
 import com.bulenkov.darcula.ui.DarculaScrollBarUI;
 import com.bulenkov.darcula.util.Animator;
+import com.bulenkov.iconloader.util.DoubleColor;
 import edu.kit.mima.api.annotations.ReflectionCall;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -30,11 +31,11 @@ import java.awt.event.MouseWheelListener;
  * @author Jannis Weis
  * @since 2018
  */
-public class CustomDarculaScrollBarUI extends DarculaScrollBarUI {
+public class DarkScrollBarUI extends DarculaScrollBarUI {
 
     private static final float MAX_ALPHA = 0.3f;
-    private static final float THUMB_ALPHA = 0.6f;
-    private final AlphaComposite composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER);
+    protected static final float THUMB_ALPHA = 0.6f;
+    protected final AlphaComposite composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER);
     private Animator trackAnimator;
     private float alpha;
     private boolean inside;
@@ -102,14 +103,14 @@ public class CustomDarculaScrollBarUI extends DarculaScrollBarUI {
     @Contract(" -> new")
     @ReflectionCall
     public static BasicScrollBarUI createNormal() {
-        return new CustomDarculaScrollBarUI();
+        return new DarkScrollBarUI();
     }
 
     @NotNull
     @Contract("_ -> new")
     @ReflectionCall
     public static ComponentUI createUI(JComponent c) {
-        return new CustomDarculaScrollBarUI();
+        return new DarkScrollBarUI();
     }
 
     @Override
@@ -180,6 +181,7 @@ public class CustomDarculaScrollBarUI extends DarculaScrollBarUI {
         return scrollbar.getClientProperty("ScrollBar.thin") == Boolean.TRUE;
     }
 
+    @Contract(" -> new")
     @NotNull
     private Dimension calculateGaps() {
         boolean vertical = this.isVertical();
@@ -197,11 +199,26 @@ public class CustomDarculaScrollBarUI extends DarculaScrollBarUI {
         return new Dimension(horizontalGap, verticalGap);
     }
 
-    private void paintMaxiThumb(@NotNull Graphics2D g, @NotNull Rectangle thumbBounds) {
-        boolean vertical = this.isVertical();
-        boolean thin = this.isThin();
+    protected void paintMaxiThumb(@NotNull Graphics2D g, @NotNull Rectangle thumbBounds) {
         final var c = g.getComposite();
         g.setComposite(composite.derive(THUMB_ALPHA));
+        var thumbRect = calculateThumbRect(thumbBounds);
+        Color start = this.adjustColor(getGradientLight());
+        Color end = this.adjustColor(getGradientDark());
+        GradientPaint paint;
+        if (isVertical()) {
+            paint = new GradientPaint(1.0F, 0.0F, start, (float) (thumbRect.width + 1), 0.0F, end);
+        } else {
+            paint = new GradientPaint(0.0F, 1.0F, start, 0.0F, (float) (thumbRect.height + 1), end);
+        }
+        g.setPaint(paint);
+        g.fillRect(thumbRect.x, thumbRect.y, thumbRect.width, thumbRect.height);
+        g.setComposite(c);
+    }
+
+    protected Rectangle calculateThumbRect(@NotNull final Rectangle thumbBounds) {
+        boolean vertical = this.isVertical();
+        boolean thin = this.isThin();
         int horizontalGap = vertical ? 2 : 1;
         int verticalGap = vertical ? 1 : 2;
         if (thin) {
@@ -228,21 +245,18 @@ public class CustomDarculaScrollBarUI extends DarculaScrollBarUI {
                 --h;
             }
         }
-        Color start = this.adjustColor(getGradientLightColor());
-        Color end = this.adjustColor(getGradientDarkColor());
-        GradientPaint paint;
-        if (vertical) {
-            paint = new GradientPaint(1.0F, 0.0F, start, (float) (w + 1), 0.0F, end);
-        } else {
-            paint = new GradientPaint(0.0F, 1.0F, start, 0.0F, (float) (h + 1), end);
-        }
-
-        g.setPaint(paint);
-        g.fillRect(horizontalGap, verticalGap, w, h);
-        g.setComposite(c);
+        return new Rectangle(horizontalGap, verticalGap, w, h);
     }
 
-    private boolean isVertical() {
+    protected DoubleColor getGradientLight() {
+        return getGradientLightColor();
+    }
+
+    protected DoubleColor getGradientDark() {
+        return getGradientDarkColor();
+    }
+
+    protected boolean isVertical() {
         return this.scrollbar.getOrientation() == 1;
     }
 

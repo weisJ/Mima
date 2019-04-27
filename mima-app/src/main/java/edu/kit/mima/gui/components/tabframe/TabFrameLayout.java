@@ -26,6 +26,7 @@ import java.awt.event.ActionEvent;
 import java.awt.geom.Point2D;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -39,12 +40,12 @@ public class TabFrameLayout implements LayoutManager {
         public void actionPerformed(ActionEvent e) {
         }
     };
-    final TabArea bottomTabs = new TabArea();
-    final TabArea topTabs = new TabArea();
+    private final TabArea bottomTabs = new TabArea();
+    private final TabArea topTabs = new TabArea();
     private final TabArea leftTabs = new TabArea();
     private final TabArea rightTabs = new TabArea();
-    final JXLayer<JComponent> rotatePaneLeft;
-    final JXLayer<JComponent> rotatePaneRight;
+    private final JXLayer<JComponent> rotatePaneLeft;
+    private final JXLayer<JComponent> rotatePaneRight;
     private final TabFrame tabFrame;
 
     private final MutableLineBorder leftBorder;
@@ -63,8 +64,8 @@ public class TabFrameLayout implements LayoutManager {
      * The increase in capacity if arrays are full.
      */
     private final TabFrameContent content = new TabFrameContent();
-    private final Map<Alignment, LinkedList<TabFrameTabComponent>> tabsMap;
-    private final Map<Alignment, LinkedList<PopupComponent>> compsMap;
+    private final Map<Alignment, List<TabFrameTabComponent>> tabsMap;
+    private final Map<Alignment, List<PopupComponent>> compsMap;
     private Color lineColor = Color.BLACK;
 
     public TabFrameLayout(@NotNull final TabFrame tabFrame) {
@@ -173,14 +174,14 @@ public class TabFrameLayout implements LayoutManager {
         insertTab(c, title, icon, a, tabsForAlignment(a).size());
     }
 
-    private LinkedList<PopupComponent> compsForAlignment(final Alignment a) {
+    private List<PopupComponent> compsForAlignment(final Alignment a) {
         if (!compsMap.containsKey(a)) {
             compsMap.put(a, new LinkedList<>());
         }
         return compsMap.get(a);
     }
 
-    private LinkedList<TabFrameTabComponent> tabsForAlignment(final Alignment a) {
+    private List<TabFrameTabComponent> tabsForAlignment(final Alignment a) {
         if (!tabsMap.containsKey(a)) {
             tabsMap.put(a, new LinkedList<>());
         }
@@ -402,6 +403,15 @@ public class TabFrameLayout implements LayoutManager {
                 }
             }
         }
+    }
+
+    /**
+     * Get a map with all the popup components.
+     *
+     * @return map from alignment to popup components.
+     */
+    public Map<Alignment, List<PopupComponent>> getPopupComponents() {
+        return compsMap;
     }
 
     private class TabArea extends JPanel {

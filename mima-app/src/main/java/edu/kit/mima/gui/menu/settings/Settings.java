@@ -24,6 +24,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -41,6 +42,7 @@ public final class Settings extends JDialog {
     private Preferences backup;
 
     private Settings() {
+        backup = Preferences.getInstance().clone();
         setIconImage(Toolkit.getDefaultToolkit().getImage(
                 getClass().getClassLoader().getResource("images/mima.png")));
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -79,8 +81,8 @@ public final class Settings extends JDialog {
         s.setLocationRelativeTo(parent);
         s.setVisible(true);
         parent.setEnabled(false);
-        s.parent = parent;
         s.backup = Preferences.getInstance().clone();
+        s.parent = parent;
     }
 
     /**
@@ -146,19 +148,28 @@ public final class Settings extends JDialog {
         buttonPanel.add(cancel);
         buttonPanel.add(apply);
 
-        var content = new CardPanelBuilder()
-                .addItem("General")
-                .addItem("Theme")
-                .addSetting("Editor:", new JComboBox<>(new String[]{"Light", "Dark"}))
-                .addItem("Editor",
+        var content = new CardPanelBuilder().addItem("General").addSetting("Theme",
+                                                                           createThemeChooser())
+                                            .addItem("Editor",
                          createFontChooserPanel(PropertyKey.EDITOR_FONT, new EditorPreview()))
-                .addItem("Console",
+                                            .addItem("Console",
                          createFontChooserPanel(PropertyKey.CONSOLE_FONT, new ConsolePreview())).addItem(
                         "View").addSetting("Show Binary:", new JCheckBox()).create(this);
         add(content, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
 
         ok.getRootPane().setDefaultButton(ok);
+    }
+
+    private JComponent createThemeChooser() {
+        var combo = new JComboBox<>(new String[]{"Light", "Dark"});
+        combo.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                backup.saveString(PropertyKey.THEME, e.getItem().toString());
+            }
+        });
+        combo.setSelectedItem(Preferences.getInstance().readString(PropertyKey.THEME));
+        return combo;
     }
 
     @NotNull

@@ -46,6 +46,8 @@ public class HighlightTextPane extends NonWrappingTextPane implements ChangeList
     @Nullable
     private Point selectionEnd;
     private int vertLine;
+    private boolean onceFocused = false;
+
 
     /**
      * TextPane that can implements better selection highlighting and allows for a vertical guiding
@@ -73,6 +75,23 @@ public class HighlightTextPane extends NonWrappingTextPane implements ChangeList
         selectedBackground = UIManager.getColor("Editor.selectedBackground");
         vertLineColor = UIManager.getColor("Editor.vertLine");
         selectionColor = UIManager.getColor("Editor.selection");
+    }
+
+    /**
+     * Get the current line index.
+     *
+     * @return index of line the caret is currently in.
+     */
+    public int currentLineIndex() {
+        int currentLineIndex = -1;
+        if (onceFocused || hasFocus()) {
+            onceFocused = true;
+            try {
+                currentLineIndex = DocumentUtil.getLineOfOffset(this, getCaretPosition());
+            } catch (@NotNull final BadLocationException ignored) {
+            }
+        }
+        return currentLineIndex;
     }
 
     /**
@@ -112,9 +131,11 @@ public class HighlightTextPane extends NonWrappingTextPane implements ChangeList
      * Highlight background of current line
      */
     private void drawLineHighlight(@NotNull final Graphics g, final int height) {
-        int y = (int) LambdaUtil.wrap(this::modelToView2D).apply((getCaretPosition())).getY();
-        g.setColor(selectedBackground);
-        g.fillRect(0, y, getWidth(), height);
+        if (currentLineIndex() >= 0) {
+            int y = (int) LambdaUtil.wrap(this::modelToView2D).apply((getCaretPosition())).getY();
+            g.setColor(selectedBackground);
+            g.fillRect(0, y, getWidth(), height);
+        }
     }
 
     /*

@@ -97,6 +97,15 @@ public class CardPanelBuilder {
 
     /*default*/
     @NotNull
+    CardPanelBuilder addItem(final String title, final JComponent c,
+                             @NotNull final CardPanelItem item) {
+        this.panelMap.put(count, new ValueTuple<>(item.getTitle(), item.getPanel()));
+        count++;
+        return addItem(title, c);
+    }
+
+    /*default*/
+    @NotNull
     CardPanelItem nextItem(final String title,
                            @NotNull final CardPanelItem item,
                            final boolean alignRight) {

@@ -35,6 +35,12 @@ public class TabFrame extends JComponent {
         return content;
     }
 
+    @Override
+    public void updateUI() {
+        super.updateUI();
+        ((TabFrameUI) getUI()).updateUI();
+    }
+
     public void setContentPane(final JComponent c) {
         ((TabFrameLayout) getLayout()).setContent(c);
     }
