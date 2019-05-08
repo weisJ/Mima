@@ -20,7 +20,6 @@ import java.util.function.Function;
  * @since 2018
  */
 public class Environment {
-    @Nullable
     public static final Environment EMPTY_ENV = new Environment(null, null);
 
     @Nullable private final Environment parent;
@@ -133,7 +132,7 @@ public class Environment {
         return lookup(env -> env.jumps, name);
     }
 
-    @Nullable
+    @NotNull
     @Contract(pure = true)
     private <T> Environment lookup(@NotNull Function<Environment, Map<?, T>> mapFunction,
                                    String name) {
@@ -210,6 +209,7 @@ public class Environment {
         return get(env -> env.jumps, name);
     }
 
+    @NotNull
     private <T> T get(@NotNull Function<Environment, Map<?, T>> mapFunction, String name) {
         if (mapFunction.apply(this).containsKey(name)) {
             return mapFunction.apply(this).get(name);

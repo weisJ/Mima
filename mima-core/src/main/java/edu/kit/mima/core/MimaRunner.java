@@ -65,9 +65,9 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
      * @param callback callback to execute with accumulator after program execution.
      */
     public void start(final Consumer<Value> callback) {
-        threadDebugController.setBreaks(Collections.emptyList());
         mima.reset();
         setupInterpreter(callback);
+        threadDebugController.setBreaks(Collections.emptyList());
         threadDebugController.start();
         getPropertyChangeSupport().firePropertyChange(RUNNING_PROPERTY, false, true);
         do {
@@ -115,12 +115,12 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
         if (program == null) {
             throw new IllegalStateException("must parse program before starting");
         }
-        createGlobalEnvironment(callback);
         sharedException.set(null);
+        interpreter = new Interpreter(program.getInstructionSet().getConstWordLength(), null, this);
+        createGlobalEnvironment(callback);
         threadDebugController = new ThreadDebugController(new Thread(
                 () -> interpreter.evaluateTopLevel(program.getProgramToken(), globalEnvironment)));
-        interpreter = new Interpreter(program.getInstructionSet().getConstWordLength(),
-                                      threadDebugController, this);
+        interpreter.setDebugController(threadDebugController);
     }
 
     /**
