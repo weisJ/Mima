@@ -29,9 +29,10 @@ public class TokenStream {
     private static final Pattern NUMBER_START = Pattern.compile(Symbol.NUMBER_SIGNED);
     private static final Pattern NUMBER = Pattern.compile(Symbol.NUMBERS);
     private static final Pattern LETTER = Pattern.compile(Symbol.LETTERS);
-    private static final Pattern PUNCTUATION = Pattern
-            .compile('[' + String.valueOf(Punctuation.getPunctuation()) + ']');
-    @NotNull protected final CharInputStream input;
+    private static final Pattern PUNCTUATION =
+            Pattern.compile('[' + String.valueOf(Punctuation.getPunctuation()) + ']');
+    @NotNull
+    protected final CharInputStream input;
 
     private @Nullable Token current;
 
@@ -152,8 +153,8 @@ public class TokenStream {
      * Cause an error with message.
      *
      * @param message error message
-     * @param <T>     Type of object the method causing the error should return. to avoid having a
-     *                null return statement
+     * @param <T>     Type of object the method causing the error should return. to avoid having a null
+     *                return statement
      * @return null
      */
     @Contract("_ -> fail")

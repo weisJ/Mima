@@ -3,14 +3,9 @@ package edu.kit.mima.gui.components;
 import edu.kit.mima.gui.layout.WrapLayout;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.Box;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Insets;
+import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.HashMap;
@@ -21,7 +16,7 @@ public class WrapPanel extends JScrollPane {
     @NotNull
     private final Box box;
     private int width = 0;
-    private Map<Integer, CPanel> panelList;
+    private final Map<Integer, CPanel> panelList;
 
     /**
      * Create new WrapPanel.
@@ -36,14 +31,15 @@ public class WrapPanel extends JScrollPane {
         panelList = new HashMap<>();
         setViewportView(box);
 
-        //Important!!! Need to invalidate the Scroll pane, otherwise it
-        //doesn't try to lay out when the container is shrunk
-        addComponentListener(new ComponentAdapter() {
-            public void componentResized(ComponentEvent ce) {
-                width = getWidth();
-                box.invalidate();
-            }
-        });
+        // Important!!! Need to invalidate the Scroll pane, otherwise it
+        // doesn't try to lay out when the container is shrunk
+        addComponentListener(
+                new ComponentAdapter() {
+                    public void componentResized(final ComponentEvent ce) {
+                        width = getWidth();
+                        box.invalidate();
+                    }
+                });
     }
 
     @NotNull
@@ -52,14 +48,13 @@ public class WrapPanel extends JScrollPane {
         return new Insets(0, 0, 0, 0);
     }
 
-
     /**
      * Add a component.
      *
      * @param c     the component.
      * @param index of target panel.
      */
-    public void addComponent(final Component c, int index) {
+    public void addComponent(final Component c, final int index) {
         ensurePanel(index);
         panelList.get(index).add(c);
     }
@@ -70,16 +65,16 @@ public class WrapPanel extends JScrollPane {
      * @param single whether the component has only one child.
      * @param index  index
      */
-    public void setPanelScale(final boolean single, int index) {
+    public void setPanelScale(final boolean single, final int index) {
         ensurePanel(index);
         panelList.get(index).setSingle(single);
     }
 
-    public JPanel getPanel(int index) {
+    public JPanel getPanel(final int index) {
         return panelList.get(index);
     }
 
-    private void ensurePanel(int index) {
+    private void ensurePanel(final int index) {
         if (!panelList.containsKey(index)) {
             var p = new CPanel();
             panelList.put(index, p);
@@ -110,7 +105,7 @@ public class WrapPanel extends JScrollPane {
             return result;
         }
 
-        private void setSingle(boolean single) {
+        private void setSingle(final boolean single) {
             if (this.single == single) {
                 return;
             }
@@ -138,7 +133,7 @@ public class WrapPanel extends JScrollPane {
         }
 
         @Override
-        public int getBaseline(int width, int height) {
+        public int getBaseline(final int width, final int height) {
             return 0;
         }
     }

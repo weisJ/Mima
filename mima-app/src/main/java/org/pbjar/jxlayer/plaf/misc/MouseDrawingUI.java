@@ -1,33 +1,33 @@
 /*
-  Copyright (c) 2008-2009, Piet Blok
-  All rights reserved.
-  <p>
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions
-  are met:
-  <p>
-  * Redistributions of source code must retain the above copyright
-  notice, this list of conditions and the following disclaimer.
-  * Redistributions in binary form must reproduce the above
-  copyright notice, this list of conditions and the following
-  disclaimer in the documentation and/or other materials provided
-  with the distribution.
-  * Neither the name of the copyright holder nor the names of the
-  contributors may be used to endorse or promote products derived
-  from this software without specific prior written permission.
-  <p>
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+ Copyright (c) 2008-2009, Piet Blok
+ All rights reserved.
+ <p>
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ <p>
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above
+ copyright notice, this list of conditions and the following
+ disclaimer in the documentation and/or other materials provided
+ with the distribution.
+ * Neither the name of the copyright holder nor the names of the
+ contributors may be used to endorse or promote products derived
+ from this software without specific prior written permission.
+ <p>
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
 package org.pbjar.jxlayer.plaf.misc;
 
@@ -35,16 +35,8 @@ import org.jdesktop.jxlayer.JXLayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JColorChooser;
-import javax.swing.JComponent;
-import javax.swing.SwingUtilities;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -64,12 +56,13 @@ public class MouseDrawingUI extends GeneralLayerUI<JComponent, MouseDrawingUI.Dr
 
     /**
      * Returns {@link Action}s for.
-     * <ol>
-     * <li>Clear the current drawing.</li>
-     * <li>Set the color for the next line to be drawn.</li>
-     * </ol>
-     * @param layer the layer
      *
+     * <ol>
+     * <li>Clear the current drawing.
+     * <li>Set the color for the next line to be drawn.
+     * </ol>
+     *
+     * @param layer the layer
      * @return list of actions.
      */
     @NotNull
@@ -78,46 +71,46 @@ public class MouseDrawingUI extends GeneralLayerUI<JComponent, MouseDrawingUI.Dr
         /*
          * Clear
          */
-        actionList.add(new AbstractAction("Clear") {
+        actionList.add(
+                new AbstractAction("Clear") {
 
-            private static final long serialVersionUID = 1L;
+                    private static final long serialVersionUID = 1L;
 
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                MouseDrawingUI.this.getStateObject(layer).clear();
-                setDirty(true);
-            }
-        });
+                    @Override
+                    public void actionPerformed(final ActionEvent event) {
+                        MouseDrawingUI.this.getStateObject(layer).clear();
+                        setDirty(true);
+                    }
+                });
         /*
          * Set line color
          */
-        actionList.add(new AbstractAction("Set line color") {
+        actionList.add(
+                new AbstractAction("Set line color") {
 
-            private static final long serialVersionUID = 1L;
+                    private static final long serialVersionUID = 1L;
 
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                DrawingState state = MouseDrawingUI.this.getStateObject(layer);
-                Color color = state.getLineColor();
-                color = JColorChooser.showDialog(layer,
-                                                 "Choose a new line color", color);
-                if (color != null) {
-                    state.setLineColor(color);
-                }
-            }
-        });
+                    @Override
+                    public void actionPerformed(final ActionEvent event) {
+                        DrawingState state = MouseDrawingUI.this.getStateObject(layer);
+                        Color color = state.getLineColor();
+                        color = JColorChooser.showDialog(layer, "Choose a new line color", color);
+                        if (color != null) {
+                            state.setLineColor(color);
+                        }
+                    }
+                });
 
         return actionList;
     }
 
     @NotNull
     @Override
-    protected DrawingState createStateObject(JXLayer<? extends JComponent> layer) {
+    protected DrawingState createStateObject(final JXLayer<? extends JComponent> layer) {
         return new DrawingState(layer);
     }
 
-    protected void paintLayer(@NotNull Graphics2D g2,
-                              @NotNull JXLayer<? extends JComponent> layer) {
+    protected void paintLayer(@NotNull final Graphics2D g2, @NotNull final JXLayer<? extends JComponent> layer) {
         super.paintLayer(g2, layer);
         DrawingState state = getStateObject(layer);
         state.updateSize();
@@ -138,8 +131,8 @@ public class MouseDrawingUI extends GeneralLayerUI<JComponent, MouseDrawingUI.Dr
     }
 
     @Override
-    protected void processMouseEvent(@NotNull MouseEvent e,
-                                     @NotNull JXLayer<? extends JComponent> layer) {
+    protected void processMouseEvent(
+            @NotNull final MouseEvent e, @NotNull final JXLayer<? extends JComponent> layer) {
         if (e.getID() == MouseEvent.MOUSE_RELEASED) {
             DrawingState state = getStateObject(layer);
             state.terminateLine();
@@ -148,12 +141,11 @@ public class MouseDrawingUI extends GeneralLayerUI<JComponent, MouseDrawingUI.Dr
     }
 
     @Override
-    protected void processMouseMotionEvent(@NotNull MouseEvent e,
-                                           @NotNull JXLayer<? extends JComponent> layer) {
+    protected void processMouseMotionEvent(
+            @NotNull final MouseEvent e, @NotNull final JXLayer<? extends JComponent> layer) {
         if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
             DrawingState state = getStateObject(layer);
-            state.addPoint(SwingUtilities.convertPoint(e.getComponent(), e
-                    .getPoint(), layer));
+            state.addPoint(SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), layer));
             setDirty(true);
         }
     }
@@ -176,11 +168,11 @@ public class MouseDrawingUI extends GeneralLayerUI<JComponent, MouseDrawingUI.Dr
         public AffineTransform inverseTransform = new AffineTransform();
         private double scale = 1.0;
 
-        public DrawingState(JXLayer<? extends JComponent> layer) {
+        public DrawingState(final JXLayer<? extends JComponent> layer) {
             this.layer = layer;
         }
 
-        public void addPoint(@NotNull Point2D point) {
+        public void addPoint(@NotNull final Point2D point) {
             if (coloredLine == null) {
                 coloredLine = new ColoredLine(lineColor);
                 lineList.add(coloredLine);
@@ -197,7 +189,7 @@ public class MouseDrawingUI extends GeneralLayerUI<JComponent, MouseDrawingUI.Dr
             return lineColor;
         }
 
-        public void setLineColor(Color color) {
+        public void setLineColor(final Color color) {
             this.lineColor = color;
         }
 
@@ -207,17 +199,16 @@ public class MouseDrawingUI extends GeneralLayerUI<JComponent, MouseDrawingUI.Dr
 
         /**
          * Not implemented.
-         * <p>
-         * This is for future use and meant to ensure that the drawing scales with the scaling of
-         * the underlying component. But it interferes a bit with the current testing on other types
-         * of components.
-         * </p>
+         *
+         * <p>This is for future use and meant to ensure that the drawing scales with the scaling of the
+         * underlying component. But it interferes a bit with the current testing on other types of
+         * components.
          */
         public void updateSize() {
             // updateSizeImpl();
         }
 
-        private double getOffset(double scale, double imageSize, double center) {
+        private double getOffset(final double scale, final double imageSize, final double center) {
             return (center - (imageSize * scale / 2.0)) / scale;
         }
 
@@ -236,13 +227,15 @@ public class MouseDrawingUI extends GeneralLayerUI<JComponent, MouseDrawingUI.Dr
             }
             if (dirty) {
                 transform.setToIdentity();
-                scale = Math.min(innerArea.getWidth() / preferred.getWidth(),
-                                 innerArea.getHeight() / preferred.getHeight());
+                scale =
+                        Math.min(
+                                innerArea.getWidth() / preferred.getWidth(),
+                                innerArea.getHeight() / preferred.getHeight());
                 transform.scale(scale, scale);
 
-                transform.translate(getOffset(scale, preferred.getWidth(),
-                                              innerArea.getCenterX()), getOffset(scale, preferred
-                        .getHeight(), innerArea.getCenterY()));
+                transform.translate(
+                        getOffset(scale, preferred.getWidth(), innerArea.getCenterX()),
+                        getOffset(scale, preferred.getHeight(), innerArea.getCenterY()));
 
                 try {
                     inverseTransform = transform.createInverse();
@@ -262,14 +255,12 @@ public class MouseDrawingUI extends GeneralLayerUI<JComponent, MouseDrawingUI.Dr
 
         public final Color color;
 
-        public ColoredLine(Color color) {
+        public ColoredLine(final Color color) {
             this.color = color;
         }
 
-        public void addPoint(Point2D point) {
+        public void addPoint(final Point2D point) {
             path.add(point);
         }
-
     }
-
 }

@@ -33,8 +33,8 @@ public abstract class ClassObservable extends AbstractObservable
      * @param property property to observe
      * @param listener change listener
      */
-    public static void addStaticPropertyChangeListener(final String property,
-                                                       final PropertyChangeListener listener) {
+    public static void addStaticPropertyChangeListener(
+            final String property, final PropertyChangeListener listener) {
         for (final var instance : INSTANCES) {
             if (instance != null) {
                 instance.addPropertyChangeListener(property, listener);
@@ -56,14 +56,13 @@ public abstract class ClassObservable extends AbstractObservable
     }
 
     /**
-     * Remove an {@link java.beans.PropertyChangeSupport} that observes all INSTANCES of this
-     * class.
+     * Remove an {@link java.beans.PropertyChangeSupport} that observes all INSTANCES of this class.
      *
      * @param property observed property
      * @param listener change listener to remove
      */
-    public static void removeStaticPropertyChangeListener(final String property,
-                                                          final PropertyChangeListener listener) {
+    public static void removeStaticPropertyChangeListener(
+            final String property, final PropertyChangeListener listener) {
         for (final var instance : INSTANCES) {
             if (instance != null) {
                 instance.removePropertyChangeListener(property, listener);
@@ -72,8 +71,7 @@ public abstract class ClassObservable extends AbstractObservable
     }
 
     /**
-     * Remove an {@link java.beans.PropertyChangeSupport} that observes all INSTANCES of this
-     * class.
+     * Remove an {@link java.beans.PropertyChangeSupport} that observes all INSTANCES of this class.
      *
      * @param listener change listener to remove
      */

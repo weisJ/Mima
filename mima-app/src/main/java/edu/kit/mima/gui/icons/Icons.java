@@ -5,7 +5,7 @@ import edu.kit.mima.core.MimaConstants;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.Icon;
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,24 +18,19 @@ import java.util.Objects;
  * @since 2018
  */
 public final class Icons {
-    private static final Icons instance = new Icons();
     public static final Icon BREAKPOINT = create("breakpoint.svg");
-
     public static final Icon DEBUG_INACTIVE = create("debug_inactive.svg");
     public static final Icon DEBUG = create("debug.svg");
     public static final Icon DEBUG_ACTIVE = create("debug_active.svg");
-
     public static final Icon RUN_INACTIVE = create("run_inactive.svg");
     public static final Icon RUN = create("run.svg");
     public static final Icon RUN_ACTIVE = create("run_active.svg");
-
     public static final Icon PAUSE = create("pause.svg");
     public static final Icon PAUSE_INACTIVE = create("pause_inactive.svg");
     public static final Icon RESUME = create("resume.svg");
     public static final Icon RESUME_INACTIVE = create("resume_inactive.svg");
     public static final Icon STOP = create("stop.svg");
     public static final Icon STOP_INACTIVE = create("stop_inactive.svg");
-
     public static final Icon DIVIDER = create("divider.svg");
     public static final Icon FOLDER = create("folder.svg");
     public static final Icon FOLDER_ROOT = create("folder_root.svg");
@@ -43,23 +38,20 @@ public final class Icons {
     public static final Icon MIMA_X = create("class.svg");
     public static final Icon TEXT_FILE = create("text.svg");
     public static final Icon UNKNOWN_FILE = create("unknown.svg");
-
-    public static final Icon MORE_TABS = loadIcon("moreTabs.svg", 20, 20);
-
     public static final Icon REDO = create("redo.svg");
     public static final Icon REDO_INACTIVE = create("redo_inactive.svg");
     public static final Icon UNDO = create("undo.svg");
     public static final Icon UNDO_INACTIVE = create("undo_inactive.svg");
-
     public static final Icon MEMORY = create("memory.svg");
     public static final Icon CONSOLE = create("console.svg");
-
     public static final Icon SEARCH = create("search.svg");
     public static final Icon SEARCH_WITH_HISTORY = create("searchWithHistory.svg");
     public static final Icon CLOSE = create("close.svg");
     public static final Icon CLOSE_HOVER = create("closeHovered.svg");
-    public static final Icon CLEAR = loadIcon("clear.svg", 12, 12);
     public static final Icon COLLAPSE = create("collapse.svg");
+    private static final Icons instance = new Icons();
+    public static final Icon MORE_TABS = loadIcon("moreTabs.svg", 20, 20);
+    public static final Icon CLEAR = loadIcon("clear.svg", 12, 12);
 
     @Contract(pure = true)
     private Icons() {

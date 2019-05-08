@@ -6,19 +6,9 @@ import edu.kit.mima.gui.components.SeamlessSplitPane;
 import org.jdesktop.swingx.JXTree;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.BorderFactory;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.tree.TreeCellRenderer;
-import java.awt.CardLayout;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -44,17 +34,18 @@ public class CardPanelBuilder {
      * Create new Card Panel Builder.
      */
     public CardPanelBuilder() {
-        panel = new JPanel(new CardLayout()) {
-            @Override
-            public Dimension getMinimumSize() {
-                for (Component comp : getComponents()) {
-                    if (comp.isVisible()) {
-                        return comp.getMinimumSize();
+        panel =
+                new JPanel(new CardLayout()) {
+                    @Override
+                    public Dimension getMinimumSize() {
+                        for (Component comp : getComponents()) {
+                            if (comp.isVisible()) {
+                                return comp.getMinimumSize();
+                            }
+                        }
+                        return super.getMinimumSize();
                     }
-                }
-                return super.getMinimumSize();
-            }
-        };
+                };
         panelMap = new TreeMap<>();
     }
 
@@ -97,8 +88,8 @@ public class CardPanelBuilder {
 
     /*default*/
     @NotNull
-    CardPanelBuilder addItem(final String title, final JComponent c,
-                             @NotNull final CardPanelItem item) {
+    CardPanelBuilder addItem(
+            final String title, final JComponent c, @NotNull final CardPanelItem item) {
         this.panelMap.put(count, new ValueTuple<>(item.getTitle(), item.getPanel()));
         count++;
         return addItem(title, c);
@@ -106,9 +97,8 @@ public class CardPanelBuilder {
 
     /*default*/
     @NotNull
-    CardPanelItem nextItem(final String title,
-                           @NotNull final CardPanelItem item,
-                           final boolean alignRight) {
+    CardPanelItem nextItem(
+            final String title, @NotNull final CardPanelItem item, final boolean alignRight) {
         this.panelMap.put(count, new ValueTuple<>(item.getTitle(), item.getPanel()));
         count++;
         return new CardPanelItem(title, this, alignRight);
@@ -120,10 +110,9 @@ public class CardPanelBuilder {
      * @param parent container to add this to
      */
     /*default*/ JComponent create(@NotNull final Container parent) {
-        final String[] items = panelMap.values().stream()
-                .map(Tuple::getFirst).toArray(String[]::new);
-        final Optional<String> maxElement = Arrays.stream(items)
-                .max(Comparator.comparingInt(String::length));
+        final String[] items = panelMap.values().stream().map(Tuple::getFirst).toArray(String[]::new);
+        final Optional<String> maxElement =
+                Arrays.stream(items).max(Comparator.comparingInt(String::length));
         int minWidth = 100;
         if (maxElement.isPresent()) {
             final Font font = UIManager.getFont("List.font");
@@ -132,22 +121,23 @@ public class CardPanelBuilder {
             final Rectangle2D bounds = metrics.getStringBounds(maxElement.get(), null);
             minWidth = Math.max(minWidth, (int) bounds.getWidth());
         }
-        final var sidebar = new JXTree(items) {
-            @Override
-            public void updateUI() {
-                super.updateUI();
-                setBackground(UIManager.getColor("Background.blue"));
-                setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1,
-                                                          UIManager.getColor("Border.line1")));
-            }
+        final var sidebar =
+                new JXTree(items) {
+                    @Override
+                    public void updateUI() {
+                        super.updateUI();
+                        setBackground(UIManager.getColor("Background.blue"));
+                        setBorder(
+                                BorderFactory.createMatteBorder(0, 0, 0, 1, UIManager.getColor("Border.line1")));
+                    }
 
-            @Override
-            public TreeCellRenderer getCellRenderer() {
-                var renderer = super.getCellRenderer();
-                ((JXTree.DelegatingRenderer) renderer).setLeafIcon(null);
-                return renderer;
-            }
-        };
+                    @Override
+                    public TreeCellRenderer getCellRenderer() {
+                        var renderer = super.getCellRenderer();
+                        ((JXTree.DelegatingRenderer) renderer).setLeafIcon(null);
+                        return renderer;
+                    }
+                };
         sidebar.setBorder(null);
         sidebar.putClientProperty("TreeTableTree", Boolean.TRUE);
         var renderer = (JXTree.DelegatingRenderer) sidebar.getCellRenderer();
@@ -158,15 +148,14 @@ public class CardPanelBuilder {
         cardPanel.setDividerLocation(JSplitPane.HORIZONTAL_SPLIT);
 
         final Dimension minDim = new Dimension(minWidth, parent.getHeight());
-        sidebar.addTreeSelectionListener(e -> {
-            final CardLayout cl = (CardLayout) (panel.getLayout());
-            cl.show(panel, sidebar.getSelectionPath().getLastPathComponent().toString());
-            cardPanel.repaint();
-            parent.setMinimumSize(new Dimension(minDim.width + calcMinWidth(),
-                                                minDim.height));
-            panel.setMinimumSize(new Dimension(calcMinWidth(),
-                                               minDim.height));
-        });
+        sidebar.addTreeSelectionListener(
+                e -> {
+                    final CardLayout cl = (CardLayout) (panel.getLayout());
+                    cl.show(panel, sidebar.getSelectionPath().getLastPathComponent().toString());
+                    cardPanel.repaint();
+                    parent.setMinimumSize(new Dimension(minDim.width + calcMinWidth(), minDim.height));
+                    panel.setMinimumSize(new Dimension(calcMinWidth(), minDim.height));
+                });
 
         final JScrollPane sideBarPane = new JScrollPane();
         sideBarPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -186,7 +175,10 @@ public class CardPanelBuilder {
 
     private int calcMinWidth() {
         return panelMap.values().stream()
-                .map(Tuple::getSecond).filter(Component::isVisible)
-                .findFirst().map(p -> p.getMinimumSize().width).orElse(0);
+                       .map(Tuple::getSecond)
+                       .filter(Component::isVisible)
+                       .findFirst()
+                       .map(p -> p.getMinimumSize().width)
+                       .orElse(0);
     }
 }

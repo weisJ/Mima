@@ -8,10 +8,8 @@ import org.apache.batik.transcoder.image.ImageTranscoder;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 
-import javax.swing.Icon;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.geom.Dimension2D;
 import java.awt.image.BufferedImage;
 
@@ -77,16 +75,15 @@ public class BufferedSVGIcon extends UserAgentAdapter implements Icon {
      * @param h   The height of the icon.
      * @throws TranscoderException if file cannot be transcoded.
      */
-    public BufferedSVGIcon(final Document doc, final int w, final int h)
-            throws TranscoderException {
+    public BufferedSVGIcon(final Document doc, final int w, final int h) throws TranscoderException {
         generateBufferedImage(new TranscoderInput(doc), w, h);
     }
 
     /**
      * Generate the BufferedImage.
      */
-    protected void generateBufferedImage(@NotNull final TranscoderInput in, final int w,
-                                         final int h) throws TranscoderException {
+    protected void generateBufferedImage(@NotNull final TranscoderInput in, final int w, final int h)
+            throws TranscoderException {
         final BufferedImageTranscoder t = new BufferedImageTranscoder();
         if (w != 0 && h != 0) {
             t.setDimensions(w, h);

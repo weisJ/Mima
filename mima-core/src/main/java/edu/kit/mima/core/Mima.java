@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Stack;
 
-
 /**
  * Implementation of a Mima handling the memory states.
  *
@@ -21,11 +20,15 @@ public class Mima {
     private final int wordLength;
     private final int constWordLength;
 
-    @NotNull private final MemoryMap memoryMap;
-    @NotNull private final MachineWord accumulator;
-    @NotNull private final MachineWord stackPointer;
+    @NotNull
+    private final MemoryMap memoryMap;
+    @NotNull
+    private final MachineWord accumulator;
+    @NotNull
+    private final MachineWord stackPointer;
 
-    @NotNull private final Stack<Tuple<Integer, Environment>> returnStack;
+    @NotNull
+    private final Stack<Tuple<Integer, Environment>> returnStack;
 
     /**
      * Construct new Mima object with the given number of bits for memory and argument {@link
@@ -133,8 +136,8 @@ public class Mima {
     /**
      * Return from routine.
      *
-     * @return Pair of instruction address and environment from which the routine has been called
-     *         see {@link #pushRoutine(int, Environment)}
+     * @return Pair of instruction address and environment from which the routine has been called see
+     * {@link #pushRoutine(int, Environment)}
      */
     public Tuple<Integer, Environment> returnRoutine() {
         return returnStack.pop();

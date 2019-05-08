@@ -1,4 +1,4 @@
-package edu.kit.mima.api.annotations;
+package edu.kit.mima.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

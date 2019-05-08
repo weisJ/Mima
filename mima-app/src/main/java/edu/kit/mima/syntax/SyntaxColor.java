@@ -6,7 +6,7 @@ import edu.kit.mima.preferences.PropertyKey;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Color;
+import java.awt.*;
 
 /**
  * Colors for Syntax highlighting.

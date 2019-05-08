@@ -16,5 +16,4 @@ public class ResourceBundleUtil {
         final String bundleString = resourceBundle.getString(key);
         return bundleString.charAt(0);
     }
-
 }

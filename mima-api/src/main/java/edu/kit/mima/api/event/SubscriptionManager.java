@@ -20,11 +20,11 @@ import java.util.Set;
  */
 public class SubscriptionManager {
 
-    private static SubscriptionManager instance = new SubscriptionManager();
+    private static final SubscriptionManager instance = new SubscriptionManager();
 
-    private Set<String> allServices;
-    private Map<SubscriptionService, Set<String>> offeredSubscriptions;
-    private Map<String, List<Subscriber>> subscriberMap;
+    private final Set<String> allServices;
+    private final Map<SubscriptionService, Set<String>> offeredSubscriptions;
+    private final Map<String, List<Subscriber>> subscriberMap;
 
     @Contract(pure = true)
     private SubscriptionManager() {
@@ -40,17 +40,16 @@ public class SubscriptionManager {
 
     /**
      * Register an subscription that others can subscribe to. IF the Subscription service send a
-     * notify event all subscribers will receive it.
-     *
-     * </p>Different subscriptions services may offer the same subscription. This allows for
-     * subscribers to listen to the events of different objects by the same identification.
+     * notify event all subscribers will receive it. Different subscriptions services may offer the
+     * same subscription. This allows for subscribers to listen to the events of different objects by
+     * the same identification.
      *
      * @param service     the subscription service.
      * @param identifiers the subscription identifier.
      * @param <T>         the subscription value type.
      */
-    public <T> void offerSubscription(@NotNull final SubscriptionService<T> service,
-                                      @NotNull final String... identifiers) {
+    public <T> void offerSubscription(
+            @NotNull final SubscriptionService<T> service, @NotNull final String... identifiers) {
         if (!offeredSubscriptions.containsKey(service)) {
             offeredSubscriptions.put(service, new HashSet<>());
         }
@@ -63,9 +62,9 @@ public class SubscriptionManager {
     }
 
     /**
-     * Subscribe an subscriber to a subscription channel. It is possible to subscribe to an channel
-     * a priori. If the channel ever gets created the subscriber will be automatically be subscribed
-     * to it.
+     * Subscribe an subscriber to a subscription channel. It is possible to subscribe to an channel a
+     * priori. If the channel ever gets created the subscriber will be automatically be subscribed to
+     * it.
      *
      * @param subscriber  the subscriber to subscribe.
      * @param identifiers the identifier for the subscription channel.
@@ -98,9 +97,12 @@ public class SubscriptionManager {
         }
     }
 
-    private <T> void notifySubscribers(final String identification, final T value,
-                                       final SubscriptionService<T> service, final Class[] owner,
-                                       final Object invoker) {
+    private <T> void notifySubscribers(
+            final String identification,
+            final T value,
+            final SubscriptionService<T> service,
+            final Class[] owner,
+            final Object invoker) {
         /*
          * Ensure the notification sender also is the provider of the subscription.
          */
@@ -108,16 +110,15 @@ public class SubscriptionManager {
             throw new IllegalSubscriptionSenderException(
                     service + " does not provide \"" + identification + "\"");
         }
-        for (var subscriber : Optional.ofNullable(subscriberMap.get(identification)).orElse(
-                List.of())) {
-            if (subscriber.useOwnerFilter() && !Arrays.asList(owner).contains(
-                    subscriber.getOwnerFilter(identification))
-                || subscriber.useInvokeFilter() && invoker != subscriber.getInvokerFilter(
-                    identification)) {
+        for (var subscriber :
+                Optional.ofNullable(subscriberMap.get(identification)).orElse(List.of())) {
+            if (subscriber.useOwnerFilter()
+                        && !Arrays.asList(owner).contains(subscriber.getOwnerFilter(identification))
+                        || subscriber.useInvokeFilter()
+                                   && invoker != subscriber.getInvokerFilter(identification)) {
                 continue;
             }
             subscriber.notifySubscription(identification, value);
         }
     }
-
 }

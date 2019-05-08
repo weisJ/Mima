@@ -7,7 +7,7 @@ import edu.kit.mima.gui.menu.settings.Settings;
 import edu.kit.mima.loading.FileManager;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JMenuBar;
+import javax.swing.*;
 
 /**
  * MenuBar for Mima App.
@@ -39,25 +39,26 @@ public class MimaMenuBar {
      */
     @NotNull
     private JMenuBar createMenu() {
-        final var menu = new MenuBuilder()
-                .addMenu("File").setMnemonic('F')
-                .addItem("New", () -> fileActions
-                        .openFile(FileManager::newFile), "control N")
-                .addItem("Load", () -> fileActions
-                        .openFile(FileManager::load), "control L")
-                .separator()
-                .addItem("Settings", () -> Settings.showWindow(mimaUI),
-                         "control alt S")
-                .separator()
-                .addItem("Save", fileActions::saveSmart, "control S")
-                .addItem("Save as", fileActions::saveAs, "control shift S")
-                .addItem("Quit", mimaUI::quit)
-                .addMenu("Edit").setMnemonic('E')
-                .addItem("Undo", () -> mimaUI.currentEditor().undo())
-                .addItem("Redo", () -> mimaUI.currentEditor().undo())
-                .addMenu("Help").setMnemonic('H')
-                .addItem("Show Help", () -> Help.showWindow(mimaUI))
-                .get();
+        final var menu =
+                new MenuBuilder()
+                        .addMenu("File")
+                        .setMnemonic('F')
+                        .addItem("New", () -> fileActions.openFile(FileManager::newFile), "control N")
+                        .addItem("Load", () -> fileActions.openFile(FileManager::load), "control L")
+                        .separator()
+                        .addItem("Settings", () -> Settings.showWindow(mimaUI), "control alt S")
+                        .separator()
+                        .addItem("Save", fileActions::saveSmart, "control S")
+                        .addItem("Save as", fileActions::saveAs, "control shift S")
+                        .addItem("Quit", mimaUI::quit)
+                        .addMenu("Edit")
+                        .setMnemonic('E')
+                        .addItem("Undo", () -> mimaUI.currentEditor().undo())
+                        .addItem("Redo", () -> mimaUI.currentEditor().undo())
+                        .addMenu("Help")
+                        .setMnemonic('H')
+                        .addItem("Show Help", () -> Help.showWindow(mimaUI))
+                        .get();
         menu.setBorder(new AdaptiveLineBorder(0, 0, 1, 0, "Border.line1"));
         return menu;
     }

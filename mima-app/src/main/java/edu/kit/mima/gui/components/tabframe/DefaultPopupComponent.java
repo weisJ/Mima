@@ -11,22 +11,8 @@ import edu.kit.mima.gui.components.tooltip.TooltipUtil;
 import edu.kit.mima.gui.icons.Icons;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.Action;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import java.awt.AWTEvent;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Insets;
-import java.awt.MouseInfo;
-import java.awt.Toolkit;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.AWTEventListener;
 import java.awt.event.MouseEvent;
 
@@ -84,7 +70,7 @@ public class DefaultPopupComponent extends PopupComponent {
             private boolean pressed;
 
             @Override
-            public void eventDispatched(@NotNull AWTEvent event) {
+            public void eventDispatched(@NotNull final AWTEvent event) {
                 if (locked) {
                     requestFocus();
                     locked = false;
@@ -120,13 +106,13 @@ public class DefaultPopupComponent extends PopupComponent {
     public void setAlignment(@NotNull final Alignment a, final boolean[] info) {
         var insets = getBorderSize(a, info);
         header.setBorder(new AdaptiveLineBorder(insets.top, insets.left, 1, insets.right,
-                                                "TabFramePopup.borderColor"));
+                "TabFramePopup.borderColor"));
         content.setBorder(new AdaptiveLineBorder(0, insets.left, insets.bottom, insets.right,
-                                                 "TabFramePopup.borderColor"));
+                "TabFramePopup.borderColor"));
     }
 
     @Override
-    public void setCloseAction(Action action) {
+    public void setCloseAction(final Action action) {
         closeButton.setAction(action);
     }
 
@@ -165,7 +151,7 @@ public class DefaultPopupComponent extends PopupComponent {
             case EAST, SOUTH_EAST -> {
                 var insets = new Insets(1, 1, 0, 0);
                 if ((info[Alignment.NORTH.getIndex()] || info[Alignment.NORTH_EAST.getIndex()])
-                    && !(a == Alignment.SOUTH_EAST && info[Alignment.EAST.getIndex()])) {
+                            && !(a == Alignment.SOUTH_EAST && info[Alignment.EAST.getIndex()])) {
                     insets.top = 0;
                 }
                 return insets;
@@ -173,7 +159,7 @@ public class DefaultPopupComponent extends PopupComponent {
             case WEST, NORTH_WEST -> {
                 var insets = new Insets(1, 0, 0, 1);
                 if ((info[Alignment.NORTH.getIndex()] || info[Alignment.NORTH_EAST.getIndex()])
-                    && !(a == Alignment.WEST && info[Alignment.NORTH_WEST.getIndex()])) {
+                            && !(a == Alignment.WEST && info[Alignment.NORTH_WEST.getIndex()])) {
                     insets.top = 0;
                 }
                 return insets;

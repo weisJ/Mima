@@ -1,8 +1,5 @@
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import java.awt.Choice;
-import java.awt.Cursor;
-import java.awt.Label;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * @author Jannis Weis
@@ -13,8 +10,7 @@ public class CursorDemo extends JFrame {
     private static Label l;
     private static Choice c;
 
-
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         JFrame f = new JFrame("cursor");
         JPanel p = new JPanel();
         c = new Choice();

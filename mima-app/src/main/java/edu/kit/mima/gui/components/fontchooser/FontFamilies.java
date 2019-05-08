@@ -3,7 +3,7 @@ package edu.kit.mima.gui.components.fontchooser;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Font;
+import java.awt.*;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;

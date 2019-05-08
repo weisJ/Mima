@@ -14,19 +14,14 @@
     <artifactId>mima.app</artifactId>
     <dependencies>
         <dependency>
+            <groupId>org.apfloat</groupId>
+            <artifactId>apfloat</artifactId>
+            <version>1.8.3</version>
+        </dependency>
+        <dependency>
             <groupId>org.swinglabs</groupId>
             <artifactId>jxlayer</artifactId>
             <version>3.0.4</version>
-        </dependency>
-        <dependency>
-            <groupId>edu.kit.weisj</groupId>
-            <artifactId>mima.core</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>edu.kit.weisj</groupId>
-            <artifactId>mima.api</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.swinglabs</groupId>
@@ -68,10 +63,44 @@
             <artifactId>batik-svg-dom</artifactId>
             <version>1.11</version>
         </dependency>
+        <dependency>
+            <groupId>edu.kit.weisj</groupId>
+            <artifactId>mima.api</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>edu.kit.weisj</groupId>
+            <artifactId>mima.core</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>edu.kit.weisj</groupId>
+            <artifactId>annotations</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>edu.kit.mima.App</mainClass>
+                        </manifest>
+                        <manifestEntries>
+                            <SplashScreen-Image>images/mima.png</SplashScreen-Image>
+                        </manifestEntries>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -95,24 +124,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
-                <executions>
-                    <execution>
-                        <id>compile</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>testCompile</id>
-                        <phase>test-compile</phase>
-                        <goals>
-                            <goal>testCompile</goal>
-                        </goals>
-                    </execution>
-                </executions>
                 <configuration>
                     <compilerArgs>
+                        <arg>--enable-preview</arg>
                         <arg>--add-exports=java.desktop/sun.awt=ALL-UNNAMED</arg>
                         <arg>--add-exports=java.desktop/com.sun.java.swing=ALL-UNNAMED</arg>
                     </compilerArgs>

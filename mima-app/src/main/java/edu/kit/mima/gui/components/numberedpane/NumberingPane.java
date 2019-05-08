@@ -7,26 +7,17 @@ import kotlin.Triple;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.border.MatteBorder;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Panel that shows line numbering for a {@link JTextPane}. It also
- * highlights the current selected line.
+ * Panel that shows line numbering for a {@link JTextPane}. It also highlights the current selected
+ * line.
  *
  * @author Jannis Weis
  * @since 2018
@@ -52,15 +43,16 @@ class NumberingPane extends JPanel {
      * @param pane       the text pane to number.
      * @param scrollPane the scroll pane wrapping the pane.
      */
-    public NumberingPane(final HighlightTextPane pane, JScrollPane scrollPane) {
+    public NumberingPane(final HighlightTextPane pane, final JScrollPane scrollPane) {
         this.pane = pane;
         this.scrollPane = scrollPane;
         componentMap = new TreeMap<>();
-        this.addMouseWheelListener(ev -> {
-            var bar = scrollPane.getVerticalScrollBar();
-            bar.setValue(bar.getValue()
-                         + Integer.signum(ev.getUnitsToScroll()) * bar.getUnitIncrement());
-        });
+        this.addMouseWheelListener(
+                ev -> {
+                    var bar = scrollPane.getVerticalScrollBar();
+                    bar.setValue(
+                            bar.getValue() + Integer.signum(ev.getUnitsToScroll()) * bar.getUnitIncrement());
+                });
     }
 
     @Override
@@ -122,7 +114,7 @@ class NumberingPane extends JPanel {
     @NotNull
     @Contract("_, _ -> new")
     private Pair<Pair<Integer, Integer>, FontMetrics> calculateBounds(
-            @NotNull final Graphics g, int maxIndex) {
+            @NotNull final Graphics g, final int maxIndex) {
         final var metrics = g.getFontMetrics(font);
         var d = String.valueOf(Math.max(100, maxIndex));
         final var bounds = metrics.getStringBounds(d, g);
@@ -135,35 +127,40 @@ class NumberingPane extends JPanel {
 
     @NotNull
     @Contract("_, _ -> new")
-    private Triple<Integer, Integer, Integer> calculatePositions(@NotNull final Graphics g,
-                                                                 @NotNull final Document doc) {
+    private Triple<Integer, Integer, Integer> calculatePositions(
+            @NotNull final Graphics g, @NotNull final Document doc) {
         final int start = pane.viewToModel2D(scrollPane.getViewport().getViewPosition());
-        final int end = pane.viewToModel2D(new Point(
-                scrollPane.getViewport().getViewPosition().x + pane.getWidth(),
-                scrollPane.getViewport().getViewPosition().y + pane.getHeight()));
+        final int end =
+                pane.viewToModel2D(
+                        new Point(
+                                scrollPane.getViewport().getViewPosition().x + pane.getWidth(),
+                                scrollPane.getViewport().getViewPosition().y + pane.getHeight()));
         final int startLine = doc.getDefaultRootElement().getElementIndex(start);
         final int endLine = doc.getDefaultRootElement().getElementIndex(end);
 
         final FontMetrics fontMetrics = g.getFontMetrics(pane.getFont());
         int startingY = -1;
         try {
-            startingY = (((int) pane.modelToView2D(start)
-                    .getY() - scrollPane.getViewport().getViewPosition().y)
-                         + fontMetrics.getHeight()) - fontMetrics.getDescent();
+            startingY =
+                    (((int) pane.modelToView2D(start).getY() - scrollPane.getViewport().getViewPosition().y)
+                             + fontMetrics.getHeight())
+                            - fontMetrics.getDescent();
         } catch (@NotNull final BadLocationException ignored) {
         }
         return new Triple<>(startLine, endLine, startingY);
     }
 
-    private void paintNumber(@NotNull final Graphics g,
-                             @NotNull Pair<FontMetrics, FontMetrics> metrics,
-                             final int line,
-                             final int digits,
-                             @NotNull final Point p) {
+    private void paintNumber(
+            @NotNull final Graphics g,
+            @NotNull final Pair<FontMetrics, FontMetrics> metrics,
+            final int line,
+            final int digits,
+            @NotNull final Point p) {
         g.setColor(numberingColor);
         final String number = Integer.toString(line + 1);
-        final int padding = (int) metrics.getFirst()
-                .getStringBounds("0".repeat(digits - number.length()), g).getWidth();
+        final int padding =
+                (int)
+                        metrics.getFirst().getStringBounds("0".repeat(digits - number.length()), g).getWidth();
         if (line == pane.currentLineIndex()) {
             g.setColor(currentBackground);
             int y = p.y + metrics.getSecond().getDescent() - metrics.getSecond().getHeight();
@@ -177,23 +174,24 @@ class NumberingPane extends JPanel {
         }
     }
 
-    private void paintComponent(@NotNull final Graphics g,
-                                @NotNull FontMetrics paneMetrics,
-                                int componentIndex,
-                                @NotNull final Point p) {
+    private void paintComponent(
+            @NotNull final Graphics g,
+            @NotNull final FontMetrics paneMetrics,
+            final int componentIndex,
+            @NotNull final Point p) {
         final IndexComponent component = componentMap.get(componentIndex);
         final var dim = component.getPreferredSize();
         final int xPos = actionThresholdX + p.x;
-        final int yPos = p.y + (paneMetrics.getDescent()
-                                - paneMetrics.getAscent()) / 2 - dim.height / 2;
+        final int yPos =
+                p.y + (paneMetrics.getDescent() - paneMetrics.getAscent()) / 2 - dim.height / 2;
         component.setVisible(true);
         component.setBounds(xPos, yPos, dim.width, dim.height);
         component.paint(g.create(xPos, yPos, dim.width, dim.height));
     }
 
     /**
-     * Get the map containing the components for the indices.
-     * Interaction with the return value of this function will change the map for this object.
+     * Get the map containing the components for the indices. Interaction with the return value of
+     * this function will change the map for this object.
      *
      * @return the reference to the component map.
      */
@@ -203,15 +201,13 @@ class NumberingPane extends JPanel {
     }
 
     /**
-     * Get the area for interaction with the numbering.
-     * Mouse listeners should check for this value when implementing an action.
-     * This is however only a recommendation and not enforced.
+     * Get the area for interaction with the numbering. Mouse listeners should check for this value
+     * when implementing an action. This is however only a recommendation and not enforced.
      *
      * @return the horizontal offset relative to the left side of this panel.
      */
     @NotNull
     public Rectangle getActionArea() {
-        return new Rectangle(actionThresholdX, 0,
-                             getWidth() - actionThresholdX, getHeight());
+        return new Rectangle(actionThresholdX, 0, getWidth() - actionThresholdX, getHeight());
     }
 }

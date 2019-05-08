@@ -19,7 +19,8 @@ import java.io.IOException;
  */
 public class MimaFileDisplay {
 
-    @NotNull private final FileDisplay fileDisplay;
+    @NotNull
+    private final FileDisplay fileDisplay;
 
     /**
      * Create File display component for Mima App.
@@ -28,23 +29,24 @@ public class MimaFileDisplay {
      */
     public MimaFileDisplay(@NotNull final FileActions fileActions) {
         fileDisplay = new FileDisplay();
-        fileDisplay.setHandler(file -> {
-            fileDisplay.requestFocus();
-            if (file.isDirectory()) {
-                fileDisplay.setFile(file);
-                fileDisplay.focusLast();
-            } else if (MimaConstants.instructionSetForFile(file) != InstructionSet.EMPTY) {
-                fileActions.openFile(fm -> {
-                    try {
-                        fm.load(file.getAbsolutePath());
-                    } catch (@NotNull final IOException e) {
-                        App.logger.error(e.getMessage());
+        fileDisplay.setHandler(
+                file -> {
+                    fileDisplay.requestFocus();
+                    if (file.isDirectory()) {
+                        fileDisplay.setFile(file);
+                        fileDisplay.focusLast();
+                    } else if (MimaConstants.instructionSetForFile(file) != InstructionSet.EMPTY) {
+                        fileActions.openFile(
+                                fm -> {
+                                    try {
+                                        fm.load(file.getAbsolutePath());
+                                    } catch (@NotNull final IOException e) {
+                                        App.logger.error(e.getMessage());
+                                    }
+                                });
                     }
                 });
-            }
-        });
-        fileDisplay.setFile(
-                new File(Preferences.getInstance().readString(PropertyKey.DIRECTORY_MIMA)));
+        fileDisplay.setFile(new File(Preferences.getInstance().readString(PropertyKey.DIRECTORY_MIMA)));
     }
 
     /**

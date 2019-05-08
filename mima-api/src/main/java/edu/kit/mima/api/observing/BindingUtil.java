@@ -3,7 +3,7 @@ package edu.kit.mima.api.observing;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JComponent;
+import javax.swing.*;
 
 /**
  * Utility class for binding function execution with property changes.
@@ -26,9 +26,10 @@ public final class BindingUtil {
      * @param property properties to check
      * @param <T>      observed object must implement the {@link Observable} interface.
      */
-    public static <T extends JComponent> void bind(@NotNull final T observed,
-                                                   @NotNull final Runnable binding,
-                                                   @NotNull final String... property) {
+    public static <T extends JComponent> void bind(
+            @NotNull final T observed,
+            @NotNull final Runnable binding,
+            @NotNull final String... property) {
         for (final var s : property) {
             observed.addPropertyChangeListener(s, p -> binding.run());
         }
@@ -42,9 +43,10 @@ public final class BindingUtil {
      * @param property properties to check
      * @param <T>      observed object must implement the {@link Observable} interface.
      */
-    public static <T extends Observable> void bind(@NotNull final T observed,
-                                                   @NotNull final Runnable binding,
-                                                   @NotNull final String... property) {
+    public static <T extends Observable> void bind(
+            @NotNull final T observed,
+            @NotNull final Runnable binding,
+            @NotNull final String... property) {
         for (final var s : property) {
             observed.addPropertyChangeListener(s, p -> binding.run());
         }
@@ -59,9 +61,8 @@ public final class BindingUtil {
      * @param <T>      observed class type.
      */
     @SuppressWarnings("unused")
-    public static <T extends ClassObservable> void bindClass(final Class<T> clazz,
-                                                             @NotNull final Runnable binding,
-                                                             @NotNull final String... property) {
+    public static <T extends ClassObservable> void bindClass(
+            final Class<T> clazz, @NotNull final Runnable binding, @NotNull final String... property) {
         for (final var s : property) {
             T.addStaticPropertyChangeListener(s, p -> binding.run());
         }

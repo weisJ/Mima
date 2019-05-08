@@ -15,7 +15,8 @@ import java.util.List;
  */
 public class SimpleSyntaxNode implements SyntaxNode {
 
-    @NotNull private final List<SyntaxNode> children;
+    @NotNull
+    private final List<SyntaxNode> children;
     private NodeType type;
     private SyntaxNode parent;
     private int begin;
@@ -29,9 +30,8 @@ public class SimpleSyntaxNode implements SyntaxNode {
      * @param end    end positon of node
      * @param parent parent node
      */
-    public SimpleSyntaxNode(final NodeType type,
-                            final int begin, final int end,
-                            final SyntaxNode parent) {
+    public SimpleSyntaxNode(
+            final NodeType type, final int begin, final int end, final SyntaxNode parent) {
         this.type = type;
         this.begin = begin;
         this.end = end;
@@ -93,10 +93,11 @@ public class SimpleSyntaxNode implements SyntaxNode {
         if (nodes == null) {
             return;
         }
-        nodes.forEach(n -> {
-            children.add(n);
-            n.setParent(this);
-        });
+        nodes.forEach(
+                n -> {
+                    children.add(n);
+                    n.setParent(this);
+                });
         updateIndex();
     }
 

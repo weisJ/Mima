@@ -4,8 +4,7 @@ import edu.kit.mima.gui.components.console.Console;
 import edu.kit.mima.gui.components.fontchooser.panes.AbstractPreviewPane;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Dimension;
-import java.awt.Font;
+import java.awt.*;
 
 /**
  * Preview for {@link Console}.
@@ -39,7 +38,7 @@ public class ConsolePreview extends AbstractPreviewPane {
     }
 
     @Override
-    public void setPreferredSize(Dimension preferredSize) {
+    public void setPreferredSize(final Dimension preferredSize) {
         console.setPreferredSize(preferredSize);
         super.setPreferredSize(preferredSize);
     }

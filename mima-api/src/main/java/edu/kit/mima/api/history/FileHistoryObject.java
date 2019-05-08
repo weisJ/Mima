@@ -3,7 +3,7 @@ package edu.kit.mima.api.history;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JTextPane;
+import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 
@@ -15,10 +15,14 @@ import javax.swing.text.SimpleAttributeSet;
  */
 public class FileHistoryObject {
 
-    @NotNull private final JTextPane editor;
-    @NotNull private final String text;
-    @NotNull private final String old;
-    @NotNull private final ChangeType type;
+    @NotNull
+    private final JTextPane editor;
+    @NotNull
+    private final String text;
+    @NotNull
+    private final String old;
+    @NotNull
+    private final ChangeType type;
     private final int caretOffset;
 
     /**

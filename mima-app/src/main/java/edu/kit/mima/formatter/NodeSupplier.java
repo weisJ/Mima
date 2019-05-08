@@ -18,5 +18,6 @@ public interface NodeSupplier<T extends SyntaxNode> {
      * @param end   end position
      * @return {@link SyntaxNode}
      */
-    @NotNull T create(int begin, int end);
+    @NotNull
+    T create(int begin, int end);
 }

@@ -6,14 +6,9 @@ import edu.kit.mima.gui.components.popupmenu.ScrollPopupMenu;
 import edu.kit.mima.gui.icons.Icons;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.AbstractAction;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.plaf.UIResource;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 
@@ -41,12 +36,12 @@ public class TabContainer extends JPanel implements UIResource {
         notifyTabbedPane = true;
     }
 
-    public void setNotifyTabbedPane(boolean notifyTabbedPane) {
+    public void setNotifyTabbedPane(final boolean notifyTabbedPane) {
         this.notifyTabbedPane = notifyTabbedPane;
     }
 
     @Override
-    public void remove(Component comp) {
+    public void remove(final Component comp) {
         int index = tabPane.indexOfTabComponent(comp);
         super.remove(comp);
         if (notifyTabbedPane && index != -1) {
@@ -74,7 +69,7 @@ public class TabContainer extends JPanel implements UIResource {
     }
 
     @Override
-    public void paint(@NotNull Graphics g) {
+    public void paint(@NotNull final Graphics g) {
         final var oldClip = new Rectangle(g.getClipBounds());
         var clip = new Rectangle(oldClip);
         clip.width -= stashWidth;
@@ -139,13 +134,15 @@ public class TabContainer extends JPanel implements UIResource {
     }
 
     @NotNull
-    private JMenuItem createStashItem(final int index, @NotNull TabComponent c) {
-        var item = new JMenuItem(new AbstractAction() {
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                tabPane.setSelectedIndex(index);
-            }
-        });
+    private JMenuItem createStashItem(final int index, @NotNull final TabComponent c) {
+        var item =
+                new JMenuItem(
+                        new AbstractAction() {
+                            @Override
+                            public void actionPerformed(final ActionEvent e) {
+                                tabPane.setSelectedIndex(index);
+                            }
+                        });
         item.setText(c.getTitle());
         item.setIcon(c.getIcon());
         return item;

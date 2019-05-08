@@ -2,15 +2,11 @@ package edu.kit.mima.gui.components;
 
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JSplitPane;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Insets;
-import java.awt.Rectangle;
+import java.awt.*;
 
 /**
  * Split Pane with zero width splitters.
@@ -22,7 +18,7 @@ public class SeamlessSplitPane extends JSplitPane {
 
     private static final int DIVIDER_DRAG_SIZE = 9;
     private static final int DIVIDER_DRAG_OFFSET = 4;
-    private boolean showBorder;
+    private final boolean showBorder;
     private int disabledPos = 0;
     private int disabledMax = -1;
     private boolean resizable = true;
@@ -39,7 +35,7 @@ public class SeamlessSplitPane extends JSplitPane {
      *
      * @param showBorder whether to show a split border. default value is true.
      */
-    public SeamlessSplitPane(boolean showBorder) {
+    public SeamlessSplitPane(final boolean showBorder) {
         this.showBorder = showBorder;
         setDividerSize(showBorder ? 1 : 0);
         setBorder(null);
@@ -76,11 +72,11 @@ public class SeamlessSplitPane extends JSplitPane {
         var leftSize = getLeftComponent().getMinimumSize();
         var rightSize = getRightComponent().getMinimumSize();
         if (orientation == JSplitPane.HORIZONTAL_SPLIT) {
-            return new Dimension(leftSize.width + rightSize.width,
-                                 Math.max(leftSize.height, rightSize.height));
+            return new Dimension(
+                    leftSize.width + rightSize.width, Math.max(leftSize.height, rightSize.height));
         } else {
-            return new Dimension(Math.max(leftSize.width, rightSize.width),
-                                 leftSize.height + rightSize.height);
+            return new Dimension(
+                    Math.max(leftSize.width, rightSize.width), leftSize.height + rightSize.height);
         }
     }
 
@@ -92,7 +88,7 @@ public class SeamlessSplitPane extends JSplitPane {
 
     @NotNull
     @Override
-    public Insets getInsets(@NotNull Insets insets) {
+    public Insets getInsets(@NotNull final Insets insets) {
         insets.set(0, 0, 0, 0);
         return insets;
     }
@@ -101,8 +97,21 @@ public class SeamlessSplitPane extends JSplitPane {
         return resizable;
     }
 
+    /**
+     * Set if the split pane should be able to resize.
+     *
+     * @param resizable true if it should resize.
+     */
+    public void setResizable(final boolean resizable) {
+        this.resizable = resizable;
+        if (!resizable) {
+            disabledPos = super.getDividerLocation();
+            disabledMax = getMaximumDividerLocation();
+        }
+    }
+
     @Override
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(final boolean enabled) {
         ((SplitPaneWithZeroSizeDividerUI) getUI()).getDivider().setEnabled(enabled);
     }
 
@@ -116,7 +125,7 @@ public class SeamlessSplitPane extends JSplitPane {
     }
 
     @Override
-    public void setDividerLocation(int location) {
+    public void setDividerLocation(final int location) {
         if (resizable || disabledPos == disabledMax) {
             super.setDividerLocation(location);
         }
@@ -128,19 +137,6 @@ public class SeamlessSplitPane extends JSplitPane {
             return super.getLastDividerLocation();
         } else {
             return disabledMax == disabledPos ? getMaximumDividerLocation() : disabledPos;
-        }
-    }
-
-    /**
-     * Set if the split pane should be able to resize.
-     *
-     * @param resizable true if it should resize.
-     */
-    public void setResizable(final boolean resizable) {
-        this.resizable = resizable;
-        if (!resizable) {
-            disabledPos = super.getDividerLocation();
-            disabledMax = getMaximumDividerLocation();
         }
     }
 
@@ -158,7 +154,6 @@ public class SeamlessSplitPane extends JSplitPane {
         private ZeroSizeDivider(@NotNull final BasicSplitPaneUI ui) {
             super(ui);
         }
-
 
         @Override
         public void setBorder(final Border border) {

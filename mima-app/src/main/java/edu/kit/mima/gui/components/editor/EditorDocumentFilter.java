@@ -33,10 +33,13 @@ public class EditorDocumentFilter extends DocumentFilter {
     }
 
     @Override
-    public void replace(@NotNull final DocumentFilter.FilterBypass fb,
-                        final int offset, final int length,
-                        final String text,
-                        final AttributeSet attrs) throws BadLocationException {
+    public void replace(
+            @NotNull final DocumentFilter.FilterBypass fb,
+            final int offset,
+            final int length,
+            final String text,
+            final AttributeSet attrs)
+            throws BadLocationException {
 
         String replacedText = text;
         while (TAB.matcher(replacedText).matches()) {
@@ -49,10 +52,12 @@ public class EditorDocumentFilter extends DocumentFilter {
     }
 
     @Override
-    public void insertString(@NotNull final DocumentFilter.FilterBypass fb,
-                             final int offset,
-                             @NotNull final String string,
-                             final AttributeSet attr) throws BadLocationException {
+    public void insertString(
+            @NotNull final DocumentFilter.FilterBypass fb,
+            final int offset,
+            @NotNull final String string,
+            final AttributeSet attr)
+            throws BadLocationException {
         String replacedText = string;
         while (TAB.matcher(replacedText).matches()) {
             replacedText = TAB.matcher(replacedText).replaceFirst(SPACE_TAB);
@@ -64,8 +69,9 @@ public class EditorDocumentFilter extends DocumentFilter {
     }
 
     @Override
-    public void remove(@NotNull final DocumentFilter.FilterBypass fb,
-                       final int offset, final int length) throws BadLocationException {
+    public void remove(
+            @NotNull final DocumentFilter.FilterBypass fb, final int offset, final int length)
+            throws BadLocationException {
         controller.addRemoveHistory(offset, length);
         super.remove(fb, offset, length);
         editor.notifyEdit();

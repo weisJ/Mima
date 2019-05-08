@@ -1,33 +1,33 @@
 /*
-  Copyright (c) 2008-2009, Piet Blok
-  All rights reserved.
-  <p>
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions
-  are met:
-  <p>
-  * Redistributions of source code must retain the above copyright
-  notice, this list of conditions and the following disclaimer.
-  * Redistributions in binary form must reproduce the above
-  copyright notice, this list of conditions and the following
-  disclaimer in the documentation and/or other materials provided
-  with the distribution.
-  * Neither the name of the copyright holder nor the names of the
-  contributors may be used to endorse or promote products derived
-  from this software without specific prior written permission.
-  <p>
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+ Copyright (c) 2008-2009, Piet Blok
+ All rights reserved.
+ <p>
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ <p>
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above
+ copyright notice, this list of conditions and the following
+ disclaimer in the documentation and/or other materials provided
+ with the distribution.
+ * Neither the name of the copyright holder nor the names of the
+ contributors may be used to endorse or promote products derived
+ from this software without specific prior written permission.
+ <p>
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
 package org.pbjar.jxlayer.plaf.misc;
 
@@ -36,11 +36,8 @@ import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.Action;
-import javax.swing.JComponent;
-import javax.swing.SwingUtilities;
-import java.awt.Component;
-import java.awt.Point;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.AWTEventListener;
 import java.awt.event.MouseWheelEvent;
 import java.util.ArrayList;
@@ -49,18 +46,16 @@ import java.util.List;
 /**
  * A generalized implementation of LayerUI.
  *
- * <p>
- * Some additional functionality:
+ * <p>Some additional functionality:
+ *
  * <ol>
- * <li>It facilitates the use of a state object for {@code LayerUI}s that are
- * intended for shared use.</li>
- * <li>It supplies {@code Action}s that can be used for the controls of a GUI.</li>
- * <li>It re-dispatches {@code MouseWheelEvent}s to the first component up in
- * the hierarchy from the originating component that has a {@code MouseWheelListener}
- * registered.</li>
- * <li>Via the constructor one can enable {@link AWTEventListener}.</li>
+ * <li>It facilitates the use of a state object for {@code LayerUI}s that are intended for shared
+ * use.
+ * <li>It supplies {@code Action}s that can be used for the controls of a GUI.
+ * <li>It re-dispatches {@code MouseWheelEvent}s to the first component up in the hierarchy from
+ * the originating component that has a {@code MouseWheelListener} registered.
+ * <li>Via the constructor one can enable {@link AWTEventListener}.
  * </ol>
- * </p>
  *
  * @param <V> JXLayer's view
  * @param <S> A state object
@@ -73,8 +68,8 @@ public class GeneralLayerUI<V extends JComponent, S> extends AbstractLayerUI<V> 
     private final String stateKey = this.getClass().getName() + ".stateKey";
 
     /**
-     * Get actions that are applicable to this LayerUI. This implementation returns an
-     * enable/disable action for this LayerUI
+     * Get actions that are applicable to this LayerUI. This implementation returns an enable/disable
+     * action for this LayerUI
      *
      * @return a list of applicable actions
      */
@@ -91,7 +86,7 @@ public class GeneralLayerUI<V extends JComponent, S> extends AbstractLayerUI<V> 
      * @return a list of applicable actions
      */
     @NotNull
-    public List<Action> getActions(JXLayer<? extends V> layer) {
+    public List<Action> getActions(final JXLayer<? extends V> layer) {
         return new ArrayList<>();
     }
 
@@ -105,12 +100,12 @@ public class GeneralLayerUI<V extends JComponent, S> extends AbstractLayerUI<V> 
     }
 
     /**
-     * Invokes super.installUI. Then invokes createStateObject. User installation actions may be
-     * coded in createStateObject.
+     * Invokes super.installUI. Then invokes createStateObject. User installation actions may be coded
+     * in createStateObject.
      */
     @SuppressWarnings("unchecked")
     @Override
-    public void installUI(@NotNull JComponent c) {
+    public void installUI(@NotNull final JComponent c) {
         super.installUI(c);
         JXLayer<? extends V> layer = (JXLayer<? extends V>) c;
         S stateObject = createStateObject(layer);
@@ -125,7 +120,7 @@ public class GeneralLayerUI<V extends JComponent, S> extends AbstractLayerUI<V> 
      */
     @Override
     @SuppressWarnings("unchecked")
-    public void uninstallUI(@NotNull JComponent c) {
+    public void uninstallUI(@NotNull final JComponent c) {
         super.uninstallUI(c);
         JXLayer<? extends V> layer = (JXLayer<? extends V>) c;
         S stateObject = getStateObject(layer);
@@ -136,7 +131,7 @@ public class GeneralLayerUI<V extends JComponent, S> extends AbstractLayerUI<V> 
     }
 
     @Nullable
-    private Component findWheelListenerComponent(@Nullable Component target) {
+    private Component findWheelListenerComponent(@Nullable final Component target) {
         if (target == null) {
             return null;
         } else if (target.getMouseWheelListeners().length == 0) {
@@ -151,8 +146,7 @@ public class GeneralLayerUI<V extends JComponent, S> extends AbstractLayerUI<V> 
      *
      * @param stateObject a state object
      */
-    protected void cleanupStateObject(S stateObject) {
-
+    protected void cleanupStateObject(final S stateObject) {
     }
 
     /**
@@ -163,7 +157,7 @@ public class GeneralLayerUI<V extends JComponent, S> extends AbstractLayerUI<V> 
      * @return a StateObject or {@code null}, if no state is maintained.
      */
     @Nullable
-    protected S createStateObject(JXLayer<? extends V> layer) {
+    protected S createStateObject(final JXLayer<? extends V> layer) {
         return null;
     }
 
@@ -175,7 +169,7 @@ public class GeneralLayerUI<V extends JComponent, S> extends AbstractLayerUI<V> 
      */
     @NotNull
     @SuppressWarnings("unchecked")
-    protected final S getStateObject(@NotNull JXLayer<? extends V> layer) {
+    protected final S getStateObject(@NotNull final JXLayer<? extends V> layer) {
         return (S) layer.getClientProperty(stateKey);
     }
 
@@ -184,8 +178,8 @@ public class GeneralLayerUI<V extends JComponent, S> extends AbstractLayerUI<V> 
      * MouseWheelEventListener} registered.
      */
     @Override
-    protected void processMouseWheelEvent(@NotNull MouseWheelEvent event,
-                                          @NotNull JXLayer<? extends V> jxlayer) {
+    protected void processMouseWheelEvent(
+            @NotNull final MouseWheelEvent event, @NotNull final JXLayer<? extends V> jxlayer) {
         /*
          * Only process an event if it is not already consumed. This may be the
          * case if this LayerUI is contained in a wrapped hierarchy.
@@ -208,28 +202,28 @@ public class GeneralLayerUI<V extends JComponent, S> extends AbstractLayerUI<V> 
             /*
              * Convert the location relative to the new target
              */
-            Point point = SwingUtilities.convertPoint(event.getComponent(),
-                                                      event.getPoint(), newTarget);
+            Point point = SwingUtilities.convertPoint(event.getComponent(), event.getPoint(), newTarget);
             /*
              * Create a new event
              */
-            MouseWheelEvent newEvent = new MouseWheelEvent(newTarget, //
-                                                           event.getID(), //
-                                                           event.getWhen(), //
-                                                           event.getModifiersEx(), //
-                                                           point.x, //
-                                                           point.y, //
-                                                           event.getClickCount(), //
-                                                           event.isPopupTrigger(), //
-                                                           event.getScrollType(), //
-                                                           event.getScrollAmount(), //
-                                                           event.getWheelRotation() //
-            );
+            MouseWheelEvent newEvent =
+                    new MouseWheelEvent(
+                            newTarget, //
+                            event.getID(), //
+                            event.getWhen(), //
+                            event.getModifiersEx(), //
+                            point.x, //
+                            point.y, //
+                            event.getClickCount(), //
+                            event.isPopupTrigger(), //
+                            event.getScrollType(), //
+                            event.getScrollAmount(), //
+                            event.getWheelRotation() //
+                    );
             /*
              * Dispatch the new event.
              */
             newTarget.dispatchEvent(newEvent);
         }
     }
-
 }

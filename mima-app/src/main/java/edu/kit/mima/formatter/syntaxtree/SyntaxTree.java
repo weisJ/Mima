@@ -20,8 +20,10 @@ import java.util.stream.IntStream;
  */
 public class SyntaxTree {
 
-    @NotNull private final SyntaxToken[] tokens;
-    @NotNull private final SyntaxNode root;
+    @NotNull
+    private final SyntaxToken[] tokens;
+    @NotNull
+    private final SyntaxNode root;
 
     /**
      * Create syntax tree.
@@ -96,8 +98,10 @@ public class SyntaxTree {
      * @param node parent node to create lines on
      */
     private void buildLines(@NotNull final SyntaxNode node) {
-        insertLayer(n -> n.getType() == NodeType.NEW_LINE,
-                    (x, y) -> new SimpleSyntaxNode(NodeType.LINE, x, y, null), node);
+        insertLayer(
+                n -> n.getType() == NodeType.NEW_LINE,
+                (x, y) -> new SimpleSyntaxNode(NodeType.LINE, x, y, null),
+                node);
     }
 
     /**
@@ -107,14 +111,14 @@ public class SyntaxTree {
      * @param split      type to split at.
      * @param createType type of new nodes.
      */
-    private void groupAndCreate(@NotNull final SyntaxNode node,
-                                final NodeType split,
-                                final NodeType createType) {
+    private void groupAndCreate(
+            @NotNull final SyntaxNode node, final NodeType split, final NodeType createType) {
         for (final var line : new ArrayList<>(node.children())) {
-            groupLayer(n -> n.getType() == split,
-                       (x, y) -> new SimpleSyntaxNode(createType, x, y, null),
-                       line,
-                       false);
+            groupLayer(
+                    n -> n.getType() == split,
+                    (x, y) -> new SimpleSyntaxNode(createType, x, y, null),
+                    line,
+                    false);
         }
     }
 
@@ -124,8 +128,10 @@ public class SyntaxTree {
      * @param node parent nodes to create blocks on
      */
     private void buildBlocks(@NotNull final SyntaxNode node) {
-        insertLayer(n -> n.children().size() <= 1,
-                    (x, y) -> new SimpleSyntaxNode(NodeType.BLOCK, x, y, null), node);
+        insertLayer(
+                n -> n.children().size() <= 1,
+                (x, y) -> new SimpleSyntaxNode(NodeType.BLOCK, x, y, null),
+                node);
         for (final var n : new ArrayList<>(node.children())) {
             if (calculateSize(n) <= 1) {
                 node.removeChild(n);
@@ -156,8 +162,8 @@ public class SyntaxTree {
      * @param function    function to apply on children
      * @param parentLayer parentNode
      */
-    private void editLayer(@NotNull final Consumer<SyntaxNode> function,
-                           @NotNull final SyntaxNode parentLayer) {
+    private void editLayer(
+            @NotNull final Consumer<SyntaxNode> function, @NotNull final SyntaxNode parentLayer) {
         editLayer(n -> true, function, parentLayer);
     }
 
@@ -168,9 +174,10 @@ public class SyntaxTree {
      * @param function    function to apply
      * @param parentLayer parentNode
      */
-    private void editLayer(@NotNull final Predicate<SyntaxNode> filter,
-                           @NotNull final Consumer<SyntaxNode> function,
-                           @NotNull final SyntaxNode parentLayer) {
+    private void editLayer(
+            @NotNull final Predicate<SyntaxNode> filter,
+            @NotNull final Consumer<SyntaxNode> function,
+            @NotNull final SyntaxNode parentLayer) {
         for (final var n : parentLayer.children()) {
             if (filter.test(n)) {
                 function.accept(n);
@@ -186,17 +193,17 @@ public class SyntaxTree {
      * @param parentNode  parent node
      * @param includeLast whether to include the last group
      */
-    private void groupLayer(@NotNull final Predicate<SyntaxNode> filter,
-                            @NotNull final BiFunction<Integer, Integer, SyntaxNode> supplier,
-                            @NotNull final SyntaxNode parentNode,
-                            final boolean includeLast) {
+    private void groupLayer(
+            @NotNull final Predicate<SyntaxNode> filter,
+            @NotNull final BiFunction<Integer, Integer, SyntaxNode> supplier,
+            @NotNull final SyntaxNode parentNode,
+            final boolean includeLast) {
         final SyntaxNode[] nodes = parentNode.children().toArray(new SyntaxNode[0]);
         final List<SyntaxNode> newNodes = group(nodes, filter, supplier, includeLast);
         for (final var n : newNodes) {
             IntStream.rangeClosed(n.getBegin(), n.getEnd()).forEach(i -> n.addChild(nodes[i]));
             parentNode.addChild(n);
         }
-
     }
 
     /**
@@ -206,9 +213,10 @@ public class SyntaxTree {
      * @param supplier    supplier for new nodes
      * @param insertAfter parent node of new nodes
      */
-    private void insertLayer(@NotNull final Predicate<SyntaxNode> filter,
-                             @NotNull final BiFunction<Integer, Integer, SyntaxNode> supplier,
-                             @NotNull final SyntaxNode insertAfter) {
+    private void insertLayer(
+            @NotNull final Predicate<SyntaxNode> filter,
+            @NotNull final BiFunction<Integer, Integer, SyntaxNode> supplier,
+            @NotNull final SyntaxNode insertAfter) {
         final SyntaxNode[] nodes = insertAfter.children().toArray(new SyntaxNode[0]);
         final List<SyntaxNode> newNodes = group(nodes, filter, supplier, true);
         insertAfter.removeAll();
@@ -230,10 +238,11 @@ public class SyntaxTree {
      * @return List of grouped items
      */
     @NotNull
-    private <T, K> List<K> group(@NotNull final T[] items,
-                                 @NotNull final Predicate<T> filter,
-                                 @NotNull final BiFunction<Integer, Integer, K> supplier,
-                                 final boolean includeLast) {
+    private <T, K> List<K> group(
+            @NotNull final T[] items,
+            @NotNull final Predicate<T> filter,
+            @NotNull final BiFunction<Integer, Integer, K> supplier,
+            final boolean includeLast) {
         final List<K> groups = new ArrayList<>();
         final int[] splits = splitOn(items, filter);
         int current = 0;

@@ -3,8 +3,7 @@ package edu.kit.mima.preferences;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Color;
-import java.awt.Font;
+import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -27,8 +26,10 @@ public class Preferences {
     private static final String optionsPath = directory + "\\options.properties";
     private static final Preferences instance = new Preferences();
     private static final List<UserPreferenceChangedListener> listenerList = new ArrayList<>();
-    @NotNull private final Properties options;
-    @NotNull private final Properties colorStyle;
+    @NotNull
+    private final Properties options;
+    @NotNull
+    private final Properties colorStyle;
     private final boolean notify;
 
     private Preferences() {
@@ -101,8 +102,9 @@ public class Preferences {
     }
 
     private void createOptions() {
-        try (final InputStream inputStream = Objects.requireNonNull(
-                getClass().getClassLoader().getResourceAsStream("options.properties"))) {
+        try (final InputStream inputStream =
+                     Objects.requireNonNull(
+                             getClass().getClassLoader().getResourceAsStream("options.properties"))) {
             options.load(inputStream);
             saveString(PropertyKey.DIRECTORY_MIMA, directory);
             saveOptions();
@@ -112,8 +114,9 @@ public class Preferences {
     }
 
     private void loadTheme(final String name) {
-        try (final InputStream inputStream = Objects.requireNonNull(
-                getClass().getClassLoader().getResourceAsStream(name + ".properties"))) {
+        try (final InputStream inputStream =
+                     Objects.requireNonNull(
+                             getClass().getClassLoader().getResourceAsStream(name + ".properties"))) {
             colorStyle.load(inputStream);
         } catch (@NotNull final IOException e) {
             e.printStackTrace();
@@ -150,12 +153,10 @@ public class Preferences {
         saveValue(PropertyType.STRING, key, value);
     }
 
-    private void saveValue(@NotNull final PropertyType type,
-                           @NotNull final PropertyKey key,
-                           final String value) {
+    private void saveValue(
+            @NotNull final PropertyType type, @NotNull final PropertyKey key, final String value) {
         if (key.getType() != type) {
-            throw new PreferenceException("Can't save " + type.toString()
-                                                  + " to " + key.toString());
+            throw new PreferenceException("Can't save " + type.toString() + " to " + key.toString());
         }
         options.setProperty(key.toString(), value);
         notifyListeners(key);

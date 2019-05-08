@@ -37,10 +37,13 @@ public final class IoTools {
      */
     @NotNull
     public static String loadFile(@NotNull final String path) throws IOException {
-        final var charSet = CHARSET_DETECTOR.setText(
-                new BufferedInputStream(new FileInputStream(path))).detect().getName();
-        try (final BufferedReader reader = new BufferedReader(
-                new InputStreamReader(new FileInputStream(path), charSet))) {
+        final var charSet =
+                CHARSET_DETECTOR
+                        .setText(new BufferedInputStream(new FileInputStream(path)))
+                        .detect()
+                        .getName();
+        try (final BufferedReader reader =
+                     new BufferedReader(new InputStreamReader(new FileInputStream(path), charSet))) {
             return reader.lines().collect(Collectors.joining("\n"));
         }
     }

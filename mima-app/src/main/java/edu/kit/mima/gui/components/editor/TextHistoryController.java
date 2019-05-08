@@ -5,7 +5,7 @@ import edu.kit.mima.api.history.FileHistoryObject.ChangeType;
 import edu.kit.mima.api.history.History;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JTextPane;
+import javax.swing.*;
 import javax.swing.text.BadLocationException;
 
 /**
@@ -42,8 +42,8 @@ public class TextHistoryController {
      * @param text   text inserted instead of old text
      * @throws BadLocationException if offset or offset + length is not inside the document bounds.
      */
-    public void addReplaceHistory(final int offset, final int length,
-                                  @NotNull final String text) throws BadLocationException {
+    public void addReplaceHistory(final int offset, final int length, @NotNull final String text)
+            throws BadLocationException {
         if (!active) {
             return;
         }
@@ -54,9 +54,7 @@ public class TextHistoryController {
             if (old.isEmpty()) {
                 addInsertHistory(offset, text);
             } else {
-                history.add(new FileHistoryObject(editorPane,
-                                                  offset,
-                                                  text, old, ChangeType.REPLACE));
+                history.add(new FileHistoryObject(editorPane, offset, text, old, ChangeType.REPLACE));
             }
         }
     }
@@ -73,13 +71,12 @@ public class TextHistoryController {
         }
         final FileHistoryObject fhs = history.getCurrent();
         if ((fhs != null)
-            && useSingle(text, fhs)
-            && (fhs.getType() == ChangeType.INSERT)
-            && (offset == (fhs.getCaretOffset() + fhs.getText().length()))) {
+                    && useSingle(text, fhs)
+                    && (fhs.getType() == ChangeType.INSERT)
+                    && (offset == (fhs.getCaretOffset() + fhs.getText().length()))) {
             history.setCurrent(
-                    new FileHistoryObject(editorPane, fhs.getCaretOffset(),
-                                          fhs.getText() + text, "",
-                                          ChangeType.INSERT));
+                    new FileHistoryObject(
+                            editorPane, fhs.getCaretOffset(), fhs.getText() + text, "", ChangeType.INSERT));
         } else {
             history.add(new FileHistoryObject(editorPane, offset, text, "", ChangeType.INSERT));
         }
@@ -87,8 +84,9 @@ public class TextHistoryController {
 
     private boolean useSingle(@NotNull final String text, @NotNull final FileHistoryObject fhs) {
         return (text.length() == 1)
-               && !text.contains("\n") && !text.contains(" ")
-               && (fhs.getText().length() < MAXIMUM_AMEND_LENGTH);
+                       && !text.contains("\n")
+                       && !text.contains(" ")
+                       && (fhs.getText().length() < MAXIMUM_AMEND_LENGTH);
     }
 
     /**
@@ -110,12 +108,12 @@ public class TextHistoryController {
         }
         assert text != null;
         if ((fhs != null)
-            && useSingle(text, fhs)
-            && (fhs.getType() == ChangeType.REMOVE)
-            && ((offset + length) == fhs.getCaretOffset())) {
+                    && useSingle(text, fhs)
+                    && (fhs.getType() == ChangeType.REMOVE)
+                    && ((offset + length) == fhs.getCaretOffset())) {
             history.setCurrent(
-                    new FileHistoryObject(editorPane, offset, "", text + fhs.getOldText(),
-                                          ChangeType.REMOVE));
+                    new FileHistoryObject(
+                            editorPane, offset, "", text + fhs.getOldText(), ChangeType.REMOVE));
         } else {
             history.add(new FileHistoryObject(editorPane, offset, "", text, ChangeType.REMOVE));
         }
@@ -140,7 +138,7 @@ public class TextHistoryController {
      *
      * @param undo true if undo false if redo.
      */
-    private void walkHistory(boolean undo) {
+    private void walkHistory(final boolean undo) {
         if (undo ? !canUndo() : !canRedo()) {
             return;
         }
@@ -178,6 +176,7 @@ public class TextHistoryController {
 
     /**
      * Reset the History.
+     *
      * @param initial the initial text.
      */
     public void reset(final String initial) {

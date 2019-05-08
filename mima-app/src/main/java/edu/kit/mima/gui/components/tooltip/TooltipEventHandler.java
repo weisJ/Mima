@@ -2,10 +2,8 @@ package edu.kit.mima.gui.components.tooltip;
 
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.SwingUtilities;
-import java.awt.AWTEvent;
-import java.awt.Point;
-import java.awt.Toolkit;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -56,7 +54,7 @@ public class TooltipEventHandler extends MouseAdapter {
         });
         this.propagator = new EventPropagator();
         Toolkit.getDefaultToolkit().addAWTEventListener(this::atAwtEvent,
-                                                        AWTEvent.MOUSE_EVENT_MASK);
+                AWTEvent.MOUSE_EVENT_MASK);
         tooltipComponent.tooltip.addMouseListener(propagator);
     }
 
@@ -177,19 +175,19 @@ public class TooltipEventHandler extends MouseAdapter {
      */
     private boolean isOnContainer(@NotNull final Point p) {
         final Point point = SwingUtilities.convertPoint(tooltipComponent.container, p,
-                                                        tooltipComponent.container.getParent());
+                tooltipComponent.container.getParent());
         return point.x > tooltipComponent.container.getX()
-                && point.x < tooltipComponent.container.getX()
-                + tooltipComponent.container.getWidth()
-                && point.y > tooltipComponent.container.getY()
-                && point.y < tooltipComponent.container.getY()
-                + tooltipComponent.container.getHeight();
+                       && point.x < tooltipComponent.container.getX()
+                                            + tooltipComponent.container.getWidth()
+                       && point.y > tooltipComponent.container.getY()
+                       && point.y < tooltipComponent.container.getY()
+                                            + tooltipComponent.container.getHeight();
     }
 
     private void contentMouseMovedEvent(@NotNull final MouseEvent e) {
         if (overContainer) {
             mouseExited(SwingUtilities.convertMouseEvent(tooltipComponent.tooltip, e,
-                                                         tooltipComponent.container));
+                    tooltipComponent.container));
         }
     }
 
@@ -227,12 +225,12 @@ public class TooltipEventHandler extends MouseAdapter {
         }
 
         @Override
-        public void mouseEntered(MouseEvent e) {
+        public void mouseEntered(final MouseEvent e) {
             propagate.accept(MouseListener::mouseEntered, e);
         }
 
         @Override
-        public void mouseExited(MouseEvent e) {
+        public void mouseExited(final MouseEvent e) {
             propagate.accept(MouseListener::mouseExited, e);
         }
     }

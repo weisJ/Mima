@@ -5,18 +5,9 @@ import edu.kit.mima.gui.components.fontchooser.FontFamily;
 import edu.kit.mima.gui.components.text.SearchTextField;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.ListModel;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
 import javax.swing.event.ListSelectionListener;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.*;
 
 /**
  * Family Display Pane.
@@ -25,7 +16,8 @@ public class FamilyPane extends JPanel {
 
     private final JList<String> familyList = new JList<>();
 
-    @NotNull private final SearchListener searchListener;
+    @NotNull
+    private final SearchListener searchListener;
 
     /**
      * Create Font Family Chooser Pane.
@@ -94,5 +86,4 @@ public class FamilyPane extends JPanel {
     public void setSelectedFamily(final String family) {
         familyList.setSelectedValue(family, true);
     }
-
 }

@@ -22,12 +22,17 @@ import java.util.function.Function;
 public class Environment {
     public static final Environment EMPTY_ENV = new Environment(null, null);
 
-    @Nullable private final Environment parent;
+    @Nullable
+    private final Environment parent;
     private final ProgramToken programToken;
-    @NotNull private final HashMap<String, MachineWord> variables;
-    @NotNull private final HashMap<String, MachineWord> constants;
-    @NotNull private final HashMap<String, Instruction> functions;
-    @NotNull private final HashMap<String, Integer> jumps;
+    @NotNull
+    private final HashMap<String, MachineWord> variables;
+    @NotNull
+    private final HashMap<String, MachineWord> constants;
+    @NotNull
+    private final HashMap<String, Instruction> functions;
+    @NotNull
+    private final HashMap<String, Integer> jumps;
 
     /**
      * Index of current expression.
@@ -95,7 +100,6 @@ public class Environment {
     @NotNull
     public Environment lookupVariable(final String name) {
         return lookup(env -> env.variables, name);
-
     }
 
     /**
@@ -107,7 +111,6 @@ public class Environment {
     @NotNull
     public Environment lookupConstant(final String name) {
         return lookup(env -> env.constants, name);
-
     }
 
     /**
@@ -134,8 +137,8 @@ public class Environment {
 
     @NotNull
     @Contract(pure = true)
-    private <T> Environment lookup(@NotNull Function<Environment, Map<?, T>> mapFunction,
-                                   String name) {
+    private <T> Environment lookup(
+            @NotNull final Function<Environment, Map<?, T>> mapFunction, final String name) {
         Environment scope = this;
         while (scope != null) {
             if (mapFunction.apply(scope).containsKey(name)) {
@@ -173,7 +176,6 @@ public class Environment {
      */
     public MachineWord getVariable(final String name) {
         return get(env -> env.variables, name);
-
     }
 
     /**
@@ -184,7 +186,6 @@ public class Environment {
      */
     public MachineWord getConstant(final String name) {
         return get(env -> env.constants, name);
-
     }
 
     /**
@@ -195,7 +196,6 @@ public class Environment {
      */
     public Instruction getFunction(final String name) {
         return get(env -> env.functions, name);
-
     }
 
     /**
@@ -210,7 +210,7 @@ public class Environment {
     }
 
     @NotNull
-    private <T> T get(@NotNull Function<Environment, Map<?, T>> mapFunction, String name) {
+    private <T> T get(@NotNull final Function<Environment, Map<?, T>> mapFunction, final String name) {
         if (mapFunction.apply(this).containsKey(name)) {
             return mapFunction.apply(this).get(name);
         }
@@ -220,7 +220,6 @@ public class Environment {
         }
         return scope.get(mapFunction, name);
     }
-
 
     /**
      * Return to the parent environment.
@@ -240,7 +239,6 @@ public class Environment {
      */
     public void defineFunction(@NotNull final String name, final Instruction function) {
         define(name, function, functions, List.of(functions));
-
     }
 
     /**
@@ -283,13 +281,14 @@ public class Environment {
      * @param <T>       Type of key
      * @param <K>       Type of value.
      */
-    private <T, K> void define(@NotNull final T key, final K value,
-                               @NotNull final Map<T, K> putMap,
-                               @NotNull final List<Map<T, K>> checkMaps) {
+    private <T, K> void define(
+            @NotNull final T key,
+            final K value,
+            @NotNull final Map<T, K> putMap,
+            @NotNull final List<Map<T, K>> checkMaps) {
         for (var m : checkMaps) {
             if (m.containsKey(key)) {
-                throw new IllegalArgumentException(
-                        "\"" + key.toString() + "\" already defined in scope");
+                throw new IllegalArgumentException("\"" + key.toString() + "\" already defined in scope");
             }
         }
         putMap.put(key, value);

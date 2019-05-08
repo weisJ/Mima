@@ -2,21 +2,9 @@ package edu.kit.mima.gui.components.fontchooser.panes;
 
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
-import javax.swing.JFormattedTextField;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
-import javax.swing.ListSelectionModel;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.event.ListSelectionListener;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.*;
 
 public class SizePane extends JPanel {
 
@@ -51,7 +39,7 @@ public class SizePane extends JPanel {
     }
 
     @Override
-    public void setPreferredSize(@NotNull Dimension preferredSize) {
+    public void setPreferredSize(@NotNull final Dimension preferredSize) {
         preferredSize.height -= sizeSpinner.getPreferredSize().height + 6;
         sizeScrollPane.setPreferredSize(preferredSize);
     }
@@ -72,33 +60,33 @@ public class SizePane extends JPanel {
         final JSpinner.DefaultEditor editor = (JSpinner.DefaultEditor) sizeSpinner.getEditor();
         final JFormattedTextField textField = editor.getTextField();
         textField.setBorder(new JScrollPane().getBorder());
-        sizeSpinner.addChangeListener(event -> {
-
-            final Integer value = (Integer) sizeSpinner.getValue();
-            final int index = ((DefaultListModel<Integer>) sizeList.getModel()).indexOf(value);
-            if (index > -1) {
-                sizeList.setSelectedValue(value, true);
-            } else {
-                sizeList.clearSelection();
-            }
-
-        });
+        sizeSpinner.addChangeListener(
+                event -> {
+                    final Integer value = (Integer) sizeSpinner.getValue();
+                    final int index = ((DefaultListModel<Integer>) sizeList.getModel()).indexOf(value);
+                    if (index > -1) {
+                        sizeList.setSelectedValue(value, true);
+                    } else {
+                        sizeList.clearSelection();
+                    }
+                });
     }
 
     private void initSizeList() {
         sizeList.setModel(sizeListModel);
         sizeList.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        sizeList.addListSelectionListener(event -> {
-            if (!event.getValueIsAdjusting()) {
-                final int index = ((DefaultListModel<Integer>) sizeList.getModel())
-                        .indexOf(sizeList.getSelectedValue());
-                if (index > -1) {
-                    sizeSpinner.setValue(sizeList.getSelectedValue());
-                }
-            }
-        });
-        final DefaultListCellRenderer renderer = (DefaultListCellRenderer) sizeList
-                .getCellRenderer();
+        sizeList.addListSelectionListener(
+                event -> {
+                    if (!event.getValueIsAdjusting()) {
+                        final int index =
+                                ((DefaultListModel<Integer>) sizeList.getModel())
+                                        .indexOf(sizeList.getSelectedValue());
+                        if (index > -1) {
+                            sizeSpinner.setValue(sizeList.getSelectedValue());
+                        }
+                    }
+                });
+        final DefaultListCellRenderer renderer = (DefaultListCellRenderer) sizeList.getCellRenderer();
         renderer.setHorizontalAlignment(SwingConstants.RIGHT);
     }
 
@@ -147,5 +135,4 @@ public class SizePane extends JPanel {
         }
         sizeSpinner.setValue(size);
     }
-
 }

@@ -3,9 +3,7 @@ package edu.kit.mima.gui.components.border;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.border.EmptyBorder;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics;
+import java.awt.*;
 
 /**
  * Line Border that can change side thickness.
@@ -17,14 +15,14 @@ public class MutableLineBorder extends EmptyBorder {
 
     private Color color;
 
-    public MutableLineBorder(final int top, final int left, final int bottom, final int right,
-                             final Color color) {
+    public MutableLineBorder(
+            final int top, final int left, final int bottom, final int right, final Color color) {
         super(top, left, bottom, right);
         this.color = color;
     }
 
     @Override
-    public void paintBorder(Component c, @NotNull Graphics g, int x, int y, int width, int height) {
+    public void paintBorder(final Component c, @NotNull final Graphics g, final int x, final int y, final int width, final int height) {
         g.setColor(getColor());
         var insets = getBorderInsets();
         g.fillRect(0, 0, width - insets.right, insets.top);
@@ -54,11 +52,11 @@ public class MutableLineBorder extends EmptyBorder {
         return true;
     }
 
-    public void setColor(final Color color) {
-        this.color = color;
-    }
-
     protected Color getColor() {
         return color;
+    }
+
+    public void setColor(final Color color) {
+        this.color = color;
     }
 }

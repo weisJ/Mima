@@ -8,14 +8,8 @@ import edu.kit.mima.util.FileName;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.BoxLayout;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-import java.awt.AWTException;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Robot;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.InputEvent;
 import java.io.File;
 
@@ -26,8 +20,8 @@ import java.io.File;
  * @since 2018
  */
 public class FileDisplay extends JPanel {
-    private static final String SEPARATOR = FileName
-            .escapeMetaCharacters(System.getProperty("file.separator"));
+    private static final String SEPARATOR =
+            FileName.escapeMetaCharacters(System.getProperty("file.separator"));
     private int maxLength = 10;
     @Nullable
     private File file;
@@ -40,7 +34,8 @@ public class FileDisplay extends JPanel {
      * File display panel.
      */
     public FileDisplay() {
-        this.handler = f -> {};
+        this.handler = f -> {
+        };
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         root = add(new IconPanel(Icons.FOLDER_ROOT), 0);
         dirComps = new Component[0];
@@ -82,23 +77,22 @@ public class FileDisplay extends JPanel {
         setMaximumSize(getMaximumSize());
     }
 
-    private void updateRoot(@NotNull final String[] directories, int max) {
+    private void updateRoot(@NotNull final String[] directories, final int max) {
         if (root != null) {
             remove(root);
         }
-        final int beginIndex = Math.min(Math.max(directories.length - max, 0),
-                                        directories.length - 1);
+        final int beginIndex = Math.min(Math.max(directories.length - max, 0), directories.length - 1);
         final StringBuilder sb = new StringBuilder();
         int index = 0;
         for (int i = 0; i < beginIndex; i++) {
             sb.append(directories[i]).append(SEPARATOR);
-            dirComps[index++].setVisible(false); //Separator
-            dirComps[index++].setVisible(false); //Item
+            dirComps[index++].setVisible(false); // Separator
+            dirComps[index++].setVisible(false); // Item
         }
         sb.append(directories[beginIndex]);
         for (int i = beginIndex; i < directories.length - 1; i++) {
-            dirComps[index++].setVisible(true); //Separator
-            dirComps[index++].setVisible(true); //Item
+            dirComps[index++].setVisible(true); // Separator
+            dirComps[index++].setVisible(true); // Item
         }
         if (sb.length() == 0) {
             root = new IconPanel(Icons.FOLDER_ROOT);
@@ -132,7 +126,7 @@ public class FileDisplay extends JPanel {
     }
 
     @Override
-    public void setMaximumSize(@NotNull Dimension maximumSize) {
+    public void setMaximumSize(@NotNull final Dimension maximumSize) {
         super.setMaximumSize(maximumSize);
         if (file == null) {
             return;
@@ -157,15 +151,16 @@ public class FileDisplay extends JPanel {
      * Focus and click last Element.
      */
     public void focusLast() {
-        SwingUtilities.invokeLater(() -> {
-            final var c = this.getComponent(getComponentCount() - 1);
-            final Point point = c.getLocationOnScreen();
-            try {
-                final Robot robot = new Robot();
-                robot.mouseMove(point.x + c.getWidth() / 2, point.y + c.getHeight() / 2);
-                robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-            } catch (@NotNull final AWTException ignored) {
-            }
-        });
+        SwingUtilities.invokeLater(
+                () -> {
+                    final var c = this.getComponent(getComponentCount() - 1);
+                    final Point point = c.getLocationOnScreen();
+                    try {
+                        final Robot robot = new Robot();
+                        robot.mouseMove(point.x + c.getWidth() / 2, point.y + c.getHeight() / 2);
+                        robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+                    } catch (@NotNull final AWTException ignored) {
+                    }
+                });
     }
 }

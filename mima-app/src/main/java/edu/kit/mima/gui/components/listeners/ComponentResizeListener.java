@@ -14,16 +14,14 @@ public interface ComponentResizeListener extends ComponentListener {
     void componentResized(ComponentEvent e);
 
     @Override
-    default void componentMoved(ComponentEvent e) {
+    default void componentMoved(final ComponentEvent e) {
     }
 
     @Override
-    default void componentShown(ComponentEvent e) {
-
+    default void componentShown(final ComponentEvent e) {
     }
 
     @Override
-    default void componentHidden(ComponentEvent e) {
-
+    default void componentHidden(final ComponentEvent e) {
     }
 }

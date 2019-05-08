@@ -4,10 +4,8 @@ import com.bulenkov.iconloader.util.EmptyIcon;
 import edu.kit.mima.gui.components.alignment.Alignment;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.Icon;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import java.awt.Insets;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * Frame that supports plugin components.
@@ -35,14 +33,14 @@ public class TabFrame extends JComponent {
         return content;
     }
 
+    public void setContentPane(final JComponent c) {
+        ((TabFrameLayout) getLayout()).setContent(c);
+    }
+
     @Override
     public void updateUI() {
         super.updateUI();
         ((TabFrameUI) getUI()).updateUI();
-    }
-
-    public void setContentPane(final JComponent c) {
-        ((TabFrameLayout) getLayout()).setContent(c);
     }
 
     @NotNull
@@ -53,32 +51,33 @@ public class TabFrame extends JComponent {
 
     @NotNull
     @Override
-    public Insets getInsets(@NotNull Insets insets) {
+    public Insets getInsets(@NotNull final Insets insets) {
         insets.set(0, 0, 0, 0);
         return insets;
     }
 
-
-    public void insertTab(@NotNull final PopupComponent c, final String title, final Icon icon,
-                          final Alignment a, final int index) {
+    public void insertTab(
+            @NotNull final PopupComponent c,
+            final String title,
+            final Icon icon,
+            final Alignment a,
+            final int index) {
         ((TabFrameLayout) getLayout()).insertTab(c, title, icon, a, index);
     }
 
-    public void insertTab(@NotNull final PopupComponent c, final String title,
-                          final Alignment a, final int index) {
+    public void insertTab(
+            @NotNull final PopupComponent c, final String title, final Alignment a, final int index) {
         insertTab(c, title, new EmptyIcon(0, 0), a, index);
     }
 
-    public void insertTab(@NotNull final PopupComponent c,
-                          final Alignment a, final int index) {
+    public void insertTab(@NotNull final PopupComponent c, final Alignment a, final int index) {
         insertTab(c, "", a, index);
     }
 
-    public void addTab(final PopupComponent c, final String title,
-                       final Icon icon, final Alignment a) {
+    public void addTab(
+            final PopupComponent c, final String title, final Icon icon, final Alignment a) {
         ((TabFrameLayout) getLayout()).addTab(c, title, icon, a);
     }
-
 
     public void addTab(final PopupComponent c, final String title, final Alignment a) {
         addTab(c, title, new EmptyIcon(0, 0), a);

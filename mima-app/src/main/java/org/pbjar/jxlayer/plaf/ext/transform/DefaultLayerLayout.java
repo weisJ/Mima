@@ -33,13 +33,8 @@ package org.pbjar.jxlayer.plaf.ext.transform;
 import org.jdesktop.jxlayer.JXLayer;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Insets;
-import java.awt.LayoutManager;
+import java.awt.*;
 import java.io.Serializable;
-
 
 /**
  * A copy of the private static inner class in JXLayer.
@@ -51,15 +46,16 @@ public class DefaultLayerLayout implements LayoutManager, Serializable {
     /**
      * {@inheritDoc}
      */
-    public void layoutContainer(Container parent) {
-        JXLayer layer = (JXLayer) parent;
+    public void layoutContainer(final Container parent) {
+        JXLayer<?> layer = (JXLayer<?>) parent;
         Component view = layer.getView();
         Component glassPane = layer.getGlassPane();
         if (view != null) {
             Insets insets = layer.getInsets();
             view.setLocation(insets.left, insets.top);
-            view.setSize(layer.getWidth() - insets.left - insets.right,
-                         layer.getHeight() - insets.top - insets.bottom);
+            view.setSize(
+                    layer.getWidth() - insets.left - insets.right,
+                    layer.getHeight() - insets.top - insets.bottom);
         }
         if (glassPane != null) {
             glassPane.setLocation(0, 0);
@@ -71,11 +67,10 @@ public class DefaultLayerLayout implements LayoutManager, Serializable {
      * {@inheritDoc}
      */
     @NotNull
-    public Dimension minimumLayoutSize(Container parent) {
-        JXLayer layer = (JXLayer) parent;
+    public Dimension minimumLayoutSize(final Container parent) {
+        JXLayer<?> layer = (JXLayer<?>) parent;
         Insets insets = layer.getInsets();
-        Dimension ret = new Dimension(insets.left + insets.right,
-                                      insets.top + insets.bottom);
+        Dimension ret = new Dimension(insets.left + insets.right, insets.top + insets.bottom);
         Component view = layer.getView();
         if (view != null) {
             Dimension size = view.getMinimumSize();
@@ -93,11 +88,10 @@ public class DefaultLayerLayout implements LayoutManager, Serializable {
      * {@inheritDoc}
      */
     @NotNull
-    public Dimension preferredLayoutSize(Container parent) {
-        JXLayer layer = (JXLayer) parent;
+    public Dimension preferredLayoutSize(final Container parent) {
+        JXLayer<?> layer = (JXLayer<?>) parent;
         Insets insets = layer.getInsets();
-        Dimension ret = new Dimension(insets.left + insets.right,
-                                      insets.top + insets.bottom);
+        Dimension ret = new Dimension(insets.left + insets.right, insets.top + insets.bottom);
         Component view = layer.getView();
         if (view != null) {
             Dimension size = view.getPreferredSize();
@@ -112,12 +106,12 @@ public class DefaultLayerLayout implements LayoutManager, Serializable {
     /**
      * {@inheritDoc}
      */
-    public void addLayoutComponent(String name, Component comp) {
+    public void addLayoutComponent(final String name, final Component comp) {
     }
 
     /**
      * {@inheritDoc}
      */
-    public void removeLayoutComponent(Component comp) {
+    public void removeLayoutComponent(final Component comp) {
     }
 }

@@ -8,15 +8,12 @@ import edu.kit.mima.preferences.PropertyKey;
 import edu.kit.mima.preferences.UserPreferenceChangedListener;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JScrollBar;
-import javax.swing.JTextPane;
+import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
-import java.awt.Adjustable;
-import java.awt.Color;
-import java.awt.Font;
+import java.awt.*;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 
@@ -28,7 +25,8 @@ import java.awt.event.AdjustmentListener;
  */
 public class Console extends BorderlessScrollPane implements UserPreferenceChangedListener {
 
-    @NotNull private final JTextPane textPane;
+    @NotNull
+    private final JTextPane textPane;
     private final StyledDocument document;
     private final Style style;
 
@@ -54,7 +52,6 @@ public class Console extends BorderlessScrollPane implements UserPreferenceChang
         StyleConstants.setForeground(style, textColor);
         scrollPane.setViewportView(textPane);
     }
-
 
     /**
      * Replace the last message printed.
@@ -177,14 +174,15 @@ public class Console extends BorderlessScrollPane implements UserPreferenceChang
      */
     private void scrollToTop() {
         final JScrollBar verticalBar = getScrollPane().getVerticalScrollBar();
-        final AdjustmentListener downScroller = new AdjustmentListener() {
-            @Override
-            public void adjustmentValueChanged(@NotNull final AdjustmentEvent e) {
-                final Adjustable adjustable = e.getAdjustable();
-                adjustable.setValue(adjustable.getMinimum());
-                verticalBar.removeAdjustmentListener(this);
-            }
-        };
+        final AdjustmentListener downScroller =
+                new AdjustmentListener() {
+                    @Override
+                    public void adjustmentValueChanged(@NotNull final AdjustmentEvent e) {
+                        final Adjustable adjustable = e.getAdjustable();
+                        adjustable.setValue(adjustable.getMinimum());
+                        verticalBar.removeAdjustmentListener(this);
+                    }
+                };
         verticalBar.addAdjustmentListener(downScroller);
         repaint();
     }

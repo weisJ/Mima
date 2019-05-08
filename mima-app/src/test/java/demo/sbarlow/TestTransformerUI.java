@@ -14,23 +14,12 @@ import org.jdesktop.swingx.painter.BusyPainter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.SwingUtilities;
-import javax.swing.Timer;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.GridLayout;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -43,12 +32,10 @@ import java.util.HashMap;
 
 /**
  * A SwingX and TransformUI demo by <b>s_barlow</b>.
- * <p>
- * Run a web start demo: <a href="http://www.pbjar.org/blogs/jxlayer/jxlayer40/SBarlowDemo.jnlp">
+ *
+ * <p>Run a web start demo: <a href="http://www.pbjar.org/blogs/jxlayer/jxlayer40/SBarlowDemo.jnlp">
  * <IMG style="CLEAR: right" alt="Web Start Shared JXLayer" src="http://javadesktop
- * .org/javanet_images/webstart.small2.gif"
- * align="middle" border="1" /> </a>
- * </p>
+ * .org/javanet_images/webstart.small2.gif" align="middle" border="1" /> </a>
  */
 public class TestTransformerUI extends JXFrame {
 
@@ -65,7 +52,7 @@ public class TestTransformerUI extends JXFrame {
         setLocationRelativeTo(null);
     }
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
@@ -75,7 +62,7 @@ public class TestTransformerUI extends JXFrame {
     }
 
     @NotNull
-    private static Border createBorder(boolean active) {
+    private static Border createBorder(final boolean active) {
         Color baseColor = Color.LIGHT_GRAY;
         Color shadowColor = Color.DARK_GRAY;
         Border inner = new LineBorder(active ? shadowColor : baseColor);
@@ -84,12 +71,12 @@ public class TestTransformerUI extends JXFrame {
     }
 
     @NotNull
-    private static Color setAlpha(@NotNull Color color, double alpha) {
+    private static Color setAlpha(@NotNull final Color color, final double alpha) {
         int alphaInt = (int) (alpha * 255);
         return new Color(color.getRed(), color.getGreen(), color.getBlue(), alphaInt);
     }
 
-    private static void setUpBackground(@NotNull JXLabel comp, Color bg, boolean translucent) {
+    private static void setUpBackground(@NotNull final JXLabel comp, final Color bg, final boolean translucent) {
         Color bg1 = bg;
         if (translucent) {
             bg1 = setAlpha(bg1, 0.25);
@@ -101,9 +88,16 @@ public class TestTransformerUI extends JXFrame {
     private Container createContent() {
         JXPanel panel = new JXPanel(new GridLayout(3, 3));
         Component note;
-        Color[] color =
-                {Color.YELLOW, Color.ORANGE, Color.RED, Color.GREEN, Color.MAGENTA, Color.GRAY,
-                 Color.LIGHT_GRAY, Color.PINK};
+        Color[] color = {
+                Color.YELLOW,
+                Color.ORANGE,
+                Color.RED,
+                Color.GREEN,
+                Color.MAGENTA,
+                Color.GRAY,
+                Color.LIGHT_GRAY,
+                Color.PINK
+        };
         for (int i = 1; i <= color.length; i++) {
             note = createNote("note number " + i, color[i - 1]);
             panel.add(note);
@@ -112,7 +106,7 @@ public class TestTransformerUI extends JXFrame {
     }
 
     @NotNull
-    private Component createNote(String title, Color color) {
+    private Component createNote(final String title, final Color color) {
         JXPanel note = new JXPanel(new BorderLayout());
         note.setName(title);
         note.setOpaque(false);
@@ -211,34 +205,36 @@ public class TestTransformerUI extends JXFrame {
         Timer clock = new Timer(1, null);
         clock.setRepeats(true);
         clock.setDelay(1000);
-        clock.addActionListener(new ActionListener() {
-            @NotNull
-            String timeFormat = "%02d:%02d:%02d";
+        clock.addActionListener(
+                new ActionListener() {
+                    @NotNull
+                    final
+                    String timeFormat = "%02d:%02d:%02d";
 
-            public void actionPerformed(ActionEvent e) {
-                Calendar cal = Calendar.getInstance();
-                int hour = cal.get(Calendar.HOUR_OF_DAY);
-                int min = cal.get(Calendar.MINUTE);
-                int sec = cal.get(Calendar.SECOND);
-                int length = busyPainter.getPoints();
+                    public void actionPerformed(final ActionEvent e) {
+                        Calendar cal = Calendar.getInstance();
+                        int hour = cal.get(Calendar.HOUR_OF_DAY);
+                        int min = cal.get(Calendar.MINUTE);
+                        int sec = cal.get(Calendar.SECOND);
+                        int length = busyPainter.getPoints();
 
-                int frame = (sec % length) - (length / 4);
-                if (frame < 0) {
-                    frame += length;
-                }
+                        int frame = (sec % length) - (length / 4);
+                        if (frame < 0) {
+                            frame += length;
+                        }
 
-                busyPainter.setFrame(frame);
-                busyLabel.repaint();
+                        busyPainter.setFrame(frame);
+                        busyLabel.repaint();
 
-                timeLabel.setText(String.format(timeFormat, hour, min, sec));
-            }
-        });
+                        timeLabel.setText(String.format(timeFormat, hour, min, sec));
+                    }
+                });
         clock.start();
         return container;
     }
 
     @NotNull
-    private JXLayer<?> wrapLayer(JXPanel content) {
+    private JXLayer<?> wrapLayer(final JXPanel content) {
         HashMap<RenderingHints.Key, Object> hints = new HashMap<>();
         hints.put(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         hints.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -247,17 +243,18 @@ public class TestTransformerUI extends JXFrame {
          * PB Wrap the content in a panel that displays the current
          * RepaintManager.
          */
-        JXPanel debugPanel = new JXPanel(new BorderLayout()) {
+        JXPanel debugPanel =
+                new JXPanel(new BorderLayout()) {
 
-            private static final long serialVersionUID = 1L;
+                    private static final long serialVersionUID = 1L;
 
-            @Override
-            public void paint(@NotNull Graphics g) {
-                super.paint(g);
-                // System.out.println(RepaintManager.currentManager(this)
-                // .getClass().getName());
-            }
-        };
+                    @Override
+                    public void paint(@NotNull final Graphics g) {
+                        super.paint(g);
+                        // System.out.println(RepaintManager.currentManager(this)
+                        // .getClass().getName());
+                    }
+                };
         debugPanel.add(content);
 
         //	TransformPort transformPort = new TransformPort(debugPanel);
@@ -280,11 +277,11 @@ public class TestTransformerUI extends JXFrame {
         @Nullable
         private Point offset;
 
-        public ReLocator(JXPanel myComp) {
+        public ReLocator(final JXPanel myComp) {
             this.myComp = myComp;
         }
 
-        public void mouseClicked(MouseEvent e) {
+        public void mouseClicked(final MouseEvent e) {
             JXPanel panel = (JXPanel) myComp.getParent();
 
             float alpha = myComp.getAlpha();
@@ -303,19 +300,19 @@ public class TestTransformerUI extends JXFrame {
             panel.repaint();
         }
 
-        public void mousePressed(@NotNull MouseEvent e) {
+        public void mousePressed(@NotNull final MouseEvent e) {
             System.out.println("pressed: " + myComp.getName());
             offset = e.getPoint();
             offset.x = -offset.x;
             offset.y = -offset.y;
         }
 
-        public void mouseReleased(MouseEvent e) {
+        public void mouseReleased(final MouseEvent e) {
             System.out.println("released: " + myComp.getName());
             offset = null;
         }
 
-        public void mouseDragged(@NotNull MouseEvent e) {
+        public void mouseDragged(@NotNull final MouseEvent e) {
             Dimension size = myComp.getSize();
             Dimension pSize = myComp.getParent().getSize();
 

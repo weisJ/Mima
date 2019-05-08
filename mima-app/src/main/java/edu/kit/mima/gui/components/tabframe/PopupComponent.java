@@ -2,9 +2,8 @@ package edu.kit.mima.gui.components.tabframe;
 
 import edu.kit.mima.gui.components.alignment.Alignment;
 
-import javax.swing.Action;
-import javax.swing.JPanel;
-import java.awt.Dimension;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * Popup Component for {@link TabFrame}.

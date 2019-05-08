@@ -1,12 +1,11 @@
 package edu.kit.mima.gui.laf.components;
 
-import edu.kit.mima.api.annotations.ReflectionCall;
+import edu.kit.mima.annotations.ReflectionCall;
 import edu.kit.mima.gui.components.tabbededitor.EditorTabbedPaneUI;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JComponent;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.plaf.ComponentUI;
 
 /**
@@ -26,7 +25,7 @@ public class DarkEditorTabbedPaneUI extends EditorTabbedPaneUI {
     @NotNull
     @Contract("_ -> new")
     @ReflectionCall
-    public static ComponentUI createUI(JComponent c) {
+    public static ComponentUI createUI(final JComponent c) {
         return new DarkEditorTabbedPaneUI();
     }
 

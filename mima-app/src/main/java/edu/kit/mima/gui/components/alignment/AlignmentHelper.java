@@ -3,9 +3,7 @@ package edu.kit.mima.gui.components.alignment;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.function.BiFunction;
 
 /**
@@ -42,8 +40,8 @@ final class AlignmentHelper {
      */
     @NotNull
     @Contract(pure = true)
-    /*default*/ static BiFunction<Dimension, Rectangle, Point> align(@NotNull Mapper mapperX,
-                                                                     @NotNull Mapper mapperY) {
+    /*default*/ static BiFunction<Dimension, Rectangle, Point> align(
+            @NotNull final Mapper mapperX, @NotNull final Mapper mapperY) {
         return (d, p) -> new Point(mapperX.apply(d, p), mapperY.apply(d, p));
     }
 

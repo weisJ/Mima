@@ -4,14 +4,8 @@ import edu.kit.mima.api.util.Tuple;
 import edu.kit.mima.api.util.ValueTuple;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.BoxLayout;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,13 +18,14 @@ import java.util.List;
 public class CardPanelItem {
 
     private final CardPanelBuilder builder;
-    @NotNull private final JPanel panel;
+    @NotNull
+    private final JPanel panel;
     private final String title;
-    @NotNull private final List<Tuple<String, JComponent>> settings;
+    @NotNull
+    private final List<Tuple<String, JComponent>> settings;
 
-    /*default*/ CardPanelItem(final String title,
-                              final CardPanelBuilder builder,
-                              final boolean alignLeft) {
+    /*default*/ CardPanelItem(
+            final String title, final CardPanelBuilder builder, final boolean alignLeft) {
         this.builder = builder;
         this.title = title;
         settings = new ArrayList<>();
@@ -63,7 +58,6 @@ public class CardPanelItem {
     public CardPanelItem addItem(final String title) {
         return addItem(title, true);
     }
-
 
     /**
      * Create new item.

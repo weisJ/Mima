@@ -2,8 +2,8 @@ package edu.kit.mima.gui.components;
 
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JComponent;
-import java.awt.Color;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * Component to draw at line index.

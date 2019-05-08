@@ -52,29 +52,26 @@ public final class CodeChecker {
      */
     @NotNull
     @SuppressWarnings("unchecked") /*Construction of tokens guarantees these
-    types*/ private static List<String> checkReferenceDuplicates(
-            final ProgramToken token) {
+    types*/
+    private static List<String> checkReferenceDuplicates(final ProgramToken token) {
         final List<String> warnings = new ArrayList<>();
         final ProgramQuery query = new ProgramQuery(token);
-        final List<String> referencesJump = query
-                .whereEqual(Token::getType, TokenType.JUMP_POINT)
-                .stream()
-                .map(t -> ((Token<Token>) t).getValue().getValue().toString())
-                .collect(Collectors.toList());
+        final List<String> referencesJump =
+                query.whereEqual(Token::getType, TokenType.JUMP_POINT).stream()
+                        .map(t -> ((Token<Token>) t).getValue().getValue().toString())
+                        .collect(Collectors.toList());
         addWarnings(warnings, referencesJump);
-        final List<String> referencesVar = query
-                .whereEqual(Token::getType, TokenType.CONSTANT)
-                .or()
-                .whereEqual(Token::getType, TokenType.REFERENCE)
-                .stream()
-                .map(t -> ((Token<Token>) t).getValue().getValue().toString())
-                .collect(Collectors.toList());
+        final List<String> referencesVar =
+                query.whereEqual(Token::getType, TokenType.CONSTANT).or()
+                        .whereEqual(Token::getType, TokenType.REFERENCE).stream()
+                        .map(t -> ((Token<Token>) t).getValue().getValue().toString())
+                        .collect(Collectors.toList());
         addWarnings(warnings, referencesVar);
         return warnings;
     }
 
-    private static void addWarnings(@NotNull final List<String> warnings,
-                                    @NotNull final List<String> checkList) {
+    private static void addWarnings(
+            @NotNull final List<String> warnings, @NotNull final List<String> checkList) {
         Set<String> duplicates = findDuplicates(checkList);
         if (!duplicates.isEmpty()) {
             final String duplicatesS = String.join(", ", duplicates);

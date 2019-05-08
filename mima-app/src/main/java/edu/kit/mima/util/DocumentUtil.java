@@ -31,8 +31,8 @@ public final class DocumentUtil {
      * @return line of offset.
      * @throws BadLocationException if offset it outside of document range.
      */
-    public static int getLineOfOffset(@NotNull final JTextComponent comp,
-                                      final int offset) throws BadLocationException {
+    public static int getLineOfOffset(@NotNull final JTextComponent comp, final int offset)
+            throws BadLocationException {
         final Document doc = comp.getDocument();
         if (offset < 0) {
             throw new BadLocationException("Can't translate offset to line", -1);
@@ -52,8 +52,8 @@ public final class DocumentUtil {
      * @return index of first character in line.
      * @throws BadLocationException if offset it outside of document range.
      */
-    public static int getLineStartOffset(@NotNull final JTextComponent comp,
-                                         final int line) throws BadLocationException {
+    public static int getLineStartOffset(@NotNull final JTextComponent comp, final int line)
+            throws BadLocationException {
         final Element map = comp.getDocument().getDefaultRootElement();
         if (line < 0) {
             throw new BadLocationException("Negative line", -1);
@@ -72,8 +72,10 @@ public final class DocumentUtil {
      * @param index    index in file
      * @param document the document.
      */
-    public static void transformLine(@NotNull final Function<String, String> function,
-                                     final int index, @NotNull final Document document) {
+    public static void transformLine(
+            @NotNull final Function<String, String> function,
+            final int index,
+            @NotNull final Document document) {
         try {
             final String text = document.getText(0, document.getLength() - 1);
             final int lower = text.substring(0, index).lastIndexOf('\n') + 1;

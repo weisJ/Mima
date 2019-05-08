@@ -27,7 +27,8 @@ public class GlobalEnvironment extends Environment {
 
     private final Consumer<Value> callback;
     private final Interpreter interpreter;
-    @NotNull private final Mima mima;
+    @NotNull
+    private final Mima mima;
 
     /**
      * Create global environment.
@@ -37,10 +38,11 @@ public class GlobalEnvironment extends Environment {
      * @param interpreter  the {@link Interpreter} for this global environment
      * @param callback     final callback when halting the program.
      */
-    public GlobalEnvironment(final ProgramToken programToken,
-                             @NotNull final Mima mima,
-                             final Interpreter interpreter,
-                             final Consumer<Value> callback) {
+    public GlobalEnvironment(
+            final ProgramToken programToken,
+            @NotNull final Mima mima,
+            final Interpreter interpreter,
+            final Consumer<Value> callback) {
         super(null, programToken);
         this.mima = mima;
         this.interpreter = interpreter;
@@ -65,31 +67,40 @@ public class GlobalEnvironment extends Environment {
      * Setup the default instruction set from {@link MimaInstruction} for the given environment.
      */
     private void setupDefaultInstructions() {
-        //Halt Instruction
-        defineNewFunction("HALT", 0, (args, env, call) -> {
-            interpreter.setRunning(false);
-            GlobalEnvironment.this.callback
-                    .accept(new Value<>(ValueType.NUMBER, mima.getAccumulator()));
-        });
-        //Jump Instruction
-        defineNewFunction("JMP", 1, (args, env, call) -> {
-            var info = getJumpInformation(args, env);
-            interpreter.jump(info.getFirst(), info.getSecond(), call);
-        });
-        //Jump if negative Instruction
-        defineNewFunction("JMN", 1, (args, env, call) -> {
-            var info = getJumpInformation(args, env);
-            if (mima.getAccumulator().msb() == 1) {
-                interpreter.jump(info.getFirst(), info.getSecond(), call);
-            } else {
-                call.accept(new Value<>(ValueType.NUMBER, 0));
-            }
-        });
+        // Halt Instruction
+        defineNewFunction(
+                "HALT",
+                0,
+                (args, env, call) -> {
+                    interpreter.setRunning(false);
+                    GlobalEnvironment.this.callback.accept(
+                            new Value<>(ValueType.NUMBER, mima.getAccumulator()));
+                });
+        // Jump Instruction
+        defineNewFunction(
+                "JMP",
+                1,
+                (args, env, call) -> {
+                    var info = getJumpInformation(args, env);
+                    interpreter.jump(info.getFirst(), info.getSecond(), call);
+                });
+        // Jump if negative Instruction
+        defineNewFunction(
+                "JMN",
+                1,
+                (args, env, call) -> {
+                    var info = getJumpInformation(args, env);
+                    if (mima.getAccumulator().msb() == 1) {
+                        interpreter.jump(info.getFirst(), info.getSecond(), call);
+                    } else {
+                        call.accept(new Value<>(ValueType.NUMBER, 0));
+                    }
+                });
     }
 
     @NotNull
-    private Tuple<Environment, Integer> getJumpInformation(@NotNull List<Value> args,
-                                                           @NotNull Environment env) {
+    private Tuple<Environment, Integer> getJumpInformation(
+            @NotNull final List<Value> args, @NotNull final Environment env) {
         final var argument = InstructionTools.getJumpReference(args, 0);
         final Environment jumpEnv = env.lookupJump(argument.getValue().toString());
         final int jumpIndex = env.getJump(argument.getValue().toString());
@@ -101,22 +112,28 @@ public class GlobalEnvironment extends Environment {
      * environment.
      */
     public void setupExtendedInstructionSet() {
-        //CALL subroutine
-        defineNewFunction("CALL", 1, (args, env, call) -> {
-            final var argument = InstructionTools.getJumpReference(args, 0);
-            mima.pushRoutine(env.getExpressionIndex() + 1, env);
-            final Environment jumpEnv = env.lookupJump(argument.getValue().toString());
-            final int jumpIndex = env.getJump(argument.getValue().toString());
-            interpreter.jump(jumpEnv, jumpIndex, call);
-        });
-        //Return from subroutine
-        defineNewFunction("RET", 0, (args, env, call) -> {
-            if (mima.hasEmptyReturnStack()) {
-                throw new IllegalArgumentException("nowhere to return to");
-            }
-            final var pair = mima.returnRoutine();
-            interpreter.jump(pair.getSecond(), pair.getFirst(), call);
-        });
+        // CALL subroutine
+        defineNewFunction(
+                "CALL",
+                1,
+                (args, env, call) -> {
+                    final var argument = InstructionTools.getJumpReference(args, 0);
+                    mima.pushRoutine(env.getExpressionIndex() + 1, env);
+                    final Environment jumpEnv = env.lookupJump(argument.getValue().toString());
+                    final int jumpIndex = env.getJump(argument.getValue().toString());
+                    interpreter.jump(jumpEnv, jumpIndex, call);
+                });
+        // Return from subroutine
+        defineNewFunction(
+                "RET",
+                0,
+                (args, env, call) -> {
+                    if (mima.hasEmptyReturnStack()) {
+                        throw new IllegalArgumentException("nowhere to return to");
+                    }
+                    final var pair = mima.returnRoutine();
+                    interpreter.jump(pair.getSecond(), pair.getFirst(), call);
+                });
     }
 
     /**
@@ -126,12 +143,13 @@ public class GlobalEnvironment extends Environment {
      * @param argNum      number of arguments of function
      * @param instruction execution instructions
      */
-    private void defineNewFunction(@NotNull final String name,
-                                   final int argNum,
-                                   @NotNull final Instruction instruction) {
-        defineFunction(name, (args, env, call) -> {
-            InstructionTools.checkArgNumber(args, argNum);
-            instruction.apply(args, env, call);
-        });
+    private void defineNewFunction(
+            @NotNull final String name, final int argNum, @NotNull final Instruction instruction) {
+        defineFunction(
+                name,
+                (args, env, call) -> {
+                    InstructionTools.checkArgNumber(args, argNum);
+                    instruction.apply(args, env, call);
+                });
     }
 }

@@ -21,7 +21,8 @@ public class ListToken<T> extends FileObjectAdapter implements Token<List<T>> {
 
     private static final Pattern INDENT = Pattern.compile("\n");
     private static final String INDENT_REPLACEMENT = "\n\t";
-    @NotNull private final String className;
+    @NotNull
+    private final String className;
     private final int filePos;
     private final int index;
     @NotNull
@@ -64,7 +65,7 @@ public class ListToken<T> extends FileObjectAdapter implements Token<List<T>> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Stream<Token> stream(boolean includeChildren) {
+    public Stream<Token> stream(final boolean includeChildren) {
         if (includeChildren && !values.isEmpty() && values.get(0) instanceof Token) {
             return values.stream().flatMap(t -> ((Token) t).stream());
         } else {
@@ -85,11 +86,13 @@ public class ListToken<T> extends FileObjectAdapter implements Token<List<T>> {
     @NotNull
     @Override
     public String toString() {
-        return "[type=list, data=" + className + "] {\n\t"
-                + values.stream()
-                .map(t -> INDENT.matcher(t.toString()).replaceAll(INDENT_REPLACEMENT))
-                .collect(Collectors.joining("\n"))
-                + "\n}";
+        return "[type=list, data="
+                       + className
+                       + "] {\n\t"
+                       + values.stream()
+                                 .map(t -> INDENT.matcher(t.toString()).replaceAll(INDENT_REPLACEMENT))
+                                 .collect(Collectors.joining("\n"))
+                       + "\n}";
     }
 
     @SuppressWarnings("unchecked")
@@ -98,11 +101,9 @@ public class ListToken<T> extends FileObjectAdapter implements Token<List<T>> {
     public String simpleName() {
         if (!values.isEmpty() && values.get(0) instanceof Token) {
             final List<Token> tokens = (List<Token>) values;
-            return '(' + tokens.stream().map(Token::simpleName)
-                    .collect(Collectors.joining(", ")) + ')';
+            return '(' + tokens.stream().map(Token::simpleName).collect(Collectors.joining(", ")) + ')';
         } else {
-            return '(' + values.stream().map(Object::toString)
-                    .collect(Collectors.joining(", ")) + ')';
+            return '(' + values.stream().map(Object::toString).collect(Collectors.joining(", ")) + ')';
         }
     }
 
@@ -116,8 +117,7 @@ public class ListToken<T> extends FileObjectAdapter implements Token<List<T>> {
             return false;
         }
         final ListToken<?> that = (ListToken<?>) obj;
-        return values.equals(that.values)
-                && Objects.equals(className, that.className);
+        return values.equals(that.values) && Objects.equals(className, that.className);
     }
 
     @Override

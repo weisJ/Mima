@@ -1,7 +1,7 @@
 package edu.kit.mima.gui.components.tooltip;
 
-import javax.swing.JWindow;
-import java.awt.Color;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * DefaultTooltipWindow Window constrain class.

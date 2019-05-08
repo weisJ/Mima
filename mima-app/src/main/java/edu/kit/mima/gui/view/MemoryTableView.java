@@ -7,6 +7,7 @@ import edu.kit.mima.core.interpretation.environment.Environment;
 import edu.kit.mima.gui.components.FixedScrollTable;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -14,7 +15,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.swing.JTable;
 
 /**
  * Implementation of {@link MemoryView} based on Mima.
@@ -37,11 +37,13 @@ public class MemoryTableView implements MemoryView {
         this.table = table;
     }
 
-    private static String getAssociation(@NotNull final Map<String, Integer> associations,
-                                         final int value) {
+    private static String getAssociation(
+            @NotNull final Map<String, Integer> associations, final int value) {
         return associations.entrySet().stream()
-                .filter(entry -> entry.getValue() == value).findFirst()
-                .map(Map.Entry::getKey).orElse(null);
+                       .filter(entry -> entry.getValue() == value)
+                       .findFirst()
+                       .map(Map.Entry::getKey)
+                       .orElse(null);
     }
 
     @Override
@@ -72,11 +74,11 @@ public class MemoryTableView implements MemoryView {
         Environment scope = mimaRunner.getCurrentEnvironment();
         final Map<String, Integer> map = new HashMap<>();
         while (scope != null) {
-            map.putAll(new HashSet<>(scope.getDefinitions().get(0).entrySet())
-                               .stream()
-                               .filter(e -> !map.containsKey(e.getKey()))
-                               .collect(Collectors.toMap(Map.Entry::getKey,
-                                                         e -> e.getValue().intValue())));
+            map.putAll(
+                    new HashSet<>(scope.getDefinitions().get(0).entrySet())
+                            .stream()
+                            .filter(e -> !map.containsKey(e.getKey()))
+                            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().intValue())));
             scope = scope.returnToParent();
         }
         return createMemoryTable(map);
@@ -97,22 +99,26 @@ public class MemoryTableView implements MemoryView {
 
         final Map<Integer, MachineWord> values = memoryM.getMapping();
         final List<Object[]> data = new ArrayList<>();
-        data.add(new Object[]{ACCUMULATOR, binaryView
-                ? accumulator.binaryRepresentation()
-                : accumulator.intValue()});
+        data.add(
+                new Object[]{
+                        ACCUMULATOR, binaryView ? accumulator.binaryRepresentation() : accumulator.intValue()
+                });
 
         final List<Object[]> memory = new ArrayList<>();
         final var entryList = new ArrayList<>(values.entrySet());
         entryList.sort(Comparator.comparingInt(Map.Entry::getKey));
         for (final Map.Entry<Integer, MachineWord> entry : entryList) {
-            final String valueString = binaryView
-                    ? entry.getValue().binaryRepresentation()
-                    : String.valueOf(entry.getValue().intValue());
-            final Object[] element = associations.containsValue(entry.getKey())
-                    ? new Object[]{entry.getKey()
-                    + " (" + getAssociation(associations, entry.getKey())
-                    + ')', valueString}
-                    : new Object[]{entry.getKey(), valueString};
+            final String valueString =
+                    binaryView
+                            ? entry.getValue().binaryRepresentation()
+                            : String.valueOf(entry.getValue().intValue());
+            final Object[] element =
+                    associations.containsValue(entry.getKey())
+                            ? new Object[]{
+                            entry.getKey() + " (" + getAssociation(associations, entry.getKey()) + ')',
+                            valueString
+                    }
+                            : new Object[]{entry.getKey(), valueString};
             boolean skip;
             try {
                 final int value = Integer.parseInt(element[0].toString());

@@ -7,13 +7,10 @@ import edu.kit.mima.preferences.UserPreferenceChangedListener;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.*;
 import javax.swing.plaf.metal.DefaultMetalTheme;
 import javax.swing.plaf.metal.MetalLookAndFeel;
-import java.awt.Frame;
-import java.awt.Window;
+import java.awt.*;
 
 /**
  * Manager for the Look and Feel.
@@ -27,7 +24,6 @@ public final class LafManager implements UserPreferenceChangedListener {
     public static final String LIGHT = "Light";
     private static final LafManager instance = new LafManager();
     private static String currentLaf;
-
 
     private LafManager() {
         Preferences.registerUserPreferenceChangedListener(this);
@@ -54,9 +50,9 @@ public final class LafManager implements UserPreferenceChangedListener {
             }
             updateLaf();
         } catch (@NotNull final ClassNotFoundException
-                | InstantiationException
-                | IllegalAccessException
-                | UnsupportedLookAndFeelException e) {
+                                        | InstantiationException
+                                        | IllegalAccessException
+                                        | UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
     }
@@ -67,9 +63,9 @@ public final class LafManager implements UserPreferenceChangedListener {
             UIManager.setLookAndFeel(loaf);
             updateLaf();
         } catch (@NotNull final ClassNotFoundException
-                | InstantiationException
-                | IllegalAccessException
-                | UnsupportedLookAndFeelException e) {
+                                        | InstantiationException
+                                        | IllegalAccessException
+                                        | UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
     }

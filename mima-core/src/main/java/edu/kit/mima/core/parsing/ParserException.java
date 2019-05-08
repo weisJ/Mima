@@ -24,9 +24,8 @@ public class ParserException extends RuntimeException {
      * @param column   column in which the exception happened
      * @param position absolute position in file
      */
-    public ParserException(final String message,
-                           final int line, final int column,
-                           final int position) {
+    public ParserException(
+            final String message, final int line, final int column, final int position) {
         this.line = line;
         this.column = column;
         this.message = message;

@@ -3,10 +3,9 @@ package edu.kit.mima.gui.components.fontchooser.listeners;
 import edu.kit.mima.gui.components.fontchooser.FontContainer;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Font;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-
+import java.awt.*;
 
 /**
  * Created by dheid on 4/1/17.
@@ -29,5 +28,4 @@ public class StyleListSelectionListener implements ListSelectionListener {
             fontContainer.setPreviewFont(newFont);
         }
     }
-
 }

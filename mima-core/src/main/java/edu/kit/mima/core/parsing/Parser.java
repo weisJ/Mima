@@ -32,10 +32,11 @@ import java.util.function.Supplier;
  */
 public final class Parser extends Processor<Token, TokenStream> {
 
-    @NotNull private final Set<ParserException> errors;
+    @NotNull
+    private final Set<ParserException> errors;
     private boolean skipEndOfInstruction;
     private int scopeIndex;
-    private Stack<Integer> tokenIndexStack;
+    private final Stack<Integer> tokenIndexStack;
 
     /**
      * Create parser from string input.
@@ -49,7 +50,6 @@ public final class Parser extends Processor<Token, TokenStream> {
         scopeIndex = -1;
         tokenIndexStack = new Stack<>();
     }
-
 
     /**
      * Parse the whole input.
@@ -98,8 +98,8 @@ public final class Parser extends Processor<Token, TokenStream> {
             }
         }
         tokenIndexStack.pop();
-        return new ValueTuple<>(new ProgramToken(program.toArray(new Token[0]), line),
-                                new ArrayList<>(errors));
+        return new ValueTuple<>(
+                new ProgramToken(program.toArray(new Token[0]), line), new ArrayList<>(errors));
     }
 
     /*
@@ -115,42 +115,43 @@ public final class Parser extends Processor<Token, TokenStream> {
      */
     @NotNull
     private Token parseAtomic() {
-        return maybeCall(() -> {
-            if (isPunctuation(Punctuation.SCOPE_OPEN)) {
-                input.next();
-                final var parsed = parseTopLevel();
-                errors.addAll(parsed.getSecond());
-                final Token program = parsed.getFirst();
-                if (isPunctuation(Punctuation.INSTRUCTION_END)) {
-                    input.next();
-                }
-                skipEndOfInstruction = false;
-                return program;
-            }
-            if (isPunctuation(Punctuation.SCOPE_CLOSED)) {
-                return new AtomToken<>(TokenType.SCOPE_END, scopeIndex,
-                                       tokenIndexStack.peek(), input.getLine());
-            }
-            if (isPunctuation(Punctuation.OPEN_BRACKET)) {
-                input.next();
-                final Token expression = parseExpression();
-                skipPunctuation(Punctuation.CLOSED_BRACKET);
-                return expression;
-            }
-            if (isPunctuation(Punctuation.DEFINITION_BEGIN)) {
-                input.next();
-                return parseDefinition();
-            }
-            final Token token = input.peek();
-            if (token != null
-                    && (token.getType() == TokenType.IDENTIFICATION
-                                || token.getType() == TokenType.BINARY
-                                || token.getType() == TokenType.NUMBER)) {
-                input.next();
-                return token;
-            }
-            return unexpected();
-        });
+        return maybeCall(
+                () -> {
+                    if (isPunctuation(Punctuation.SCOPE_OPEN)) {
+                        input.next();
+                        final var parsed = parseTopLevel();
+                        errors.addAll(parsed.getSecond());
+                        final Token program = parsed.getFirst();
+                        if (isPunctuation(Punctuation.INSTRUCTION_END)) {
+                            input.next();
+                        }
+                        skipEndOfInstruction = false;
+                        return program;
+                    }
+                    if (isPunctuation(Punctuation.SCOPE_CLOSED)) {
+                        return new AtomToken<>(
+                                TokenType.SCOPE_END, scopeIndex, tokenIndexStack.peek(), input.getLine());
+                    }
+                    if (isPunctuation(Punctuation.OPEN_BRACKET)) {
+                        input.next();
+                        final Token expression = parseExpression();
+                        skipPunctuation(Punctuation.CLOSED_BRACKET);
+                        return expression;
+                    }
+                    if (isPunctuation(Punctuation.DEFINITION_BEGIN)) {
+                        input.next();
+                        return parseDefinition();
+                    }
+                    final Token token = input.peek();
+                    if (token != null
+                                && (token.getType() == TokenType.IDENTIFICATION
+                                            || token.getType() == TokenType.BINARY
+                                            || token.getType() == TokenType.NUMBER)) {
+                        input.next();
+                        return token;
+                    }
+                    return unexpected();
+                });
     }
 
     /*
@@ -161,10 +162,12 @@ public final class Parser extends Processor<Token, TokenStream> {
         final int line = input.getLine();
         if (isPunctuation(Punctuation.JUMP_DELIMITER)) {
             input.next();
-            return new BinaryToken<>(TokenType.JUMP_POINT,
-                                     expression,
-                                     maybeJumpAssociation(supplier),
-                                     tokenIndexStack.peek(), line);
+            return new BinaryToken<>(
+                    TokenType.JUMP_POINT,
+                    expression,
+                    maybeJumpAssociation(supplier),
+                    tokenIndexStack.peek(),
+                    line);
         }
         return expression;
     }
@@ -184,11 +187,15 @@ public final class Parser extends Processor<Token, TokenStream> {
     @NotNull
     private Token parseCall(@NotNull final Token reference) {
         final int line = input.getLine();
-        return new BinaryToken<>(TokenType.CALL, reference, delimited(
-                new char[]{Punctuation.OPEN_BRACKET,
-                        Punctuation.CLOSED_BRACKET,
-                        Punctuation.COMMA},
-                this::parseExpression, true), tokenIndexStack.peek(), line);
+        return new BinaryToken<>(
+                TokenType.CALL,
+                reference,
+                delimited(
+                        new char[]{Punctuation.OPEN_BRACKET, Punctuation.CLOSED_BRACKET, Punctuation.COMMA},
+                        this::parseExpression,
+                        true),
+                tokenIndexStack.peek(),
+                line);
     }
 
     /*
@@ -199,11 +206,14 @@ public final class Parser extends Processor<Token, TokenStream> {
     private Token parseDefinition() {
         skipKeyword(Keyword.DEFINITION);
         final int line = input.getLine();
-        return new AtomToken<>(TokenType.DEFINITION, delimited(
-                new char[]{CharInputStream.EMPTY_CHAR,
-                        Punctuation.INSTRUCTION_END,
-                        Punctuation.COMMA},
-                this::maybeConstant, false), tokenIndexStack.peek(), line);
+        return new AtomToken<>(
+                TokenType.DEFINITION,
+                delimited(
+                        new char[]{CharInputStream.EMPTY_CHAR, Punctuation.INSTRUCTION_END, Punctuation.COMMA},
+                        this::maybeConstant,
+                        false),
+                tokenIndexStack.peek(),
+                line);
     }
 
     @NotNull
@@ -228,8 +238,7 @@ public final class Parser extends Processor<Token, TokenStream> {
         if (reference != null && reference.getType() == TokenType.IDENTIFICATION) {
             skipPunctuation(Punctuation.DEFINITION_DELIMITER);
             final Token value = parseExpression();
-            return new BinaryToken<>(TokenType.CONSTANT, reference, value,
-                                     tokenIndexStack.peek(), line);
+            return new BinaryToken<>(TokenType.CONSTANT, reference, value, tokenIndexStack.peek(), line);
         }
         return input.error("expected identifier");
     }
@@ -245,11 +254,11 @@ public final class Parser extends Processor<Token, TokenStream> {
             if (isPunctuation(Punctuation.DEFINITION_DELIMITER)) {
                 skipPunctuation(Punctuation.DEFINITION_DELIMITER);
                 final Token value = parseExpression();
-                return new BinaryToken<>(TokenType.REFERENCE, reference, value,
-                                         tokenIndexStack.peek(), line);
+                return new BinaryToken<>(
+                        TokenType.REFERENCE, reference, value, tokenIndexStack.peek(), line);
             }
-            return new BinaryToken<>(TokenType.REFERENCE, reference, new EmptyToken(),
-                                     tokenIndexStack.peek(), line);
+            return new BinaryToken<>(
+                    TokenType.REFERENCE, reference, new EmptyToken(), tokenIndexStack.peek(), line);
         }
         return input.error("expected identifier");
     }
@@ -257,7 +266,10 @@ public final class Parser extends Processor<Token, TokenStream> {
     @Nullable
     @Override
     protected Token parseDelimiter() {
-        return Optional.ofNullable(input.peek()).map(t -> t.getType() == TokenType.PUNCTUATION)
-                       .orElse(false) ? input.next() : new EmptyToken();
+        return Optional.ofNullable(input.peek())
+                       .map(t -> t.getType() == TokenType.PUNCTUATION)
+                       .orElse(false)
+                       ? input.next()
+                       : new EmptyToken();
     }
 }

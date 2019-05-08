@@ -1,14 +1,13 @@
 package edu.kit.mima.gui.laf.components;
 
-import edu.kit.mima.api.annotations.ReflectionCall;
+import edu.kit.mima.annotations.ReflectionCall;
 import edu.kit.mima.gui.components.tabbededitor.EditorTabbedPaneUI;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JComponent;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.plaf.ComponentUI;
-import java.awt.Graphics;
+import java.awt.*;
 
 /**
  * Darcula UI for {@link edu.kit.mima.gui.components.tabbededitor.EditorTabbedPane}.
@@ -27,7 +26,7 @@ public class LightEditorTabbedPaneUI extends EditorTabbedPaneUI {
     @NotNull
     @Contract("_ -> new")
     @ReflectionCall
-    public static ComponentUI createUI(JComponent c) {
+    public static ComponentUI createUI(final JComponent c) {
         return new LightEditorTabbedPaneUI();
     }
 
@@ -40,7 +39,7 @@ public class LightEditorTabbedPaneUI extends EditorTabbedPaneUI {
     }
 
     @Override
-    protected void paintTabArea(@NotNull Graphics g, int tabPlacement, int selectedIndex) {
+    protected void paintTabArea(@NotNull final Graphics g, final int tabPlacement, final int selectedIndex) {
         super.paintTabArea(g, tabPlacement, selectedIndex);
         if (selectedIndex >= 0) {
             var bounds = tabbedPane.getTabAreaBound();

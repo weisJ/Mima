@@ -9,14 +9,9 @@ import edu.kit.mima.gui.components.text.HighlightTextPane;
 import edu.kit.mima.util.DocumentUtil;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
+import javax.swing.*;
 import javax.swing.text.BadLocationException;
-import java.awt.BorderLayout;
-import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,52 +40,52 @@ public class NumberedTextPane extends JPanel {
     public NumberedTextPane() {
         super(new BorderLayout());
         listenerList = new ArrayList<>();
-        //Add number rendering to panel.
-        pane = new HighlightTextPane(this) {
-            @Override
-            public void paintComponent(@NotNull final Graphics g) {
-                super.paintComponent(g);
-                numberingPane.repaint();
-            }
-        };
+        // Add number rendering to panel.
+        pane =
+                new HighlightTextPane(this) {
+                    @Override
+                    public void paintComponent(@NotNull final Graphics g) {
+                        super.paintComponent(g);
+                        numberingPane.repaint();
+                    }
+                };
         var borderedPane = new BorderlessScrollPane(pane);
         scrollPane = borderedPane.getScrollPane();
         scrollPane.getVerticalScrollBar().setUnitIncrement(2 * getFont().getSize());
         numberingPane = new NumberingPane(pane, scrollPane);
-        pane.addCaretListener(
-                new VisibleCaretListener(scrollPane.getVerticalScrollBar().getWidth()));
+        pane.addCaretListener(new VisibleCaretListener(scrollPane.getVerticalScrollBar().getWidth()));
 
         add(numberingPane, BorderLayout.LINE_START);
         add(borderedPane, BorderLayout.CENTER);
 
-
-        numberingPane.addMouseListener((MouseClickListener) e -> {
-            if (e.getButton() == MouseEvent.BUTTON1) {
-                final Point p = e.getPoint();
-                try {
-                    p.y += scrollPane.getViewport().getViewPosition().getY();
-                    final int index = DocumentUtil.getLineOfOffset(pane, pane.viewToModel2D(p));
-                    if (numberingPane.getActionArea().contains(e.getPoint())) {
-                        for (final var listener : listenerList) {
-                            if (listener != null) {
-                                listener.indexClicked(index);
+        numberingPane.addMouseListener(
+                (MouseClickListener)
+                        e -> {
+                            if (e.getButton() == MouseEvent.BUTTON1) {
+                                final Point p = e.getPoint();
+                                try {
+                                    p.y += scrollPane.getViewport().getViewPosition().getY();
+                                    final int index = DocumentUtil.getLineOfOffset(pane, pane.viewToModel2D(p));
+                                    if (numberingPane.getActionArea().contains(e.getPoint())) {
+                                        for (final var listener : listenerList) {
+                                            if (listener != null) {
+                                                listener.indexClicked(index);
+                                            }
+                                            repaint();
+                                        }
+                                    } else {
+                                        pane.selectLine(index);
+                                    }
+                                } catch (@NotNull final BadLocationException ignored) {
+                                }
                             }
-                            repaint();
-                        }
-                    } else {
-                        pane.selectLine(index);
-                    }
-                } catch (@NotNull final BadLocationException ignored) {
-                }
-            }
-        });
+                        });
     }
 
     public void scrollToIndex(final int index) {
         if (index > 0) {
             try {
-                Rectangle r = pane.modelToView2D(DocumentUtil.getLineStartOffset(pane, index))
-                                  .getBounds();
+                Rectangle r = pane.modelToView2D(DocumentUtil.getLineStartOffset(pane, index)).getBounds();
                 var viewport = scrollPane.getViewport();
                 var viewRect = viewport.getViewRect();
                 if (viewRect.y + viewRect.height < r.y || viewRect.y > r.y) {
@@ -168,7 +163,6 @@ public class NumberedTextPane extends JPanel {
     public Collection<IndexComponent> getIndexComponents() {
         return numberingPane.getComponentMap().values();
     }
-
 
     /**
      * Get the JTextPane of the NumberedTextPane.

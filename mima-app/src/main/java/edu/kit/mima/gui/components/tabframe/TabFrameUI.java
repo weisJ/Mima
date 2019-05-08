@@ -1,13 +1,11 @@
 package edu.kit.mima.gui.components.tabframe;
 
-import edu.kit.mima.api.annotations.ReflectionCall;
+import edu.kit.mima.annotations.ReflectionCall;
 import edu.kit.mima.gui.components.alignment.Alignment;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JComponent;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.plaf.ComponentUI;
 
 /**
@@ -18,17 +16,17 @@ import javax.swing.plaf.ComponentUI;
  */
 public class TabFrameUI extends ComponentUI {
 
+    private TabFrameLayout layout;
+
     @NotNull
     @Contract("_ -> new")
     @ReflectionCall
-    public static ComponentUI createUI(JComponent c) {
+    public static ComponentUI createUI(final JComponent c) {
         return new TabFrameUI();
     }
 
-    private TabFrameLayout layout;
-
     @Override
-    public void installUI(@NotNull JComponent c) {
+    public void installUI(@NotNull final JComponent c) {
         super.installUI(c);
         if (!(c.getLayout() instanceof TabFrameLayout)) {
             TabFrame tabFrame = (TabFrame) c;
@@ -40,7 +38,7 @@ public class TabFrameUI extends ComponentUI {
     }
 
     @Override
-    public int getBaseline(@NotNull JComponent c, int width, int height) {
+    public int getBaseline(@NotNull final JComponent c, final int width, final int height) {
         super.getBaseline(c, width, height);
         return 0;
     }

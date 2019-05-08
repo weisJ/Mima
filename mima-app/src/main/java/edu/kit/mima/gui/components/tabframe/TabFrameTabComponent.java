@@ -1,19 +1,13 @@
 package edu.kit.mima.gui.components.tabframe;
 
+import edu.kit.mima.annotations.ContextManager;
 import edu.kit.mima.gui.components.IconLabel;
 import edu.kit.mima.gui.components.alignment.Alignment;
-import edu.kit.mima.gui.components.listeners.PopupListener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.AbstractAction;
-import javax.swing.Icon;
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import java.awt.Color;
-import java.awt.event.ActionEvent;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -25,15 +19,16 @@ import java.awt.event.MouseEvent;
  */
 public class TabFrameTabComponent extends IconLabel {
 
+    @NotNull
+    private final TabFrameLayout parent;
     private Color defaultFontColor;
     private Color selectedFontColor;
     private String title;
     private boolean selected;
     private boolean hover;
     private int accelerator;
-    private Alignment alignment;
+    private final Alignment alignment;
     private int index;
-
     private Color selectedColor;
     private Color hoverColor;
 
@@ -52,10 +47,11 @@ public class TabFrameTabComponent extends IconLabel {
         this.alignment = alignment;
         this.title = title;
         this.index = index;
+        this.parent = parent;
         label.setFont(label.getFont().deriveFont(11.0f));
         addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mouseClicked(final MouseEvent e) {
                 if (SwingUtilities.isLeftMouseButton(e)) {
                     setSelected(!selected);
                     parent.notifySelectChange(TabFrameTabComponent.this);
@@ -63,48 +59,35 @@ public class TabFrameTabComponent extends IconLabel {
             }
 
             @Override
-            public void mouseEntered(MouseEvent e) {
+            public void mouseEntered(final MouseEvent e) {
                 hover = true;
                 repaint();
             }
 
             @Override
-            public void mouseExited(MouseEvent e) {
+            public void mouseExited(final MouseEvent e) {
                 hover = false;
                 repaint();
             }
         });
-        var menu = new JPopupMenu();
-        var remove = new JMenuItem();
-        remove.setAction(new AbstractAction("Remove from Sidebar") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                parent.removeTab(alignment, TabFrameTabComponent.this.index);
-            }
-        });
-        menu.add(remove);
-        var hide = new JMenuItem();
-        hide.setAction(new AbstractAction("Hide") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setSelected(false);
-                parent.notifySelectChange(TabFrameTabComponent.this);
-            }
-        });
-        menu.addSeparator();
-        menu.add(hide);
-        var listener = new PopupListener(menu);
-        listener.setUseAbsolutePos(true);
-        addMouseListener(listener);
-
+        ContextManager.createContext(this);
         setOrientation(Alignment.WEST);
+    }
+
+    public void removeFromParent() {
+        parent.removeTab(alignment, TabFrameTabComponent.this.index);
+    }
+
+    public void setPopupVisible(final boolean visible) {
+        setSelected(visible);
+        parent.notifySelectChange(TabFrameTabComponent.this);
     }
 
     public int getIndex() {
         return index;
     }
 
-    public void setIndex(int index) {
+    public void setIndex(final int index) {
         this.index = index;
     }
 
@@ -158,8 +141,8 @@ public class TabFrameTabComponent extends IconLabel {
     @Override
     public Color getBackground() {
         return selected && selectedColor != null
-               ? selectedColor
-               : hover && hoverColor != null ? hoverColor : super.getBackground();
+                       ? selectedColor
+                       : hover && hoverColor != null ? hoverColor : super.getBackground();
     }
 
     @Override
@@ -185,7 +168,7 @@ public class TabFrameTabComponent extends IconLabel {
      *
      * @param selected true if selected.
      */
-    public void setSelected(boolean selected) {
+    public void setSelected(final boolean selected) {
         this.selected = selected;
         label.setForeground(selected ? selectedFontColor : defaultFontColor);
         repaint();
@@ -196,7 +179,7 @@ public class TabFrameTabComponent extends IconLabel {
      *
      * @param title the title
      */
-    public void setTitle(@Nullable String title) {
+    public void setTitle(@Nullable final String title) {
         this.title = title == null ? "" : title;
         updateLabel();
     }

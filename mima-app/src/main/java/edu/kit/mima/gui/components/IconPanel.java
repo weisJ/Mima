@@ -6,12 +6,8 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.Icon;
-import javax.swing.JComponent;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 
 /**
@@ -21,13 +17,14 @@ import java.awt.geom.AffineTransform;
  * @since 2018
  */
 public class IconPanel extends JComponent {
-    @NotNull private final Icon icon;
+    @NotNull
+    private final Icon icon;
     private Alignment alignment;
 
     /**
      * Create new Icon panel.
      *
-     * @param icon        icon to draw.
+     * @param icon icon to draw.
      */
     public IconPanel(@NotNull final Icon icon) {
         this.icon = icon;
@@ -96,18 +93,18 @@ public class IconPanel extends JComponent {
         return alignment;
     }
 
-    @NotNull
-    @Override
-    public Dimension getMaximumSize() {
-        return new Dimension(icon.getIconWidth(), icon.getIconHeight());
-    }
-
     /**
      * Set the alignment.
      *
      * @param alignment the alignment.
      */
-    public void setAlignment(@Nullable Alignment alignment) {
+    public void setAlignment(@Nullable final Alignment alignment) {
         this.alignment = alignment == null ? Alignment.NORTH : alignment;
+    }
+
+    @NotNull
+    @Override
+    public Dimension getMaximumSize() {
+        return new Dimension(icon.getIconWidth(), icon.getIconHeight());
     }
 }

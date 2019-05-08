@@ -3,44 +3,41 @@ import org.jetbrains.annotations.NotNull;
 import org.pbjar.jxlayer.plaf.ext.transform.DefaultTransformModel;
 import org.pbjar.jxlayer.plaf.ext.transform.TransformUtils;
 
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JSlider;
-import javax.swing.JTextField;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-import java.awt.GridBagLayout;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.geom.Point2D;
 
 public class JLayerTransform {
 
     public JLayerTransform() {
-        EventQueue.invokeLater(() -> {
-            try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            } catch (@NotNull ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ignore) {
-            }
+        EventQueue.invokeLater(
+                () -> {
+                    try {
+                        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                    } catch (@NotNull
+                                     ClassNotFoundException
+                                             | InstantiationException
+                                             | IllegalAccessException
+                                             | UnsupportedLookAndFeelException ignore) {
+                    }
 
-            JFrame frame = new JFrame();
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setLayout(new BorderLayout());
-            frame.add(new ExamplePane());
-            frame.pack();
-            frame.setLocationRelativeTo(null);
-            frame.setVisible(true);
-        });
+                    JFrame frame = new JFrame();
+                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                    frame.setLayout(new BorderLayout());
+                    frame.add(new ExamplePane());
+                    frame.pack();
+                    frame.setLocationRelativeTo(null);
+                    frame.setVisible(true);
+                });
     }
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         new JLayerTransform();
     }
 
     public class ExamplePane extends JPanel {
 
-        private JSlider slider;
+        private final JSlider slider;
         private DefaultTransformModel transformModel;
 
         public ExamplePane() {
@@ -49,8 +46,7 @@ public class JLayerTransform {
 
             slider = new JSlider(0, 360);
             slider.setValue(0);
-            slider.addChangeListener(
-                    e -> transformModel.setRotation(Math.toRadians(slider.getValue())));
+            slider.addChangeListener(e -> transformModel.setRotation(Math.toRadians(slider.getValue())));
 
             var fieldPane = new JTextField();
 
@@ -65,7 +61,6 @@ public class JLayerTransform {
 
             add(slider, BorderLayout.NORTH);
             add(rotatePane);
-
         }
     }
 
@@ -78,7 +73,6 @@ public class JLayerTransform {
             field.setText("Hello world");
 
             add(field);
-
         }
     }
 }

@@ -3,27 +3,13 @@ package edu.kit.mima.gui.components.popupmenu;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
-import javax.swing.JWindow;
-import javax.swing.MenuElement;
-import javax.swing.MenuSelectionManager;
+import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.plaf.basic.BasicPopupMenuUI;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Window;
+import java.awt.*;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.lang.reflect.Field;
-
 
 /**
  * Hacked JPopupMenu(Plus) - displayed in JScrollPane if too long.
@@ -32,8 +18,10 @@ public class ScrollPopupMenu extends JPopupMenu implements MouseWheelListener {
 
     private static final int SB_WIDTH = 8;
     private final int maxHeight;
-    @Nullable private JWindow popWin;
-    @Nullable private JScrollPane scrollPane;
+    @Nullable
+    private JWindow popWin;
+    @Nullable
+    private JScrollPane scrollPane;
     private int posX;
     private int posY;
     private Border border;
@@ -48,17 +36,6 @@ public class ScrollPopupMenu extends JPopupMenu implements MouseWheelListener {
         addMouseWheelListener(this);
     }
 
-    @Override
-    public void mouseWheelMoved(MouseWheelEvent e) {
-        if (scrollPane != null) {
-            if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
-                var bar = scrollPane.getVerticalScrollBar();
-                bar.setValue(bar.getValue()
-                             + Integer.signum(e.getUnitsToScroll()) * bar.getUnitIncrement());
-            }
-        }
-    }
-
     /*
      * Prevent component from trying to close Popup.
      */
@@ -70,6 +47,17 @@ public class ScrollPopupMenu extends JPopupMenu implements MouseWheelListener {
             component.putClientProperty("doNotCancelPopup", field.get(null)); // NOI18N
         } catch (@NotNull final Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public void mouseWheelMoved(final MouseWheelEvent e) {
+        if (scrollPane != null) {
+            if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
+                var bar = scrollPane.getVerticalScrollBar();
+                bar.setValue(
+                        bar.getValue() + Integer.signum(e.getUnitsToScroll()) * bar.getUnitIncrement());
+            }
         }
     }
 
@@ -109,9 +97,7 @@ public class ScrollPopupMenu extends JPopupMenu implements MouseWheelListener {
         while (comp.getParent() != null) {
             comp = comp.getParent();
         }
-        popWin = comp instanceof Window
-                ? new JWindow((Window) comp)
-                : new JWindow(new JFrame());
+        popWin = comp instanceof Window ? new JWindow((Window) comp) : new JWindow(new JFrame());
         popWin.setLocation(posX, posY);
         pack();
         popWin.setVisible(true);
@@ -177,8 +163,8 @@ public class ScrollPopupMenu extends JPopupMenu implements MouseWheelListener {
             final Dimension d = bar.getPreferredSize();
             d.width = SB_WIDTH;
             bar.setPreferredSize(d);
-            final int increment = getComponentCount() > 0 ? Math.max(1, getComponent(
-                    0).getPreferredSize().height / 2) : 1;
+            final int increment =
+                    getComponentCount() > 0 ? Math.max(1, getComponent(0).getPreferredSize().height / 2) : 1;
             bar.setUnitIncrement(increment);
             doNotCancelPopupHack(bar);
         }
@@ -230,8 +216,7 @@ public class ScrollPopupMenu extends JPopupMenu implements MouseWheelListener {
                      * this scroll bar is in fact the child of a popupMenu and won't cancel it
                      * when scrolled.
                      */
-                    StackWalker walker = StackWalker.getInstance(
-                            StackWalker.Option.RETAIN_CLASS_REFERENCE);
+                    StackWalker walker = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
                     Class<?> callerClass = walker.getCallerClass();
                     if (BasicPopupMenuUI.class.equals(callerClass.getEnclosingClass())) {
                         return ScrollPopupMenu.this;

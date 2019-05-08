@@ -1,16 +1,8 @@
 import org.pbjar.jxlayer.plaf.ext.transform.TransformRPMFallBack;
 import org.pbjar.jxlayer.plaf.ext.transform.TransformRPMImpl;
 
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.RepaintManager;
-import javax.swing.SwingUtilities;
-import java.awt.Graphics;
+import javax.swing.*;
+import java.awt.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 
@@ -30,7 +22,7 @@ public class RepaintManagerTest {
 
     private RepaintManager oldManager;
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         TransformRPMImpl.hack = true;
         SwingUtilities.invokeLater(() -> new RepaintManagerTest().createGui());
     }
@@ -61,11 +53,11 @@ public class RepaintManagerTest {
                     bufferStrategyType.setAccessible(false);
                     switch (strategyType) {
                         case (0) -> System.out
-                                .println("bufferStrategyType: BUFFER_STRATEGY_NOT_SPECIFIED");
+                                            .println("bufferStrategyType: BUFFER_STRATEGY_NOT_SPECIFIED");
                         case (1) -> System.out
-                                .println("bufferStrategyType: BUFFER_STRATEGY_SPECIFIED_ON");
+                                            .println("bufferStrategyType: BUFFER_STRATEGY_SPECIFIED_ON");
                         case (2) -> System.out
-                                .println("bufferStrategyType: BUFFER_STRATEGY_SPECIFIED_OFF");
+                                            .println("bufferStrategyType: BUFFER_STRATEGY_SPECIFIED_OFF");
                         default -> System.out.println("bufferStrategyType: " + strategyType);
                     }
                     /*
@@ -86,7 +78,7 @@ public class RepaintManagerTest {
                     paintManager.setAccessible(true);
                     Object paintManagerInstance = paintManager.get(oldManager);
                     System.out.println("PaintManager is of type: " + paintManagerInstance.getClass()
-                                                                                         .getName());
+                                                                             .getName());
                     paintManager.set(newManager, paintManagerInstance);
                     paintManager.setAccessible(false);
                 } catch (Throwable t) {
@@ -129,7 +121,7 @@ public class RepaintManagerTest {
 
             private static final long serialVersionUID = 1L;
 
-            public void paint(Graphics g) {
+            public void paint(final Graphics g) {
                 super.paint(g);
                 String newLine = System.currentTimeMillis() + " JFrame.paint()\n";
                 textArea.setText(textArea.getText() + newLine);

@@ -4,7 +4,7 @@ import edu.kit.mima.api.observing.ClassObservable;
 import edu.kit.mima.api.observing.Observable;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JComponent;
+import javax.swing.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -17,25 +17,25 @@ import java.beans.PropertyChangeListener;
  * @since 2019
  */
 public class BridgeSubscriptionService<T> extends SubscriptionService<T> implements
-                                                                         PropertyChangeListener {
+        PropertyChangeListener {
 
     private final Object observed;
     private final Type type;
 
-    public <K extends Observable> BridgeSubscriptionService(@NotNull K observed) {
+    public <K extends Observable> BridgeSubscriptionService(@NotNull final K observed) {
         super(observed.getClass());
         this.observed = observed;
         this.type = Type.OBSERVABLE;
     }
 
-    public <K extends ClassObservable> BridgeSubscriptionService(@NotNull K observed) {
+    public <K extends ClassObservable> BridgeSubscriptionService(@NotNull final K observed) {
         super(observed.getClass());
         this.observed = observed;
         this.type = Type.CLASS_OBSERVABLE;
 
     }
 
-    public <K extends JComponent> BridgeSubscriptionService(@NotNull K observed) {
+    public <K extends JComponent> BridgeSubscriptionService(@NotNull final K observed) {
         super(observed.getClass());
         this.observed = observed;
         this.type = Type.COMPONENT;
@@ -43,19 +43,19 @@ public class BridgeSubscriptionService<T> extends SubscriptionService<T> impleme
 
 
     @Override
-    void initService(@NotNull String... identifiers) {
+    void initService(@NotNull final String... identifiers) {
         for (var s : identifiers) {
             switch (type) {
                 case OBSERVABLE -> ((Observable) observed).addPropertyChangeListener(s, this);
                 case CLASS_OBSERVABLE -> ((ClassObservable) observed).addPropertyChangeListener(s,
-                                                                                                this);
+                        this);
                 case COMPONENT -> ((JComponent) observed).addPropertyChangeListener(s, this);
             }
         }
     }
 
     @Override
-    public void propertyChange(@NotNull PropertyChangeEvent evt) {
+    public void propertyChange(@NotNull final PropertyChangeEvent evt) {
         //noinspection unchecked
         notifyEvent(evt.getPropertyName(), (T) evt.getNewValue(), observed);
     }

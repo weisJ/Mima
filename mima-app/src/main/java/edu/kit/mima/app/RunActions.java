@@ -37,8 +37,11 @@ public class RunActions {
      * @param debugger     the debugger of app.
      */
     @Contract(pure = true)
-    public RunActions(final MimaUserInterface mimaUI, final MimaCompiler mimaCompiler,
-                      final MimaRunner mimaRunner, final Debugger debugger) {
+    public RunActions(
+            final MimaUserInterface mimaUI,
+            final MimaCompiler mimaCompiler,
+            final MimaRunner mimaRunner,
+            final Debugger debugger) {
         this.mimaUI = mimaUI;
         this.mimaRunner = mimaRunner;
         this.debugger = debugger;
@@ -75,31 +78,38 @@ public class RunActions {
     }
 
     private void executionAction(final boolean debug) {
-        runThread = new Thread(() -> {
-            String file = mimaUI.currentFileManager().getLastFile();
-            App.logger.log("Executing program: " + FileName.shorten(file));
-            LoadingIndicator.start("Executing", 3);
-            var pref = Preferences.getInstance();
-            mimaRunner.setProgram(new Program(
-                    mimaCompiler.compile(mimaUI.currentEditor().getText(),
-                                         mimaUI.currentFileManager().getLastFile(),
-                                         pref.readString(PropertyKey.DIRECTORY_WORKING),
-                                         pref.readString(PropertyKey.DIRECTORY_MIMA)),
-                    MimaConstants.instructionSetForFile(file)));
-            if (debug) {
-                debugger.start(v -> LoadingIndicator.stop("Executing (done)"),
-                               mimaUI.currentEditor().getBreakpoints());
-            } else {
-                mimaRunner.start(v -> LoadingIndicator.stop("Executing (done)"));
-            }
-        });
-        final Thread.UncaughtExceptionHandler exceptionHandler = (t, e) -> {
-            if (e instanceof MimaRuntimeException || e instanceof InterpreterException) {
-                LoadingIndicator.error("Execution " + "failed: " + e.getMessage());
-            } else {
-                throw new RuntimeException(e);
-            }
-        };
+        runThread =
+                new Thread(
+                        () -> {
+                            String file = mimaUI.currentFileManager().getLastFile();
+                            App.logger.log("Executing program: " + FileName.shorten(file));
+                            LoadingIndicator.start("Executing", 3);
+                            var pref = Preferences.getInstance();
+                            mimaRunner.setProgram(
+                                    new Program(
+                                            mimaCompiler.compile(
+                                                    mimaUI.currentEditor().getText(),
+                                                    mimaUI.currentFileManager().getLastFile(),
+                                                    pref.readString(PropertyKey.DIRECTORY_WORKING),
+                                                    pref.readString(PropertyKey.DIRECTORY_MIMA)),
+                                            MimaConstants.instructionSetForFile(file)));
+                            if (debug) {
+                                debugger.start(
+                                        v -> LoadingIndicator.stop("Executing (done)"),
+                                        mimaUI.currentEditor().getBreakpoints());
+                            } else {
+                                mimaRunner.start(v -> LoadingIndicator.stop("Executing (done)"));
+                            }
+                        });
+        final Thread.UncaughtExceptionHandler exceptionHandler =
+                (t, e) -> {
+                    if (e instanceof MimaRuntimeException || e instanceof InterpreterException) {
+                        LoadingIndicator.error("Execution " + "failed: " + e.getMessage());
+                    } else {
+                        e.printStackTrace();
+                        throw new RuntimeException(e);
+                    }
+                };
         /*
          * Register exception handler for the AWT event thread and for the execution thread.
          */

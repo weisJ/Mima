@@ -37,11 +37,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.pbjar.jxlayer.plaf.ext.TransformUI;
 
-import javax.swing.JComponent;
-import javax.swing.RepaintManager;
-import javax.swing.SwingUtilities;
-import java.awt.Point;
-import java.awt.Rectangle;
+import javax.swing.*;
+import java.awt.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -51,7 +48,7 @@ import java.lang.reflect.Method;
  *
  * @author Piet Blok
  */
-public class TransformRPMImpl {
+public final class TransformRPMImpl {
 
     /**
      * A flag, indicating whether or not a very dirty initialization on created {@link
@@ -86,8 +83,8 @@ public class TransformRPMImpl {
      * {@code false} otherwise
      */
     @SuppressWarnings("unchecked")
-    public static boolean addDirtyRegion(@NotNull JComponent aComponent, int x, int y,
-                                         int w, int h, @NotNull RepaintManager manager) {
+    public static boolean addDirtyRegion(@NotNull final JComponent aComponent, final int x, final int y,
+                                         final int w, final int h, @NotNull final RepaintManager manager) {
         if (aComponent.isShowing()) {
             JXLayer<?> layer = findJXLayer(aComponent);
             if (layer != null) {
@@ -96,11 +93,11 @@ public class TransformRPMImpl {
                 Point point = aComponent.getLocationOnScreen();
                 SwingUtilities.convertPointFromScreen(point, layer);
                 Rectangle transformPortRegion = ui.transform(new Rectangle(x
-                                                                           + point.x, y + point.y, w, h),
-                                                             (JXLayer<JComponent>) layer);
+                                                                                   + point.x, y + point.y, w, h),
+                        (JXLayer<JComponent>) layer);
                 manager.addDirtyRegion(layer,
-                                       transformPortRegion.x, transformPortRegion.y,
-                                       transformPortRegion.width, transformPortRegion.height);
+                        transformPortRegion.x, transformPortRegion.y,
+                        transformPortRegion.width, transformPortRegion.height);
                 return true;
             }
         }
@@ -115,30 +112,30 @@ public class TransformRPMImpl {
      * @param sourceManager      the source manager
      * @param destinationManager the destination manager
      */
-    public static void hackInitialization(RepaintManager sourceManager,
-                                          RepaintManager destinationManager) {
+    public static void hackInitialization(final RepaintManager sourceManager,
+                                          final RepaintManager destinationManager) {
         if (hack) {
             Class<RepaintManager> rpmClass = RepaintManager.class;
             try {
 
                 Field fieldBufferStrategyType = rpmClass
-                        .getDeclaredField("bufferStrategyType");
+                                                        .getDeclaredField("bufferStrategyType");
                 Field fieldPaintManager = rpmClass
-                        .getDeclaredField("paintManager");
+                                                  .getDeclaredField("paintManager");
                 Method methodGetPaintManager = rpmClass
-                        .getDeclaredMethod("getPaintManager");
+                                                       .getDeclaredMethod("getPaintManager");
 
                 fieldBufferStrategyType.setAccessible(true);
                 fieldPaintManager.setAccessible(true);
                 methodGetPaintManager.setAccessible(true);
 
                 Object paintManager = methodGetPaintManager
-                        .invoke(sourceManager);
+                                              .invoke(sourceManager);
                 short bufferStrategyType = (Short) fieldBufferStrategyType
-                        .get(sourceManager);
+                                                           .get(sourceManager);
 
                 fieldBufferStrategyType.set(destinationManager,
-                                            bufferStrategyType);
+                        bufferStrategyType);
                 fieldPaintManager.set(destinationManager, paintManager);
 
                 fieldBufferStrategyType.setAccessible(false);
@@ -146,19 +143,19 @@ public class TransformRPMImpl {
                 methodGetPaintManager.setAccessible(false);
 
                 System.out.println("Copied paintManager of type: "
-                                   + paintManager.getClass().getName());
+                                           + paintManager.getClass().getName());
                 switch (bufferStrategyType) {
                     case (0) -> System.out.println("Copied bufferStrategyType "
-                                                   + bufferStrategyType
-                                                   + ": BUFFER_STRATEGY_NOT_SPECIFIED");
+                                                           + bufferStrategyType
+                                                           + ": BUFFER_STRATEGY_NOT_SPECIFIED");
                     case (1) -> System.out.println("Copied bufferStrategyType "
-                                                   + bufferStrategyType
-                                                   + ": BUFFER_STRATEGY_SPECIFIED_ON");
+                                                           + bufferStrategyType
+                                                           + ": BUFFER_STRATEGY_SPECIFIED_ON");
                     case (2) -> System.out.println("Copied bufferStrategyType "
-                                                   + bufferStrategyType
-                                                   + ": BUFFER_STRATEGY_SPECIFIED_OFF");
+                                                           + bufferStrategyType
+                                                           + ": BUFFER_STRATEGY_SPECIFIED_OFF");
                     default -> System.out.println("Copied bufferStrategyType "
-                                                  + bufferStrategyType + ": ???");
+                                                          + bufferStrategyType + ": ???");
                 }
             } catch (Throwable t) {
                 t.printStackTrace(System.out);
@@ -173,7 +170,7 @@ public class TransformRPMImpl {
      * @return a {@link JXLayer} instance or {@code null}
      */
     @Nullable
-    private static JXLayer<?> findJXLayer(JComponent aComponent) {
+    private static JXLayer<?> findJXLayer(final JComponent aComponent) {
 
         JXLayer<?> layer = (JXLayer<?>) SwingUtilities.getAncestorOfClass(
                 JXLayer.class, aComponent);

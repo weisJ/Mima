@@ -100,11 +100,10 @@ public class ArithmeticLogicUnit {
      * @return -1 if x == y else 0
      */
     @NotNull
-    public MachineWord negativeIfEquals(@NotNull final MachineWord x,
-                                        @NotNull final MachineWord y) {
+    public MachineWord negativeIfEquals(@NotNull final MachineWord x, @NotNull final MachineWord y) {
         checkWord(x, y);
-        final MachineWord comp = new MachineWord(bitwise(x, y, (v, w) -> v ? w : !w),
-                                                 machineWordLength);
+        final MachineWord comp =
+                new MachineWord(bitwise(x, y, (v, w) -> v ? w : !w), machineWordLength);
         return comp.intValue() == -1 ? comp : new MachineWord(0, machineWordLength);
     }
 
@@ -128,9 +127,10 @@ public class ArithmeticLogicUnit {
      * Perform an bitwise operator on two machine words
      */
     @NotNull
-    private boolean[] bitwise(@NotNull final MachineWord x,
-                              @NotNull final MachineWord y,
-                              @NotNull final BinaryOperator<Boolean> operator) {
+    private boolean[] bitwise(
+            @NotNull final MachineWord x,
+            @NotNull final MachineWord y,
+            @NotNull final BinaryOperator<Boolean> operator) {
         final boolean[] bits = new boolean[machineWordLength];
         final boolean[] aBits = x.getBits();
         final boolean[] bBits = y.getBits();

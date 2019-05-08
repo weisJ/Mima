@@ -10,17 +10,8 @@ import edu.kit.mima.util.HSLColor;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.Action;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.KeyStroke;
-import javax.swing.UIManager;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.GridLayout;
-import java.awt.LayoutManager;
+import javax.swing.*;
+import java.awt.*;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.function.Supplier;
@@ -33,8 +24,10 @@ import java.util.function.Supplier;
  */
 public final class ButtonPanelBuilder {
 
-    @NotNull private final JPanel panel;
-    @NotNull private final Queue<JButton> buttons;
+    @NotNull
+    private final JPanel panel;
+    @NotNull
+    private final Queue<JButton> buttons;
     @NotNull
     private final LayoutManager layoutManager;
 
@@ -149,9 +142,10 @@ public final class ButtonPanelBuilder {
          */
         @Contract("_, _, _ -> this")
         @NotNull
-        public <T extends JComponent> ButtonBuilder bind(@NotNull final T observed,
-                                                         @NotNull final Runnable binding,
-                                                         @NotNull final String... property) {
+        public <T extends JComponent> ButtonBuilder bind(
+                @NotNull final T observed,
+                @NotNull final Runnable binding,
+                @NotNull final String... property) {
             BindingUtil.bind(observed, binding, property);
             return this;
         }
@@ -167,9 +161,10 @@ public final class ButtonPanelBuilder {
          */
         @Contract("_, _, _ -> this")
         @NotNull
-        public <T extends Observable> ButtonBuilder bind(@NotNull final T observed,
-                                                         @NotNull final Runnable binding,
-                                                         @NotNull final String... property) {
+        public <T extends Observable> ButtonBuilder bind(
+                @NotNull final T observed,
+                @NotNull final Runnable binding,
+                @NotNull final String... property) {
             BindingUtil.bind(observed, binding, property);
             return this;
         }
@@ -186,9 +181,7 @@ public final class ButtonPanelBuilder {
         @Contract("_, _, _ -> this")
         @NotNull
         public <T extends ClassObservable> ButtonBuilder bindClass(
-                final Class<T> clazz,
-                @NotNull final Runnable binding,
-                @NotNull final String... property) {
+                final Class<T> clazz, @NotNull final Runnable binding, @NotNull final String... property) {
             BindingUtil.bindClass(clazz, binding, property);
             return this;
         }
@@ -307,7 +300,6 @@ public final class ButtonPanelBuilder {
             return this;
         }
 
-
         /**
          * Set tooltip component.
          *
@@ -317,8 +309,7 @@ public final class ButtonPanelBuilder {
          */
         @Contract("_ -> this")
         @NotNull
-        public <T extends TooltipWindow> ButtonBuilder setTooltip(
-                @NotNull final T component) {
+        public <T extends TooltipWindow> ButtonBuilder setTooltip(@NotNull final T component) {
             TooltipUtil.createDefaultTooltip(button, component);
             button.setToolTipText(null);
             return this;
@@ -400,7 +391,8 @@ public final class ButtonPanelBuilder {
 
         private void setAccelerator(final String accelerator) {
             final Action clickAction = new ClickAction(button);
-            button.getInputMap(JButton.WHEN_IN_FOCUSED_WINDOW)
+            button
+                    .getInputMap(JButton.WHEN_IN_FOCUSED_WINDOW)
                     .put(KeyStroke.getKeyStroke(accelerator), accelerator);
             button.getActionMap().put(accelerator, clickAction);
         }

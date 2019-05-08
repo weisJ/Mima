@@ -21,9 +21,10 @@ public enum InstructionSet {
         @NotNull
         @Override
         public String[] getInstructions() {
-            final List<String> instructions = Arrays.stream(MimaInstruction.values())
-                    .map(MimaInstruction::toString)
-                    .collect(Collectors.toList());
+            final List<String> instructions =
+                    Arrays.stream(MimaInstruction.values())
+                            .map(MimaInstruction::toString)
+                            .collect(Collectors.toList());
             instructions.add("HALT");
             instructions.add("JMP");
             instructions.add("JMN");
@@ -37,12 +38,14 @@ public enum InstructionSet {
         @NotNull
         @Override
         public String[] getInstructions() {
-            final List<String> instructions = Arrays.stream(MimaXInstruction.values())
-                    .map(MimaXInstruction::toString)
-                    .collect(Collectors.toList());
-            instructions.addAll(Arrays.stream(MimaInstruction.values())
-                                        .map(MimaInstruction::toString)
-                                        .collect(Collectors.toList()));
+            final List<String> instructions =
+                    Arrays.stream(MimaXInstruction.values())
+                            .map(MimaXInstruction::toString)
+                            .collect(Collectors.toList());
+            instructions.addAll(
+                    Arrays.stream(MimaInstruction.values())
+                            .map(MimaInstruction::toString)
+                            .collect(Collectors.toList()));
             instructions.add("JMP");
             instructions.add("JMN");
             instructions.add("HALT");

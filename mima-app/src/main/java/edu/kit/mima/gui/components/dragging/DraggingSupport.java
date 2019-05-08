@@ -2,20 +2,8 @@ package edu.kit.mima.gui.components.dragging;
 
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JWindow;
-import javax.swing.SwingUtilities;
-import javax.swing.Timer;
-import javax.swing.UIManager;
-import java.awt.AWTEvent;
-import java.awt.BasicStroke;
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.MouseInfo;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.Window;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.AWTEventListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
@@ -42,48 +30,59 @@ public class DraggingSupport implements AWTEventListener {
     private boolean extended;
     private boolean paintDrag;
 
-
     public DraggingSupport(final Component component) {
         this(component, 1.0f, 1.0f);
     }
 
-    public DraggingSupport(final Component component, final float opacityInside,
-                           float opacityOutside) {
+    public DraggingSupport(
+            final Component component, final float opacityInside, final float opacityOutside) {
         this.component = component;
-        dragWindow = new JWindow() {
-            @Override
-            public void paint(@NotNull final Graphics g) {
-                setLocation(dragLocation);
-                if (extended) {
-                    g.drawImage(extendedImage, 2, 2, extendedImage.getWidth(this) - 4,
-                                extendedImage.getHeight(this) - 4, this);
-                    var g2 = (Graphics2D) g;
-                    g2.setStroke(new BasicStroke(2));
-                    g2.setColor(UIManager.getColor("Border.line2"));
-                    g2.drawRect(1, 1, getWidth() - 2, getHeight() - 2);
-                } else {
-                    g.drawImage(draggingImage, 0, 0, this);
-                }
-            }
-        };
+        dragWindow =
+                new JWindow() {
+                    @Override
+                    public void paint(@NotNull final Graphics g) {
+                        setLocation(dragLocation);
+                        if (extended) {
+                            g.drawImage(
+                                    extendedImage,
+                                    2,
+                                    2,
+                                    extendedImage.getWidth(this) - 4,
+                                    extendedImage.getHeight(this) - 4,
+                                    this);
+                            var g2 = (Graphics2D) g;
+                            g2.setStroke(new BasicStroke(2));
+                            g2.setColor(UIManager.getColor("Border.line2"));
+                            g2.drawRect(1, 1, getWidth() - 2, getHeight() - 2);
+                        } else {
+                            g.drawImage(draggingImage, 0, 0, this);
+                        }
+                    }
+                };
         Toolkit.getDefaultToolkit().addAWTEventListener(this, getAWTEventMask());
         dragWindow.setOpacity(opacityInside);
         dragWindow.setAlwaysOnTop(true);
         dragWindow.setFocusable(false);
         listenerList = new ArrayList<>();
 
-        timer = new Timer(10, e -> {
-            final Point p = MouseInfo.getPointerInfo().getLocation();
-            extended = !SwingUtilities.getWindowAncestor(component).getBounds().contains(
-                    p) && extendedImage != null;
-            dragWindow.setOpacity(extended ? opacityOutside : opacityInside);
-            timerTask(e, p);
-            notifyListeners(DragListener::onDrag, listenerList, p);
-        });
+        timer =
+                new Timer(
+                        10,
+                        e -> {
+                            final Point p = MouseInfo.getPointerInfo().getLocation();
+                            extended =
+                                    !SwingUtilities.getWindowAncestor(component).getBounds().contains(p)
+                                            && extendedImage != null;
+                            dragWindow.setOpacity(extended ? opacityOutside : opacityInside);
+                            timerTask(e, p);
+                            notifyListeners(DragListener::onDrag, listenerList, p);
+                        });
     }
 
-    protected <T> void notifyListeners(final BiConsumer<T, Point> consumer,
-                                       @NotNull final Collection<T> listeners, final Point point) {
+    protected <T> void notifyListeners(
+            final BiConsumer<T, Point> consumer,
+            @NotNull final Collection<T> listeners,
+            final Point point) {
         for (var listener : listeners) {
             if (listener != null) {
                 consumer.accept(listener, new Point(point));
@@ -222,7 +221,7 @@ public class DraggingSupport implements AWTEventListener {
     }
 
     @Override
-    public void eventDispatched(@NotNull AWTEvent event) {
+    public void eventDispatched(@NotNull final AWTEvent event) {
         if (event.getID() == MouseEvent.MOUSE_RELEASED) {
             showDrag(false);
         }

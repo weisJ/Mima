@@ -19,5 +19,6 @@ public interface TriFunction<T, K, R, S> {
      * @param third  third argument.
      * @return return value of function.
      */
-    @NotNull S apply(T first, K second, R third);
+    @NotNull
+    S apply(T first, K second, R third);
 }

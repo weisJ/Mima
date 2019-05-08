@@ -3,8 +3,8 @@ package edu.kit.mima.gui.components.tabframe;
 import edu.kit.mima.gui.components.alignment.Alignment;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.Action;
-import java.awt.Dimension;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * Placeholder PopupComponent.

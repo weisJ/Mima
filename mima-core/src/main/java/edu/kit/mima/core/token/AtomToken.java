@@ -27,10 +27,8 @@ public class AtomToken<T> extends ValueTuple<T, TokenType> implements Token<T> {
      * @param index   index of token
      * @param filePos position in file
      */
-    public AtomToken(@NotNull final TokenType type,
-                     @NotNull final T value,
-                     final int index,
-                     final int filePos) {
+    public AtomToken(
+            @NotNull final TokenType type, @NotNull final T value, final int index, final int filePos) {
         super(value, type);
         this.index = index;
         this.filePos = filePos;
@@ -76,7 +74,7 @@ public class AtomToken<T> extends ValueTuple<T, TokenType> implements Token<T> {
     @NotNull
     @Override
     @SuppressWarnings("unchecked")
-    public Stream<Token> stream(boolean includeChildren) {
+    public Stream<Token> stream(final boolean includeChildren) {
         Stream<Token> stream = Stream.of(this);
         if (includeChildren && getValue() instanceof Token) {
             stream = Stream.concat(stream, ((Token) (getValue())).stream());
@@ -110,8 +108,7 @@ public class AtomToken<T> extends ValueTuple<T, TokenType> implements Token<T> {
             return false;
         }
         final AtomToken<?> atomToken = (AtomToken<?>) obj;
-        return getType() == atomToken.getType()
-                && Objects.equals(getValue(), atomToken.getValue());
+        return getType() == atomToken.getType() && Objects.equals(getValue(), atomToken.getValue());
     }
 
     @NotNull

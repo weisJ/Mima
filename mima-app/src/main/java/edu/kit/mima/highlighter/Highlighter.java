@@ -2,7 +2,7 @@ package edu.kit.mima.highlighter;
 
 import edu.kit.mima.api.history.FileHistoryObject;
 
-import javax.swing.JTextPane;
+import javax.swing.*;
 
 /**
  * Highlighter for {@link edu.kit.mima.gui.components.editor.Editor}.

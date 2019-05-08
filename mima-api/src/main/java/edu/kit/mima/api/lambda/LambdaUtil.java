@@ -35,7 +35,6 @@ public final class LambdaUtil {
         return (t, k) -> f.apply(createRecursive(f)).accept(t, k);
     }
 
-
     /**
      * Wrap checked function to normal function.
      *
@@ -103,15 +102,15 @@ public final class LambdaUtil {
 
     @NotNull
     @Contract(pure = true)
-    public static <T, K> Consumer<K> reduceFirst(@NotNull final BiConsumer<T, K> cons,
-                                                 final T first) {
+    public static <T, K> Consumer<K> reduceFirst(
+            @NotNull final BiConsumer<T, K> cons, final T first) {
         return (K k) -> cons.accept(first, k);
     }
 
     @NotNull
     @Contract(pure = true)
-    public static <T, K> Consumer<T> reduceSecond(@NotNull final BiConsumer<T, K> cons,
-                                                  final K second) {
+    public static <T, K> Consumer<T> reduceSecond(
+            @NotNull final BiConsumer<T, K> cons, final K second) {
         return (T t) -> cons.accept(t, second);
     }
 
@@ -126,6 +125,4 @@ public final class LambdaUtil {
     public static <T, K> BiConsumer<T, K> liftSecond(@NotNull final Consumer<T> cons) {
         return (T t, K k) -> cons.accept(t);
     }
-
-
 }

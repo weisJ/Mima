@@ -1,6 +1,6 @@
 package edu.kit.mima.gui.laf;
 
-import javax.swing.UIManager;
+import javax.swing.*;
 
 /**
  * {@link javax.swing.UIManager.LookAndFeelInfo} for {@link CustomDarculaLightLaf}.

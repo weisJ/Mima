@@ -20,8 +20,7 @@ public class SubscriptionService<T> {
         this.owner = owner == null ? new Class[0] : owner;
     }
 
-
-    void setSendDelegate(SubscriptionDelegate<T> sendDelegate) {
+    void setSendDelegate(final SubscriptionDelegate<T> sendDelegate) {
         this.sendDelegate = sendDelegate;
     }
 
@@ -32,20 +31,24 @@ public class SubscriptionService<T> {
      * @param value          the value of the event.
      * @param invoker        the invoker.
      */
-    public final void notifyEvent(final String identification, T value, Object invoker) {
+    public final void notifyEvent(final String identification, final T value, final Object invoker) {
         /*
          * This function may not be overwritten to prevent non subscription services to
          * send notifications.
          */
-        Optional.ofNullable(sendDelegate).ifPresent(
-                sd -> sd.sendNotify(identification, value, this, owner, invoker));
+        Optional.ofNullable(sendDelegate)
+                .ifPresent(sd -> sd.sendNotify(identification, value, this, owner, invoker));
     }
 
     void initService(final String... identifiers) {
     }
 
     interface SubscriptionDelegate<T> {
-        void sendNotify(final String identification, T value, final SubscriptionService<T> service,
-                        final Class[] serviceOwner, final Object invoker);
+        void sendNotify(
+                final String identification,
+                T value,
+                final SubscriptionService<T> service,
+                final Class[] serviceOwner,
+                final Object invoker);
     }
 }

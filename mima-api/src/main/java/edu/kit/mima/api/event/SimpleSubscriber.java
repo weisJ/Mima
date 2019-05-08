@@ -13,8 +13,8 @@ public class SimpleSubscriber extends AbstractSubscriber {
     private final SubscriberEventHandler handler;
 
     @Contract(pure = true)
-    public SimpleSubscriber(final Class classFilter, final Object invokerFilter,
-                            final SubscriberEventHandler handler) {
+    public SimpleSubscriber(
+            final Class classFilter, final Object invokerFilter, final SubscriberEventHandler handler) {
         super(classFilter, invokerFilter);
         this.handler = handler;
     }
@@ -35,7 +35,7 @@ public class SimpleSubscriber extends AbstractSubscriber {
     }
 
     @Override
-    public <T> void notifySubscription(String identifier, T value) {
+    public <T> void notifySubscription(final String identifier, final T value) {
         handler.notifySubscription(identifier, value);
     }
 }

@@ -13,18 +13,14 @@ import edu.kit.mima.preferences.PropertyKey;
 import edu.kit.mima.preferences.UserPreferenceChangedListener;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyledDocument;
 import javax.swing.text.StyledEditorKit;
 import javax.swing.text.ViewFactory;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -44,8 +40,8 @@ import java.util.Set;
  * @author Jannis Weis
  * @since 2018
  */
-public class Editor extends NumberedTextPane implements UserPreferenceChangedListener,
-                                                        AutoCloseable {
+public class Editor extends NumberedTextPane
+        implements UserPreferenceChangedListener, AutoCloseable {
 
     private static final Preferences PREF = Preferences.getInstance();
     @NotNull
@@ -69,37 +65,40 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
 
         final Font font = PREF.readFont(PropertyKey.EDITOR_FONT);
         breakpoints = new HashSet<>();
-        addIndexListener(index -> {
-            if (hasComponentAt(index)) {
-                pane.removeMark(index, "break");
-                removeComponentAt(index);
-                breakpoints.remove(new SimpleBreakpoint(index));
-            } else {
-                var comp = new BreakpointComponent(index);
-                pane.markLine(index, "break", comp.getLineColor());
-                addComponentAt(comp, index);
-                breakpoints.add(new SimpleBreakpoint(index));
-            }
-        });
+        addIndexListener(
+                index -> {
+                    if (hasComponentAt(index)) {
+                        pane.removeMark(index, "break");
+                        removeComponentAt(index);
+                        breakpoints.remove(new SimpleBreakpoint(index));
+                    } else {
+                        var comp = new BreakpointComponent(index);
+                        pane.markLine(index, "break", comp.getLineColor());
+                        addComponentAt(comp, index);
+                        breakpoints.add(new SimpleBreakpoint(index));
+                    }
+                });
 
         pane.setFont(font);
-        pane.setEditorKit(new StyledEditorKit() {
-            @NotNull
-            public ViewFactory getViewFactory() {
-                return new HighlightViewFactory();
-            }
-        });
-        pane.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
-            }
+        pane.setEditorKit(
+                new StyledEditorKit() {
+                    @NotNull
+                    public ViewFactory getViewFactory() {
+                        return new HighlightViewFactory();
+                    }
+                });
+        pane.addMouseListener(
+                new MouseAdapter() {
+                    @Override
+                    public void mouseEntered(final MouseEvent e) {
+                        setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
+                    }
 
-            @Override
-            public void mouseExited(MouseEvent e) {
-                setCursor(Cursor.getDefaultCursor());
-            }
-        });
+                    @Override
+                    public void mouseExited(final MouseEvent e) {
+                        setCursor(Cursor.getDefaultCursor());
+                    }
+                });
         historyController = new TextHistoryController(pane, 100);
         editEventHandlers = new ArrayList<>();
         repaint = true;
@@ -130,7 +129,6 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
         update();
     }
 
-
     /**
      * Update the document.
      */
@@ -143,10 +141,11 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
         historyController.setActive(false);
         final int caret = pane.getCaretPosition();
         if (highlighter != null) {
-            var fhs = historyController.isActive()
-                      ? historyController.getHistory().getCurrent()
-                      : new FileHistoryObject(getPane(), 0, getText(), "",
-                                              FileHistoryObject.ChangeType.INSERT);
+            var fhs =
+                    historyController.isActive()
+                            ? historyController.getHistory().getCurrent()
+                            : new FileHistoryObject(
+                            getPane(), 0, getText(), "", FileHistoryObject.ChangeType.INSERT);
             highlighter.updateHighlighting(pane, fhs);
         }
         setCaretPosition(caret);
@@ -187,7 +186,6 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
     public boolean canRedo() {
         return historyController.canRedo();
     }
-
 
     /**
      * Insert String into text.
@@ -258,7 +256,6 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
         editEventHandlers.add(handler);
     }
 
-
     @Override
     public synchronized void addMouseListener(final MouseListener l) {
         super.addMouseListener(l);
@@ -301,9 +298,7 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
         }
         final int pos = getCaretPosition();
         try {
-            historyController.addReplaceHistory(0,
-                                                pane.getText().length(),
-                                                text);
+            historyController.addReplaceHistory(0, pane.getText().length(), text);
         } catch (@NotNull final BadLocationException ignored) {
         }
         historyController.setActive(false);
@@ -324,12 +319,12 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
     }
 
     @Override
-    public synchronized void addFocusListener(FocusListener l) {
+    public synchronized void addFocusListener(final FocusListener l) {
         pane.addFocusListener(l);
     }
 
     @Override
-    public synchronized void removeFocusListener(FocusListener l) {
+    public synchronized void removeFocusListener(final FocusListener l) {
         pane.removeFocusListener(l);
     }
 
@@ -352,8 +347,8 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
     }
 
     /**
-     * Set the limit of characters per line. The Editor will then be drawing a line at this
-     * position. A value <= 0 signals that no line should be drawn.
+     * Set the limit of characters per line. The Editor will then be drawing a line at this position.
+     * A value <= 0 signals that no line should be drawn.
      *
      * @param limit character limit
      */
@@ -411,22 +406,20 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
     @NotNull
     public BufferedImage createPreviewImage() {
         var b = pane.getBounds();
-        BufferedImage image = new BufferedImage(b.width / 2,
-                                                Math.min(b.height / 4, b.width),
-                                                BufferedImage.TYPE_INT_ARGB);
+        BufferedImage image =
+                new BufferedImage(
+                        b.width / 2, Math.min(b.height / 4, b.width), BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = (Graphics2D) image.getGraphics();
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                           RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                           RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(
+                RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
         pane.paint(g);
-        BufferedImage scaledImage = new BufferedImage(image.getWidth() / 2,
-                                                      image.getHeight() / 2,
-                                                      BufferedImage.TYPE_INT_ARGB);
+        BufferedImage scaledImage =
+                new BufferedImage(image.getWidth() / 2, image.getHeight() / 2, BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics2D = scaledImage.createGraphics();
         AffineTransform xform = AffineTransform.getScaleInstance(0.5, 0.5);
-        graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                                    RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        graphics2D.setRenderingHint(
+                RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
         graphics2D.drawImage(image, xform, null);
         graphics2D.dispose();
         return scaledImage;

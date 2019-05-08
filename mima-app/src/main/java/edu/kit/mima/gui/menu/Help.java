@@ -8,15 +8,10 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JEditorPane;
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -37,7 +32,8 @@ public final class Help extends JFrame {
 
     private static final Charset ENCODING = StandardCharsets.UTF_8;
     private static final String HELP_LOCAL = "Help.md";
-    private static final String HELP_WEB = "https://raw.githubusercontent.com/weisJ/Mima/master/README.md";
+    private static final String HELP_WEB =
+            "https://raw.githubusercontent.com/weisJ/Mima/master/README.md";
     private static final int MAXIMUM_ATTEMPTS = 20;
 
     private static final int CONNECTION_TIMEOUT = 3000;
@@ -47,14 +43,14 @@ public final class Help extends JFrame {
     private static final Dimension SIZE = Toolkit.getDefaultToolkit().getScreenSize();
 
     @NotNull
-    private static Help instance = new Help();
+    private static final Help instance = new Help();
 
     @Nullable
     private Thread loadSource;
     private boolean loadedFromWeb;
 
-    private JEditorPane panel;
-    private HTMLEditorKit kit;
+    private final JEditorPane panel;
+    private final HTMLEditorKit kit;
     @Nullable
     private String source;
 
@@ -62,8 +58,9 @@ public final class Help extends JFrame {
      * Construct the Help Screen
      */
     private Help() {
-        setIconImage(Toolkit.getDefaultToolkit()
-                             .getImage(getClass().getClassLoader().getResource("images/mima.png")));
+        setIconImage(
+                Toolkit.getDefaultToolkit()
+                        .getImage(getClass().getClassLoader().getResource("images/mima.png")));
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         setSize((int) SIZE.getHeight() / 3, (int) SIZE.getWidth() / 3);
         setTitle("Help");
@@ -115,12 +112,23 @@ public final class Help extends JFrame {
         getInstance().setVisible(false);
     }
 
+    /*
+     * Render the markdown to HTML
+     */
+    private static String renderMarkdown(final String text) {
+        final Parser parser = Parser.builder().build();
+        final Node document = parser.parse(text);
+        final HtmlRenderer renderer = HtmlRenderer.builder().build();
+        return renderer.render(document);
+    }
+
     private void showHtml(final String htmlSource) {
-        SwingUtilities.invokeLater(() -> {
-            var doc = kit.createDefaultDocument();
-            panel.setDocument(doc);
-            panel.setText("<html><body>" + htmlSource + "</body></html>");
-        });
+        SwingUtilities.invokeLater(
+                () -> {
+                    var doc = kit.createDefaultDocument();
+                    panel.setDocument(doc);
+                    panel.setText("<html><body>" + htmlSource + "</body></html>");
+                });
     }
 
     /**
@@ -138,16 +146,6 @@ public final class Help extends JFrame {
     }
 
     /*
-     * Render the markdown to HTML
-     */
-    private static String renderMarkdown(final String text) {
-        final Parser parser = Parser.builder().build();
-        final Node document = parser.parse(text);
-        final HtmlRenderer renderer = HtmlRenderer.builder().build();
-        return renderer.render(document);
-    }
-
-    /*
      * Load ReadMe from github
      */
     private @Nullable
@@ -158,9 +156,8 @@ public final class Help extends JFrame {
             urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
             urlConnection.setReadTimeout(READ_TIMEOUT);
 
-            try (final BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(urlConnection.getInputStream(), ENCODING)
-            )) {
+            try (final BufferedReader reader =
+                         new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), ENCODING))) {
                 final String markdown = reader.lines().collect(Collectors.joining("\n"));
                 loadedFromWeb = true;
                 return markdown;
@@ -175,9 +172,11 @@ public final class Help extends JFrame {
      */
     @Nullable
     private String loadFallback() {
-        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(
-                Objects.requireNonNull(
-                        getClass().getClassLoader().getResourceAsStream(HELP_LOCAL)), ENCODING))) {
+        try (final BufferedReader reader =
+                     new BufferedReader(
+                             new InputStreamReader(
+                                     Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(HELP_LOCAL)),
+                                     ENCODING))) {
             return reader.lines().collect(Collectors.joining("\n"));
         } catch (@NotNull final IOException e) {
             return null;

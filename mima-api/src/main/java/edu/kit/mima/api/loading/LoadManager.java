@@ -52,5 +52,4 @@ public interface LoadManager {
      * @param errorMessage fail message
      */
     void onFail(String errorMessage);
-
 }

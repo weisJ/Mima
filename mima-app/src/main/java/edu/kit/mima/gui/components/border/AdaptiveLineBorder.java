@@ -1,7 +1,7 @@
 package edu.kit.mima.gui.components.border;
 
-import javax.swing.UIManager;
-import java.awt.Color;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * @author Jannis Weis
@@ -11,8 +11,8 @@ public class AdaptiveLineBorder extends MutableLineBorder {
 
     private final String colorKey;
 
-    public AdaptiveLineBorder(final int top, final int left, final int bottom, final int right,
-                              final String color) {
+    public AdaptiveLineBorder(
+            final int top, final int left, final int bottom, final int right, final String color) {
         super(top, left, bottom, right, UIManager.getColor(color));
         this.colorKey = color;
     }

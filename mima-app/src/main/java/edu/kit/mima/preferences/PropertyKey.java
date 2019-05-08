@@ -9,7 +9,6 @@ import org.jetbrains.annotations.Contract;
  * @since 2018
  */
 public enum PropertyKey {
-
     THEME("theme.name", PropertyType.STRING),
     THEME_EDITOR("theme.editor", PropertyType.STRING),
     THEME_PATH("theme.path", PropertyType.STRING),

@@ -8,22 +8,9 @@ import org.jetbrains.annotations.NotNull;
 import org.pbjar.jxlayer.plaf.ext.transform.DefaultTransformModel;
 import org.pbjar.jxlayer.plaf.ext.transform.TransformUtils;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.Icon;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.Timer;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.LayoutManager;
-import java.awt.Point;
-import java.awt.Rectangle;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.geom.Point2D;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,7 +24,7 @@ public class TabFrameLayout implements LayoutManager {
 
     private static final Action EMPTY_ACTION = new AbstractAction() {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(final ActionEvent e) {
         }
     };
     private final TabArea bottomTabs = new TabArea();
@@ -52,9 +39,6 @@ public class TabFrameLayout implements LayoutManager {
     private final MutableLineBorder topBorder;
     private final MutableLineBorder bottomBorder;
     private final MutableLineBorder rightBorder;
-
-    private final DefaultTransformModel leftTransformModel;
-    private final DefaultTransformModel rightTransformModel;
 
     /**
      * The width/height of the frame.
@@ -71,14 +55,14 @@ public class TabFrameLayout implements LayoutManager {
     public TabFrameLayout(@NotNull final TabFrame tabFrame) {
         this.tabFrame = tabFrame;
 
-        rightTransformModel = new DefaultTransformModel();
+        DefaultTransformModel rightTransformModel = new DefaultTransformModel();
         rightTransformModel.setQuadrantRotation(1);
-        rightTransformModel.setScaleToPreferredSize(false);
+        rightTransformModel.setScaleToPreferredSize(true);
         rotatePaneRight = TransformUtils.createTransformJXLayer(rightTabs, rightTransformModel);
 
-        leftTransformModel = new DefaultTransformModel();
+        DefaultTransformModel leftTransformModel = new DefaultTransformModel();
         leftTransformModel.setQuadrantRotation(3);
-        leftTransformModel.setScaleToPreferredSize(false);
+        leftTransformModel.setScaleToPreferredSize(true);
         rotatePaneLeft = TransformUtils.createTransformJXLayer(leftTabs, leftTransformModel);
 
         tabFrame.add(content);
@@ -100,13 +84,6 @@ public class TabFrameLayout implements LayoutManager {
 
         tabsMap = new HashMap<>();
         compsMap = new HashMap<>();
-
-        new Timer(100, e -> {
-            //            transformModel2.setRotation(transformModel2.getRotation() + 0.1);
-            rotatePaneLeft.repaint();
-            System.out.println(rotatePaneLeft.getBounds());
-            System.out.println(leftTabs.getBounds());
-        });//.start();
     }
 
     public void setLineColor(final Color lineColor) {
@@ -139,7 +116,7 @@ public class TabFrameLayout implements LayoutManager {
 
         c.setCloseAction(new AbstractAction() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(final ActionEvent e) {
                 tabComponent.setSelected(false);
                 notifySelectChange(tabComponent);
             }
@@ -201,31 +178,31 @@ public class TabFrameLayout implements LayoutManager {
 
     @NotNull
     @Override
-    public Dimension preferredLayoutSize(Container parent) {
+    public Dimension preferredLayoutSize(final Container parent) {
         var b = content.getPreferredSize();
         return new Dimension(leftTabs.getWidth() + rightTabs.getWidth() + b.width,
-                             topTabs.getHeight() + bottomTabs.getHeight() + b.height);
+                topTabs.getHeight() + bottomTabs.getHeight() + b.height);
     }
 
 
     @NotNull
     @Override
-    public Dimension minimumLayoutSize(Container parent) {
+    public Dimension minimumLayoutSize(final Container parent) {
         var b = content.getMinimumSize();
         return new Dimension(leftTabs.getWidth() + rightTabs.getWidth() + b.width,
-                             topTabs.getHeight() + bottomTabs.getHeight() + b.height);
+                topTabs.getHeight() + bottomTabs.getHeight() + b.height);
     }
 
     @Override
-    public void addLayoutComponent(String name, Component comp) {
+    public void addLayoutComponent(final String name, final Component comp) {
     }
 
     @Override
-    public void removeLayoutComponent(Component comp) {
+    public void removeLayoutComponent(final Component comp) {
     }
 
     @Override
-    public void layoutContainer(@NotNull Container parent) {
+    public void layoutContainer(@NotNull final Container parent) {
         var dim = parent.getBounds().getSize();
         int topSize = tabsForAlignment(Alignment.NORTH).size() + tabsForAlignment(
                 Alignment.NORTH_EAST).size();
@@ -240,34 +217,17 @@ public class TabFrameLayout implements LayoutManager {
         layoutLeftTab(dim, leftSize);
         layoutRightTab(dim, rightSize);
 
-        /*
-         * In case the dimensions are uneven we need to shift the rotation center to prevent the
-         * rotated pane from being shifted over half a unit. Usually this wouldn't be a major
-         * problem but it made the line borders look too thin compared to the top and bottom ones.
-         *
-         * I only partly understand why the offsets need to be different for the left and right
-         * panel, but it already took far too long to figure out what was causing the issue, so I
-         *  won't be looking into this any further.
-         */
-        double d = rightTabs.getWidth() % 2 == 1 ? 1 : 0;
-        rightTransformModel.setRotationCenter(
-                new Point2D.Double(rightTabs.getHeight() / 2.0, (rightTabs.getWidth() + d) / 2.0));
-        rightTransformModel.invalidate();
-        leftTransformModel.setRotationCenter(
-                new Point2D.Double((leftTabs.getHeight() + d) / 2.0, leftTabs.getWidth() / 2.0));
-        leftTransformModel.invalidate();
-
         leftBorder.setRight(topSize > 0 ? 0 : 1);
         leftBorder.setLeft(bottomSize > 0 ? 0 : 1);
         rightBorder.setRight(bottomSize > 0 ? 0 : 1);
         rightBorder.setLeft(topSize > 0 ? 0 : 1);
 
         content.setBounds(rotatePaneLeft.getWidth(), topTabs.getHeight(),
-                          dim.width - rotatePaneLeft.getWidth() - rotatePaneRight.getWidth(),
-                          dim.height - topTabs.getHeight() - bottomTabs.getHeight());
+                dim.width - rotatePaneLeft.getWidth() - rotatePaneRight.getWidth(),
+                dim.height - topTabs.getHeight() - bottomTabs.getHeight());
     }
 
-    private void layoutTopTab(Dimension dim, int topSize, int leftSize, int rightSize) {
+    private void layoutTopTab(final Dimension dim, final int topSize, final int leftSize, final int rightSize) {
         if (topSize > 0) {
             topTabs.setBounds(0, 0, dim.width, size);
             layoutHorizontal(dim, Alignment.NORTH, Alignment.NORTH_EAST, 0, leftSize, rightSize);
@@ -276,7 +236,7 @@ public class TabFrameLayout implements LayoutManager {
         }
     }
 
-    private void layoutBottomTab(Dimension dim, int bottomSize, int leftSize, int rightSize) {
+    private void layoutBottomTab(final Dimension dim, final int bottomSize, final int leftSize, final int rightSize) {
         if (bottomSize > 0) {
             bottomTabs.setBounds(0, dim.height - size, dim.width, size);
             layoutHorizontal(dim, Alignment.SOUTH_WEST, Alignment.SOUTH, 1, leftSize, rightSize);
@@ -296,10 +256,12 @@ public class TabFrameLayout implements LayoutManager {
         }
     }
 
-    private void layoutLeftTab(Dimension dim, int leftSize) {
+    private void layoutLeftTab(final Dimension dim, final int leftSize) {
         if (leftSize > 0) {
             rotatePaneLeft.setBounds(0, topTabs.getHeight(), size,
-                                     dim.height - topTabs.getHeight() - bottomTabs.getHeight() + 1);
+                    dim.height - topTabs.getHeight() - bottomTabs.getHeight()
+                            + (dim.height - topTabs.getHeight() - bottomTabs.getHeight())
+                                      % 2);
             leftTabs.setPreferredSize(
                     new Dimension(rotatePaneLeft.getHeight(), rotatePaneLeft.getWidth()));
             leftTabs.setSize(leftTabs.getPreferredSize());
@@ -316,17 +278,17 @@ public class TabFrameLayout implements LayoutManager {
         }
     }
 
-    private void layoutRightTab(Dimension dim, int rightSize) {
+    private void layoutRightTab(final Dimension dim, final int rightSize) {
         if (rightSize > 0) {
-            rotatePaneRight.setBounds(dim.width - size, topTabs.getHeight() - 1, size,
-                                      dim.height - topTabs.getHeight() - bottomTabs.getHeight()
-                                      + 2);
+            rotatePaneRight.setBounds(dim.width - size, topTabs.getHeight(), size,
+                    dim.height - topTabs.getHeight() - bottomTabs.getHeight()
+                            + (dim.height - topTabs.getHeight() - bottomTabs.getHeight()) % 2);
             rightTabs.setPreferredSize(
                     new Dimension(rotatePaneRight.getHeight(), rotatePaneRight.getWidth()));
             rightTabs.setSize(rightTabs.getPreferredSize());
             var start = new Point(0, 0);
             int topEnd = layoutTabArea(start, Alignment.EAST, true, size - 1);
-            start.x = rightTabs.getWidth() - 1;
+            start.x = rightTabs.getWidth();
             var bottomStart = layoutTabArea(start, Alignment.SOUTH_EAST, false, size - 1);
             if (bottomStart < topEnd) {
                 shift(topEnd - bottomStart, Alignment.SOUTH_EAST);
@@ -414,7 +376,11 @@ public class TabFrameLayout implements LayoutManager {
         return compsMap;
     }
 
-    private class TabArea extends JPanel {
+    public void setContent(final JComponent c) {
+        content.setContentPane(c);
+    }
+
+    private final class TabArea extends JPanel {
 
         private TabArea() {
             setLayout(null);
@@ -422,15 +388,11 @@ public class TabFrameLayout implements LayoutManager {
         }
 
         @Override
-        public void paint(@NotNull Graphics g) {
+        public void paint(@NotNull final Graphics g) {
             g.setColor(getBackground());
             g.fillRect(0, 0, getWidth() - 1, getHeight() - 1);
             paintChildren(g);
             paintBorder(g);
         }
-    }
-
-    public void setContent(JComponent c) {
-        content.setContentPane(c);
     }
 }

@@ -4,7 +4,7 @@ import edu.kit.mima.core.parsing.ParserException;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Point;
+import java.awt.*;
 
 /**
  * The CharInputStream reads single characters from a line and is responsible for keeping track in
@@ -86,7 +86,6 @@ public class CharInputStream {
     public void error(final String message) {
         throw new ParserException(message, line, col, position);
     }
-
 
     /**
      * Get current position in text file.

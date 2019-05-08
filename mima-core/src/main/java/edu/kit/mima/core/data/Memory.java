@@ -18,7 +18,8 @@ public interface Memory<T> {
      * @param index index in memory
      * @return memory at index
      */
-    @NotNull T loadValue(int index);
+    @NotNull
+    T loadValue(int index);
 
     /**
      * Store value to memory.

@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.text.BadLocationException;
-import java.awt.Font;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -22,14 +22,16 @@ import java.awt.event.ActionListener;
  * @since 2018
  */
 public enum EditorHotKeys implements ActionListener {
-
     COMMENT_TOGGLE("control 7") {
         @Override
         public void actionPerformed(final ActionEvent e) {
-            DocumentUtil.transformLine(s -> {
-                final String comment = String.valueOf(Punctuation.COMMENT);
-                return s.trim().startsWith(comment) ? s.replaceFirst(comment, "") : comment + s;
-            }, editor.getCaretPosition(), editor.getTextPane().getDocument());
+            DocumentUtil.transformLine(
+                    s -> {
+                        final String comment = String.valueOf(Punctuation.COMMENT);
+                        return s.trim().startsWith(comment) ? s.replaceFirst(comment, "") : comment + s;
+                    },
+                    editor.getCaretPosition(),
+                    editor.getTextPane().getDocument());
         }
     },
     STRING_CREATE("shift NUMBER_SIGN") {
@@ -45,7 +47,7 @@ public enum EditorHotKeys implements ActionListener {
     STRING_DELETE("BACK_SPACE") {
         @Override
         public void actionPerformed(final ActionEvent e) {
-            //Todo
+            // Todo
         }
     },
     FORMAT("control alt F") {
@@ -81,7 +83,6 @@ public enum EditorHotKeys implements ActionListener {
         }
     };
 
-
     private static final Preferences pref = Preferences.getInstance();
     private static Editor editor;
     private final String accelerator;
@@ -95,7 +96,7 @@ public enum EditorHotKeys implements ActionListener {
         EditorHotKeys.editor = editor;
     }
 
-    protected void changeFontSize(int increment) {
+    protected void changeFontSize(final int increment) {
         final Font font = pref.readFont(PropertyKey.EDITOR_FONT);
         final Font newFont = font.deriveFont((float) font.getSize() + increment);
         pref.saveFont(PropertyKey.EDITOR_FONT, newFont);

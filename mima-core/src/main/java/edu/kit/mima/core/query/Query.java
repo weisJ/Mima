@@ -17,8 +17,8 @@ public interface Query<T> {
      * Get results in query where the outcome of the function and the compare value are. equal
      *
      * @param function Function which takes in a value of the type of this query
-     * @param compare  compare value. Should be the same type as the outcome of the function, but
-     *                 can be of any type (if the query result should be empty)
+     * @param compare  compare value. Should be the same type as the outcome of the function, but can
+     *                 be of any type (if the query result should be empty)
      * @param <K>      Type of function return value
      * @return QueryResult
      */
@@ -28,8 +28,8 @@ public interface Query<T> {
      * Get results in query where the outcome of the function and the compare value are not equal.
      *
      * @param function Function which takes in a value of the type of this query
-     * @param compare  compare value. Should be the same type as the outcome of the function, but
-     *                 can be of any type (if the query result should contain all values)
+     * @param compare  compare value. Should be the same type as the outcome of the function, but can
+     *                 be of any type (if the query result should contain all values)
      * @param <K>      Type of function return value
      * @return QueryResult
      */
@@ -41,7 +41,8 @@ public interface Query<T> {
      * @param predicate Predicate that takes in the same type as this query type
      * @return QueryResult
      */
-    @NotNull QueryResult<T> where(Predicate<T> predicate);
+    @NotNull
+    QueryResult<T> where(Predicate<T> predicate);
 
     /**
      * Get the results for which the predicate returns false.
@@ -49,14 +50,16 @@ public interface Query<T> {
      * @param predicate Predicate that takes in the same type as this query type
      * @return QueryResult
      */
-    @NotNull QueryResult<T> whereNot(Predicate<T> predicate);
+    @NotNull
+    QueryResult<T> whereNot(Predicate<T> predicate);
 
     /**
      * Get a query result with all values.
      *
      * @return QueryResult
      */
-    @NotNull QueryResult<T> all();
+    @NotNull
+    QueryResult<T> all();
 
     /**
      * Reset query for further use.

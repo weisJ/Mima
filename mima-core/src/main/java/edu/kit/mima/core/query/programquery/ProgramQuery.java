@@ -72,30 +72,26 @@ public class ProgramQuery implements Query<Token> {
      *
      * @param joiningFunction new Joining Function
      */
-    //@formatter:off
-    /* default */ void setJoiningFunction(final BiFunction<Predicate<Token>,
-                                                           Predicate<Token>,
-                                                           Predicate<Token>> joiningFunction) {
-        //@formatter:on
+    // @formatter:off
+    /* default */ void setJoiningFunction(
+            final BiFunction<Predicate<Token>, Predicate<Token>, Predicate<Token>> joiningFunction) {
+        // @formatter:on
         this.joiningFunction = joiningFunction;
     }
 
-
     @NotNull
     @Override
-    public <K> QueryResult<Token> whereEqual(@NotNull final Function<Token, K> function,
-                                             final K compare) {
-        filter = joiningFunction
-                .apply(filter, item -> Objects.equals(function.apply(item), compare));
+    public <K> QueryResult<Token> whereEqual(
+            @NotNull final Function<Token, K> function, final K compare) {
+        filter = joiningFunction.apply(filter, item -> Objects.equals(function.apply(item), compare));
         return new ProgramQueryResult(this);
     }
 
     @NotNull
     @Override
-    public <K> QueryResult<Token> whereNotEqual(@NotNull final Function<Token, K> function,
-                                                final K compare) {
-        filter = joiningFunction
-                .apply(filter, item -> !Objects.equals(function.apply(item), compare));
+    public <K> QueryResult<Token> whereNotEqual(
+            @NotNull final Function<Token, K> function, final K compare) {
+        filter = joiningFunction.apply(filter, item -> !Objects.equals(function.apply(item), compare));
         return new ProgramQueryResult(this);
     }
 

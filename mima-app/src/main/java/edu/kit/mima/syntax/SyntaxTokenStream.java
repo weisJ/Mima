@@ -27,17 +27,20 @@ public class SyntaxTokenStream extends TokenStream {
     }
 
     @Override
-    public @Nullable SyntaxToken next() {
+    public @Nullable
+    SyntaxToken next() {
         return (SyntaxToken) super.next();
     }
 
     @Override
-    public @Nullable SyntaxToken peek() {
+    public @Nullable
+    SyntaxToken peek() {
         return (SyntaxToken) super.peek();
     }
 
     @Override
-    protected @Nullable SyntaxToken readNext() {
+    protected @Nullable
+    SyntaxToken readNext() {
         readWhile(c -> isWhitespace(c) && c != NEW_LINE);
         if (input.isEmpty()) {
             return null;
@@ -46,8 +49,8 @@ public class SyntaxTokenStream extends TokenStream {
         SyntaxToken token = null;
         if (c == NEW_LINE) {
             input.next();
-            token = new AtomSyntaxToken<>(TokenType.NEW_LINE, NEW_LINE,
-                                          SyntaxColor.TEXT, getPosition(), 1);
+            token =
+                    new AtomSyntaxToken<>(TokenType.NEW_LINE, NEW_LINE, SyntaxColor.TEXT, getPosition(), 1);
         } else if (c == Punctuation.COMMENT) {
             token = readComment();
         } else if (isDigitStart(c)) {
@@ -61,14 +64,15 @@ public class SyntaxTokenStream extends TokenStream {
         } else if (isPunctuationChar(c)) {
             final int index = getPosition();
             input.next();
-            //Needs further processing to determine Color
-            token = new AtomSyntaxToken<>(TokenType.PUNCTUATION, String.valueOf(c),
-                                          SyntaxColor.TEXT, index, 1);
+            // Needs further processing to determine Color
+            token =
+                    new AtomSyntaxToken<>(
+                            TokenType.PUNCTUATION, String.valueOf(c), SyntaxColor.TEXT, index, 1);
         }
         if (token == null) {
             input.next();
-            return new AtomSyntaxToken<>(TokenType.ERROR, String.valueOf(c),
-                                         SyntaxColor.TEXT, getPosition(), 1);
+            return new AtomSyntaxToken<>(
+                    TokenType.ERROR, String.valueOf(c), SyntaxColor.TEXT, getPosition(), 1);
         } else {
             return token;
         }
@@ -84,8 +88,8 @@ public class SyntaxTokenStream extends TokenStream {
             comment += input.next();
         }
         final int stopIndex = getPosition();
-        return new AtomSyntaxToken<>(TokenType.COMMENT, comment, SyntaxColor.COMMENT,
-                                     startIndex, stopIndex - startIndex);
+        return new AtomSyntaxToken<>(
+                TokenType.COMMENT, comment, SyntaxColor.COMMENT, startIndex, stopIndex - startIndex);
     }
 
     @NotNull
@@ -95,8 +99,8 @@ public class SyntaxTokenStream extends TokenStream {
         String number = "" + input.next();
         number += readWhile(TokenStream::isDigit);
         final int stopIndex = getPosition();
-        return new AtomSyntaxToken<>(TokenType.NUMBER, number, SyntaxColor.NUMBER,
-                                     startIndex, stopIndex - startIndex);
+        return new AtomSyntaxToken<>(
+                TokenType.NUMBER, number, SyntaxColor.NUMBER, startIndex, stopIndex - startIndex);
     }
 
     @NotNull
@@ -106,8 +110,8 @@ public class SyntaxTokenStream extends TokenStream {
         String binary = "" + input.next();
         binary += readWhile(c -> c == '0' || c == '1');
         final int stopIndex = getPosition();
-        return new AtomSyntaxToken<>(TokenType.BINARY, binary, SyntaxColor.BINARY,
-                                     startIndex, stopIndex - startIndex);
+        return new AtomSyntaxToken<>(
+                TokenType.BINARY, binary, SyntaxColor.BINARY, startIndex, stopIndex - startIndex);
     }
 
     @NotNull
@@ -117,12 +121,12 @@ public class SyntaxTokenStream extends TokenStream {
         final String identifier = readWhile(TokenStream::isIdentification);
         final int stopIndex = getPosition();
         if (isKeyword(identifier)) {
-            return new AtomSyntaxToken<>(TokenType.KEYWORD, identifier, SyntaxColor.KEYWORD,
-                                         startIndex, stopIndex - startIndex);
+            return new AtomSyntaxToken<>(
+                    TokenType.KEYWORD, identifier, SyntaxColor.KEYWORD, startIndex, stopIndex - startIndex);
         }
-        //Needs further processing to determine Color
-        return new AtomSyntaxToken<>(TokenType.IDENTIFICATION, identifier, SyntaxColor.TEXT,
-                                     startIndex, stopIndex - startIndex);
+        // Needs further processing to determine Color
+        return new AtomSyntaxToken<>(
+                TokenType.IDENTIFICATION, identifier, SyntaxColor.TEXT, startIndex, stopIndex - startIndex);
     }
 
     @NotNull
@@ -133,7 +137,7 @@ public class SyntaxTokenStream extends TokenStream {
         string += readWhile(c -> c != Punctuation.STRING && c != NEW_LINE);
         string += input.next();
         final int stopIndex = getPosition();
-        return new AtomSyntaxToken<>(TokenType.STRING, string, SyntaxColor.STRING,
-                                     startIndex, stopIndex - startIndex);
+        return new AtomSyntaxToken<>(
+                TokenType.STRING, string, SyntaxColor.STRING, startIndex, stopIndex - startIndex);
     }
 }

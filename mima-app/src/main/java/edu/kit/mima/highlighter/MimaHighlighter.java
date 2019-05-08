@@ -16,13 +16,13 @@ import edu.kit.mima.preferences.UserPreferenceChangedListener;
 import edu.kit.mima.syntax.SyntaxParser;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JTextPane;
+import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
-import java.awt.Color;
+import java.awt.*;
 import java.util.List;
 
 /**
@@ -32,7 +32,7 @@ import java.util.List;
  * @since 2018
  */
 public class MimaHighlighter implements Highlighter, FileEventHandler,
-                                        UserPreferenceChangedListener {
+                                                UserPreferenceChangedListener {
 
     private InstructionSet currentInstructionSet;
     private Color errorColor;
@@ -50,7 +50,7 @@ public class MimaHighlighter implements Highlighter, FileEventHandler,
 
     @Override
     public void updateHighlighting(@NotNull final JTextPane textPane,
-                                   @NotNull FileHistoryObject fhs) {
+                                   @NotNull final FileHistoryObject fhs) {
         boolean update = !switch (fhs.getType()) {
             case INSERT -> fhs.getText().isBlank();
             case REMOVE -> fhs.getOldText().isBlank();
@@ -86,9 +86,9 @@ public class MimaHighlighter implements Highlighter, FileEventHandler,
 
             var pref = Preferences.getInstance();
             final var processed = new PreProcessor(text, "",
-                                                   pref.readString(PropertyKey.DIRECTORY_WORKING),
-                                                   pref.readString(PropertyKey.DIRECTORY_MIMA),
-                                                   false).process();
+                    pref.readString(PropertyKey.DIRECTORY_WORKING),
+                    pref.readString(PropertyKey.DIRECTORY_MIMA),
+                    false).process();
             final var parsed = new Parser(processed.getFirst()).parse();
 
             final List<ParserException> errors = processed.getSecond();
@@ -109,8 +109,8 @@ public class MimaHighlighter implements Highlighter, FileEventHandler,
     @Override
     public void fileLoadedEvent(@NotNull final String filePath) {
         currentInstructionSet = filePath.endsWith(MimaConstants.MIMA_EXTENSION)
-                ? InstructionSet.MIMA
-                : InstructionSet.MIMA_X;
+                                        ? InstructionSet.MIMA
+                                        : InstructionSet.MIMA_X;
     }
 
     @Override
@@ -119,7 +119,8 @@ public class MimaHighlighter implements Highlighter, FileEventHandler,
     }
 
     @Override
-    public void saveEvent(final String filePath) { }
+    public void saveEvent(final String filePath) {
+    }
 
     @Override
     public void notifyUserPreferenceChanged(final PropertyKey key) {

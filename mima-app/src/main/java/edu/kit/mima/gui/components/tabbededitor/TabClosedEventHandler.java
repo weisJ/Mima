@@ -1,6 +1,6 @@
 package edu.kit.mima.gui.components.tabbededitor;
 
-import java.awt.Component;
+import java.awt.*;
 
 /**
  * Event Handler for tab closing events.

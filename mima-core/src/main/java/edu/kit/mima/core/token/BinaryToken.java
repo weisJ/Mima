@@ -20,7 +20,8 @@ public class BinaryToken<T, K> extends FileObjectAdapter implements Token<T>, Im
 
     private static final Pattern INDENT = Pattern.compile("\n");
     private static final String INDENT_REPLACEMENT = "\n\t";
-    @NotNull private final TokenType type;
+    @NotNull
+    private final TokenType type;
     private final int filePos;
     private final int index;
     @NotNull
@@ -37,11 +38,12 @@ public class BinaryToken<T, K> extends FileObjectAdapter implements Token<T>, Im
      * @param index   index of token
      * @param filePos position in file
      */
-    public BinaryToken(@NotNull final TokenType type,
-                       @NotNull final T first,
-                       @NotNull final K second,
-                       final int index,
-                       final int filePos) {
+    public BinaryToken(
+            @NotNull final TokenType type,
+            @NotNull final T first,
+            @NotNull final K second,
+            final int index,
+            final int filePos) {
         this.type = type;
         this.first = first;
         this.second = second;
@@ -56,9 +58,8 @@ public class BinaryToken<T, K> extends FileObjectAdapter implements Token<T>, Im
      * @param first  first value
      * @param second second value
      */
-    public BinaryToken(@NotNull final TokenType type,
-                       @NotNull final T first,
-                       @NotNull final K second) {
+    public BinaryToken(
+            @NotNull final TokenType type, @NotNull final T first, @NotNull final K second) {
         this(type, first, second, -1, -1);
     }
 
@@ -94,7 +95,7 @@ public class BinaryToken<T, K> extends FileObjectAdapter implements Token<T>, Im
     @NotNull
     @Override
     @SuppressWarnings("unchecked")
-    public Stream<Token> stream(boolean includeChildren) {
+    public Stream<Token> stream(final boolean includeChildren) {
         Stream<Token> stream = Stream.of(this);
         if (includeChildren) {
             if (first instanceof Token) {
@@ -120,22 +121,22 @@ public class BinaryToken<T, K> extends FileObjectAdapter implements Token<T>, Im
     @NotNull
     @Override
     public String toString() {
-        return "[type=" + type + "] {\n\t"
-                + INDENT.matcher(first.toString()).replaceAll(INDENT_REPLACEMENT)
-                + "\n\t"
-                + INDENT.matcher(second.toString()).replaceAll(INDENT_REPLACEMENT)
-                + "\n}";
+        return "[type="
+                       + type
+                       + "] {\n\t"
+                       + INDENT.matcher(first.toString()).replaceAll(INDENT_REPLACEMENT)
+                       + "\n\t"
+                       + INDENT.matcher(second.toString()).replaceAll(INDENT_REPLACEMENT)
+                       + "\n}";
     }
 
     @NotNull
     @Override
     public String simpleName() {
-        final String firstName = first instanceof Token
-                ? ((Token) first).simpleName()
-                : first.toString();
-        final String secondName = second instanceof Token
-                ? ((Token) second).simpleName()
-                : second.toString();
+        final String firstName =
+                first instanceof Token ? ((Token) first).simpleName() : first.toString();
+        final String secondName =
+                second instanceof Token ? ((Token) second).simpleName() : second.toString();
         return type.getPrefix() + firstName + ' ' + secondName;
     }
 
@@ -150,8 +151,8 @@ public class BinaryToken<T, K> extends FileObjectAdapter implements Token<T>, Im
         }
         final BinaryToken<?, ?> that = (BinaryToken<?, ?>) obj;
         return type == that.type
-                && Objects.equals(first, that.first)
-                && Objects.equals(second, that.second);
+                       && Objects.equals(first, that.first)
+                       && Objects.equals(second, that.second);
     }
 
     @Override

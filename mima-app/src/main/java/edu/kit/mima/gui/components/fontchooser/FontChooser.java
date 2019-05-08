@@ -35,13 +35,10 @@ import edu.kit.mima.gui.components.fontchooser.panes.StylePane;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.Box;
-import javax.swing.JComponent;
+import javax.swing.*;
 import javax.swing.event.ChangeListener;
-import java.awt.Dimension;
-import java.awt.Font;
+import java.awt.*;
 import java.util.ResourceBundle;
-
 
 /**
  * Provides a pane of controls designed to allow a user to select a {@code Font}.
@@ -60,10 +57,8 @@ public class FontChooser extends WrapPanel implements FontContainer {
     private final SizePane sizePane = new SizePane();
     private final FamilyListSelectionListener familyPaneListener =
             new FamilyListSelectionListener(this);
-    private final StyleListSelectionListener stylePaneListener =
-            new StyleListSelectionListener(this);
-    private final SizeListSelectionListener sizePaneListener =
-            new SizeListSelectionListener(this);
+    private final StyleListSelectionListener stylePaneListener = new StyleListSelectionListener(this);
+    private final SizeListSelectionListener sizePaneListener = new SizeListSelectionListener(this);
     @NotNull
     private final AbstractPreviewPane previewPane;
     @NotNull
@@ -85,8 +80,8 @@ public class FontChooser extends WrapPanel implements FontContainer {
         this(initialFont, new PreviewPane());
     }
 
-    public FontChooser(@NotNull final Font initialFont,
-                       @NotNull final AbstractPreviewPane previewPane) {
+    public FontChooser(
+            @NotNull final Font initialFont, @NotNull final AbstractPreviewPane previewPane) {
         this(new DefaultFontSelectionModel(initialFont), previewPane);
     }
 
@@ -96,8 +91,8 @@ public class FontChooser extends WrapPanel implements FontContainer {
      * @param model       the {@code FontSelectionModel} to be used
      * @param previewPane the preview pane
      */
-    public FontChooser(@NotNull final FontSelectionModel model,
-                       @NotNull final AbstractPreviewPane previewPane) {
+    public FontChooser(
+            @NotNull final FontSelectionModel model, @NotNull final AbstractPreviewPane previewPane) {
         this.previewPane = previewPane;
         resourceBundle = ResourceBundle.getBundle("FontChooser");
         selectionModel = model;
@@ -128,8 +123,8 @@ public class FontChooser extends WrapPanel implements FontContainer {
     }
 
     /**
-     * Sets the current font of the FontChooser to the specified font. The {@code
-     * FontSelectionModel} will fire a {@code ChangeEvent}
+     * Sets the current font of the FontChooser to the specified font. The {@code FontSelectionModel}
+     * will fire a {@code ChangeEvent}
      *
      * @param font the font to be set in the font chooser
      * @see JComponent#addPropertyChangeListener
@@ -201,14 +196,10 @@ public class FontChooser extends WrapPanel implements FontContainer {
     }
 
     private void addComponents() {
-        addComponent(new LabeledPane(familyPane,
-                                     resourceBundle.getString("font.family")), 0);
-        addComponent(new LabeledPane(stylePane,
-                                     resourceBundle.getString("font.style")), 0);
-        addComponent(new LabeledPane(sizePane,
-                                     resourceBundle.getString("font.size")), 0);
-        addComponent(new LabeledPane(previewPane,
-                                     resourceBundle.getString("font.preview")), 1);
+        addComponent(new LabeledPane(familyPane, resourceBundle.getString("font.family")), 0);
+        addComponent(new LabeledPane(stylePane, resourceBundle.getString("font.style")), 0);
+        addComponent(new LabeledPane(sizePane, resourceBundle.getString("font.size")), 0);
+        addComponent(new LabeledPane(previewPane, resourceBundle.getString("font.preview")), 1);
         setPanelScale(true, 1);
         addComponent(Box.createRigidArea(new Dimension(0, 10)), 2);
     }
