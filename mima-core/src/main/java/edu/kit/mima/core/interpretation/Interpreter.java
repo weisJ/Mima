@@ -39,12 +39,11 @@ public class Interpreter {
     private final int wordLength;
     @NotNull private final StackGuard stackGuard;
 
-    private final DebugController debugController;
+    private DebugController debugController;
     private final ExceptionHandler exceptionHandler;
-
-    private boolean running;
     private Token currentToken;
     private Environment currentScope;
+    private boolean running;
 
     /**
      * Construct new Interpreter that uses the given number of bits in arguments.
@@ -77,8 +76,8 @@ public class Interpreter {
         try {
             debugController.pause();
             execute(() -> {
-                program.getJumps().forEach((t, i) -> runtimeEnvironment
-                        .defineJump(t.getValue().toString(), i));
+                program.getJumps().forEach(
+                        (t, i) -> runtimeEnvironment.defineJump(t.getValue().toString(), i));
                 evaluateProgram(program, runtimeEnvironment, v -> { });
             });
         } catch (@NotNull final IllegalArgumentException | IllegalStateException e) {
@@ -101,6 +100,15 @@ public class Interpreter {
                 func = cont.getContinuation();
             }
         }
+    }
+
+    @NotNull
+    private Value<MachineWord> fail(final String message) {
+        exceptionHandler.notifyException(new InterpreterException(message));
+        debugController.stop();
+        System.out.println("set fail");
+        running = false;
+        return VOID;
     }
 
     /*
@@ -297,14 +305,6 @@ public class Interpreter {
         return new Value<>(type, value);
     }
 
-    @NotNull
-    private Value<MachineWord> fail(final String message) {
-        exceptionHandler.notifyException(new InterpreterException(message));
-        debugController.stop();
-        running = false;
-        return VOID;
-    }
-
     /**
      * Returns whether the interpreter is running.
      *
@@ -323,6 +323,16 @@ public class Interpreter {
      */
     public void setRunning(final boolean running) {
         this.running = running;
+    }
+
+    /**
+     * Set the debug controller for this interpreter.
+     *
+     * @param debugController the debug controller to use.
+     */
+    public void setDebugController(DebugController debugController) {
+        System.out.println("set " + debugController);
+        this.debugController = debugController;
     }
 
     /**
