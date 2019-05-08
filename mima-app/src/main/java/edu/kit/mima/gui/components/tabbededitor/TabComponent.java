@@ -8,17 +8,10 @@ import edu.kit.mima.gui.icons.Icons;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicButtonUI;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.util.function.Consumer;
 
 /**
@@ -36,12 +29,13 @@ public class TabComponent extends JPanel {
      * Create new Tab Component.
      *
      * @param title   title of tab.
-     * @param icon the icon
+     * @param icon    the icon
      * @param onClick event handler when closing.
      */
-    public TabComponent(final String title,
-                        @Nullable final Icon icon,
-                        @NotNull final Consumer<TabComponent> onClick) {
+    public TabComponent(
+            final String title,
+            @Nullable final Icon icon,
+            @NotNull final Consumer<TabComponent> onClick) {
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         iconLabel = new IconLabel(icon, title, IconLabel.LEFT, 5, 3);
         iconLabel.setOpaque(false);

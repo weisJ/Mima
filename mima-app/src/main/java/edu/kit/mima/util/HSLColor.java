@@ -3,7 +3,7 @@ package edu.kit.mima.util;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.function.Function;
 
 /**
@@ -13,10 +13,10 @@ import java.util.function.Function;
  * <p>The HUE is the color, the Saturation is the purity of the color (with respect to grey) and
  * Luminance is the brightness of the color (with respect to black and white)
  *
- * <p>The Hue is specified as an angel between 0 - 360 degrees where red is 0, green is 120 and
- * blue is 240. In between you have the colors of the rainbow. Saturation is specified as a
- * percentage between 0 - 100 where 100 is fully saturated and 0 approaches gray. Luminance is
- * specified as a percentage between 0 - 100 where 0 is black and 100 is white.
+ * <p>The Hue is specified as an angel between 0 - 360 degrees where red is 0, green is 120 and blue
+ * is 240. In between you have the colors of the rainbow. Saturation is specified as a percentage
+ * between 0 - 100 where 100 is fully saturated and 0 approaches gray. Luminance is specified as a
+ * percentage between 0 - 100 where 0 is black and 100 is white.
  *
  * <p>In particular the HSL color space makes it easier change the Tone or Shade of a color by
  * adjusting the luminance value.
@@ -126,8 +126,8 @@ public class HSLColor {
 
     /**
      * Convert HSL values to a RGB Color with a default alpha value of 1. H (Hue) is specified as
-     * degrees in the range 0 - 360. S (Saturation) is specified as a percentage in the range 1 -
-     * 100. L (Luminance) is specified as a percentage in the range 1 - 100.
+     * degrees in the range 0 - 360. S (Saturation) is specified as a percentage in the range 1 - 100.
+     * L (Luminance) is specified as a percentage in the range 1 - 100.
      *
      * @param hsl an array containing the 3 HSL values
      * @return the RGB Color object
@@ -139,8 +139,8 @@ public class HSLColor {
 
     /**
      * Convert HSL values to a RGB Color. H (Hue) is specified as degrees in the range 0 - 360. S
-     * (Saturation) is specified as a percentage in the range 1 - 100. L (Luminance) is specified as
-     * a percentage in the range 1 - 100.
+     * (Saturation) is specified as a percentage in the range 1 - 100. L (Luminance) is specified as a
+     * percentage in the range 1 - 100.
      *
      * @param hsl   an array containing the 3 HSL values
      * @param alpha the alpha value between 0 - 1
@@ -182,9 +182,10 @@ public class HSLColor {
         final float saturation = s / 100f;
         final float luminance = l / 100f;
 
-        final float q = luminance < 0.5
-                ? luminance * (1 + saturation)
-                : (luminance + saturation) - (saturation * luminance);
+        final float q =
+                luminance < 0.5
+                        ? luminance * (1 + saturation)
+                        : (luminance + saturation) - (saturation * luminance);
         final float p = 2 * luminance - q;
 
         final float r = Math.min(Math.max(0, hueToRGB(p, q, hue + (1.0f / 3.0f))), 1.0f);
@@ -245,8 +246,8 @@ public class HSLColor {
     }
 
     /**
-     * Create a RGB Color object based on this HSLColor with a different Luminance value. The
-     * percent specified is an absolute value.
+     * Create a RGB Color object based on this HSLColor with a different Luminance value. The percent
+     * specified is an absolute value.
      *
      * @param percent - the Luminance value between 0 - 100
      * @return the RGB Color object
@@ -257,8 +258,8 @@ public class HSLColor {
     }
 
     /**
-     * Create a RGB Color object based on this HSLColor with a different Saturation value. The
-     * percent specified is an absolute value.
+     * Create a RGB Color object based on this HSLColor with a different Saturation value. The percent
+     * specified is an absolute value.
      *
      * @param percent - the Saturation value between 0 - 100
      * @return the RGB Color object
@@ -281,8 +282,8 @@ public class HSLColor {
     }
 
     /**
-     * Create a RGB Color object based on this HSLColor with a different Tone. Changing the tone
-     * will return a lighter color. The percent specified is a relative value.
+     * Create a RGB Color object based on this HSLColor with a different Tone. Changing the tone will
+     * return a lighter color. The percent specified is a relative value.
      *
      * @param percent - the value between 0 - 100
      * @return the RGB Color object
@@ -293,8 +294,8 @@ public class HSLColor {
     }
 
     @NotNull
-    private HSLColor adjustLuminancePercent(final float percent,
-                                            @NotNull final Function<Float, Float> capFunction) {
+    private HSLColor adjustLuminancePercent(
+            final float percent, @NotNull final Function<Float, Float> capFunction) {
         final float multiplier = (100.0f + percent) / 100.0f;
         final float l = capFunction.apply(hsl[2] * multiplier);
         return new HSLColor(toRGB(hsl[0], hsl[1], l, alpha));

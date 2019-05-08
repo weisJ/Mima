@@ -6,8 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.JTextComponent;
-import java.awt.Graphics;
-import java.awt.Rectangle;
+import java.awt.*;
 
 /**
  * Caret that can have different thickness.
@@ -23,7 +22,7 @@ public class LineCaret extends DefaultCaret {
         this(1);
     }
 
-    public LineCaret(int thickness) {
+    public LineCaret(final int thickness) {
         this.thickness = thickness;
         super.setBlinkRate(500);
     }
@@ -32,12 +31,12 @@ public class LineCaret extends DefaultCaret {
         return thickness;
     }
 
-    public void setThickness(int thickness) {
+    public void setThickness(final int thickness) {
         this.thickness = thickness;
     }
 
     @Override
-    protected synchronized void damage(@Nullable Rectangle r) {
+    protected synchronized void damage(@Nullable final Rectangle r) {
         if (r == null) {
             return;
         }
@@ -49,7 +48,7 @@ public class LineCaret extends DefaultCaret {
     }
 
     @Override
-    public void paint(@NotNull Graphics g) {
+    public void paint(@NotNull final Graphics g) {
         JTextComponent comp = getComponent();
         if (comp == null) {
             return;
@@ -83,5 +82,4 @@ public class LineCaret extends DefaultCaret {
             g.fillRect(r.x, r.y, thickness, height);
         }
     }
-
 }

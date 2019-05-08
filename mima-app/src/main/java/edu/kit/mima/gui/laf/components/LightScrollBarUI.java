@@ -1,15 +1,13 @@
 package edu.kit.mima.gui.laf.components;
 
-import edu.kit.mima.api.annotations.ReflectionCall;
+import edu.kit.mima.annotations.ReflectionCall;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JComponent;
+import javax.swing.*;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicScrollBarUI;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.awt.*;
 
 /**
  * Light version of {@link DarkScrollBarUI}.
@@ -29,12 +27,12 @@ public class LightScrollBarUI extends DarkScrollBarUI {
     @NotNull
     @Contract("_ -> new")
     @ReflectionCall
-    public static ComponentUI createUI(JComponent c) {
+    public static ComponentUI createUI(final JComponent c) {
         return new LightScrollBarUI();
     }
 
     @Override
-    public void installUI(JComponent c) {
+    public void installUI(final JComponent c) {
         super.installUI(c);
     }
 
@@ -44,7 +42,7 @@ public class LightScrollBarUI extends DarkScrollBarUI {
         return new Color(217, 217, 217);
     }
 
-    protected void paintMaxiThumb(@NotNull Graphics2D g, @NotNull Rectangle thumbBounds) {
+    protected void paintMaxiThumb(@NotNull final Graphics2D g, @NotNull final Rectangle thumbBounds) {
         final var c = g.getComposite();
         g.setComposite(composite.derive(THUMB_ALPHA));
         var thumbRect = calculateThumbRect(thumbBounds);
@@ -73,5 +71,4 @@ public class LightScrollBarUI extends DarkScrollBarUI {
     private Color getThumbColor() {
         return new Color(217, 217, 217);
     }
-
 }

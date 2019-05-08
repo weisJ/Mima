@@ -7,12 +7,9 @@ import edu.kit.mima.gui.icons.Icons;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.BoxLayout;
-import javax.swing.Icon;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import java.awt.Component;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.io.File;
 
@@ -31,9 +28,8 @@ import java.io.File;
      * @param file    file associated with this component
      * @param handler action handler for popup
      */
-    /*default*/ FolderDisplay(final String name,
-                              @NotNull final File file,
-                              @NotNull final FilePopupActionHandler handler) {
+    /*default*/ FolderDisplay(
+            final String name, @NotNull final File file, @NotNull final FilePopupActionHandler handler) {
         this(name, file, Icons.forFile(file), handler);
     }
 
@@ -45,10 +41,11 @@ import java.io.File;
      * @param icon    file icon
      * @param handler action handler for popup
      */
-    /*default*/ FolderDisplay(@Nullable final String name,
-                              @NotNull final File file,
-                              @NotNull final Icon icon,
-                              @NotNull final FilePopupActionHandler handler) {
+    /*default*/ FolderDisplay(
+            @Nullable final String name,
+            @NotNull final File file,
+            @NotNull final Icon icon,
+            @NotNull final FilePopupActionHandler handler) {
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         setAlignmentY(Component.CENTER_ALIGNMENT);
         setOpaque(false);
@@ -56,8 +53,7 @@ import java.io.File;
         addMouseListener(new PopupListener(tooltip, MouseEvent.BUTTON1, true));
         add(new IconPanel(icon));
         if (name != null && name.length() != 0) {
-            final String title = file.isDirectory() ? name
-                    : name.substring(0, name.lastIndexOf('.'));
+            final String title = file.isDirectory() ? name : name.substring(0, name.lastIndexOf('.'));
             final JLabel label = new JLabel(title);
             label.setBorder(new EmptyBorder(0, 2, 0, 2));
             add(label);

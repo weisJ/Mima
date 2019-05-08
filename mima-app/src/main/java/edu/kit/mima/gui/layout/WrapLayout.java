@@ -2,13 +2,8 @@ package edu.kit.mima.gui.layout;
 
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Insets;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * FlowLayout subclass that fully supports wrapping of components.
@@ -16,75 +11,72 @@ import java.awt.Insets;
 public class WrapLayout extends FlowLayout {
 
     /**
-     * Constructs a new <code>edu.kit.mima.gui.layout.WrapLayout</code> with a left
-     * alignment and a default 5-unit horizontal and vertical gap.
+     * Constructs a new <code>edu.kit.mima.gui.layout.WrapLayout</code> with a left alignment and a
+     * default 5-unit horizontal and vertical gap.
      */
     public WrapLayout() {
         super();
     }
 
     /**
-     * Constructs a new <code>FlowLayout</code> with the specified
-     * alignment and a default 5-unit horizontal and vertical gap.
+     * Constructs a new <code>FlowLayout</code> with the specified alignment and a default 5-unit
+     * horizontal and vertical gap.
      *
      * @param align the alignment value
      */
-    public WrapLayout(int align) {
+    public WrapLayout(final int align) {
         super(align);
     }
 
     /**
-     * Creates a new flow layout manager with the indicated alignment
-     * and the indicated horizontal and vertical gaps.
+     * Creates a new flow layout manager with the indicated alignment and the indicated horizontal and
+     * vertical gaps.
      *
      * @param align the alignment value
      * @param gapH  the horizontal gap between components
      * @param gapV  the vertical gap between components
      */
-    public WrapLayout(int align, int gapH, int gapV) {
+    public WrapLayout(final int align, final int gapH, final int gapV) {
         super(align, gapH, gapV);
     }
 
     /**
-     * Returns the preferred dimensions for this layout given the
-     * <i>visible</i> components in the specified target container.
+     * Returns the preferred dimensions for this layout given the <i>visible</i> components in the
+     * specified target container.
      *
      * @param target the component which needs to be laid out
-     * @return the preferred dimensions to lay out the
-     *         subcomponents of the specified container
+     * @return the preferred dimensions to lay out the subcomponents of the specified container
      */
     @NotNull
     @Override
-    public Dimension preferredLayoutSize(@NotNull Container target) {
+    public Dimension preferredLayoutSize(@NotNull final Container target) {
         return layoutSize(target, true);
     }
 
     /**
-     * Returns the minimum dimensions needed to layout the <i>visible</i>
-     * components contained in the specified target container.
+     * Returns the minimum dimensions needed to layout the <i>visible</i> components contained in the
+     * specified target container.
      *
      * @param target the component which needs to be laid out
-     * @return the minimum dimensions to lay out the
-     *         subcomponents of the specified container.
+     * @return the minimum dimensions to lay out the subcomponents of the specified container.
      */
     @NotNull
     @Override
-    public Dimension minimumLayoutSize(@NotNull Container target) {
+    public Dimension minimumLayoutSize(@NotNull final Container target) {
         Dimension minimum = layoutSize(target, false);
         minimum.width -= (getHgap() + 1);
         return minimum;
     }
 
     /**
-     * Returns the minimum or preferred dimension needed to layout the target
-     * container.
+     * Returns the minimum or preferred dimension needed to layout the target container.
      *
      * @param target    target to get layout size for
      * @param preferred should preferred size be calculated
      * @return the dimension to layout the target container
      */
     @NotNull
-    private Dimension layoutSize(@NotNull Container target, boolean preferred) {
+    private Dimension layoutSize(@NotNull final Container target, final boolean preferred) {
         synchronized (target.getTreeLock()) {
             //  Each row must fit with the width allocated to the container.
             //  When the container width = 0, the preferred width of the container
@@ -166,7 +158,7 @@ public class WrapLayout extends FlowLayout {
      *  @param rowWidth the width of the row to add
      *  @param rowHeight the height of the row to add
      */
-    private void addRow(@NotNull Dimension dim, int rowWidth, int rowHeight) {
+    private void addRow(@NotNull final Dimension dim, final int rowWidth, final int rowHeight) {
         dim.width = Math.max(dim.width, rowWidth);
 
         if (dim.height > 0) {

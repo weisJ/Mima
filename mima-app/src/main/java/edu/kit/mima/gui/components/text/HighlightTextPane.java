@@ -8,19 +8,12 @@ import org.apache.commons.collections4.map.LinkedMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.BadLocationException;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -33,6 +26,7 @@ import java.util.Optional;
  * @since 2018
  */
 public class HighlightTextPane extends NonWrappingTextPane implements ChangeListener {
+
     private final Component container;
     @NotNull
     private final Map<Integer, Tuple<String, LinkedMap<String, Color>>> markings;
@@ -47,7 +41,6 @@ public class HighlightTextPane extends NonWrappingTextPane implements ChangeList
     private Point selectionEnd;
     private int vertLine;
     private boolean onceFocused = false;
-
 
     /**
      * TextPane that can implements better selection highlighting and allows for a vertical guiding
@@ -142,8 +135,9 @@ public class HighlightTextPane extends NonWrappingTextPane implements ChangeList
      * Paint background of selection
      */
     private void drawSelection(@NotNull final Graphics g, final int height) {
-        if (selectionStart != null && selectionEnd != null
-            && (!selectionStart.equals(selectionEnd) || lineSelected)) {
+        if (selectionStart != null
+                    && selectionEnd != null
+                    && (!selectionStart.equals(selectionEnd) || lineSelected)) {
             if (selectionStart.y > selectionEnd.y) {
                 final var tmp = selectionEnd;
                 selectionEnd = selectionStart;
@@ -154,8 +148,7 @@ public class HighlightTextPane extends NonWrappingTextPane implements ChangeList
                 final int w = lineSelected ? getWidth() : selectionEnd.x - selectionStart.x;
                 g.fillRect(selectionStart.x, selectionStart.y, w, height);
             } else {
-                g.fillRect(selectionStart.x, selectionStart.y,
-                           getWidth() - selectionStart.x, height);
+                g.fillRect(selectionStart.x, selectionStart.y, getWidth() - selectionStart.x, height);
                 for (int y = selectionStart.y + height; y < selectionEnd.y; y += height) {
                     g.fillRect(xoff, y, getWidth(), height);
                 }
@@ -167,8 +160,8 @@ public class HighlightTextPane extends NonWrappingTextPane implements ChangeList
     /*
      * Highlight the background of line in given colour.
      */
-    private void drawMarking(@NotNull final Graphics g, final Color c,
-                             final int index, final int height) {
+    private void drawMarking(
+            @NotNull final Graphics g, final Color c, final int index, final int height) {
         try {
             final var view = modelToView2D(DocumentUtil.getLineStartOffset(this, index));
             g.setColor(c);
@@ -195,10 +188,8 @@ public class HighlightTextPane extends NonWrappingTextPane implements ChangeList
             final var firstView = modelToView2D(0).getBounds();
             final var view = modelToView2D(getSelectionStart()).getBounds();
             final var endView = modelToView2D(getSelectionEnd()).getBounds();
-            selectionStart = Optional.ofNullable(view)
-                    .map(Rectangle::getLocation).orElse(null);
-            selectionEnd = Optional.ofNullable(endView)
-                    .map(Rectangle::getLocation).orElse(null);
+            selectionStart = Optional.ofNullable(view).map(Rectangle::getLocation).orElse(null);
+            selectionEnd = Optional.ofNullable(endView).map(Rectangle::getLocation).orElse(null);
             xoff = Optional.ofNullable(firstView).map(r -> r.x).orElse(0);
         } catch (@NotNull final NullPointerException | BadLocationException ignored) {
             xoff = 0;
@@ -236,7 +227,7 @@ public class HighlightTextPane extends NonWrappingTextPane implements ChangeList
      * Mark the background of line in given colour.
      *
      * @param lineIndex index of line to mark
-     * @param label label of color.
+     * @param label     label of color.
      * @param color     marking colour.
      */
     public void markLine(final int lineIndex, final String label, final Color color) {
@@ -252,7 +243,7 @@ public class HighlightTextPane extends NonWrappingTextPane implements ChangeList
      * Remove Marking from line.
      *
      * @param lineIndex index of line to remove marking from
-     * @param label the label to remove.
+     * @param label     the label to remove.
      */
     public void removeMark(final int lineIndex, final String label) {
         if (markings.containsKey(lineIndex)) {

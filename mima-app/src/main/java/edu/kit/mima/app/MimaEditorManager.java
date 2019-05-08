@@ -14,9 +14,7 @@ import edu.kit.mima.preferences.PropertyKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.AbstractAction;
-import javax.swing.JComponent;
-import javax.swing.KeyStroke;
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -44,11 +42,10 @@ public class MimaEditorManager implements AutoCloseable {
      *
      * @param parent parent App.
      */
-    public MimaEditorManager(MimaUserInterface parent) {
+    public MimaEditorManager(final MimaUserInterface parent) {
         fileManagers = new HashMap<>();
         tabbedEditor = createEditorPane();
         this.parent = parent;
-
     }
 
     /**
@@ -64,14 +61,15 @@ public class MimaEditorManager implements AutoCloseable {
     @NotNull
     private EditorTabbedPane createEditorPane() {
         var pane = new EditorTabbedPane();
-        pane.addTabClosedEventHandler(c -> {
-            final Editor editor = (Editor) c;
-            try {
-                closeEditor(editor);
-            } catch (@NotNull final IOException e) {
-                throw new IllegalArgumentException("didn't save", e);
-            }
-        });
+        pane.addTabClosedEventHandler(
+                c -> {
+                    final Editor editor = (Editor) c;
+                    try {
+                        closeEditor(editor);
+                    } catch (@NotNull final IOException e) {
+                        throw new IllegalArgumentException("didn't save", e);
+                    }
+                });
         pane.addChangeListener(e -> parent.fileChanged());
         return pane;
     }
@@ -82,9 +80,10 @@ public class MimaEditorManager implements AutoCloseable {
     private void closeEditor(@NotNull final Editor editor) throws IOException {
         final var fm = fileManagers.get(editor);
         if (fm.unsaved()) {
-            fm.savePopUp(() -> {
-                throw new IllegalArgumentException("aborted");
-            });
+            fm.savePopUp(
+                    () -> {
+                        throw new IllegalArgumentException("aborted");
+                    });
         }
         fm.close();
         editor.close();
@@ -104,15 +103,16 @@ public class MimaEditorManager implements AutoCloseable {
         fm.addFileEventHandler(highlighter);
         editor.setRepaint(false);
         editor.setHighlighter(highlighter);
-        editor.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                parent.fileChanged();
-            }
-        });
-        editor.addEditEventHandler(() -> fm
-                .setText(editor.getText().replaceAll(String.format("%n"), "\n")));
-        editor.showCharacterLimit(80); //Todo Preference
+        editor.addFocusListener(
+                new FocusAdapter() {
+                    @Override
+                    public void focusGained(final FocusEvent e) {
+                        parent.fileChanged();
+                    }
+                });
+        editor.addEditEventHandler(
+                () -> fm.setText(editor.getText().replaceAll(String.format("%n"), "\n")));
+        editor.showCharacterLimit(80); // Todo Preference
         editor.setText(fm.getText());
         setupHotKeys(editor);
         cashed = new ValueTuple<>(editor, fm);
@@ -125,11 +125,10 @@ public class MimaEditorManager implements AutoCloseable {
      * @param editor      editor to open.
      * @param fileManager corresponding file manager.
      */
-    public void openEditor(@NotNull Editor editor, @NotNull FileManager fileManager) {
+    public void openEditor(@NotNull final Editor editor, @NotNull final FileManager fileManager) {
         String lastFile = fileManager.getLastFile();
         for (final var entry : fileManagers.entrySet()) {
-            if (entry.getValue() != fileManager
-                && entry.getValue().getLastFile().equals(lastFile)) {
+            if (entry.getValue() != fileManager && entry.getValue().getLastFile().equals(lastFile)) {
                 tabbedEditor.setSelectedComponent(entry.getKey());
                 return;
             }
@@ -137,10 +136,12 @@ public class MimaEditorManager implements AutoCloseable {
         editor.setRepaint(true);
         editor.setText(fileManager.getText());
         var pref = Preferences.getInstance();
-        editor.useHistory(pref.readBoolean(PropertyKey.EDITOR_HISTORY),
-                          pref.readInteger(PropertyKey.EDITOR_HISTORY_SIZE));
-        lastFile = lastFile.substring(Math.max(Math.min(lastFile.lastIndexOf('\\') + 1,
-                                                        lastFile.length() - 1), 0));
+        editor.useHistory(
+                pref.readBoolean(PropertyKey.EDITOR_HISTORY),
+                pref.readInteger(PropertyKey.EDITOR_HISTORY_SIZE));
+        lastFile =
+                lastFile.substring(
+                        Math.max(Math.min(lastFile.lastIndexOf('\\') + 1, lastFile.length() - 1), 0));
         tabbedEditor.addTab(lastFile, Icons.forFile(lastFile), editor);
         fileManagers.put(editor, fileManager);
     }
@@ -151,14 +152,19 @@ public class MimaEditorManager implements AutoCloseable {
     private void setupHotKeys(@NotNull final Editor editor) {
         EditorHotKeys.setEditor(editor);
         for (final EditorHotKeys key : EditorHotKeys.values()) {
-            editor.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+            editor
+                    .getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
                     .put(KeyStroke.getKeyStroke(key.getAccelerator()), key.toString());
-            editor.getActionMap().put(key.toString(), new AbstractAction() {
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                    key.actionPerformed(e);
-                }
-            });
+            editor
+                    .getActionMap()
+                    .put(
+                            key.toString(),
+                            new AbstractAction() {
+                                @Override
+                                public void actionPerformed(final ActionEvent e) {
+                                    key.actionPerformed(e);
+                                }
+                            });
         }
     }
 
@@ -205,15 +211,15 @@ public class MimaEditorManager implements AutoCloseable {
         }
     }
 
-
     @Override
     public void close() throws IOException {
         final StringBuilder openFiles = new StringBuilder();
         for (final var fm : fileManagers.values()) {
             if (fm.unsaved()) {
-                fm.savePopUp(() -> {
-                    throw new IllegalArgumentException("aborted");
-                });
+                fm.savePopUp(
+                        () -> {
+                            throw new IllegalArgumentException("aborted");
+                        });
             }
             openFiles.append(fm.getLastFile()).append("/");
             fm.close();

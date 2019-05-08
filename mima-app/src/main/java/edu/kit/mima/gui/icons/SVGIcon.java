@@ -12,11 +12,8 @@ import org.apache.batik.util.XMLResourceDescriptor;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.svg.SVGDocument;
 
-import javax.swing.Icon;
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.net.URL;
@@ -30,22 +27,38 @@ import java.util.Arrays;
  */
 public class SVGIcon implements Icon {
 
-    private final int width;
-    private final int height;
+    private final double width;
+    private final double height;
 
     private final int displayWidth;
     private final int displayHeight;
-    private GraphicsNode svgIcon;
+    private final GraphicsNode svgIcon;
 
     /**
      * Method to fetch the SVG icon from a url.
      *
-     * @param url the url from which to fetch the SVG icon.
-     * @param displayWidth display width of icon.
+     * @param url           the url from which to fetch the SVG icon.
+     * @param displayWidth  display width of icon.
      * @param displayHeight display height of icon.
      * @throws IOException if url can't be fetched.
      */
     public SVGIcon(@NotNull final URL url, final int displayWidth, final int displayHeight)
+            throws IOException {
+        this(url, displayWidth, displayHeight, false);
+    }
+
+    /**
+     * Method to fetch the SVG icon from a url.
+     *
+     * @param url           the url from which to fetch the SVG icon.
+     * @param displayWidth  display width of icon.
+     * @param displayHeight display height of icon.
+     * @param usePrimitive  uses the primitive bounds of the svg image for width and height. Assumes
+     *                      the icon is centered and uses (w + 2 * x, h + 2 * y) as the size.
+     * @throws IOException if url can't be fetched.
+     */
+    public SVGIcon(
+            @NotNull final URL url, final int displayWidth, final int displayHeight, final boolean usePrimitive)
             throws IOException {
         this.displayHeight = displayHeight;
         this.displayWidth = displayWidth;
@@ -56,7 +69,6 @@ public class SVGIcon implements Icon {
 
         var element = doc.getDocumentElement();
 
-
         UserAgent userAgent = new UserAgentAdapter();
         DocumentLoader loader = new DocumentLoader(userAgent);
 
@@ -65,45 +77,52 @@ public class SVGIcon implements Icon {
 
         GVTBuilder builder = new GVTBuilder();
         this.svgIcon = builder.build(bridgeContext, doc);
-        if (!element.hasAttribute("viewBox")) {
-            width = (int) svgIcon.getPrimitiveBounds().getWidth();
-            height = (int) svgIcon.getPrimitiveBounds().getHeight();
+        if (!element.hasAttribute("viewBox") || usePrimitive) {
+            width = svgIcon.getPrimitiveBounds().getWidth() + 2 * svgIcon.getPrimitiveBounds().getX();
+            height = svgIcon.getPrimitiveBounds().getHeight() + 2 * svgIcon.getPrimitiveBounds().getY();
         } else {
             var viewBox = element.getAttribute("viewBox");
-            int[] bounds = Arrays.stream(viewBox.split(" ", 4)).mapToInt(
-                    Integer::parseInt).toArray();
+            double[] bounds =
+                    Arrays.stream(viewBox.split(" ", 4)).mapToDouble(Double::parseDouble).toArray();
             width = bounds[2] - bounds[0];
             height = bounds[3] - bounds[1];
         }
     }
 
-    private void renderIcon(@NotNull Graphics2D gc, int width, int height, double angleRadians) {
+    private void renderIcon(
+            @NotNull final Graphics2D gc, final double width, final double height, final double angleRadians) {
         gc.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        double scaleX = (double) width / this.width;
-        double scaleY = (double) height / this.height;
+        double scaleX = width / this.width;
+        double scaleY = height / this.height;
+        if (width < 0 || height < 0) {
+            scaleX = 1.0;
+            scaleY = 1.0;
+        }
 
         AffineTransform affineTransform = new AffineTransform();
-        affineTransform.translate(-width / 2.0, -height / 2.0);
+        affineTransform.translate(-this.width / 2.0, -this.height / 2.0);
         affineTransform.scale(scaleX, scaleY);
-        affineTransform.translate((width / scaleX) / 2.0, (height / scaleY) / 2.0);
+        affineTransform.translate((this.width / (2 * scaleX)), (this.height / (2 * scaleY)));
         if (angleRadians != 0) {
-            affineTransform.rotate(angleRadians, (width / scaleX) / 2.0, (height / scaleY) / 2.0);
+            affineTransform.rotate(angleRadians, (width / (2 * scaleX)), (height / (2 * scaleY)));
         }
-        svgIcon.setTransform(affineTransform);
+        if (!affineTransform.isIdentity()) {
+            svgIcon.setTransform(affineTransform);
+        }
         svgIcon.paint(gc);
     }
 
     /**
-     *   Paint the icon with rotation.
+     * Paint the icon with rotation.
      *
-     * @param c the parent component.
-     * @param g the graphics object.
-     * @param x the x coordinate
-     * @param y the y coordinate
+     * @param c        the parent component.
+     * @param g        the graphics object.
+     * @param x        the x coordinate
+     * @param y        the y coordinate
      * @param rotation the rotation in radians.
      */
-    public void paintIcon(final Component c, @NotNull final Graphics g, int x, int y,
-                          double rotation) {
+    public void paintIcon(
+            final Component c, @NotNull final Graphics g, final int x, final int y, final double rotation) {
         var g2 = (Graphics2D) g.create();
         g2.translate(x, y);
         renderIcon(g2, displayWidth, displayHeight, rotation);
@@ -111,7 +130,7 @@ public class SVGIcon implements Icon {
     }
 
     @Override
-    public void paintIcon(final Component c, final Graphics g, int x, int y) {
+    public void paintIcon(final Component c, final Graphics g, final int x, final int y) {
         paintIcon(c, g, x, y, 0);
     }
 

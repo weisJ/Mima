@@ -21,6 +21,5 @@ public interface Instruction {
      * @param environment runtime environment
      * @param callback    callback for method return value
      */
-    void apply(List<Value> arguments, Environment environment,
-               Consumer<Value> callback);
+    void apply(List<Value> arguments, Environment environment, Consumer<Value> callback);
 }

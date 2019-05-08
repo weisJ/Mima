@@ -1,9 +1,8 @@
 import edu.kit.mima.gui.components.text.SearchTextField;
 import edu.kit.mima.gui.laf.LafManager;
 
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-import java.awt.BorderLayout;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * @author Jannis Weis
@@ -11,17 +10,18 @@ import java.awt.BorderLayout;
  */
 public class SearchFieldDemo {
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            LafManager.setDefaultTheme(true);
-            JFrame frame = new JFrame();
-            frame.setSize(200, 50);
-            var search = new SearchTextField();
-            frame.setLayout(new BorderLayout());
-            frame.add(search, BorderLayout.CENTER);
-            frame.setLocationRelativeTo(null);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setVisible(true);
-        });
+    public static void main(final String[] args) {
+        SwingUtilities.invokeLater(
+                () -> {
+                    LafManager.setDefaultTheme(true);
+                    JFrame frame = new JFrame();
+                    frame.setSize(200, 50);
+                    var search = new SearchTextField();
+                    frame.setLayout(new BorderLayout());
+                    frame.add(search, BorderLayout.CENTER);
+                    frame.setLocationRelativeTo(null);
+                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                    frame.setVisible(true);
+                });
     }
 }

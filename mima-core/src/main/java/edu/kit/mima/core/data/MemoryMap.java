@@ -17,8 +17,7 @@ public class MemoryMap implements Memory<MachineWord> {
     private Map<Integer, MachineWord> memory;
 
     /**
-     * Create new MemoryMap using the given number of bits for machine words. Has an initial
-     * capacity
+     * Create new MemoryMap using the given number of bits for machine words. Has an initial capacity
      *
      * @param machineWordLength number of bits in machineWord
      * @param initialCapacity   initial capacity

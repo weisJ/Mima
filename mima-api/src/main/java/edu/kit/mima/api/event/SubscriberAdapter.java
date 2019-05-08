@@ -8,8 +8,7 @@ package edu.kit.mima.api.event;
  */
 public abstract class SubscriberAdapter implements Subscriber {
     @Override
-    public <T> void notifySubscription(String identifier, T value) {
-
+    public <T> void notifySubscription(final String identifier, final T value) {
     }
 
     @Override

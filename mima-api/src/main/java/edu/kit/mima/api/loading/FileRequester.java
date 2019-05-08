@@ -5,9 +5,9 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JFileChooser;
+import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.Component;
+import java.awt.*;
 import java.io.File;
 import java.util.Optional;
 
@@ -43,14 +43,14 @@ public class FileRequester {
      * @param extension    allowed file extension
      * @param abortHandler action to perform if request was aborted
      */
-    public void requestSave(@NotNull final String text,
-                            final String searchPath,
-                            @NotNull final String extension,
-                            @NotNull final Runnable abortHandler) {
+    public void requestSave(
+            @NotNull final String text,
+            final String searchPath,
+            @NotNull final String extension,
+            @NotNull final Runnable abortHandler) {
         try {
             Optional.ofNullable(requestPath(searchPath, new String[]{extension}, abortHandler))
-                    .map(p -> !p.endsWith(extension) ? p + '.' + extension : p)
-                    .stream()
+                    .map(p -> !p.endsWith(extension) ? p + '.' + extension : p).stream()
                     .peek(manager::onSave)
                     .peek(LambdaUtil.reduceFirst(LambdaUtil.wrap(IoTools::saveFile), text))
                     .forEach(p -> manager.afterSave());
@@ -67,16 +67,15 @@ public class FileRequester {
      * @param abortHandler action to perform if request was aborted
      * @return loaded text
      */
-    public @Nullable String requestLoad(final String searchPath,
-                                        final String[] extensions,
-                                        @NotNull final Runnable abortHandler) {
+    public @Nullable String requestLoad(
+            final String searchPath, final String[] extensions, @NotNull final Runnable abortHandler) {
         manager.beforeLoad();
         try {
-            return Optional.ofNullable(requestPath(searchPath, extensions, abortHandler))
-                    .stream()
-                    .peek(manager::onLoad)
-                    .map(LambdaUtil.wrap(IoTools::loadFile))
-                    .findFirst().orElse(null);
+            return Optional.ofNullable(requestPath(searchPath, extensions, abortHandler)).stream()
+                           .peek(manager::onLoad)
+                           .map(LambdaUtil.wrap(IoTools::loadFile))
+                           .findFirst()
+                           .orElse(null);
         } catch (@NotNull final RuntimeException e) {
             manager.onFail(e.getMessage());
             return null;
@@ -86,22 +85,21 @@ public class FileRequester {
     /*
      * Request the path form user using JFileChooser
      */
-    private @Nullable String requestPath(final String savedPath,
-                                         final String[] extensions,
-                                         @NotNull final Runnable abortHandler) {
+    private @Nullable String requestPath(
+            final String savedPath, final String[] extensions, @NotNull final Runnable abortHandler) {
         final JFileChooser chooser = new JFileChooser(savedPath);
-        final FileNameExtensionFilter filter = new FileNameExtensionFilter(extensions[0],
-                                                                           extensions);
+        final FileNameExtensionFilter filter = new FileNameExtensionFilter(extensions[0], extensions);
         chooser.setFileFilter(filter);
         return Optional.of(chooser.showDialog(parent, "Choose File")).stream()
-                .filter(i -> i == JFileChooser.APPROVE_OPTION)
-                .map(i -> chooser.getSelectedFile())
-                .peek(manager::afterRequest)
-                .map(File::getAbsolutePath)
-                .findFirst()
-                .orElseGet(() -> {
-                    abortHandler.run();
-                    return null;
-                });
+                       .filter(i -> i == JFileChooser.APPROVE_OPTION)
+                       .map(i -> chooser.getSelectedFile())
+                       .peek(manager::afterRequest)
+                       .map(File::getAbsolutePath)
+                       .findFirst()
+                       .orElseGet(
+                               () -> {
+                                   abortHandler.run();
+                                   return null;
+                               });
     }
 }

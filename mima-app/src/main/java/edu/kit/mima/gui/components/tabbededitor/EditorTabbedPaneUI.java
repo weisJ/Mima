@@ -2,19 +2,9 @@ package edu.kit.mima.gui.components.tabbededitor;
 
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.BorderFactory;
-import javax.swing.JComponent;
-import javax.swing.JTabbedPane;
+import javax.swing.*;
 import javax.swing.plaf.basic.BasicTabbedPaneUI;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Insets;
-import java.awt.LayoutManager;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.util.Objects;
 
@@ -26,27 +16,27 @@ import java.util.Objects;
  */
 public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
 
-    private TabContainer tabContainer;
     protected Color dropColor;
     protected Color selectedColor;
     protected Color tabBorderColor;
     protected Color selectedBackground;
     protected EditorTabbedPane tabbedPane;
+    private TabContainer tabContainer;
     private int minVisible;
     private int maxVisible;
     private int currentShift;
 
     private PropertyChangeListener handler;
 
-    /**Sy
-     * Create Custom Tabbed Pane ui.
+    /**
+     * Sy Create Custom Tabbed Pane ui.
      */
     public EditorTabbedPaneUI() {
         setupColors();
     }
 
     @Override
-    public void installUI(@NotNull JComponent c) {
+    public void installUI(@NotNull final JComponent c) {
         tabbedPane = (EditorTabbedPane) c;
         tabbedPane.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, tabBorderColor));
         super.installUI(c);
@@ -59,7 +49,8 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
     protected LayoutManager createLayoutManager() {
         if (tabPane.getTabLayoutPolicy() == JTabbedPane.SCROLL_TAB_LAYOUT) {
             return super.createLayoutManager();
-        } else { /* WRAP_TAB_LAYOUT */
+        } else {
+            /* WRAP_TAB_LAYOUT */
             return new CustomTabbedPaneLayout();
         }
     }
@@ -74,19 +65,20 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
             }
         }
         tabbedPane.add(tabContainer);
-        handler = evt -> {
-            if (Objects.equals(evt.getPropertyName(), "indexForTabComponent")) {
-                if (tabContainer != null) {
-                    tabContainer.removeUnusedTabComponents();
-                }
-                Component c1 = tabPane.getTabComponentAt((Integer) evt.getNewValue());
-                if (c1 != null) {
-                    tabContainer.add(c1);
-                }
-                tabPane.revalidate();
-                tabPane.repaint();
-            }
-        };
+        handler =
+                evt -> {
+                    if (Objects.equals(evt.getPropertyName(), "indexForTabComponent")) {
+                        if (tabContainer != null) {
+                            tabContainer.removeUnusedTabComponents();
+                        }
+                        Component c1 = tabPane.getTabComponentAt((Integer) evt.getNewValue());
+                        if (c1 != null) {
+                            tabContainer.add(c1);
+                        }
+                        tabPane.revalidate();
+                        tabPane.repaint();
+                    }
+                };
         tabbedPane.addPropertyChangeListener(handler);
     }
 
@@ -99,7 +91,7 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
     }
 
     @Override
-    public Dimension getMinimumSize(JComponent c) {
+    public Dimension getMinimumSize(final JComponent c) {
         EditorTabbedPane t = (EditorTabbedPane) c;
         var dim = super.getMinimumSize(c);
         if (t.getTabCount() <= 0) {
@@ -110,8 +102,8 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
     }
 
     @Override
-    protected void paintTabArea(@NotNull Graphics g, final int tabPlacement,
-                                final int selectedIndex) {
+    protected void paintTabArea(
+            @NotNull final Graphics g, final int tabPlacement, final int selectedIndex) {
         if (tabPlacement != EditorTabbedPaneUI.TOP) {
             super.paintTabArea(g, tabPlacement, selectedIndex);
             return;
@@ -121,8 +113,8 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
         if (dropSourceIndex >= 0) {
             tabPane.doLayout();
         }
-        final var sourceBounds = dropSourceIndex >= 0 ? rects[dropSourceIndex]
-                                 : new Rectangle(0, 0, 0, 0);
+        final var sourceBounds =
+                dropSourceIndex >= 0 ? rects[dropSourceIndex] : new Rectangle(0, 0, 0, 0);
         for (int i = minVisible; i <= maxVisible && i < rects.length; i++) {
             if (i != dropSourceIndex && i != selectedIndex) {
                 drawTab((Graphics2D) g.create(), i, false);
@@ -152,7 +144,7 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
     }
 
     @Override
-    protected Rectangle getTabBounds(int tabIndex, @NotNull Rectangle dest) {
+    protected Rectangle getTabBounds(final int tabIndex, @NotNull final Rectangle dest) {
         if (tabbedPane.getTabLayoutPolicy() == JTabbedPane.SCROLL_TAB_LAYOUT) {
             return super.getTabBounds(tabIndex, dest);
         }
@@ -165,8 +157,8 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
     }
 
     @Override
-    protected int calculateTabAreaHeight(final int tabPlacement, final int horizRunCount,
-                                         final int maxTabHeight) {
+    protected int calculateTabAreaHeight(
+            final int tabPlacement, final int horizRunCount, final int maxTabHeight) {
         return super.calculateTabAreaHeight(tabPlacement, 1, maxTabHeight);
     }
 
@@ -195,8 +187,11 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
         }
         g.translate(-0.5, 0);
         g.setColor(tabBorderColor);
-        g.drawLine(bounds.x + bounds.width - 2, bounds.y, bounds.x + bounds.width - 2,
-                   bounds.y + bounds.height);
+        g.drawLine(
+                bounds.x + bounds.width - 2,
+                bounds.y,
+                bounds.x + bounds.width - 2,
+                bounds.y + bounds.height);
         g.dispose();
     }
 
@@ -210,7 +205,7 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
         }
 
         @Override
-        protected void calculateTabRects(int tabPlacement, int tabCount) {
+        protected void calculateTabRects(final int tabPlacement, final int tabCount) {
             if (tabPlacement != EditorTabbedPane.TOP || tabCount == 0) {
                 super.calculateTabRects(tabPlacement, tabCount);
                 return;
@@ -293,8 +288,8 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
             shiftTabs(shift, returnAt, tabCount, true);
         }
 
-        private void shiftTabs(final int shift, final int returnAt, final int tabCount,
-                               final boolean updateShift) {
+        private void shiftTabs(
+                final int shift, final int returnAt, final int tabCount, final boolean updateShift) {
             boolean firstVisible = false;
             if (updateShift) {
                 currentShift += shift;
@@ -339,13 +334,15 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
                     continue;
                 }
                 final Dimension preferredSize = c.getPreferredSize();
-                //center component
+                // center component
                 int x = rects[i].x + (rects[i].width - preferredSize.width) / 2;
                 final int y = rects[i].y + (rects[i].height - preferredSize.height) / 2;
                 final boolean isSelected = i == tabPane.getSelectedIndex();
-                c.setBounds(x + getTabLabelShiftX(tabPane.getTabPlacement(), i, isSelected),
-                            y + getTabLabelShiftY(tabPane.getTabPlacement(), i, isSelected),
-                            preferredSize.width, preferredSize.height);
+                c.setBounds(
+                        x + getTabLabelShiftX(tabPane.getTabPlacement(), i, isSelected),
+                        y + getTabLabelShiftY(tabPane.getTabPlacement(), i, isSelected),
+                        preferredSize.width,
+                        preferredSize.height);
             }
         }
     }

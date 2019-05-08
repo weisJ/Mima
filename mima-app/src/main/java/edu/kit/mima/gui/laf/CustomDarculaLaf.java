@@ -9,19 +9,14 @@ import com.bulenkov.iconloader.util.SystemInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.InputMap;
-import javax.swing.KeyStroke;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.IconUIResource;
 import javax.swing.plaf.InsetsUIResource;
 import javax.swing.plaf.basic.BasicLookAndFeel;
 import javax.swing.plaf.metal.MetalLookAndFeel;
 import javax.swing.text.DefaultEditorKit;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
+import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
@@ -36,7 +31,6 @@ import java.util.logging.Logger;
 /**
  * CustomDarcula Look and Feel to allow for better extension.
  */
-@SuppressWarnings({"CheckStyle"})
 public class CustomDarculaLaf extends BasicLookAndFeel {
     private static final Logger LOGGER = Logger.getLogger(CustomDarculaLaf.class.getName());
     private static final String NAME = "Darcula";
@@ -59,8 +53,8 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
         }
     }
 
-    private static void patchComboBox(@NotNull final UIDefaults metalDefaults,
-                                      @NotNull final UIDefaults defaults) {
+    private static void patchComboBox(
+            @NotNull final UIDefaults metalDefaults, @NotNull final UIDefaults defaults) {
         defaults.remove("ComboBox.ancestorInputMap");
         defaults.remove("ComboBox.actionMap");
         defaults.put("ComboBox.ancestorInputMap", metalDefaults.get("ComboBox.ancestorInputMap"));
@@ -74,10 +68,11 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
         }
         if (key.endsWith("Insets")) {
             final List<String> numbers = StringUtil.split(value, ",");
-            return new InsetsUIResource(Integer.parseInt(numbers.get(0)),
-                                        Integer.parseInt(numbers.get(1)),
-                                        Integer.parseInt(numbers.get(2)),
-                                        Integer.parseInt(numbers.get(3)));
+            return new InsetsUIResource(
+                    Integer.parseInt(numbers.get(0)),
+                    Integer.parseInt(numbers.get(1)),
+                    Integer.parseInt(numbers.get(2)),
+                    Integer.parseInt(numbers.get(3)));
         } else if (key.endsWith(".border")) {
             try {
                 return Class.forName(value).getDeclaredConstructor().newInstance();
@@ -95,10 +90,9 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
         } else {
             final Color color = ColorUtil.fromHex(value, null);
             final Integer invVal = getInteger(value);
-            final Boolean boolVal = "true".equals(value)
-                                    ? Boolean.TRUE
-                                    : "false".equals(value) ? Boolean.FALSE : null;
-            //TODO: copy image loading
+            final Boolean boolVal =
+                    "true".equals(value) ? Boolean.TRUE : "false".equals(value) ? Boolean.FALSE : null;
+            // TODO: copy image loading
             //
             // final Icon icon = key.toLowerCase().endsWith("icon") ? null : null;
             if (color != null) {
@@ -144,8 +138,7 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
             installCutCopyPasteShortcuts(textFieldInputMap, false);
         }
         // Cut/Copy/Paste in JPasswordField
-        final InputMap passwordFieldInputMap = (InputMap) defaults
-                .get("PasswordField.focusInputMap");
+        final InputMap passwordFieldInputMap = (InputMap) defaults.get("PasswordField.focusInputMap");
         if (passwordFieldInputMap != null) {
             // It really can be null, for example when LAF isn't properly initialized
             // (Alloy license problem)
@@ -160,28 +153,21 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
         }
     }
 
-    private static void installCutCopyPasteShortcuts(@NotNull final InputMap inputMap,
-                                                     final boolean useSimpleActionKeys) {
+    private static void installCutCopyPasteShortcuts(
+            @NotNull final InputMap inputMap, final boolean useSimpleActionKeys) {
         final String copyActionKey = useSimpleActionKeys ? "copy" : DefaultEditorKit.copyAction;
         final String pasteActionKey = useSimpleActionKeys ? "paste" : DefaultEditorKit.pasteAction;
         final String cutActionKey = useSimpleActionKeys ? "cut" : DefaultEditorKit.cutAction;
         // Ctrl+Ins, Shift+Ins, Shift+Del
         inputMap.put(
-                KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, InputEvent.CTRL_DOWN_MASK),
-                copyActionKey);
+                KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, InputEvent.CTRL_DOWN_MASK), copyActionKey);
         inputMap.put(
-                KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, InputEvent.SHIFT_DOWN_MASK),
-                pasteActionKey);
+                KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, InputEvent.SHIFT_DOWN_MASK), pasteActionKey);
         inputMap.put(
-                KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, InputEvent.SHIFT_DOWN_MASK),
-                cutActionKey);
+                KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, InputEvent.SHIFT_DOWN_MASK), cutActionKey);
         // Ctrl+C, Ctrl+V, Ctrl+X
-        inputMap.put(
-                KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK),
-                copyActionKey);
-        inputMap.put(
-                KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK),
-                pasteActionKey);
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK), copyActionKey);
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK), pasteActionKey);
         inputMap.put(
                 KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_DOWN_MASK),
                 DefaultEditorKit.cutAction);
@@ -194,8 +180,7 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
 
     private void callInit(@NotNull final String method, final UIDefaults defaults) {
         try {
-            final Method superMethod = BasicLookAndFeel.class
-                    .getDeclaredMethod(method, UIDefaults.class);
+            final Method superMethod = BasicLookAndFeel.class.getDeclaredMethod(method, UIDefaults.class);
             superMethod.setAccessible(true);
             superMethod.invoke(base, defaults);
         } catch (@NotNull final Exception e) {
@@ -208,34 +193,48 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
         try {
             final Method superMethod = BasicLookAndFeel.class.getDeclaredMethod("getDefaults");
             superMethod.setAccessible(true);
-            final UIDefaults metalDefaults =
-                    (UIDefaults) superMethod.invoke(new MetalLookAndFeel());
+            final UIDefaults metalDefaults = (UIDefaults) superMethod.invoke(new MetalLookAndFeel());
             final UIDefaults defaults = (UIDefaults) superMethod.invoke(base);
             initInputMapDefaults(defaults);
             initIdeaDefaults(defaults);
             patchComboBox(metalDefaults, defaults);
             defaults.remove("Spinner.arrowButtonBorder");
             defaults.put("Spinner.arrowButtonSize", new Dimension(16, 5));
-            defaults.put("Tree.collapsedIcon", new IconUIResource(IconLoader.getIcon(
-                    "/com/bulenkov/darcula/icons/treeNodeCollapsed.png")));
-            defaults.put("Tree.expandedIcon", new IconUIResource(IconLoader.getIcon(
-                    "/com/bulenkov/darcula/icons/treeNodeExpanded.png")));
-            defaults.put("Menu.arrowIcon", new IconUIResource(IconLoader.getIcon(
-                    "/com/bulenkov/darcula/icons/menuItemArrowIcon.png")));
+            defaults.put(
+                    "Tree.collapsedIcon",
+                    new IconUIResource(
+                            IconLoader.getIcon("/com/bulenkov/darcula/icons/treeNodeCollapsed.png")));
+            defaults.put(
+                    "Tree.expandedIcon",
+                    new IconUIResource(
+                            IconLoader.getIcon("/com/bulenkov/darcula/icons/treeNodeExpanded.png")));
+            defaults.put(
+                    "Menu.arrowIcon",
+                    new IconUIResource(
+                            IconLoader.getIcon("/com/bulenkov/darcula/icons/menuItemArrowIcon.png")));
             defaults.put("CheckBoxMenuItem.checkIcon", EmptyIcon.create(16));
             defaults.put("RadioButtonMenuItem.checkIcon", EmptyIcon.create(16));
-            defaults.put("InternalFrame.icon", new IconUIResource(IconLoader.getIcon(
-                    "/com/bulenkov/darcula/icons/internalFrame.png")));
-            defaults.put("OptionPane.informationIcon", new IconUIResource(IconLoader.getIcon(
-                    "/com/bulenkov/darcula/icons/option_pane_info.png")));
-            defaults.put("OptionPane.questionIcon", new IconUIResource(IconLoader.getIcon(
-                    "/com/bulenkov/darcula/icons/option_pane_question.png")));
-            defaults.put("OptionPane.warningIcon", new IconUIResource(IconLoader.getIcon(
-                    "/com/bulenkov/darcula/icons/option_pane_warning.png")));
-            defaults.put("OptionPane.errorIcon", new IconUIResource(IconLoader.getIcon(
-                    "/com/bulenkov/darcula/icons/option_pane_error.png")));
-            if (SystemInfo.isMac && !"true".equalsIgnoreCase(System.getProperty(
-                    "apple.laf.useScreenMenuBar", "false"))) {
+            defaults.put(
+                    "InternalFrame.icon",
+                    new IconUIResource(IconLoader.getIcon("/com/bulenkov/darcula/icons/internalFrame.png")));
+            defaults.put(
+                    "OptionPane.informationIcon",
+                    new IconUIResource(
+                            IconLoader.getIcon("/com/bulenkov/darcula/icons/option_pane_info.png")));
+            defaults.put(
+                    "OptionPane.questionIcon",
+                    new IconUIResource(
+                            IconLoader.getIcon("/com/bulenkov/darcula/icons/option_pane_question.png")));
+            defaults.put(
+                    "OptionPane.warningIcon",
+                    new IconUIResource(
+                            IconLoader.getIcon("/com/bulenkov/darcula/icons/option_pane_warning.png")));
+            defaults.put(
+                    "OptionPane.errorIcon",
+                    new IconUIResource(
+                            IconLoader.getIcon("/com/bulenkov/darcula/icons/option_pane_error.png")));
+            if (SystemInfo.isMac
+                        && !"true".equalsIgnoreCase(System.getProperty("apple.laf.useScreenMenuBar", "false"))) {
                 defaults.put("MenuBarUI", "com.bulenkov.darcula.ui.DarculaMenuBarUI");
                 defaults.put("MenuUI", "javax.swing.plaf.basic.BasicMenuUI");
             }
@@ -263,71 +262,72 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
     @SuppressWarnings({"HardCodedStringLiteral"})
     private void initIdeaDefaults(@NotNull final UIDefaults defaults) {
         loadDefaults(defaults);
-        defaults.put("Table.ancestorInputMap", new UIDefaults.LazyInputMap(new Object[]{
-                "ctrl C", "copy",
-                "ctrl V", "paste",
-                "ctrl X", "cut",
-                "COPY", "copy",
-                "PASTE", "paste",
-                "CUT", "cut",
-                "control INSERT", "copy",
-                "shift INSERT", "paste",
-                "shift DELETE", "cut",
-                "RIGHT", "selectNextColumn",
-                "KP_RIGHT", "selectNextColumn",
-                "LEFT", "selectPreviousColumn",
-                "KP_LEFT", "selectPreviousColumn",
-                "DOWN", "selectNextRow",
-                "KP_DOWN", "selectNextRow",
-                "UP", "selectPreviousRow",
-                "KP_UP", "selectPreviousRow",
-                "shift RIGHT", "selectNextColumnExtendSelection",
-                "shift KP_RIGHT", "selectNextColumnExtendSelection",
-                "shift LEFT", "selectPreviousColumnExtendSelection",
-                "shift KP_LEFT", "selectPreviousColumnExtendSelection",
-                "shift DOWN", "selectNextRowExtendSelection",
-                "shift KP_DOWN", "selectNextRowExtendSelection",
-                "shift UP", "selectPreviousRowExtendSelection",
-                "shift KP_UP", "selectPreviousRowExtendSelection",
-                "PAGE_UP", "scrollUpChangeSelection",
-                "PAGE_DOWN", "scrollDownChangeSelection",
-                "HOME", "selectFirstColumn",
-                "END", "selectLastColumn",
-                "shift PAGE_UP", "scrollUpExtendSelection",
-                "shift PAGE_DOWN", "scrollDownExtendSelection",
-                "shift HOME", "selectFirstColumnExtendSelection",
-                "shift END", "selectLastColumnExtendSelection",
-                "ctrl PAGE_UP", "scrollLeftChangeSelection",
-                "ctrl PAGE_DOWN", "scrollRightChangeSelection",
-                "ctrl HOME", "selectFirstRow",
-                "ctrl END", "selectLastRow",
-                "ctrl shift PAGE_UP", "scrollRightExtendSelection",
-                "ctrl shift PAGE_DOWN", "scrollLeftExtendSelection",
-                "ctrl shift HOME", "selectFirstRowExtendSelection",
-                "ctrl shift END", "selectLastRowExtendSelection",
-                "TAB", "selectNextColumnCell",
-                "shift TAB", "selectPreviousColumnCell",
-                //"ENTER", "selectNextRowCell",
-                "shift ENTER", "selectPreviousRowCell",
-                "ctrl A", "selectAll",
-                "meta A", "selectAll",
-                //"ESCAPE", "cancel",
-                "F2", "startEditing"
-        }));
+        defaults.put(
+                "Table.ancestorInputMap",
+                new UIDefaults.LazyInputMap(
+                        new Object[]{
+                                "ctrl C", "copy",
+                                "ctrl V", "paste",
+                                "ctrl X", "cut",
+                                "COPY", "copy",
+                                "PASTE", "paste",
+                                "CUT", "cut",
+                                "control INSERT", "copy",
+                                "shift INSERT", "paste",
+                                "shift DELETE", "cut",
+                                "RIGHT", "selectNextColumn",
+                                "KP_RIGHT", "selectNextColumn",
+                                "LEFT", "selectPreviousColumn",
+                                "KP_LEFT", "selectPreviousColumn",
+                                "DOWN", "selectNextRow",
+                                "KP_DOWN", "selectNextRow",
+                                "UP", "selectPreviousRow",
+                                "KP_UP", "selectPreviousRow",
+                                "shift RIGHT", "selectNextColumnExtendSelection",
+                                "shift KP_RIGHT", "selectNextColumnExtendSelection",
+                                "shift LEFT", "selectPreviousColumnExtendSelection",
+                                "shift KP_LEFT", "selectPreviousColumnExtendSelection",
+                                "shift DOWN", "selectNextRowExtendSelection",
+                                "shift KP_DOWN", "selectNextRowExtendSelection",
+                                "shift UP", "selectPreviousRowExtendSelection",
+                                "shift KP_UP", "selectPreviousRowExtendSelection",
+                                "PAGE_UP", "scrollUpChangeSelection",
+                                "PAGE_DOWN", "scrollDownChangeSelection",
+                                "HOME", "selectFirstColumn",
+                                "END", "selectLastColumn",
+                                "shift PAGE_UP", "scrollUpExtendSelection",
+                                "shift PAGE_DOWN", "scrollDownExtendSelection",
+                                "shift HOME", "selectFirstColumnExtendSelection",
+                                "shift END", "selectLastColumnExtendSelection",
+                                "ctrl PAGE_UP", "scrollLeftChangeSelection",
+                                "ctrl PAGE_DOWN", "scrollRightChangeSelection",
+                                "ctrl HOME", "selectFirstRow",
+                                "ctrl END", "selectLastRow",
+                                "ctrl shift PAGE_UP", "scrollRightExtendSelection",
+                                "ctrl shift PAGE_DOWN", "scrollLeftExtendSelection",
+                                "ctrl shift HOME", "selectFirstRowExtendSelection",
+                                "ctrl shift END", "selectLastRowExtendSelection",
+                                "TAB", "selectNextColumnCell",
+                                "shift TAB", "selectPreviousColumnCell",
+                                // "ENTER", "selectNextRowCell",
+                                "shift ENTER", "selectPreviousRowCell",
+                                "ctrl A", "selectAll",
+                                "meta A", "selectAll",
+                                // "ESCAPE", "cancel",
+                                "F2", "startEditing"
+                        }));
     }
 
     private void loadDefaults(@NotNull final UIDefaults defaults) {
         final Properties properties = new Properties();
-        final String osSuffix = SystemInfo.isMac
-                                ? "mac" : SystemInfo.isWindows ? "windows" : "linux";
+        final String osSuffix = SystemInfo.isMac ? "mac" : SystemInfo.isWindows ? "windows" : "linux";
         try {
-            InputStream stream = CustomDarculaLaf.class
-                    .getResourceAsStream(getPrefix() + ".properties");
+            InputStream stream = CustomDarculaLaf.class.getResourceAsStream(getPrefix() + ".properties");
             properties.load(stream);
             stream.close();
 
-            stream = CustomDarculaLaf.class
-                    .getResourceAsStream(getPrefix() + "_" + osSuffix + ".properties");
+            stream =
+                    CustomDarculaLaf.class.getResourceAsStream(getPrefix() + "_" + osSuffix + ".properties");
             properties.load(stream);
             stream.close();
 
@@ -335,9 +335,8 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
             final String prefix = "darcula.";
             for (final String key : properties.stringPropertyNames()) {
                 if (key.startsWith(prefix)) {
-                    darculaGlobalSettings
-                            .put(key.substring(prefix.length()),
-                                 parseValue(key, properties.getProperty(key)));
+                    darculaGlobalSettings.put(
+                            key.substring(prefix.length()), parseValue(key, properties.getProperty(key)));
                 }
             }
 
@@ -356,9 +355,8 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
                 defaults.put(key, parseValue(key, value));
             }
 
-            //CustomUI classes.
-            defaults.put("EditorTabbedPane",
-                         "edu.kit.mima.gui.laf.components.DarkEditorTabbedPaneUI");
+            // CustomUI classes.
+            defaults.put("EditorTabbedPane", "edu.kit.mima.gui.laf.components.DarkEditorTabbedPaneUI");
         } catch (@NotNull final IOException e) {
             LOGGER.log(Level.SEVERE, e.toString(), e);
         }
@@ -413,13 +411,12 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
     }
 
     @Override
-    protected void loadSystemColors(final UIDefaults defaults, final String[] systemColors,
-                                    final boolean useNative) {
+    protected void loadSystemColors(
+            final UIDefaults defaults, final String[] systemColors, final boolean useNative) {
         try {
-            final Method superMethod = BasicLookAndFeel.class.getDeclaredMethod("loadSystemColors",
-                                                                                UIDefaults.class,
-                                                                                String[].class,
-                                                                                boolean.class);
+            final Method superMethod =
+                    BasicLookAndFeel.class.getDeclaredMethod(
+                            "loadSystemColors", UIDefaults.class, String[].class, boolean.class);
             superMethod.setAccessible(true);
             superMethod.invoke(base, defaults, systemColors, useNative);
         } catch (@NotNull final Exception e) {

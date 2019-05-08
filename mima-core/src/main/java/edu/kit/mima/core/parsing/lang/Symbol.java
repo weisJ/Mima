@@ -39,10 +39,7 @@ public interface Symbol {
     @Contract(value = " -> new", pure = true)
     static String[] getSymbols() {
         return new String[]{
-                ALLOWED_SYMBOLS,
-                NUMBERS,
-                NUMBER_SIGNED,
-                LETTERS,
+                ALLOWED_SYMBOLS, NUMBERS, NUMBER_SIGNED, LETTERS,
         };
     }
 }

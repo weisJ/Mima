@@ -4,32 +4,13 @@ import edu.kit.mima.gui.components.tabframe.TabFrame;
 import edu.kit.mima.gui.icons.Icons;
 import edu.kit.mima.gui.laf.LafManager;
 
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import java.awt.BorderLayout;
-import java.awt.Color;
+import javax.swing.*;
+import java.awt.*;
 
 public class TabFrameDemo extends JPanel {
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         LafManager.setDefaultTheme(true);
-        var content = new JPanel(new BorderLayout());
-        var p1 = new JPanel();
-        var p2 = new JPanel();
-        var p3 = new JPanel();
-        var p4 = new JPanel();
-
-        p1.setBackground(Color.RED);
-        p2.setBackground(Color.RED);
-        p3.setBackground(Color.RED);
-        p4.setBackground(Color.RED);
-
-        content.add(p1, BorderLayout.NORTH);
-        content.add(p2, BorderLayout.SOUTH);
-        content.add(p3, BorderLayout.EAST);
-        content.add(p4, BorderLayout.WEST);
-
 
         Icons.loadIcons();
         final JFrame frame = new JFrame();
@@ -48,10 +29,8 @@ public class TabFrameDemo extends JPanel {
         }
         var c = new JPanel(new BorderLayout());
         p.setContentPane(c);
-        c.setBackground(Color.RED);
-        content.add(p, BorderLayout.CENTER);
 
-        frame.setContentPane(content);
+        frame.setContentPane(p);
         frame.pack();
         frame.setSize(1000, 500);
         frame.setLocationRelativeTo(null);

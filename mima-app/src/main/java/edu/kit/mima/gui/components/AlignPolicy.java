@@ -2,7 +2,7 @@ package edu.kit.mima.gui.components;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Point;
+import java.awt.*;
 
 /**
  * Align Policies for aligning something relative to the mouse or a container.

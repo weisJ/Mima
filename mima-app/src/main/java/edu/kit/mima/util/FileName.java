@@ -86,8 +86,8 @@ public final class FileName {
      * @return file without extension.
      */
     @NotNull
-    public static String removeExtension(@NotNull final File file,
-                                         @NotNull final String[] blacklist) {
+    public static String removeExtension(
+            @NotNull final File file, @NotNull final String[] blacklist) {
         final String name = file.getName();
         for (final var s : blacklist) {
             if (name.endsWith("." + s)) {
@@ -104,10 +104,10 @@ public final class FileName {
      * @return input string with all special characters escaped
      */
     @NotNull
-    public static String escapeMetaCharacters(@NotNull String inputString) {
-        final String[] metaCharacters = {"\\",
-                "^", "$", "{", "}", "[", "]", "(", ")", ".",
-                "*", "+", "?", "|", "<", ">", "-", "&", "%"};
+    public static String escapeMetaCharacters(@NotNull final String inputString) {
+        final String[] metaCharacters = {
+                "\\", "^", "$", "{", "}", "[", "]", "(", ")", ".", "*", "+", "?", "|", "<", ">", "-", "&", "%"
+        };
         String input = inputString;
         for (final String metaCharacter : metaCharacters) {
             if (inputString.contains(metaCharacter)) {

@@ -25,19 +25,8 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-import javax.swing.WindowConstants;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dialog;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.Frame;
-import java.awt.GraphicsConfiguration;
-import java.awt.Window;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ResourceBundle;
@@ -80,8 +69,8 @@ public class FontDialog extends JDialog {
         initDialog();
     }
 
-    public FontDialog(final Frame owner, final String title,
-                      final boolean modal, final GraphicsConfiguration gc) {
+    public FontDialog(
+            final Frame owner, final String title, final boolean modal, final GraphicsConfiguration gc) {
         super(owner, title, modal, gc);
         initDialog();
     }
@@ -106,8 +95,8 @@ public class FontDialog extends JDialog {
         initDialog();
     }
 
-    public FontDialog(final Dialog owner, final String title,
-                      final boolean modal, final GraphicsConfiguration gc) {
+    public FontDialog(
+            final Dialog owner, final String title, final boolean modal, final GraphicsConfiguration gc) {
         super(owner, title, modal, gc);
         initDialog();
     }
@@ -132,8 +121,11 @@ public class FontDialog extends JDialog {
         initDialog();
     }
 
-    public FontDialog(final Window owner, final String title,
-                      final ModalityType modalityType, final GraphicsConfiguration gc) {
+    public FontDialog(
+            final Window owner,
+            final String title,
+            final ModalityType modalityType,
+            final GraphicsConfiguration gc) {
         super(owner, title, modalityType, gc);
         initDialog();
     }
@@ -158,12 +150,13 @@ public class FontDialog extends JDialog {
         getRootPane().setDefaultButton(okButton);
 
         cancelButton.addActionListener(event -> cancelSelected = true);
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(final WindowEvent e) {
-                cancelSelected = true;
-            }
-        });
+        addWindowListener(
+                new WindowAdapter() {
+                    @Override
+                    public void windowClosing(final WindowEvent e) {
+                        cancelSelected = true;
+                    }
+                });
     }
 
     private void initComponents() {
@@ -186,10 +179,11 @@ public class FontDialog extends JDialog {
 
         cancelButton.setMnemonic(resourceBundleUtil.getFirstChar("action.cancel.mnemonic"));
         cancelButton.setText(bundle.getString("action.cancel"));
-        cancelButton.addActionListener(event -> {
-            cancelSelected = true;
-            dispose();
-        });
+        cancelButton.addActionListener(
+                event -> {
+                    cancelSelected = true;
+                    dispose();
+                });
         controlPanel.add(cancelButton);
 
         pack();

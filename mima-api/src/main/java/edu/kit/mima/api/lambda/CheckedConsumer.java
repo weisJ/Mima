@@ -6,10 +6,8 @@ package edu.kit.mima.api.lambda;
  * @author Jannis Weis
  * @since 2018
  */
-
 @FunctionalInterface
 public interface CheckedConsumer<T, K extends Exception> {
 
     void accept(T t) throws K;
-
 }

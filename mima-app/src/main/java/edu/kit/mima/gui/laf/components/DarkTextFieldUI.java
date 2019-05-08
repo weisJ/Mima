@@ -4,38 +4,28 @@ import com.bulenkov.darcula.ui.DarculaTextBorder;
 import com.bulenkov.darcula.ui.DarculaTextFieldUI;
 import com.bulenkov.iconloader.util.GraphicsConfig;
 import com.bulenkov.iconloader.util.Gray;
-import edu.kit.mima.api.annotations.ReflectionCall;
+import edu.kit.mima.annotations.ReflectionCall;
 import edu.kit.mima.gui.icons.Icons;
 import edu.kit.mima.gui.laf.MimaUIUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.Icon;
-import javax.swing.JComponent;
-import javax.swing.JPopupMenu;
+import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.text.JTextComponent;
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Insets;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
+import java.awt.*;
 
 public class DarkTextFieldUI extends DarculaTextFieldUI {
-
 
     @NotNull
     @Contract("_ -> new")
     @ReflectionCall
-    public static ComponentUI createUI(JComponent c) {
+    public static ComponentUI createUI(final JComponent c) {
         return new DarkTextFieldUI();
     }
 
-    protected void paintBackground(Graphics graphics) {
+    protected void paintBackground(final Graphics graphics) {
         Graphics2D g = (Graphics2D) graphics;
         JTextComponent c = this.getComponent();
         Container parent = c.getParent();
@@ -45,10 +35,8 @@ public class DarkTextFieldUI extends DarculaTextFieldUI {
             g.fillRect(0, 0, c.getWidth(), c.getHeight());
         }
         final GraphicsConfig config = new GraphicsConfig(g);
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                           RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
-                           RenderingHints.VALUE_STROKE_NORMALIZE);
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
         Border border = c.getBorder();
         if (isSearchField(c)) {
             paintSearchField(g, c);
@@ -60,8 +48,8 @@ public class DarkTextFieldUI extends DarculaTextFieldUI {
         config.restore();
     }
 
-    private void paintBorderBackground(@NotNull final Graphics2D g, @NotNull final JTextComponent c,
-                                       @NotNull final Border b) {
+    private void paintBorderBackground(
+            @NotNull final Graphics2D g, @NotNull final JTextComponent c, @NotNull final Border b) {
         if (c.isEnabled() && c.isEditable()) {
             g.setColor(c.getBackground());
         }
@@ -70,13 +58,16 @@ public class DarkTextFieldUI extends DarculaTextFieldUI {
         int height = c.getHeight();
         Insets i = b.getBorderInsets(c);
         if (c.hasFocus()) {
-            g.fillRoundRect(i.left - 5, i.top - 2,
-                            width - i.right - i.left + 10,
-                            height - i.top - i.bottom + 6, 5, 5);
+            g.fillRoundRect(
+                    i.left - 5,
+                    i.top - 2,
+                    width - i.right - i.left + 10,
+                    height - i.top - i.bottom + 6,
+                    5,
+                    5);
         } else {
-            g.fillRect(i.left - 5, i.top - 2,
-                       width - i.right - i.left + 12,
-                       height - i.top - i.bottom + 6);
+            g.fillRect(
+                    i.left - 5, i.top - 2, width - i.right - i.left + 12, height - i.top - i.bottom + 6);
         }
     }
 
@@ -106,10 +97,10 @@ public class DarkTextFieldUI extends DarculaTextFieldUI {
 
     private void paintSearchIcon(final Graphics2D g) {
         Point p = this.getSearchIconCoord();
-        Icon searchIcon = this.getComponent().getClientProperty("JTextField.Search.FindPopup")
-                                  instanceof JPopupMenu
-                          ? Icons.SEARCH_WITH_HISTORY
-                          : Icons.SEARCH;
+        Icon searchIcon =
+                this.getComponent().getClientProperty("JTextField.Search.FindPopup") instanceof JPopupMenu
+                        ? Icons.SEARCH_WITH_HISTORY
+                        : Icons.SEARCH;
         searchIcon.paintIcon(null, g, p.x, p.y);
     }
 }

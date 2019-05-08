@@ -5,14 +5,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.border.AbstractBorder;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Insets;
-import java.awt.Polygon;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.RoundRectangle2D;
 
@@ -67,7 +60,7 @@ public class TextBubbleBorder extends AbstractBorder {
         this.pointerWidth = pointerSize;
 
         hints = new RenderingHints(RenderingHints.KEY_ANTIALIASING,
-                                   RenderingHints.VALUE_ANTIALIAS_ON);
+                RenderingHints.VALUE_ANTIALIAS_ON);
         insets = new Insets(0, 0, 0, 0);
         setThickness(thickness);
     }
@@ -108,7 +101,7 @@ public class TextBubbleBorder extends AbstractBorder {
      * @param pointerWidth the width of the pointer base.
      * @return this
      */
-    public TextBubbleBorder setPointerWidth(int pointerWidth) {
+    public TextBubbleBorder setPointerWidth(final int pointerWidth) {
         this.pointerWidth = pointerWidth;
         return this;
     }

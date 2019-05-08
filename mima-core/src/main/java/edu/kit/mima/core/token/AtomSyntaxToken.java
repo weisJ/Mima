@@ -2,7 +2,7 @@ package edu.kit.mima.core.token;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Color;
+import java.awt.*;
 
 /**
  * {@link SyntaxToken} implementation based on {@link AtomToken}.
@@ -24,11 +24,12 @@ public class AtomSyntaxToken<T> extends AtomToken<T> implements SyntaxToken<T> {
      * @param index  index of token
      * @param length length of token.
      */
-    public AtomSyntaxToken(@NotNull final TokenType type,
-                           @NotNull final T value,
-                           @NotNull final Color color,
-                           final int index,
-                           final int length) {
+    public AtomSyntaxToken(
+            @NotNull final TokenType type,
+            @NotNull final T value,
+            @NotNull final Color color,
+            final int index,
+            final int length) {
         super(type, value, index, index);
         this.length = length;
         this.color = color;

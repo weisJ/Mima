@@ -28,13 +28,9 @@ import edu.kit.mima.util.FileName;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Insets;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -56,8 +52,8 @@ public final class MimaUserInterface extends JFrame {
     private final MimaRunner mimaRunner = new MimaRunner();
     private final Debugger debugger = mimaRunner.debugger();
     private final FileActions fileActions = new FileActions(this, editorManager);
-    private final RunActions runActions = new RunActions(this, new MimaCompiler(),
-                                                         mimaRunner, debugger);
+    private final RunActions runActions =
+            new RunActions(this, new MimaCompiler(), mimaRunner, debugger);
 
     @NotNull
     private final FileDisplay fileDisplay;
@@ -79,8 +75,8 @@ public final class MimaUserInterface extends JFrame {
         fileDisplay = new MimaFileDisplay(fileActions).getDisplay();
         tabbedEditor = editorManager.getTabbedEditor();
         console = new Console();
-        memoryTable = new FixedScrollTable(new String[]{"Address", "Value"}, 100,
-                                           new Insets(0, 5, 0, 0));
+        memoryTable =
+                new FixedScrollTable(new String[]{"Address", "Value"}, 100, new Insets(0, 5, 0, 0));
         memoryView = new MemoryTableView(mimaRunner, memoryTable);
 
         App.logger.setConsole(console);
@@ -94,58 +90,63 @@ public final class MimaUserInterface extends JFrame {
     private void createBinding() {
         final var subscriptionManager = SubscriptionManager.getCurrentManager();
 
-        /*subscriptionManager.subscribe(new AbstractSubscriber(debugger) {
-            @Override
-            public <T> void notifySubscription(String identifier, T value) {
-                int index = Optional.ofNullable(mimaRunner.getCurrentStatement())
-                                    .map(Token::getOffset)
-                                    .orElse(-1);
-
-                editorManager.currentEditor().markLine(index);
-                memoryView.updateView();
-            }
-        }, Debugger.PAUSE_PROPERTY);
-
-        subscriptionManager.subscribe(new AbstractSubscriber(mimaRunner) {
-            @Override
-            public <T> void notifySubscription(String identifier, T value) {
-
-            }
-        }, MimaRunner.RUNNING_PROPERTY);
-
-        subscriptionManager.subscribe(new AbstractSubscriber(debugger) {
-            @Override
-            public <T> void notifySubscription(String identifier, T value) {
-                currentEditor().markLine(-1);
-                memoryView.updateView();
-            }
-        }, MimaRunner.RUNNING_PROPERTY);
-        */
-
-
-        BindingUtil.bind(debugger, () -> {
+    /*subscriptionManager.subscribe(new AbstractSubscriber(debugger) {
+        @Override
+        public <T> void notifySubscription(String identifier, T value) {
             int index = Optional.ofNullable(mimaRunner.getCurrentStatement())
-                    .map(Token::getOffset)
-                    .orElse(-1);
+                                .map(Token::getOffset)
+                                .orElse(-1);
 
             editorManager.currentEditor().markLine(index);
             memoryView.updateView();
-        }, Debugger.PAUSE_PROPERTY);
+        }
+    }, Debugger.PAUSE_PROPERTY);
 
-        BindingUtil.bind(mimaRunner, memoryView::updateView,
-                         MimaRunner.RUNNING_PROPERTY);
-        BindingUtil.bind(debugger, () -> currentEditor().markLine(-1),
-                         Debugger.RUNNING_PROPERTY);
-        tabbedEditor.addChangeListener(e -> Optional
-                .ofNullable((Editor) tabbedEditor.getSelectedComponent())
-                .ifPresent(editor -> {
-                    var file = new File(Optional.ofNullable(editorManager.managerForEditor(editor))
-                                                .map(FileManager::getLastFile)
-                                                .orElse(System.getProperty("SystemDrive")));
+    subscriptionManager.subscribe(new AbstractSubscriber(mimaRunner) {
+        @Override
+        public <T> void notifySubscription(String identifier, T value) {
 
-                    fileDisplay.setFile(file);
-                    EditorHotKeys.setEditor(editor);
-                }));
+        }
+    }, MimaRunner.RUNNING_PROPERTY);
+
+    subscriptionManager.subscribe(new AbstractSubscriber(debugger) {
+        @Override
+        public <T> void notifySubscription(String identifier, T value) {
+            currentEditor().markLine(-1);
+            memoryView.updateView();
+        }
+    }, MimaRunner.RUNNING_PROPERTY);
+    */
+
+        BindingUtil.bind(
+                debugger,
+                () -> {
+                    int index =
+                            Optional.ofNullable(mimaRunner.getCurrentStatement())
+                                    .map(Token::getOffset)
+                                    .orElse(-1);
+
+                    editorManager.currentEditor().markLine(index);
+                    memoryView.updateView();
+                },
+                Debugger.PAUSE_PROPERTY);
+
+        BindingUtil.bind(mimaRunner, memoryView::updateView, MimaRunner.RUNNING_PROPERTY);
+        BindingUtil.bind(debugger, () -> currentEditor().markLine(-1), Debugger.RUNNING_PROPERTY);
+        tabbedEditor.addChangeListener(
+                e ->
+                        Optional.ofNullable((Editor) tabbedEditor.getSelectedComponent())
+                                .ifPresent(
+                                        editor -> {
+                                            var file =
+                                                    new File(
+                                                            Optional.ofNullable(editorManager.managerForEditor(editor))
+                                                                    .map(FileManager::getLastFile)
+                                                                    .orElse(System.getProperty("SystemDrive")));
+
+                                            fileDisplay.setFile(file);
+                                            EditorHotKeys.setEditor(editor);
+                                        }));
     }
 
     /**
@@ -174,9 +175,7 @@ public final class MimaUserInterface extends JFrame {
     private void startSession(@Nullable final String filePath) {
         if (filePath == null || filePath.isEmpty()) {
             final String filesString = Preferences.getInstance().readString(PropertyKey.LAST_FILE);
-            final String[] files = filesString.isEmpty()
-                                   ? new String[0]
-                                   : filesString.split("/");
+            final String[] files = filesString.isEmpty() ? new String[0] : filesString.split("/");
             for (final String file : files) {
                 fileActions.openFile(file);
             }
@@ -190,28 +189,30 @@ public final class MimaUserInterface extends JFrame {
      */
     private void setupWindow() {
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(final WindowEvent e) {
-                quit();
-            }
+        addWindowListener(
+                new WindowAdapter() {
+                    @Override
+                    public void windowClosing(final WindowEvent e) {
+                        quit();
+                    }
 
-            @Override
-            public void windowActivated(final WindowEvent e) {
-                if (Settings.isOpen()) {
-                    Settings.getInstance().toFront();
-                    Settings.getInstance().repaint();
-                }
-            }
-        });
+                    @Override
+                    public void windowActivated(final WindowEvent e) {
+                        if (Settings.isOpen()) {
+                            Settings.getInstance().toFront();
+                            Settings.getInstance().repaint();
+                        }
+                    }
+                });
         setResizable(true);
-        final var dimension = new Dimension((int) FULLSCREEN.getWidth() / 2,
-                                            (int) FULLSCREEN.getHeight() / 2);
+        final var dimension =
+                new Dimension((int) FULLSCREEN.getWidth() / 2, (int) FULLSCREEN.getHeight() / 2);
         setSize(dimension);
         setPreferredSize(dimension);
         setTitle(TITLE);
-        var image = Toolkit.getDefaultToolkit()
-                .getImage(getClass().getClassLoader().getResource("images/mima.png"));
+        var image =
+                Toolkit.getDefaultToolkit()
+                        .getImage(getClass().getClassLoader().getResource("images/mima.png"));
         setIconImage(image);
     }
 
@@ -219,37 +220,45 @@ public final class MimaUserInterface extends JFrame {
 
         final JPanel controlPanel = new JPanel(new BorderLayout());
         controlPanel.add(fileDisplay, BorderLayout.WEST);
-        var buttonArea = new MimaButtonArea(this, tabbedEditor, runActions).getPane();
+        var buttonArea = new MimaButtonArea(this, runActions).getPane();
 
         controlPanel.add(buttonArea, BorderLayout.EAST);
         controlPanel.setBorder(new EmptyBorder(2, 2, 2, 2));
         controlPanel.setComponentZOrder(fileDisplay, 1);
         controlPanel.setComponentZOrder(buttonArea, 0);
 
-        Runnable resizeAction = () -> fileDisplay.setMaximumSize(new Dimension(
-                buttonArea.getX() - fileDisplay.getX(),
-                controlPanel.getMinimumSize().height));
+        Runnable resizeAction =
+                () ->
+                        fileDisplay.setMaximumSize(
+                                new Dimension(
+                                        buttonArea.getX() - fileDisplay.getX(), controlPanel.getMinimumSize().height));
         controlPanel.addComponentListener((ComponentResizeListener) e -> resizeAction.run());
         BindingUtil.bind(debugger, resizeAction, Debugger.RUNNING_PROPERTY);
 
-        /*
-        var subscriptionManager = SubscriptionManager.getCurrentManager();
-        subscriptionManager.subscribe(new AbstractSubscriber(debugger) {
-            @Override
-            public <T> void notifySubscription(String identifier, T value) {
-                fileDisplay.setMaximumSize(new Dimension(buttonArea.getX() - fileDisplay.getX(),
-                                                         controlPanel.getMinimumSize().height));
-            }
-        }, Debugger.RUNNING_PROPERTY);
-        */
+    /*
+    var subscriptionManager = SubscriptionManager.getCurrentManager();
+    subscriptionManager.subscribe(new AbstractSubscriber(debugger) {
+        @Override
+        public <T> void notifySubscription(String identifier, T value) {
+            fileDisplay.setMaximumSize(new Dimension(buttonArea.getX() - fileDisplay.getX(),
+                                                     controlPanel.getMinimumSize().height));
+        }
+    }, Debugger.RUNNING_PROPERTY);
+    */
 
         add(controlPanel, BorderLayout.NORTH);
         var tabFrame = new TabFrame();
         tabFrame.setContentPane(tabbedEditor);
-        tabFrame.addTab(new DefaultPopupComponent("Memory", Icons.MEMORY, memoryTable),
-                        "Memory", Icons.MEMORY, Alignment.NORTH_WEST);
-        tabFrame.addTab(new DefaultPopupComponent("Console", Icons.CONSOLE, console),
-                        "Console", Icons.CONSOLE, Alignment.SOUTH_WEST);
+        tabFrame.addTab(
+                new DefaultPopupComponent("Memory", Icons.MEMORY, memoryTable),
+                "Memory",
+                Icons.MEMORY,
+                Alignment.NORTH_WEST);
+        tabFrame.addTab(
+                new DefaultPopupComponent("Console", Icons.CONSOLE, console),
+                "Console",
+                Icons.CONSOLE,
+                Alignment.SOUTH_WEST);
 
         add(tabFrame, BorderLayout.CENTER);
         pack();
@@ -278,19 +287,19 @@ public final class MimaUserInterface extends JFrame {
      * Update window title to current file name.
      */
     public void fileChanged() {
-        Optional.ofNullable(editorManager.currentFileManager())
-                .map(FileManager::getLastFile)
-                .stream()
+        Optional.ofNullable(editorManager.currentFileManager()).map(FileManager::getLastFile).stream()
                 .peek(f -> fileDisplay.setFile(new File(f)))
                 .peek(f -> setTitle(TITLE + ' ' + FileName.shorten(f)))
                 .findFirst()
-                .ifPresent(f -> {
-                    final File parent = new File(f).getParentFile();
-                    final var pref = Preferences.getInstance();
-                    final String workDir = parent != null
-                                           ? parent.getAbsolutePath()
-                                           : pref.readString(PropertyKey.DIRECTORY_MIMA);
-                    pref.saveString(PropertyKey.DIRECTORY_WORKING, workDir);
-                });
+                .ifPresent(
+                        f -> {
+                            final File parent = new File(f).getParentFile();
+                            final var pref = Preferences.getInstance();
+                            final String workDir =
+                                    parent != null
+                                            ? parent.getAbsolutePath()
+                                            : pref.readString(PropertyKey.DIRECTORY_MIMA);
+                            pref.saveString(PropertyKey.DIRECTORY_WORKING, workDir);
+                        });
     }
 }

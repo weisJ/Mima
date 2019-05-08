@@ -1,6 +1,6 @@
 package edu.kit.mima.core.token;
 
-import java.awt.Color;
+import java.awt.*;
 
 /**
  * Token that additionally has an offset, length and associated colour.

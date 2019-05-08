@@ -2,12 +2,8 @@ package edu.kit.mima.gui.components;
 
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * Pane for component with label.
@@ -23,7 +19,7 @@ public class LabeledPane extends JPanel {
      * @param panel component
      * @param label label
      */
-    public LabeledPane(@NotNull JComponent panel, String label) {
+    public LabeledPane(@NotNull final JComponent panel, final String label) {
         var l = new JLabel(label);
         l.setLabelFor(panel);
         setLayout(new GridBagLayout());
@@ -41,7 +37,7 @@ public class LabeledPane extends JPanel {
     }
 
     @Override
-    public int getBaseline(int width, int height) {
+    public int getBaseline(final int width, final int height) {
         return 0;
     }
 }

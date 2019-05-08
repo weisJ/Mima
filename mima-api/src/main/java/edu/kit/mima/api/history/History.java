@@ -20,17 +20,16 @@ public class History<T> extends ClassObservable {
     public static final String POSITION_PROPERTY = "historyPosition";
     private static final SubscriptionService<Integer> SUBSCRIPTION_SERVICE =
             new SubscriptionService<>();
+
+    static {
+        SubscriptionManager.getCurrentManager()
+                .offerSubscription(SUBSCRIPTION_SERVICE, LENGTH_PROPERTY, POSITION_PROPERTY);
+    }
+
     @NotNull
     private final LinkedList<T> history;
     private int maxCapacity;
     private int head;
-
-    static {
-        SubscriptionManager.getCurrentManager().offerSubscription(SUBSCRIPTION_SERVICE,
-                                                                  LENGTH_PROPERTY,
-                                                                  POSITION_PROPERTY);
-    }
-
     private int preserved;
 
     /**
@@ -61,8 +60,8 @@ public class History<T> extends ClassObservable {
     }
 
     /**
-     * Add to history. If history reaches maximum capacity oldest object will be deleted. If there
-     * are elements in front of the current one they too will be deleted.
+     * Add to history. If history reaches maximum capacity oldest object will be deleted. If there are
+     * elements in front of the current one they too will be deleted.
      *
      * @param element element to add
      */
@@ -206,5 +205,4 @@ public class History<T> extends ClassObservable {
         SUBSCRIPTION_SERVICE.notifyEvent(POSITION_PROPERTY, head, this);
         getPropertyChangeSupport().firePropertyChange(POSITION_PROPERTY, prevPos, head);
     }
-
 }

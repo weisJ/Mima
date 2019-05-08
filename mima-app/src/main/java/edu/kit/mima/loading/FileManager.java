@@ -8,8 +8,8 @@ import edu.kit.mima.preferences.PropertyKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JOptionPane;
-import java.awt.Component;
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,24 +28,28 @@ public class FileManager implements AutoCloseable {
     private static final String UNSAVED_PREFIX = "unsaved";
     private final Component parent;
 
-    @NotNull private final FileRequester fileRequester;
-    @NotNull private final List<FileEventHandler> eventHandlers;
+    @NotNull
+    private final FileRequester fileRequester;
+    @NotNull
+    private final List<FileEventHandler> eventHandlers;
 
     private final String[] extensions;
     private boolean isNewFile;
     private String lastFile;
     private String directory;
 
-    @Nullable private String text;
+    @Nullable
+    private String text;
     private String lastExtension;
 
     private int fileHash;
 
     /**
      * Create new FileManager to control loading and saving of files. Keeps track:
+     *
      * <ul>
-     * <li>if files are unsaved</li>
-     * <li>last used file extension</li>
+     * <li>if files are unsaved
+     * <li>last used file extension
      * </ul>
      *
      * @param parent     parent component for dialogs
@@ -56,29 +60,32 @@ public class FileManager implements AutoCloseable {
         this.extensions = extensions;
         this.parent = parent;
 
-        fileRequester = new FileRequester(this.parent, new LogLoadManager() {
-            private String backupLastFile;
-            private String backupLastExtension;
+        fileRequester =
+                new FileRequester(
+                        this.parent,
+                        new LogLoadManager() {
+                            private String backupLastFile;
+                            private String backupLastExtension;
 
-            @Override
-            public void beforeLoad() {
-                backupLastFile = lastFile;
-                backupLastExtension = lastExtension;
-            }
+                            @Override
+                            public void beforeLoad() {
+                                backupLastFile = lastFile;
+                                backupLastExtension = lastExtension;
+                            }
 
-            @Override
-            public void onFail(final String errorMessage) {
-                super.onFail(errorMessage);
-                lastFile = backupLastFile;
-                lastExtension = backupLastExtension;
-            }
+                            @Override
+                            public void onFail(final String errorMessage) {
+                                super.onFail(errorMessage);
+                                lastFile = backupLastFile;
+                                lastExtension = backupLastExtension;
+                            }
 
-            @Override
-            public void afterRequest(@NotNull final File chosenFile) {
-                lastFile = chosenFile.getAbsolutePath();
-                updateReferences(chosenFile.getAbsolutePath());
-            }
-        });
+                            @Override
+                            public void afterRequest(@NotNull final File chosenFile) {
+                                lastFile = chosenFile.getAbsolutePath();
+                                updateReferences(chosenFile.getAbsolutePath());
+                            }
+                        });
         directory = Preferences.getInstance().readString(PropertyKey.DIRECTORY_WORKING);
     }
 
@@ -88,7 +95,8 @@ public class FileManager implements AutoCloseable {
      * @throws IOException if no file was chosen or file could not be loaded.
      */
     public void load() throws IOException {
-        text = fileRequester.requestLoad(directory, extensions, () -> {});
+        text = fileRequester.requestLoad(directory, extensions, () -> {
+        });
         if (text == null) {
             throw new IOException("no file given");
         }
@@ -115,10 +123,16 @@ public class FileManager implements AutoCloseable {
      * Create a new File. Requests user to chose file type
      */
     public void newFile() {
-        final String response = (String) JOptionPane
-                .showInputDialog(parent, "Choose file type", "New File",
-                                 JOptionPane.QUESTION_MESSAGE,
-                                 null, extensions, extensions[0]);
+        final String response =
+                (String)
+                        JOptionPane.showInputDialog(
+                                parent,
+                                "Choose file type",
+                                "New File",
+                                JOptionPane.QUESTION_MESSAGE,
+                                null,
+                                extensions,
+                                extensions[0]);
         if (response == null) {
             throw new IllegalArgumentException("aborted");
         }
@@ -154,9 +168,13 @@ public class FileManager implements AutoCloseable {
         if (text == null) {
             return;
         }
-        fileRequester.requestSave(text, directory, lastExtension, () -> {
-            throw new IllegalArgumentException("aborted save");
-        });
+        fileRequester.requestSave(
+                text,
+                directory,
+                lastExtension,
+                () -> {
+                    throw new IllegalArgumentException("aborted save");
+                });
         isNewFile = false;
         fileHash = text.hashCode();
         notifyHandlers(e -> e.saveEvent(lastFile));
@@ -168,12 +186,18 @@ public class FileManager implements AutoCloseable {
      * @param abortCallback callback in case of abort.
      */
     public void savePopUp(@NotNull final Runnable abortCallback) {
-        final int response = JOptionPane
-                .showOptionDialog(parent, "Do you want to save?", "Unsaved File",
-                                  JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
-                                  null, new String[]{"Save", "Save as", "Don't save"}, "Save");
+        final int response =
+                JOptionPane.showOptionDialog(
+                        parent,
+                        "Do you want to save?",
+                        "Unsaved File",
+                        JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.WARNING_MESSAGE,
+                        null,
+                        new String[]{"Save", "Save as", "Don't save"},
+                        "Save");
         switch (response) {
-            case 0: //Save
+            case 0: // Save
                 if (isNewFile) {
                     saveAs();
                 } else {
@@ -184,7 +208,7 @@ public class FileManager implements AutoCloseable {
                     }
                 }
                 break;
-            case 1: //Save as
+            case 1: // Save as
                 saveAs();
                 break;
             case 2: /*Don't save (do nothing)*/
@@ -268,9 +292,10 @@ public class FileManager implements AutoCloseable {
         final var pref = Preferences.getInstance();
         isNewFile = lastFile.startsWith(UNSAVED_PREFIX);
         final File lFile = new File(lastFile);
-        directory = lFile.exists()
-                ? lFile.getParentFile().getAbsolutePath()
-                : pref.readString(PropertyKey.DIRECTORY_MIMA);
+        directory =
+                lFile.exists()
+                        ? lFile.getParentFile().getAbsolutePath()
+                        : pref.readString(PropertyKey.DIRECTORY_MIMA);
         pref.saveString(PropertyKey.DIRECTORY_WORKING, directory);
     }
 

@@ -3,11 +3,8 @@ package edu.kit.mima.gui.menu;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.MenuBar;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.KeyStroke;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * Builder for creating simple {@link MenuBar}.
@@ -61,9 +58,8 @@ public final class MenuBuilder {
          */
         @Contract("_, _, _ -> this")
         @NotNull
-        public SubMenuBuilder addItem(final String title,
-                                      @NotNull final Runnable action,
-                                      final String accelerator) {
+        public SubMenuBuilder addItem(
+                final String title, @NotNull final Runnable action, final String accelerator) {
             final JMenuItem item = new JMenuItem(title);
             item.addActionListener(e -> action.run());
             item.setAccelerator(KeyStroke.getKeyStroke(accelerator));
@@ -110,8 +106,7 @@ public final class MenuBuilder {
          */
         @Contract("_, _ -> this")
         @NotNull
-        public SubMenuBuilder addItem(@NotNull final JMenuItem item,
-                                      @NotNull final Runnable action) {
+        public SubMenuBuilder addItem(@NotNull final JMenuItem item, @NotNull final Runnable action) {
             menu.add(item);
             item.addActionListener(e -> action.run());
             return this;

@@ -2,11 +2,8 @@ package edu.kit.mima.gui.components.dragging;
 
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.SwingUtilities;
-import java.awt.AWTEvent;
-import java.awt.Component;
-import java.awt.Point;
-import java.awt.Rectangle;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -35,10 +32,12 @@ public class SnapDraggingSupport extends DraggingSupport {
      * @param opacityInside    the opacity for inside the parent frame.
      * @param opacityOutside   the opacity for outside the parent frame.
      */
-    public SnapDraggingSupport(final Component component,
-                               final Supplier<Rectangle> snapRectSupplier,
-                               final float opacityInside, final float opacityOutside,
-                               final int snapRectGrow) {
+    public SnapDraggingSupport(
+            final Component component,
+            final Supplier<Rectangle> snapRectSupplier,
+            final float opacityInside,
+            final float opacityOutside,
+            final int snapRectGrow) {
         super(component, opacityInside, opacityOutside);
         this.component = component;
         this.snapRectSupplier = snapRectSupplier;
@@ -82,28 +81,28 @@ public class SnapDraggingSupport extends DraggingSupport {
     }
 
     @Override
-    public void showDrag(boolean showDrag) {
+    public void showDrag(final boolean showDrag) {
         super.showDrag(showDrag);
     }
 
     @Override
-    protected void calculateDragLocation(Point dragLocation) {
+    protected void calculateDragLocation(final Point dragLocation) {
         super.calculateDragLocation(dragLocation);
         if (snapped) {
             Point point = new Point(getDragLocation());
             var snapBound = snapRectSupplier.get();
             var compPos = snapBound.getLocation();
             SwingUtilities.convertPointToScreen(compPos, component);
-            point.x = Math.min(Math.max(compPos.x, point.x),
-                               compPos.x + snapBound.width - getDragWidth());
-            point.y = Math.min(Math.max(compPos.y, point.y),
-                               compPos.y + snapBound.height - getDragHeight());
+            point.x =
+                    Math.min(Math.max(compPos.x, point.x), compPos.x + snapBound.width - getDragWidth());
+            point.y =
+                    Math.min(Math.max(compPos.y, point.y), compPos.y + snapBound.height - getDragHeight());
             dragLocation.setLocation(point);
         }
     }
 
     @Override
-    public void eventDispatched(@NotNull AWTEvent event) {
+    public void eventDispatched(@NotNull final AWTEvent event) {
         super.eventDispatched(event);
         if (event.getID() == MouseEvent.MOUSE_RELEASED) {
             setSnapped(false);

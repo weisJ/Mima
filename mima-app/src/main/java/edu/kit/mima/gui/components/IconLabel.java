@@ -4,14 +4,8 @@ import com.bulenkov.iconloader.util.EmptyIcon;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.Icon;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.LayoutManager;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * Label with icon.
@@ -29,8 +23,8 @@ public class IconLabel extends JPanel {
     protected final JLabel label;
     protected IconPanel iconPanel;
     private int alignment;
-    private int horizontalGap;
-    private int iconGap;
+    private final int horizontalGap;
+    private final int iconGap;
 
     /**
      * Create new Icon label.
@@ -61,7 +55,7 @@ public class IconLabel extends JPanel {
      * @param title     the label text.
      * @param alignment the alignment. one of {@link #LEFT},{@link #CENTER} or {@link #RIGHT}
      */
-    public IconLabel(final Icon icon, final String title, int alignment) {
+    public IconLabel(final Icon icon, final String title, final int alignment) {
         this(icon, title, alignment, 5, 5);
     }
 
@@ -76,7 +70,7 @@ public class IconLabel extends JPanel {
     }
 
     @Override
-    public void paint(Graphics g) {
+    public void paint(final Graphics g) {
         getLayout().layoutContainer(this);
         super.paint(g);
     }
@@ -123,7 +117,7 @@ public class IconLabel extends JPanel {
      *
      * @param alignment one of {@link #LEFT},{@link #CENTER} or {@link #RIGHT}.
      */
-    public void setHorizontalAlignment(int alignment) {
+    public void setHorizontalAlignment(final int alignment) {
         this.alignment = alignment;
     }
 
@@ -135,22 +129,22 @@ public class IconLabel extends JPanel {
     private class TabLayout implements LayoutManager {
 
         @Override
-        public void addLayoutComponent(String name, Component comp) {
+        public void addLayoutComponent(final String name, final Component comp) {
         }
 
         @Override
-        public void removeLayoutComponent(Component comp) {
+        public void removeLayoutComponent(final Component comp) {
         }
 
         @NotNull
         @Override
-        public Dimension preferredLayoutSize(Container parent) {
+        public Dimension preferredLayoutSize(final Container parent) {
             return minimumLayoutSize(parent);
         }
 
         @NotNull
         @Override
-        public Dimension minimumLayoutSize(Container parent) {
+        public Dimension minimumLayoutSize(final Container parent) {
             var lm = label.getPreferredSize();
             var im = iconPanel.getMinimumSize();
             int gap = switch (alignment) {
@@ -159,11 +153,11 @@ public class IconLabel extends JPanel {
                 default -> 0;
             };
             return new Dimension(lm.width + im.width + gap + iconGap,
-                                 Math.max(lm.height, im.height) + 1);
+                    Math.max(lm.height, im.height) + 1);
         }
 
         @Override
-        public void layoutContainer(@NotNull Container parent) {
+        public void layoutContainer(@NotNull final Container parent) {
             var b = label.getPreferredSize();
             var ib = iconPanel.getPreferredSize();
             int x = switch (alignment) {

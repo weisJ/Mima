@@ -6,13 +6,9 @@ import edu.kit.mima.gui.components.listeners.AncestorAdapter;
 import org.apache.poi.sl.usermodel.Insets2D;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JSplitPane;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.event.AncestorEvent;
-import java.awt.BorderLayout;
-import java.awt.Color;
+import java.awt.*;
 import java.util.Arrays;
 import java.util.function.BiConsumer;
 
@@ -27,17 +23,17 @@ public class TabFrameContent extends JPanel {
     private static final double VERTICAL_PROP = 0.2;
 
 
-    private SeamlessSplitPane topSplit;
-    private SeamlessSplitPane bottomSplit;
-    private SeamlessSplitPane leftSplit;
-    private SeamlessSplitPane rightSplit;
-    private SeamlessSplitPane leftSplitter;
-    private SeamlessSplitPane rightSplitter;
-    private SeamlessSplitPane topSplitter;
-    private SeamlessSplitPane bottomSplitter;
+    private final SeamlessSplitPane topSplit;
+    private final SeamlessSplitPane bottomSplit;
+    private final SeamlessSplitPane leftSplit;
+    private final SeamlessSplitPane rightSplit;
+    private final SeamlessSplitPane leftSplitter;
+    private final SeamlessSplitPane rightSplitter;
+    private final SeamlessSplitPane topSplitter;
+    private final SeamlessSplitPane bottomSplitter;
 
     @NotNull
-    private boolean[] enabled = new boolean[8];
+    private final boolean[] enabled = new boolean[8];
 
     private JComponent cont = new JPanel();
 
@@ -112,7 +108,7 @@ public class TabFrameContent extends JPanel {
 
         addAncestorListener(new AncestorAdapter() {
             @Override
-            public void ancestorAdded(AncestorEvent event) {
+            public void ancestorAdded(final AncestorEvent event) {
                 removeAncestorListener(this);
                 disableAll();
                 SwingUtilities.invokeLater(() -> disableAll());
@@ -142,7 +138,7 @@ public class TabFrameContent extends JPanel {
         return cont;
     }
 
-    public void setContentPane(JComponent pane) {
+    public void setContentPane(final JComponent pane) {
         cont = pane;
         rightSplit.setLeftComponent(pane);
     }

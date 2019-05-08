@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.Point;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,10 +33,14 @@ import java.util.Set;
  */
 public final class PreProcessor extends Processor<Token, TokenStream> {
 
-    @NotNull private final String workingDirectory;
-    @NotNull private final String mimaDirectory;
-    @NotNull private final StringBuilder processedInput;
-    @NotNull private final Set<File> processedFiles;
+    @NotNull
+    private final String workingDirectory;
+    @NotNull
+    private final String mimaDirectory;
+    @NotNull
+    private final StringBuilder processedInput;
+    @NotNull
+    private final Set<File> processedFiles;
     private List<ParserException> errors;
     private boolean recursive;
     private boolean isHome = false;
@@ -50,11 +54,12 @@ public final class PreProcessor extends Processor<Token, TokenStream> {
      * @param mimaDirectory    mima directory
      * @param recursive        whether to recursively parse and input included files
      */
-    public PreProcessor(@NotNull final String inputString,
-                        @NotNull final String inputPath,
-                        @NotNull final String workingDirectory,
-                        @NotNull final String mimaDirectory,
-                        final boolean recursive) {
+    public PreProcessor(
+            @NotNull final String inputString,
+            @NotNull final String inputPath,
+            @NotNull final String workingDirectory,
+            @NotNull final String mimaDirectory,
+            final boolean recursive) {
         super(new TokenStream(inputString));
         this.workingDirectory = workingDirectory;
         this.mimaDirectory = mimaDirectory;
@@ -74,11 +79,12 @@ public final class PreProcessor extends Processor<Token, TokenStream> {
      * @param mimaDirectory    mima directory
      * @param isHome           whether the file to process is on the working directory
      */
-    private PreProcessor(@NotNull final String inputString,
-                         @NotNull final Set<File> processedFiles,
-                         @NotNull final String workingDirectory,
-                         @NotNull final String mimaDirectory,
-                         final boolean isHome) {
+    private PreProcessor(
+            @NotNull final String inputString,
+            @NotNull final Set<File> processedFiles,
+            @NotNull final String workingDirectory,
+            @NotNull final String mimaDirectory,
+            final boolean isHome) {
         super(new TokenStream(inputString));
         this.workingDirectory = workingDirectory;
         this.mimaDirectory = mimaDirectory;
@@ -130,7 +136,7 @@ public final class PreProcessor extends Processor<Token, TokenStream> {
      *
      * @param beginIndex begin index of statement
      * @return Point (x,y) where x denotes the start of the statement and y the end of statement
-     *         inside file.
+     * inside file.
      */
     @NotNull
     @Contract("_ -> new")
@@ -172,15 +178,15 @@ public final class PreProcessor extends Processor<Token, TokenStream> {
         }
     }
 
-    private boolean tryPaths(final String path, @NotNull final String fullPath,
-                             final String extension) {
+    private boolean tryPaths(
+            final String path, @NotNull final String fullPath, final String extension) {
         final File workingDir = new File(workingDirectory);
         final File homeDir = new File(mimaDirectory);
-        return !isHome && workingDir.exists()
-                && tryPath(workingDir.getAbsolutePath() + path + '.' + extension, false)
-                || homeDir.exists()
-                && tryPath(homeDir.getAbsolutePath() + path + '.' + extension, true)
-                || tryPath(fullPath, false);
+        return !isHome
+                       && workingDir.exists()
+                       && tryPath(workingDir.getAbsolutePath() + path + '.' + extension, false)
+                       || homeDir.exists() && tryPath(homeDir.getAbsolutePath() + path + '.' + extension, true)
+                       || tryPath(fullPath, false);
     }
 
     /**
@@ -197,8 +203,9 @@ public final class PreProcessor extends Processor<Token, TokenStream> {
             try {
                 final String file = IoTools.loadFile(path);
                 processedInput.append("\n#<<File = ").append(path).append(">>#\n");
-                final var processed = new PreProcessor(file, processedFiles, workingDirectory,
-                                                       mimaDirectory, isHome).process();
+                final var processed =
+                        new PreProcessor(file, processedFiles, workingDirectory, mimaDirectory, isHome)
+                                .process();
                 final List<ParserException> err = processed.getSecond();
                 if (!err.isEmpty()) {
                     errors.add(new ProcessorException("File not found: \"" + path + "\""));

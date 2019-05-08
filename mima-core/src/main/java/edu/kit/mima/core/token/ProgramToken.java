@@ -49,8 +49,10 @@ public class ProgramToken extends FileObjectAdapter implements Token<Token[]> {
      * Create jump map for program token
      */
     private void resolveJumps() {
-        final List<Token> tokens = ((ProgramQueryResult) new ProgramQuery(this)
-                .whereEqual(Token::getType, TokenType.JUMP_POINT)).get(false);
+        final List<Token> tokens =
+                ((ProgramQueryResult)
+                         new ProgramQuery(this).whereEqual(Token::getType, TokenType.JUMP_POINT))
+                        .get(false);
         for (final var token : tokens) {
             jumpMap.put((Token) token.getValue(), token.getLineIndex());
         }
@@ -79,7 +81,7 @@ public class ProgramToken extends FileObjectAdapter implements Token<Token[]> {
     }
 
     @Override
-    public Stream<Token> stream(boolean includeChildren) {
+    public Stream<Token> stream(final boolean includeChildren) {
         if (includeChildren) {
             return Arrays.stream(program).flatMap(Token::stream);
         } else {
@@ -108,11 +110,10 @@ public class ProgramToken extends FileObjectAdapter implements Token<Token[]> {
         return print(Token::simpleName, "");
     }
 
-    private String print(@NotNull Function<Token, String> mapping, String prefix) {
+    private String print(@NotNull final Function<Token, String> mapping, final String prefix) {
         return Arrays.stream(program)
-                .map(t -> '\t' + INDENT.matcher(mapping.apply(t))
-                        .replaceAll(INDENT_REPLACEMENT) + '\n')
-                .collect(Collectors.joining("", prefix + "{\n", "}"));
+                       .map(t -> '\t' + INDENT.matcher(mapping.apply(t)).replaceAll(INDENT_REPLACEMENT) + '\n')
+                       .collect(Collectors.joining("", prefix + "{\n", "}"));
     }
 
     @Contract(value = "null -> false", pure = true)

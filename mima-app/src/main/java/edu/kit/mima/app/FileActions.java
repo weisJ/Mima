@@ -81,8 +81,8 @@ public final class FileActions {
      */
     public void save() {
         try {
-            String fileM = "Saving \""
-                    + FileName.shorten(editorManager.currentFileManager().getLastFile()) + "\"";
+            String fileM =
+                    "Saving \"" + FileName.shorten(editorManager.currentFileManager().getLastFile()) + "\"";
             LoadingIndicator.start(fileM, 3);
             editorManager.currentFileManager().save();
             LoadingIndicator.stop(fileM + " (done)");
@@ -98,5 +98,4 @@ public final class FileActions {
         editorManager.currentFileManager().saveAs();
         mimaUI.fileChanged();
     }
-
 }

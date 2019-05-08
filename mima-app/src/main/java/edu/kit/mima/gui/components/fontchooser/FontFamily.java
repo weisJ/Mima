@@ -2,7 +2,7 @@ package edu.kit.mima.gui.components.fontchooser;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Font;
+import java.awt.*;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;

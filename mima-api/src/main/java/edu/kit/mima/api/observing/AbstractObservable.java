@@ -21,8 +21,8 @@ public abstract class AbstractObservable implements Observable {
     }
 
     @Override
-    public void addPropertyChangeListener(final String property,
-                                          final PropertyChangeListener listener) {
+    public void addPropertyChangeListener(
+            final String property, final PropertyChangeListener listener) {
         propertyChangeSupport.addPropertyChangeListener(property, listener);
     }
 
@@ -32,8 +32,8 @@ public abstract class AbstractObservable implements Observable {
     }
 
     @Override
-    public void removePropertyChangeListener(final String property,
-                                             final PropertyChangeListener listener) {
+    public void removePropertyChangeListener(
+            final String property, final PropertyChangeListener listener) {
         propertyChangeSupport.removePropertyChangeListener(property, listener);
     }
 

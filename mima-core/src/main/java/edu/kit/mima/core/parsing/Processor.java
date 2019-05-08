@@ -45,9 +45,8 @@ public abstract class Processor<T extends Token, K extends TokenStream> {
      * @return Expressions in ListToken
      */
     @NotNull
-    protected ListToken<T> delimited(@NotNull final char[] del,
-                                     @NotNull final Supplier<T> parser,
-                                     final boolean skipLast) {
+    protected ListToken<T> delimited(
+            @NotNull final char[] del, @NotNull final Supplier<T> parser, final boolean skipLast) {
         return delimited(del, parser, skipLast, false);
     }
 
@@ -61,17 +60,19 @@ public abstract class Processor<T extends Token, K extends TokenStream> {
      * @return Expressions in ListToken
      */
     @NotNull
-    protected ListToken<T> delimited(@NotNull final char[] del,
-                                     @NotNull final Supplier<T> parser,
-                                     final boolean skipLast,
-                                     final boolean includeSkipped) {
+    protected ListToken<T> delimited(
+            @NotNull final char[] del,
+            @NotNull final Supplier<T> parser,
+            final boolean skipLast,
+            final boolean includeSkipped) {
         final List<T> tokens = new ArrayList<>();
         final List<T> skips = includeSkipped ? tokens : new ArrayList<>();
         if (del[0] != CharInputStream.EMPTY_CHAR) {
             skips.add(parseDelimiter());
         }
-        boolean end = parseDelimited(new char[]{del[0], del[1], CharInputStream.EMPTY_CHAR},
-                                     parser, tokens, skips);
+        boolean end =
+                parseDelimited(
+                        new char[]{del[0], del[1], CharInputStream.EMPTY_CHAR}, parser, tokens, skips);
         while (!end && !input.isEmpty()) {
             end = parseDelimited(del, parser, tokens, skips);
         }
@@ -81,12 +82,12 @@ public abstract class Processor<T extends Token, K extends TokenStream> {
         return new ListToken<>(tokens);
     }
 
-    private boolean parseDelimited(@NotNull final char[] del,
-                                   @NotNull final Supplier<T> parser,
-                                   @NotNull final List<T> tokenList,
-                                   @NotNull final List<T> skipList) {
-        if (!isPunctuation(del[1])
-                && (del[2] == CharInputStream.EMPTY_CHAR || isPunctuation(del[2]))) {
+    private boolean parseDelimited(
+            @NotNull final char[] del,
+            @NotNull final Supplier<T> parser,
+            @NotNull final List<T> tokenList,
+            @NotNull final List<T> skipList) {
+        if (!isPunctuation(del[1]) && (del[2] == CharInputStream.EMPTY_CHAR || isPunctuation(del[2]))) {
             if (del[2] != CharInputStream.EMPTY_CHAR) {
                 skipList.add(parseDelimiter());
             }
@@ -113,10 +114,9 @@ public abstract class Processor<T extends Token, K extends TokenStream> {
     protected boolean isPunctuation(final char expected) {
         final Token token = input.peek();
         return token != null
-                && (token.getType() == TokenType.PUNCTUATION)
-                && (token.getValue().equals(String.valueOf(expected)));
+                       && (token.getType() == TokenType.PUNCTUATION)
+                       && (token.getValue().equals(String.valueOf(expected)));
     }
-
 
     /**
      * Returns whether current token is of the given keyword.
@@ -127,8 +127,8 @@ public abstract class Processor<T extends Token, K extends TokenStream> {
     protected boolean isKeyword(final String keyword) {
         final Token token = input.peek();
         return token != null
-                && (token.getType() == TokenType.KEYWORD)
-                && (token.getValue().equals(keyword));
+                       && (token.getType() == TokenType.KEYWORD)
+                       && (token.getValue().equals(keyword));
     }
 
     /**

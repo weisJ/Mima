@@ -13,10 +13,9 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.LinkedList;
 import java.util.Queue;
-
 
 /**
  * ConsoleLogger that outputs to a {@link Console}.
@@ -27,12 +26,12 @@ import java.util.Queue;
 public final class ConsoleLogger implements Logger {
 
     private final Queue<Tuple<String, Color>> messageQueue = new LinkedList<>();
-    @Nullable private Console console;
+    @Nullable
+    private Console console;
     private LogLevel level = LogLevel.INFO;
     private boolean locked = false;
 
     public ConsoleLogger() {
-
     }
 
     /**
@@ -120,8 +119,8 @@ public final class ConsoleLogger implements Logger {
         print("[ERROR] " + message, LogColor.ERROR, overwriteLast);
     }
 
-    private void print(final String message, @NotNull final LogColor logColor,
-                       final boolean overwriteLast) {
+    private void print(
+            final String message, @NotNull final LogColor logColor, final boolean overwriteLast) {
         if (console == null) {
             return;
         }
@@ -165,7 +164,7 @@ public final class ConsoleLogger implements Logger {
         }
 
         private Color color;
-        private ColorKey key;
+        private final ColorKey key;
 
         @Contract(pure = true)
         LogColor(final Color color, final ColorKey key) {

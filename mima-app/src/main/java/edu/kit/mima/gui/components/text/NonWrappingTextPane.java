@@ -1,9 +1,8 @@
 package edu.kit.mima.gui.components.text;
 
-import javax.swing.JTextPane;
+import javax.swing.*;
 import javax.swing.plaf.ComponentUI;
-import java.awt.Component;
-import java.awt.Dimension;
+import java.awt.*;
 
 /**
  * JTextPane that keeps the original width of text.

@@ -6,16 +6,11 @@ import com.bulenkov.darcula.ui.DarculaButtonUI;
 import com.bulenkov.iconloader.util.GraphicsConfig;
 import com.bulenkov.iconloader.util.Gray;
 
-import javax.swing.JButton;
-import javax.swing.UIManager;
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Insets;
-import java.awt.RenderingHints;
+import javax.swing.*;
+import java.awt.*;
 
 /**
- * Custom adaption of  {@link DarculaButtonPainter}.
+ * Custom adaption of {@link DarculaButtonPainter}.
  *
  * @author Jannis Weis
  * @since 2019
@@ -23,7 +18,7 @@ import java.awt.RenderingHints;
 public class DarkButtonPainter extends DarculaButtonPainter {
 
     @Override
-    public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+    public void paintBorder(final Component c, final Graphics g, final int x, final int y, final int width, final int height) {
         Graphics2D g2d = (Graphics2D) g;
         Insets ins = this.getBorderInsets(c);
         int yOff = (ins.top + ins.bottom) / 4;
@@ -33,18 +28,21 @@ public class DarkButtonPainter extends DarculaButtonPainter {
             DarculaUIUtil.paintFocusRing(g2d, offset, yOff, width - 2 * offset, height - 2 * yOff);
         } else {
             GraphicsConfig config = new GraphicsConfig(g);
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                                 RenderingHints.VALUE_ANTIALIAS_ON);
-            g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
-                                 RenderingHints.VALUE_STROKE_DEFAULT);
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_DEFAULT);
             if (c instanceof JButton && ((JButton) c).isDefaultButton()) {
                 g2d.setPaint(UIManager.getColor("Button.darcula.selection.color2"));
 
             } else {
                 g2d.setPaint(Gray._100.withAlpha(180));
             }
-            g2d.drawRoundRect(x + offset, y + yOff, width - 2 * offset, height - 2 * yOff,
-                              square ? 3 : 5, square ? 3 : 5);
+            g2d.drawRoundRect(
+                    x + offset,
+                    y + yOff,
+                    width - 2 * offset,
+                    height - 2 * yOff,
+                    square ? 3 : 5,
+                    square ? 3 : 5);
             config.restore();
         }
     }

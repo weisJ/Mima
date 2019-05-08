@@ -2,8 +2,7 @@ package edu.kit.mima.gui.components.fontchooser;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Font;
-import java.awt.GraphicsEnvironment;
+import java.awt.*;
 
 public class FontFamiliesFactory {
 
@@ -15,8 +14,8 @@ public class FontFamiliesFactory {
     @NotNull
     public static FontFamilies create() {
         final FontFamilies fontFamilies = new FontFamilies();
-        final GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment
-                .getLocalGraphicsEnvironment();
+        final GraphicsEnvironment graphicsEnvironment =
+                GraphicsEnvironment.getLocalGraphicsEnvironment();
         final Font[] allFonts = graphicsEnvironment.getAllFonts();
 
         for (final Font font : allFonts) {
@@ -25,5 +24,4 @@ public class FontFamiliesFactory {
 
         return fontFamilies;
     }
-
 }

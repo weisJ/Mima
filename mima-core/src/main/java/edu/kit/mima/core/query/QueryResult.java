@@ -34,7 +34,8 @@ public interface QueryResult<T> {
      *
      * @return sourceData \ foundData.
      */
-    @NotNull QueryResult<T> invert();
+    @NotNull
+    QueryResult<T> invert();
 
     /**
      * Get the query Result as a list.

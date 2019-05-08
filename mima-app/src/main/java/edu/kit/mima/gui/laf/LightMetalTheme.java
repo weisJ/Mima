@@ -2,9 +2,9 @@ package edu.kit.mima.gui.laf;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Color;
 import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.metal.DefaultMetalTheme;
+import java.awt.*;
 
 /**
  * Metal theme with light colours for {@link CustomDarculaLightLaf}.

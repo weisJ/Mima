@@ -27,8 +27,8 @@ public class InstructionTools {
      * @param args                   arguments list
      * @param expectedArgumentNumber expected number of arguments
      */
-    public static void checkArgNumber(@NotNull final List<Value> args,
-                                      final int expectedArgumentNumber) {
+    public static void checkArgNumber(
+            @NotNull final List<Value> args, final int expectedArgumentNumber) {
         if (args.size() != expectedArgumentNumber) {
             fail("invalid number of arguments");
         }
@@ -50,8 +50,7 @@ public class InstructionTools {
     }
 
     /**
-     * Check whether argument is a memory reference and if it is, whether the value is legal
-     * address.
+     * Check whether argument is a memory reference and if it is, whether the value is legal address.
      *
      * @param arguments argument list
      * @param index     index of argument in list
@@ -60,13 +59,13 @@ public class InstructionTools {
     public static Value getMemoryReference(@NotNull final List<Value> arguments, final int index) {
         final var argument = arguments.get(index);
         if (argument == null
-                || !(argument.getType() == ValueType.NUMBER
-                             || argument.getType() == ValueType.CONSTANT
-                             || argument.getType() == ValueType.MEMORY_REFERENCE)) {
+                    || !(argument.getType() == ValueType.NUMBER
+                                 || argument.getType() == ValueType.CONSTANT
+                                 || argument.getType() == ValueType.MEMORY_REFERENCE)) {
             fail("must pass a memory address");
         }
         if (!(argument.getType() == ValueType.MEMORY_REFERENCE)
-                && ((MachineWord) (argument.getValue())).intValue() < 0) {
+                    && ((MachineWord) (argument.getValue())).intValue() < 0) {
             fail("illegal memory address");
         }
         return argument;
@@ -86,7 +85,6 @@ public class InstructionTools {
         }
         return argument;
     }
-
 
     /**
      * Throw error with given message.

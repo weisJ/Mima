@@ -1,13 +1,13 @@
 package edu.kit.mima.gui.laf.components;
 
 import com.bulenkov.darcula.ui.DarculaButtonUI;
-import edu.kit.mima.api.annotations.ReflectionCall;
+import edu.kit.mima.annotations.ReflectionCall;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JComponent;
+import javax.swing.*;
 import javax.swing.plaf.ComponentUI;
-import java.awt.Color;
+import java.awt.*;
 
 /**
  * Custom adaption of {@link DarculaButtonUI}.
@@ -20,7 +20,7 @@ public class DarkButtonUI extends DarculaButtonUI {
     @NotNull
     @Contract(value = "_ -> new", pure = true)
     @ReflectionCall
-    public static ComponentUI createUI(JComponent c) {
+    public static ComponentUI createUI(final JComponent c) {
         return new DarkButtonUI();
     }
 

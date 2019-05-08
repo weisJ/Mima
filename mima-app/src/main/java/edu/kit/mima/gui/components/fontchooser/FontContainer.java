@@ -2,8 +2,7 @@ package edu.kit.mima.gui.components.fontchooser;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.Font;
-
+import java.awt.*;
 
 /**
  * Created by dheid on 4/1/17.
@@ -22,5 +21,4 @@ public interface FontContainer {
     void setSelectedFont(Font font);
 
     void setPreviewFont(Font font);
-
 }

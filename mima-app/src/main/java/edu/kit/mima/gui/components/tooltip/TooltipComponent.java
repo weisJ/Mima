@@ -5,12 +5,8 @@ import edu.kit.mima.gui.components.alignment.Alignment;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JComponent;
-import javax.swing.SwingUtilities;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.MouseInfo;
-import java.awt.Point;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 
 /**
@@ -19,8 +15,8 @@ import java.awt.event.MouseAdapter;
  * @author Jannis Weis
  * @since 2018
  */
-public class TooltipComponent<T extends TooltipWindow>
-        extends MouseAdapter implements TooltipConstants {
+public class TooltipComponent<T extends TooltipWindow> extends MouseAdapter
+        implements TooltipConstants {
 
     /*default*/
     @NotNull
@@ -40,16 +36,18 @@ public class TooltipComponent<T extends TooltipWindow>
      * Register a tooltip component.
      *
      * @param container      container to attach tooltip to.
-     * @param tooltip        tooltip of tooltip. Must be of type {@link JComponent} and implement
-     *                       the {@link ITooltip} interface.
+     * @param tooltip        tooltip of tooltip. Must be of type {@link JComponent} and implement the {@link
+     *                       ITooltip} interface.
      * @param delay          display delay
      * @param vanishingDelay vanishing delay or {@link TooltipConstants#PERSISTENT}.
      * @param centerAt       one of {@link AlignPolicy}.
      */
-    public TooltipComponent(@NotNull final JComponent container, @NotNull final T tooltip,
-                            final int delay,
-                            final int vanishingDelay,
-                            final AlignPolicy centerAt) {
+    public TooltipComponent(
+            @NotNull final JComponent container,
+            @NotNull final T tooltip,
+            final int delay,
+            final int vanishingDelay,
+            final AlignPolicy centerAt) {
         this.centerAt = centerAt;
         this.container = container;
         this.tooltip = tooltip;
@@ -74,8 +72,8 @@ public class TooltipComponent<T extends TooltipWindow>
     }
 
     /**
-     * Show tooltip once and then remove it. Note: the given position has to be relative to the
-     * whole screen.
+     * Show tooltip once and then remove it. Note: the given position has to be relative to the whole
+     * screen.
      *
      * @param p position to show at.
      */
@@ -106,7 +104,7 @@ public class TooltipComponent<T extends TooltipWindow>
             eventHandler.setActive(false);
         }
         tooltip.hideTooltip();
-        tooltip.setVisible(false); //Ensure it's hidden
+        tooltip.setVisible(false); // Ensure it's hidden
     }
 
     /*
@@ -128,11 +126,11 @@ public class TooltipComponent<T extends TooltipWindow>
      */
     @NotNull
     @Contract("_, _, _ -> new")
-    private Point calculatePositionIn(@NotNull Component c, @NotNull final Dimension size,
-                                      @NotNull final Point mousePos) {
-        final var containerPos = SwingUtilities
-                .convertPoint(container,
-                              new Point(container.getWidth() / 2, container.getHeight() / 2), c);
+    private Point calculatePositionIn(
+            @NotNull final Component c, @NotNull final Dimension size, @NotNull final Point mousePos) {
+        final var containerPos =
+                SwingUtilities.convertPoint(
+                        container, new Point(container.getWidth() / 2, container.getHeight() / 2), c);
         SwingUtilities.convertPointFromScreen(mousePos, c);
         var pos = centerAt.calculatePosition(mousePos, containerPos);
         Alignment alignment = Alignment.getAlignment(pos, size, c.getBounds(), Alignment.SOUTH);

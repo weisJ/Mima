@@ -4,10 +4,7 @@ import org.apache.batik.ext.awt.RenderingHintsKeyExt;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Component;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 /**
@@ -24,7 +21,8 @@ public final class ImageUtil {
     public static final int SCALE = 1;
 
     @Contract(pure = true)
-    private ImageUtil() {}
+    private ImageUtil() {
+    }
 
     /**
      * Create image from component.
@@ -34,10 +32,10 @@ public final class ImageUtil {
      * @return image containing the captured area.
      */
     @NotNull
-    public static Image imageFromComponent(@NotNull final Component c,
-                                           @NotNull final Rectangle bounds) {
-        BufferedImage image = new BufferedImage(SCALE * bounds.width, SCALE * bounds.height,
-                                                BufferedImage.TYPE_INT_RGB);
+    public static Image imageFromComponent(
+            @NotNull final Component c, @NotNull final Rectangle bounds) {
+        BufferedImage image =
+                new BufferedImage(SCALE * bounds.width, SCALE * bounds.height, BufferedImage.TYPE_INT_RGB);
         final Graphics2D g2d = (Graphics2D) image.getGraphics();
         g2d.setRenderingHint(RenderingHintsKeyExt.KEY_BUFFERED_IMAGE, image);
         g2d.scale(SCALE, SCALE);

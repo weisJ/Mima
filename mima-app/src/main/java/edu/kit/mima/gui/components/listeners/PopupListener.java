@@ -3,10 +3,8 @@ package edu.kit.mima.gui.components.listeners;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JPopupMenu;
-import java.awt.Component;
-import java.awt.MouseInfo;
-import java.awt.Point;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -31,19 +29,21 @@ public class PopupListener extends MouseAdapter {
      * @param attachToComponent whether the menu should be attached to the component.
      * @param rightAlign        whether to align right when attached to component.
      */
-    public PopupListener(final JPopupMenu popupMenu, final int mouseButton,
-                         final boolean attachToComponent, final boolean rightAlign) {
+    public PopupListener(
+            final JPopupMenu popupMenu,
+            final int mouseButton,
+            final boolean attachToComponent,
+            final boolean rightAlign) {
         this.popupMenu = popupMenu;
         this.rightAlign = rightAlign;
         this.mouseButton = mouseButton;
         this.attachToComponent = attachToComponent;
     }
 
-    public PopupListener(final JPopupMenu popupMenu, final int mouseButton,
-                         final boolean attachToComponent) {
+    public PopupListener(
+            final JPopupMenu popupMenu, final int mouseButton, final boolean attachToComponent) {
         this(popupMenu, mouseButton, attachToComponent, false);
     }
-
 
     public PopupListener(final JPopupMenu popupMenu) {
         this(popupMenu, MouseEvent.BUTTON3, false);
@@ -54,7 +54,7 @@ public class PopupListener extends MouseAdapter {
      *
      * @param menu menu to show.
      */
-    public void setPopupMenu(JPopupMenu menu) {
+    public void setPopupMenu(final JPopupMenu menu) {
         this.popupMenu = menu;
     }
 
@@ -64,7 +64,7 @@ public class PopupListener extends MouseAdapter {
      *
      * @param useAbsolutePos true if position should be use from position on screen.
      */
-    public void setUseAbsolutePos(boolean useAbsolutePos) {
+    public void setUseAbsolutePos(final boolean useAbsolutePos) {
         this.useAbsolutePos = useAbsolutePos;
     }
 

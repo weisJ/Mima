@@ -20,14 +20,16 @@ public interface Token<T> extends FileObject {
      *
      * @return value
      */
-    @NotNull T getValue();
+    @NotNull
+    T getValue();
 
     /**
      * Get the type of the token. Types are defined in {@link TokenType}.
      *
      * @return type of token
      */
-    @NotNull TokenType getType();
+    @NotNull
+    TokenType getType();
 
     /**
      * Get stream of token and child tokens.
@@ -59,5 +61,6 @@ public interface Token<T> extends FileObject {
      *
      * @return simple name as string
      */
-    @NotNull String simpleName();
+    @NotNull
+    String simpleName();
 }

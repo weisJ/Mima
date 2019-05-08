@@ -3,7 +3,7 @@ package edu.kit.mima.core.token;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.Color;
+import java.awt.*;
 
 /**
  * Empty SyntaxToken that doesn't hold any value an has plain style.

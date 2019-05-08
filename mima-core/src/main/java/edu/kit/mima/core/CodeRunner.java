@@ -13,7 +13,8 @@ import java.util.function.Consumer;
  */
 public interface CodeRunner {
 
-    @NotNull Debugger debugger();
+    @NotNull
+    Debugger debugger();
 
     void start(Consumer<Value> callback);
 

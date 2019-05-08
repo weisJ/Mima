@@ -34,13 +34,13 @@ import java.util.function.Consumer;
 public class Interpreter {
 
     private static final Value<MachineWord> VOID = new Value<>(ValueType.VOID,
-                                                               new MachineWord(0, 0));
+            new MachineWord(0, 0));
 
     private final int wordLength;
-    @NotNull private final StackGuard stackGuard;
-
-    private DebugController debugController;
+    @NotNull
+    private final StackGuard stackGuard;
     private final ExceptionHandler exceptionHandler;
+    private DebugController debugController;
     private Token currentToken;
     private Environment currentScope;
     private boolean running;
@@ -78,7 +78,8 @@ public class Interpreter {
             execute(() -> {
                 program.getJumps().forEach(
                         (t, i) -> runtimeEnvironment.defineJump(t.getValue().toString(), i));
-                evaluateProgram(program, runtimeEnvironment, v -> { });
+                evaluateProgram(program, runtimeEnvironment, v -> {
+                });
             });
         } catch (@NotNull final IllegalArgumentException | IllegalStateException e) {
             exceptionHandler.notifyException(e);
@@ -124,7 +125,7 @@ public class Interpreter {
                 final Environment scope = environment.extend(programToken);
                 scope.setReservedIndex(environment.getReservedIndex());
                 programToken.getJumps().forEach((t, i) -> scope
-                        .defineJump(t.getValue().toString(), i));
+                                                                  .defineJump(t.getValue().toString(), i));
                 evaluateProgram(programToken, scope, callback);
             }
             case DEFINITION -> {
@@ -136,9 +137,9 @@ public class Interpreter {
             case BINARY -> callback.accept(evaluateBinary((String) expression.getValue()));
             case IDENTIFICATION -> callback.accept(evaluateIdentification(expression, environment));
             case CALL -> evaluateFunction((BinaryToken<Token, ListToken<Token>>) expression,
-                                          environment, callback);
+                    environment, callback);
             case JUMP_POINT -> evaluate(((Tuple<Token, Token>) expression).getSecond(),
-                                        environment, callback);
+                    environment, callback);
             default -> fail("Unexpected: " + expression);
         }
     }
@@ -219,7 +220,7 @@ public class Interpreter {
                     fail("Can't have negative memory references");
                 }
                 environment.defineVariable(definition.getFirst().getValue().toString(),
-                                           (MachineWord) v.getValue());
+                        (MachineWord) v.getValue());
                 continuation.run();
             });
         }
@@ -236,11 +237,12 @@ public class Interpreter {
                 fail("Not a definition body: " + definition.getSecond());
             }
             environment.defineConstant(definition.getFirst().getValue().toString(),
-                                       (MachineWord) v.getValue()
+                    (MachineWord) v.getValue()
             );
             continuation.run();
         });
     }
+
     /*
      * Evaluate a function call
      */
@@ -278,7 +280,7 @@ public class Interpreter {
     @NotNull
     private Value<MachineWord> evaluateBinary(@NotNull final String binary) {
         final Boolean[] bits = new StringBuilder(binary).reverse().toString()
-                .chars().mapToObj(i -> i == '1').toArray(Boolean[]::new);
+                                       .chars().mapToObj(i -> i == '1').toArray(Boolean[]::new);
         return new Value<>(ValueType.NUMBER, new MachineWord(bits, wordLength));
     }
 
@@ -330,7 +332,7 @@ public class Interpreter {
      *
      * @param debugController the debug controller to use.
      */
-    public void setDebugController(DebugController debugController) {
+    public void setDebugController(final DebugController debugController) {
         System.out.println("set " + debugController);
         this.debugController = debugController;
     }

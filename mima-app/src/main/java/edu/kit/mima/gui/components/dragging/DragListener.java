@@ -1,6 +1,6 @@
 package edu.kit.mima.gui.components.dragging;
 
-import java.awt.Point;
+import java.awt.*;
 
 /**
  * DragListner for {@link DraggingSupport}.

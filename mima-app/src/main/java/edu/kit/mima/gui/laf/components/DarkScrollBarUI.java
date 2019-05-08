@@ -3,20 +3,14 @@ package edu.kit.mima.gui.laf.components;
 import com.bulenkov.darcula.ui.DarculaScrollBarUI;
 import com.bulenkov.darcula.util.Animator;
 import com.bulenkov.iconloader.util.DoubleColor;
-import edu.kit.mima.api.annotations.ReflectionCall;
+import edu.kit.mima.annotations.ReflectionCall;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JComponent;
+import javax.swing.*;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicScrollBarUI;
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GradientPaint;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.MouseAdapter;
@@ -33,71 +27,75 @@ import java.awt.event.MouseWheelListener;
  */
 public class DarkScrollBarUI extends DarculaScrollBarUI {
 
-    private static final float MAX_ALPHA = 0.3f;
     protected static final float THUMB_ALPHA = 0.6f;
+    private static final float MAX_ALPHA = 0.3f;
     protected final AlphaComposite composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER);
     private Animator trackAnimator;
     private float alpha;
     private boolean inside;
     private boolean dragging;
-    @NotNull
-    private MouseListener listener = new MouseAdapter() {
 
-        @Override
-        public void mouseExited(MouseEvent e) {
-            if (getThumbBounds().isEmpty()) {
-                return;
-            }
-            inside = false;
-            if (!scrollbar.getValueIsAdjusting()) {
-                if (trackAnimator.isRunning()) {
+    @NotNull
+    private final MouseListener listener =
+            new MouseAdapter() {
+
+                @Override
+                public void mouseExited(final MouseEvent e) {
+                    if (getThumbBounds().isEmpty()) {
+                        return;
+                    }
+                    inside = false;
+                    if (!scrollbar.getValueIsAdjusting()) {
+                        if (trackAnimator.isRunning()) {
+                            trackAnimator.suspend();
+                            trackAnimator.reset();
+                        }
+                        trackAnimator.resume();
+                    }
+                }
+
+                @Override
+                public void mouseEntered(final MouseEvent e) {
+                    if (getThumbBounds().isEmpty()) {
+                        return;
+                    }
+                    inside = true;
                     trackAnimator.suspend();
                     trackAnimator.reset();
+                    alpha = MAX_ALPHA;
+                    scrollbar.repaint();
                 }
-                trackAnimator.resume();
-            }
-        }
-
-        @Override
-        public void mouseEntered(MouseEvent e) {
-            if (getThumbBounds().isEmpty()) {
-                return;
-            }
-            inside = true;
-            trackAnimator.suspend();
-            trackAnimator.reset();
-            alpha = MAX_ALPHA;
-            scrollbar.repaint();
-        }
-    };
+            };
 
     @NotNull
-    private AdjustmentListener adjustmentListener = new AdjustmentListener() {
-        @Override
-        public void adjustmentValueChanged(@NotNull AdjustmentEvent e) {
-            if (getThumbBounds().isEmpty()) {
-                return;
-            }
-            if (inside && e.getValueIsAdjusting()) {
-                dragging = true;
-            }
-            if (!inside && dragging && !e.getValueIsAdjusting()) {
-                listener.mouseExited(null);
-                dragging = false;
-            }
-        }
-    };
+    private final AdjustmentListener adjustmentListener =
+            new AdjustmentListener() {
+                @Override
+                public void adjustmentValueChanged(@NotNull final AdjustmentEvent e) {
+                    if (getThumbBounds().isEmpty()) {
+                        return;
+                    }
+                    if (inside && e.getValueIsAdjusting()) {
+                        dragging = true;
+                    }
+                    if (!inside && dragging && !e.getValueIsAdjusting()) {
+                        listener.mouseExited(null);
+                        dragging = false;
+                    }
+                }
+            };
 
     @NotNull
-    private MouseWheelListener wheelListener = e -> {
-        if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
-            scrollbar.setValueIsAdjusting(true);
-            scrollbar.setValue(scrollbar.getValue()
-                               + Integer.signum(e.getUnitsToScroll())
-                                 * scrollbar.getUnitIncrement());
-            scrollbar.setValueIsAdjusting(false);
-        }
-    };
+    private final MouseWheelListener wheelListener =
+            e -> {
+                if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
+                    scrollbar.setValueIsAdjusting(true);
+                    scrollbar.setValue(
+                            scrollbar.getValue()
+                                    + Integer.signum(e.getUnitsToScroll()) * scrollbar.getUnitIncrement());
+                    scrollbar.setValueIsAdjusting(false);
+                }
+            };
 
     @NotNull
     @Contract(" -> new")
@@ -109,12 +107,12 @@ public class DarkScrollBarUI extends DarculaScrollBarUI {
     @NotNull
     @Contract("_ -> new")
     @ReflectionCall
-    public static ComponentUI createUI(JComponent c) {
+    public static ComponentUI createUI(final JComponent c) {
         return new DarkScrollBarUI();
     }
 
     @Override
-    public Dimension getPreferredSize(JComponent c) {
+    public Dimension getPreferredSize(final JComponent c) {
         var size = super.getPreferredSize(c);
         var gaps = calculateGaps();
         size.width -= gaps.width;
@@ -123,7 +121,7 @@ public class DarkScrollBarUI extends DarculaScrollBarUI {
     }
 
     @Override
-    public void installUI(JComponent c) {
+    public void installUI(final JComponent c) {
         super.installUI(c);
     }
 
@@ -146,8 +144,7 @@ public class DarkScrollBarUI extends DarculaScrollBarUI {
         this.scrollbar.removeMouseWheelListener(wheelListener);
     }
 
-    protected void paintTrack(@NotNull Graphics g, @NotNull JComponent c,
-                              @NotNull Rectangle bounds) {
+    protected void paintTrack(@NotNull final Graphics g, @NotNull final JComponent c, @NotNull final Rectangle bounds) {
         if (c.getClientProperty("scrollBar.updateBackground") != Boolean.FALSE) {
             g.setColor(scrollbar.getBackground());
             g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
@@ -163,7 +160,7 @@ public class DarkScrollBarUI extends DarculaScrollBarUI {
         g2.dispose();
     }
 
-    protected void paintThumb(@NotNull Graphics g, JComponent c, @NotNull Rectangle thumbBounds) {
+    protected void paintThumb(@NotNull final Graphics g, final JComponent c, @NotNull final Rectangle thumbBounds) {
         if (!thumbBounds.isEmpty() && this.scrollbar.isEnabled()) {
             g.translate(thumbBounds.x, thumbBounds.y);
             this.paintMaxiThumb((Graphics2D) g, thumbBounds);
@@ -199,7 +196,7 @@ public class DarkScrollBarUI extends DarculaScrollBarUI {
         return new Dimension(horizontalGap, verticalGap);
     }
 
-    protected void paintMaxiThumb(@NotNull Graphics2D g, @NotNull Rectangle thumbBounds) {
+    protected void paintMaxiThumb(@NotNull final Graphics2D g, @NotNull final Rectangle thumbBounds) {
         final var c = g.getComposite();
         g.setComposite(composite.derive(THUMB_ALPHA));
         var thumbRect = calculateThumbRect(thumbBounds);
@@ -264,7 +261,7 @@ public class DarkScrollBarUI extends DarculaScrollBarUI {
     @Contract(" -> new")
     private Animator createTrackAnimator() {
         return new Animator("Track fadeout", 20, 400, false) {
-            public void paintNow(int frame, int totalFrames, int cycle) {
+            public void paintNow(final int frame, final int totalFrames, final int cycle) {
                 alpha = (float) (1 - (double) frame / totalFrames) * MAX_ALPHA;
                 if (frame >= totalFrames - 1) {
                     alpha = 0;

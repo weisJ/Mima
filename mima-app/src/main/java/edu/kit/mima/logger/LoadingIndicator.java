@@ -50,8 +50,7 @@ public final class LoadingIndicator {
         timer = new Timer();
         App.logger.log(startMessage);
         App.logger.setLock(true);
-        timer.scheduleAtFixedRate(
-                new LoadingTask(startMessage, dotsNumber), 0, PERIOD);
+        timer.scheduleAtFixedRate(new LoadingTask(startMessage, dotsNumber), 0, PERIOD);
         running = true;
     }
 

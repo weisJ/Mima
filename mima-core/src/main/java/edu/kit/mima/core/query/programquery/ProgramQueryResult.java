@@ -80,8 +80,10 @@ public class ProgramQueryResult implements QueryResult<Token> {
      * @return List of tokens matching query
      */
     public List<Token> get(final boolean recursive) {
-        final var result = createTokenStream(query.getTokens(), recursive)
-                .filter(query.getFilter()).collect(Collectors.toList());
+        final var result =
+                createTokenStream(query.getTokens(), recursive)
+                        .filter(query.getFilter())
+                        .collect(Collectors.toList());
         query.reset();
         return result;
     }
@@ -91,8 +93,7 @@ public class ProgramQueryResult implements QueryResult<Token> {
      */
     @Override
     public Stream<Token> stream() {
-        final var stream = createTokenStream(query.getTokens(), true)
-                .filter(query.getFilter());
+        final var stream = createTokenStream(query.getTokens(), true).filter(query.getFilter());
         query.reset();
         return stream;
     }
@@ -102,8 +103,11 @@ public class ProgramQueryResult implements QueryResult<Token> {
      */
     @Override
     public List<Token> getSorted(final Comparator<? super Token> comparator) {
-        final var result = createTokenStream(query.getTokens(), true)
-                .filter(query.getFilter()).sorted(comparator).collect(Collectors.toList());
+        final var result =
+                createTokenStream(query.getTokens(), true)
+                        .filter(query.getFilter())
+                        .sorted(comparator)
+                        .collect(Collectors.toList());
         query.reset();
         return result;
     }
@@ -120,10 +124,10 @@ public class ProgramQueryResult implements QueryResult<Token> {
     @Override
     public QueryItem<Token> findFirst() {
         return createTokenStream(query.getTokens(), true)
-                .filter(query.getFilter())
-                .findFirst()
-                .map(ProgramQueryResult.ProgramQueryItem::new)
-                .orElseGet(() -> new ProgramQueryResult.ProgramQueryItem(null));
+                       .filter(query.getFilter())
+                       .findFirst()
+                       .map(ProgramQueryResult.ProgramQueryItem::new)
+                       .orElseGet(() -> new ProgramQueryResult.ProgramQueryItem(null));
     }
 
     /**
@@ -141,8 +145,7 @@ public class ProgramQueryResult implements QueryResult<Token> {
      */
     @Override
     public boolean anyMatch() {
-        final boolean match = createTokenStream(query.getTokens(), true)
-                .anyMatch(query.getFilter());
+        final boolean match = createTokenStream(query.getTokens(), true).anyMatch(query.getFilter());
         query.reset();
         return match;
     }
@@ -150,16 +153,16 @@ public class ProgramQueryResult implements QueryResult<Token> {
     /*
      * Create Token stream from program Token flattening all nested program occurrences.
      */
-    private Stream<Token> createTokenStream(@NotNull final ProgramToken programToken,
-                                            final boolean recursive) {
+    private Stream<Token> createTokenStream(
+            @NotNull final ProgramToken programToken, final boolean recursive) {
         // The types work out perfectly but it gets erased.
         //noinspection unchecked
         return Arrays.stream(programToken.getValue()).flatMap(t -> t.stream(recursive));
     }
 
     /**
-     * QueryItem of a Database Query. Acts like an Optional object, but gives the ability to add
-     * items to the original Database
+     * QueryItem of a Database Query. Acts like an Optional object, but gives the ability to add items
+     * to the original Database
      */
     private final class ProgramQueryItem implements QueryItem<Token> {
 

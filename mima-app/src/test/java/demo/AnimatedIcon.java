@@ -25,13 +25,8 @@ package demo;
 
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.AbstractAction;
-import javax.swing.Icon;
-import javax.swing.Timer;
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Ellipse2D;
 import java.util.Iterator;
@@ -48,47 +43,50 @@ public class AnimatedIcon implements Icon {
     private static final int maxRadius = 4;
 
     @NotNull
-    private Map<Component, Object> componentMap = new WeakHashMap<>();
+    private final Map<Component, Object> componentMap = new WeakHashMap<>();
 
     private double radius = 0;
 
     @NotNull
-    private Ellipse2D dot = new Ellipse2D.Float();
+    private final Ellipse2D dot = new Ellipse2D.Float();
 
     public AnimatedIcon() {
 
-        Timer timer = new Timer(100, new AbstractAction() {
+        Timer timer =
+                new Timer(
+                        100,
+                        new AbstractAction() {
 
-            private static final long serialVersionUID = 1L;
+                            private static final long serialVersionUID = 1L;
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                radius += 0.1;
-                if (radius > maxRadius) {
-                    radius = 0.1;
-                }
-                dot.setFrameFromCenter(maxRadius, maxRadius, maxRadius - radius,
-                                       maxRadius - radius);
-                // For all registered components
-                Iterator<Component> iterator = componentMap.keySet().iterator();
-                while (iterator.hasNext()) {
-                    iterator.next().repaint();
-                    // Remove, because the component will be re-registered
-                    // when painting, or not when not painting.
-                    iterator.remove();
-                }
-            }
-        });
+                            @Override
+                            public void actionPerformed(final ActionEvent e) {
+                                radius += 0.1;
+                                if (radius > maxRadius) {
+                                    radius = 0.1;
+                                }
+                                dot.setFrameFromCenter(
+                                        maxRadius, maxRadius, maxRadius - radius, maxRadius - radius);
+                                // For all registered components
+                                Iterator<Component> iterator = componentMap.keySet().iterator();
+                                while (iterator.hasNext()) {
+                                    iterator.next().repaint();
+                                    // Remove, because the component will be re-registered
+                                    // when painting, or not when not painting.
+                                    iterator.remove();
+                                }
+                            }
+                        });
         timer.start();
     }
 
     @Override
-    public void paintIcon(Component c, @NotNull Graphics g, int x, int y) {
+    public void paintIcon(final Component c, @NotNull final Graphics g, final int x, final int y) {
         // Remember the component for a repaint
         componentMap.put(c, null);
         // Paint the icon
-        ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                                          RenderingHints.VALUE_ANTIALIAS_ON);
+        ((Graphics2D) g)
+                .setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.translate(x, y);
         ((Graphics2D) g).fill(dot);
     }
@@ -102,5 +100,4 @@ public class AnimatedIcon implements Icon {
     public int getIconHeight() {
         return 2 * maxRadius;
     }
-
 }

@@ -26,10 +26,11 @@ public class MimaCompiler {
      * @param mimaDirectory    mima directory
      * @return compiled {@link ProgramToken}.
      */
-    public ProgramToken compile(@NotNull String input,
-                                @NotNull String filePath,
-                                @NotNull String workingDirectory,
-                                @NotNull String mimaDirectory) {
+    public ProgramToken compile(
+            @NotNull final String input,
+            @NotNull final String filePath,
+            @NotNull final String workingDirectory,
+            @NotNull final String mimaDirectory) {
         return compile(input, filePath, workingDirectory, mimaDirectory, true, true, true);
     }
 
@@ -45,18 +46,19 @@ public class MimaCompiler {
      * @param performCheck     whether code checking should be performed.
      * @return compiled {@link ProgramToken}.
      */
-    public ProgramToken compile(@NotNull String input,
-                                @NotNull String filePath,
-                                @NotNull String workingDirectory,
-                                @NotNull String mimaDirectory,
-                                final boolean throwErrors,
-                                final boolean preProcess,
-                                final boolean performCheck) {
+    public ProgramToken compile(
+            @NotNull final String input,
+            @NotNull final String filePath,
+            @NotNull final String workingDirectory,
+            @NotNull final String mimaDirectory,
+            final boolean throwErrors,
+            final boolean preProcess,
+            final boolean performCheck) {
         final List<Exception> errors = new ArrayList<>();
         String text = input;
         if (preProcess) {
-            final var processed = new PreProcessor(input, filePath, workingDirectory,
-                                                   mimaDirectory, true).process();
+            final var processed =
+                    new PreProcessor(input, filePath, workingDirectory, mimaDirectory, true).process();
             errors.addAll(processed.getSecond());
             text = processed.getFirst();
         }
@@ -64,9 +66,8 @@ public class MimaCompiler {
         final var programToken = parsed.getFirst();
         errors.addAll(parsed.getSecond());
         if (!errors.isEmpty() && throwErrors) {
-            final String message = errors.stream()
-                    .map(Exception::getMessage)
-                    .collect(Collectors.joining("\n"));
+            final String message =
+                    errors.stream().map(Exception::getMessage).collect(Collectors.joining("\n"));
             throw new IllegalArgumentException("Invalid Tokens \n" + message);
         }
         if (performCheck) {

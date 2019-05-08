@@ -2,15 +2,11 @@ package edu.kit.mima.gui.laf.components;
 
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.border.AbstractBorder;
 import javax.swing.plaf.InsetsUIResource;
 import javax.swing.plaf.UIResource;
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Insets;
-import java.awt.RenderingHints;
+import java.awt.*;
 
 /**
  * Custom border in darcula style for Popup menu.
@@ -21,7 +17,7 @@ import java.awt.RenderingHints;
 public class DarkPopupMenuBorder extends AbstractBorder implements UIResource {
 
     @Override
-    public void paintBorder(Component c, @NotNull Graphics g, int x, int y, int width, int height) {
+    public void paintBorder(final Component c, @NotNull final Graphics g, final int x, final int y, final int width, final int height) {
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setColor(UIManager.getDefaults().getColor("Separator.foreground"));
@@ -30,7 +26,7 @@ public class DarkPopupMenuBorder extends AbstractBorder implements UIResource {
 
     @NotNull
     @Override
-    public Insets getBorderInsets(Component c) {
+    public Insets getBorderInsets(final Component c) {
         return new InsetsUIResource(1, 1, 1, 1);
     }
 }

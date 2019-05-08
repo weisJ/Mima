@@ -20,7 +20,7 @@
  */
 package demo;
 
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.util.HashMap;
 
 /**
@@ -37,8 +37,7 @@ public class QualityHints extends HashMap<RenderingHints.Key, Object> {
      */
     public QualityHints() {
 
-        put(RenderingHints.KEY_ALPHA_INTERPOLATION,
-            RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
+        put(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
 
         put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 

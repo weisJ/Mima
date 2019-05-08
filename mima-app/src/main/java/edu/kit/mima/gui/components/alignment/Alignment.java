@@ -3,10 +3,7 @@ package edu.kit.mima.gui.components.alignment;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Dimension;
-import java.awt.Insets;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.function.BiFunction;
 
 import static edu.kit.mima.gui.components.alignment.AlignmentHelper.*;
@@ -19,31 +16,31 @@ import static edu.kit.mima.gui.components.alignment.AlignmentHelper.*;
  */
 public enum Alignment {
     NORTH(AlignmentHelper.align(HOR_CENTER_INSIDE, VERT_TOP_INSIDE),
-          AlignmentHelper.align(HOR_CENTER_OUTSIDE, VERT_TOP_OUTSIDE), 0
+            AlignmentHelper.align(HOR_CENTER_OUTSIDE, VERT_TOP_OUTSIDE), 0
     ),
     SOUTH(AlignmentHelper.align(HOR_CENTER_INSIDE, VERT_BOTTOM_INSIDE),
-          AlignmentHelper.align(HOR_CENTER_OUTSIDE, VERT_BOTTOM_OUTSIDE), 1
+            AlignmentHelper.align(HOR_CENTER_OUTSIDE, VERT_BOTTOM_OUTSIDE), 1
     ),
     EAST(AlignmentHelper.align(HOR_RIGHT_INSIDE, VERT_CENTER_INSIDE),
-         AlignmentHelper.align(HOR_RIGHT_OUTSIDE, VERT_CENTER_OUTSIDE), 2
+            AlignmentHelper.align(HOR_RIGHT_OUTSIDE, VERT_CENTER_OUTSIDE), 2
     ),
     WEST(AlignmentHelper.align(HOR_LEFT_INSIDE, VERT_CENTER_INSIDE),
-         AlignmentHelper.align(HOR_LEFT_OUTSIDE, VERT_CENTER_OUTSIDE), 3
+            AlignmentHelper.align(HOR_LEFT_OUTSIDE, VERT_CENTER_OUTSIDE), 3
     ),
     NORTH_EAST(AlignmentHelper.align(HOR_RIGHT_INSIDE, VERT_TOP_INSIDE),
-               AlignmentHelper.align(HOR_RIGHT_OUTSIDE, VERT_TOP_OUTSIDE), 4
+            AlignmentHelper.align(HOR_RIGHT_OUTSIDE, VERT_TOP_OUTSIDE), 4
     ),
     NORTH_WEST(AlignmentHelper.align(HOR_LEFT_INSIDE, VERT_TOP_INSIDE),
-               AlignmentHelper.align(HOR_LEFT_OUTSIDE, VERT_TOP_OUTSIDE), 5
+            AlignmentHelper.align(HOR_LEFT_OUTSIDE, VERT_TOP_OUTSIDE), 5
     ),
     SOUTH_EAST(AlignmentHelper.align(HOR_RIGHT_INSIDE, VERT_BOTTOM_INSIDE),
-               AlignmentHelper.align(HOR_RIGHT_OUTSIDE, VERT_BOTTOM_OUTSIDE), 6
+            AlignmentHelper.align(HOR_RIGHT_OUTSIDE, VERT_BOTTOM_OUTSIDE), 6
     ),
     SOUTH_WEST(AlignmentHelper.align(HOR_LEFT_INSIDE, VERT_BOTTOM_INSIDE),
-               AlignmentHelper.align(HOR_LEFT_OUTSIDE, VERT_BOTTOM_OUTSIDE), 7
+            AlignmentHelper.align(HOR_LEFT_OUTSIDE, VERT_BOTTOM_OUTSIDE), 7
     ),
     CENTER(AlignmentHelper.align(HOR_CENTER_INSIDE, VERT_CENTER_INSIDE),
-           AlignmentHelper.align(HOR_CENTER_OUTSIDE, VERT_CENTER_OUTSIDE), 8
+            AlignmentHelper.align(HOR_CENTER_OUTSIDE, VERT_CENTER_OUTSIDE), 8
     );
 
 
@@ -52,23 +49,12 @@ public enum Alignment {
     private final int index;
 
     @Contract(pure = true)
-    Alignment(BiFunction<Dimension, Rectangle, Point> alignInside,
-              BiFunction<Dimension, Rectangle, Point> alignOutside,
-              int index) {
+    Alignment(final BiFunction<Dimension, Rectangle, Point> alignInside,
+              final BiFunction<Dimension, Rectangle, Point> alignOutside,
+              final int index) {
         this.index = index;
         this.alignInside = alignInside;
         this.alignOutside = alignOutside;
-    }
-
-    /**
-     * Get the index of the alignment. This function is for utility purposes where one might save
-     * settings based on alignment in an array.
-     *
-     * @return the index.
-     */
-    @Contract(pure = true)
-    public int getIndex() {
-        return index;
     }
 
     /**
@@ -90,11 +76,22 @@ public enum Alignment {
         }
         for (var alignment : Alignment.values()) {
             if (alignment != Alignment.CENTER && alignment != hint
-                    && alignment.canBeAligned(point, size, outerBounds)) {
+                        && alignment.canBeAligned(point, size, outerBounds)) {
                 return alignment;
             }
         }
         return Alignment.CENTER;
+    }
+
+    /**
+     * Get the index of the alignment. This function is for utility purposes where one might save
+     * settings based on alignment in an array.
+     *
+     * @return the index.
+     */
+    @Contract(pure = true)
+    public int getIndex() {
+        return index;
     }
 
     /**
@@ -194,8 +191,8 @@ public enum Alignment {
                                 @NotNull final Rectangle outerBounds) {
         var p = relativePos(size, point);
         return p.x >= outerBounds.x && p.y >= outerBounds.y
-                && p.x + size.width < outerBounds.x + outerBounds.width
-                && p.y + size.height < outerBounds.x + outerBounds.height;
+                       && p.x + size.width < outerBounds.x + outerBounds.width
+                       && p.y + size.height < outerBounds.x + outerBounds.height;
     }
 
     /**

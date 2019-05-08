@@ -26,9 +26,8 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
-import java.awt.Font;
+import java.awt.*;
 import java.util.Objects;
-
 
 /**
  * A generic implementation of {@code FontSelectionModel}.
@@ -77,10 +76,10 @@ public class DefaultFontSelectionModel implements FontSelectionModel {
     }
 
     /**
-     * Sets the selected font to {@code font}. Note that setting the font to {@code null} is
-     * undefined and may have unpredictable results. This method fires a state changed event if it
-     * sets the current font to a new non-{@code null} font; if the new font is the same as the
-     * current font, no event is fired.
+     * Sets the selected font to {@code font}. Note that setting the font to {@code null} is undefined
+     * and may have unpredictable results. This method fires a state changed event if it sets the
+     * current font to a new non-{@code null} font; if the new font is the same as the current font,
+     * no event is fired.
      *
      * @param font the new {@code Font}
      */
@@ -132,7 +131,7 @@ public class DefaultFontSelectionModel implements FontSelectionModel {
      * DefaultFontSelectionModel} with {@code addChangeListener}.
      *
      * @return all of the {@code ChangeListener}s added, or an empty array if no listeners have been
-     *         added
+     * added
      */
     public ChangeListener[] getChangeListeners() {
         return listenerList.getListeners(ChangeListener.class);
@@ -152,5 +151,4 @@ public class DefaultFontSelectionModel implements FontSelectionModel {
             }
         }
     }
-
 }

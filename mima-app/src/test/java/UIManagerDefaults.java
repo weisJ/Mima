@@ -14,13 +14,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.ColorUIResource;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Insets;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -35,7 +29,7 @@ import java.util.TreeMap;
 import java.util.Vector;
 
 public class UIManagerDefaults implements ActionListener, ItemListener {
-    private final static String[] COLUMN_NAMES = {"Key", "Value", "Sample"};
+    private static final String[] COLUMN_NAMES = {"Key", "Value", "Sample"};
     @Nullable
     private static String selectedItem;
 
@@ -425,18 +419,18 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
 
     /**
      * Thanks to Jeanette for the use of this code found at:
-     * <p>
-     * https://jdnc-incubator.dev.java.net/source/browse/jdnc-incubator/src/kleopatra/java/org
+     *
+     * <p>https://jdnc-incubator.dev.java.net/source/browse/jdnc-incubator/src/kleopatra/java/org
      * /jdesktop/swingx/renderer/UIPropertiesViewer.java?rev=1.2&view=markup
-     * <p>
-     * Some ui-icons misbehave in that they unconditionally class-cast to the component type they
+     *
+     * <p>Some ui-icons misbehave in that they unconditionally class-cast to the component type they
      * are mostly painted on. Consequently they blow up if we are trying to paint them anywhere else
      * (f.i. in a renderer).
-     * <p>
-     * This Icon is an adaption of a cool trick by Darryl Burke found at
+     *
+     * <p>This Icon is an adaption of a cool trick by Darryl Burke found at
      * http://tips4java.wordpress.com/2008/12/18/icon-table-cell-renderer
-     * <p>
-     * The base idea is to instantiate a component of the type expected by the icon, let it paint
+     *
+     * <p>The base idea is to instantiate a component of the type expected by the icon, let it paint
      * into the graphics of a bufferedImage and create an ImageIcon from it. In subsequent calls the
      * ImageIcon is used.
      */
@@ -450,8 +444,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
         }
 
         @Override
-        public void paintIcon(final Component c, @NotNull final Graphics g, final int x,
-                              final int y) {
+        public void paintIcon(final Component c, @NotNull final Graphics g, final int x, final int y) {
             if (standIn == this) {
                 paintFallback(c, g, x, y);
             } else if (standIn != null) {
@@ -501,8 +494,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
             }
         }
 
-        private JComponent getSubstitute(@NotNull final Class<?> clazz)
-                throws IllegalAccessException {
+        private JComponent getSubstitute(@NotNull final Class<?> clazz) throws IllegalAccessException {
             JComponent standInComponent = null;
             try {
                 standInComponent = (JComponent) clazz.getDeclaredConstructor().newInstance();
@@ -516,15 +508,14 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
             return standInComponent;
         }
 
-        private Class<?> getClass(@NotNull final ClassCastException e)
-                throws ClassNotFoundException {
+        private Class<?> getClass(@NotNull final ClassCastException e) throws ClassNotFoundException {
             String className = e.getMessage();
             className = className.substring(className.lastIndexOf(" ") + 1);
             return Class.forName(className);
         }
 
-        private void paintFallback(final Component c, @NotNull final Graphics g, final int x,
-                                   final int y) {
+        private void paintFallback(
+                final Component c, @NotNull final Graphics g, final int x, final int y) {
             g.drawRect(x, y, getIconWidth(), getIconHeight());
             g.drawLine(x, y, x + getIconWidth(), y + getIconHeight());
             g.drawLine(x + getIconWidth(), y, x, y + getIconHeight());
@@ -542,10 +533,13 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
         }
 
         @NotNull
-        public Component getTableCellRendererComponent(final JTable table, final Object sample,
-                                                       final boolean isSelected,
-                                                       final boolean hasFocus, final int row,
-                                                       final int column) {
+        public Component getTableCellRendererComponent(
+                final JTable table,
+                final Object sample,
+                final boolean isSelected,
+                final boolean hasFocus,
+                final int row,
+                final int column) {
             setBackground(null);
             setBorder(null);
             setIcon(null);
@@ -586,8 +580,8 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
         private final UIManagerDefaults defaults;
         private final String laf;
 
-        private ChangeLookAndFeelAction(final UIManagerDefaults defaults, final String laf,
-                                        final String name) {
+        private ChangeLookAndFeelAction(
+                final UIManagerDefaults defaults, final String laf, final String name) {
             this.defaults = defaults;
             this.laf = laf;
             putValue(Action.NAME, name);
@@ -630,6 +624,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
             putValue(Action.SHORT_DESCRIPTION, getValue(Action.NAME));
             putValue(Action.MNEMONIC_KEY, KeyEvent.VK_X);
         }
+
         public void actionPerformed(final ActionEvent e) {
             System.exit(0);
         }

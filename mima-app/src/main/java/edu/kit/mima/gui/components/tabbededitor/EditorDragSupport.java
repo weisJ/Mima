@@ -8,12 +8,8 @@ import edu.kit.mima.util.ImageUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.Icon;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.Rectangle;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.DragGestureListener;
@@ -30,12 +26,12 @@ import java.awt.dnd.InvalidDnDOperationException;
  * @author Jannis Weis
  * @since 2018
  */
-public class EditorDragSupport implements DragSourceListener, DragGestureListener, SnapListener,
-                                          DragListener {
+public class EditorDragSupport
+        implements DragSourceListener, DragGestureListener, SnapListener, DragListener {
 
     private final EditorTabbedPane tabbedPane;
     private boolean dragging;
-    private SnapDraggingSupport draggingSupport;
+    private final SnapDraggingSupport draggingSupport;
     private int dropTargetIndex = -1;
     private int dropSourceIndex = -1;
 
@@ -43,15 +39,21 @@ public class EditorDragSupport implements DragSourceListener, DragGestureListene
     public EditorDragSupport(final EditorTabbedPane tabbedPane) {
         this.tabbedPane = tabbedPane;
         dragging = false;
-        draggingSupport = new SnapDraggingSupport(tabbedPane, () -> {
-            var rect = tabbedPane.getTabAreaBound();
-            rect.setRect(rect.x, rect.y + 1, rect.width, rect.height);
-            return rect;
-        }, 1.0f, 0.9f, 20);
+        draggingSupport =
+                new SnapDraggingSupport(
+                        tabbedPane,
+                        () -> {
+                            var rect = tabbedPane.getTabAreaBound();
+                            rect.setRect(rect.x, rect.y + 1, rect.width, rect.height);
+                            return rect;
+                        },
+                        1.0f,
+                        0.9f,
+                        20);
         draggingSupport.addSnapListener(this);
         draggingSupport.addDragListener(this);
-        new DragSource().createDefaultDragGestureRecognizer(tabbedPane,
-                                                            DnDConstants.ACTION_COPY_OR_MOVE, this);
+        new DragSource()
+                .createDefaultDragGestureRecognizer(tabbedPane, DnDConstants.ACTION_COPY_OR_MOVE, this);
     }
 
     @Override
@@ -93,7 +95,6 @@ public class EditorDragSupport implements DragSourceListener, DragGestureListene
         tabbedPane.setSelectedIndex(newIndex);
     }
 
-
     @Override
     public void dragGestureRecognized(@NotNull final DragGestureEvent dge) {
         final Point tabPt = dge.getDragOrigin();
@@ -105,8 +106,10 @@ public class EditorDragSupport implements DragSourceListener, DragGestureListene
         try {
             dragging = true;
             draggingSupport.showDrag(true);
-            dge.startDrag(Cursor.getDefaultCursor(), new TabTransferable(tabbedPane, dragTabIndex),
-                          EditorDragSupport.this);
+            dge.startDrag(
+                    Cursor.getDefaultCursor(),
+                    new TabTransferable(tabbedPane, dragTabIndex),
+                    EditorDragSupport.this);
         } catch (@NotNull final InvalidDnDOperationException ignored) {
         }
     }
@@ -122,10 +125,14 @@ public class EditorDragSupport implements DragSourceListener, DragGestureListene
         if (comp instanceof Editor) {
             compImage = ((Editor) comp).createPreviewImage();
         } else {
-            compImage = ImageUtil.imageFromComponent(c, new Rectangle(compRect.x, compRect.y,
-                                                                      Math.max(compRect.width, 200),
-                                                                      Math.max(compRect.height,
-                                                                               400)));
+            compImage =
+                    ImageUtil.imageFromComponent(
+                            c,
+                            new Rectangle(
+                                    compRect.x,
+                                    compRect.y,
+                                    Math.max(compRect.width, 200),
+                                    Math.max(compRect.height, 400)));
         }
         draggingSupport.setImage(tabImage);
         draggingSupport.setExtendedImage(compImage);
@@ -167,17 +174,17 @@ public class EditorDragSupport implements DragSourceListener, DragGestureListene
     }
 
     @Override
-    public void onExit(Point mouseLocation) {
+    public void onExit(final Point mouseLocation) {
         setDropTargetIndex(-1);
     }
 
     @Override
-    public void onEnter(Point mouseLocation) {
+    public void onEnter(final Point mouseLocation) {
         onDrag(mouseLocation);
     }
 
     @Override
-    public void onDrag(Point mouseLocation) {
+    public void onDrag(final Point mouseLocation) {
         if (draggingSupport.isSnapped()) {
             setDropTargetIndex(getTabIndexUnder(mouseLocation));
         }
@@ -214,8 +221,11 @@ public class EditorDragSupport implements DragSourceListener, DragGestureListene
             }
         }
         var rect = tabbedPane.getBoundsAt(tabbedPane.getTabCount() - 1);
-        rect.setRect(rect.x + rect.width / 2, rect.y,
-                     tabbedPane.getWidth() - (rect.x + rect.width / 2), rect.height);
+        rect.setRect(
+                rect.x + rect.width / 2,
+                rect.y,
+                tabbedPane.getWidth() - (rect.x + rect.width / 2),
+                rect.height);
         rect.y -= 20;
         rect.height += 40;
         return rect.contains(point) ? tabbedPane.getTabCount() : -1;

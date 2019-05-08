@@ -4,10 +4,8 @@ import edu.kit.mima.api.event.SubscriptionManager;
 import edu.kit.mima.api.event.SubscriptionService;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.Icon;
-import javax.swing.JTabbedPane;
-import java.awt.Component;
-import java.awt.Rectangle;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,17 +18,16 @@ import java.util.List;
  */
 public class EditorTabbedPane extends JTabbedPane {
     public static final String SELECTED_TAB_PROPERTY = "selectedTab";
-    private static final SubscriptionService<Integer> SUBSCRIPTION_SERVICE =
-            new SubscriptionService<>(
-            EditorTabbedPane.class);
-
-    static {
-        SubscriptionManager.getCurrentManager().offerSubscription(SUBSCRIPTION_SERVICE,
-                                                                  SELECTED_TAB_PROPERTY);
-    }
-
     static final String NAME = "TabTransferData";
     static final DataFlavor FLAVOR = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType, NAME);
+    private static final SubscriptionService<Integer> SUBSCRIPTION_SERVICE =
+            new SubscriptionService<>(EditorTabbedPane.class);
+
+    static {
+        SubscriptionManager.getCurrentManager()
+                .offerSubscription(SUBSCRIPTION_SERVICE, SELECTED_TAB_PROPERTY);
+    }
+
     private final EditorDragSupport dragSupport;
 
     private final List<TabClosedEventHandler> handlerList = new ArrayList<>();
@@ -41,14 +38,15 @@ public class EditorTabbedPane extends JTabbedPane {
      * Create new Editor Tabbed Pane.
      */
     public EditorTabbedPane() {
-        setFocusable(false); //Prevent focus dotted line from appearing
+        setFocusable(false); // Prevent focus dotted line from appearing
         super.setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
-        addChangeListener(e -> {
-            firePropertyChange(SELECTED_TAB_PROPERTY, selectedTab, getSelectedIndex());
-            SUBSCRIPTION_SERVICE.notifyEvent(SELECTED_TAB_PROPERTY, getSelectedIndex(),
-                                             EditorTabbedPane.this);
-            selectedTab = getSelectedIndex();
-        });
+        addChangeListener(
+                e -> {
+                    firePropertyChange(SELECTED_TAB_PROPERTY, selectedTab, getSelectedIndex());
+                    SUBSCRIPTION_SERVICE.notifyEvent(
+                            SELECTED_TAB_PROPERTY, getSelectedIndex(), EditorTabbedPane.this);
+                    selectedTab = getSelectedIndex();
+                });
         dragSupport = new EditorDragSupport(this);
     }
 
@@ -58,10 +56,13 @@ public class EditorTabbedPane extends JTabbedPane {
         return "EditorTabbedPaneUI";
     }
 
-
     @Override
-    public void insertTab(final String title, final Icon icon,
-                          final Component component, final String tip, final int index) {
+    public void insertTab(
+            final String title,
+            final Icon icon,
+            final Component component,
+            final String tip,
+            final int index) {
         super.insertTab(title, icon, component, tip, index);
         final TabComponent tabComponent = new TabComponent(title, icon, this::closeTab);
         setTabComponentAt(index, tabComponent);

@@ -6,17 +6,10 @@ import edu.kit.mima.gui.components.border.TextBubbleBorder;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
-import java.awt.AlphaComposite;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -64,7 +57,7 @@ public class DefaultTooltipWindow extends TooltipWindow {
     }
 
     @Override
-    public void setVisible(boolean b) {
+    public void setVisible(final boolean b) {
         labelPanel.setBackground(UIManager.getColor("Tooltip.background"));
         bubbleBorder.setColor(UIManager.getColor("Tooltip.borderColor"));
         super.setVisible(b);
@@ -99,7 +92,7 @@ public class DefaultTooltipWindow extends TooltipWindow {
      */
     @NotNull
     @Contract("_ -> param1")
-    private Rectangle adjustAlignment(@NotNull Rectangle bounds) {
+    private Rectangle adjustAlignment(@NotNull final Rectangle bounds) {
         final int pointerSize = bubbleBorder.getPointerSize();
         final int pointerWidth = bubbleBorder.getPointerWidth();
         final int thickness = bubbleBorder.getThickness();
@@ -185,8 +178,8 @@ public class DefaultTooltipWindow extends TooltipWindow {
                     timer.cancel();
                 }
                 alpha = start < end
-                        ? Math.min(alpha + increment, end)
-                        : Math.max(alpha + increment, end);
+                                ? Math.min(alpha + increment, end)
+                                : Math.max(alpha + increment, end);
                 if (alpha == 0) {
                     setVisible(false);
                 }
@@ -216,10 +209,10 @@ public class DefaultTooltipWindow extends TooltipWindow {
             //Move shadow according to alignment.
             Rectangle rect = switch (alignment) {
                 case NORTH, NORTH_EAST, NORTH_WEST -> new Rectangle(0, 0, getWidth(),
-                                                                    getHeight() - pointerSize);
+                        getHeight() - pointerSize);
                 case EAST -> new Rectangle(pointerSize, 0, getWidth() - pointerSize, getHeight());
                 case SOUTH, SOUTH_EAST, SOUTH_WEST -> new Rectangle(0, pointerSize, getWidth(),
-                                                                    getHeight() - pointerSize);
+                        getHeight() - pointerSize);
                 case WEST -> new Rectangle(0, 0, getWidth() - pointerSize, getHeight());
                 default -> new Rectangle(0, 0, getWidth(), getHeight());
             };

@@ -40,7 +40,6 @@ public class ThreadDebugController implements DebugController {
         this.workingThread = workingThread;
     }
 
-
     /**
      * Returns whether the thread is currently active.
      *
@@ -107,10 +106,12 @@ public class ThreadDebugController implements DebugController {
             return;
         }
         if (autoPause
-            || Optional.ofNullable(currentInstruction)
-                    .map(t -> breaks.contains(new SimpleBreakpoint(t.getOffset()))
-                              && t.getType() != TokenType.PROGRAM)
-                    .orElse(false)) {
+                    || Optional.ofNullable(currentInstruction)
+                               .map(
+                                       t ->
+                                               breaks.contains(new SimpleBreakpoint(t.getOffset()))
+                                                       && t.getType() != TokenType.PROGRAM)
+                               .orElse(false)) {
             pause();
         }
     }

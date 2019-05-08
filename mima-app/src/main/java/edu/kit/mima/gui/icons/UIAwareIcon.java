@@ -3,9 +3,8 @@ package edu.kit.mima.gui.icons;
 import edu.kit.mima.gui.laf.LafManager;
 import org.jetbrains.annotations.Contract;
 
-import javax.swing.Icon;
-import java.awt.Component;
-import java.awt.Graphics;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * Icon that is aware of the current ui theme and adjusts the icon accordingly. Icons are loaded
@@ -36,7 +35,7 @@ public class UIAwareIcon implements Icon {
     }
 
     @Override
-    public void paintIcon(Component c, Graphics g, int x, int y) {
+    public void paintIcon(final Component c, final Graphics g, final int x, final int y) {
         ensureLoaded();
         icon.paintIcon(c, g, x, y);
     }

@@ -8,14 +8,9 @@ import edu.kit.mima.util.FileName;
 import edu.kit.mima.util.HSLColor;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.AbstractAction;
-import javax.swing.JMenuItem;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.border.LineBorder;
-import java.awt.AWTException;
-import java.awt.Component;
-import java.awt.Point;
-import java.awt.Robot;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 
@@ -33,8 +28,8 @@ public class DirectoryTooltip extends ScrollPopupMenu {
      * @param directory parent directory
      * @param handler   action handler.
      */
-    public DirectoryTooltip(@NotNull final File directory,
-                            @NotNull final FilePopupActionHandler handler) {
+    public DirectoryTooltip(
+            @NotNull final File directory, @NotNull final FilePopupActionHandler handler) {
         super(300);
         final var children = directory.listFiles();
         if (children == null) {
@@ -43,12 +38,14 @@ public class DirectoryTooltip extends ScrollPopupMenu {
         setBorder(new LineBorder(new HSLColor(getBackground()).adjustTone(60).getRGB(), 1));
         for (final var file : children) {
             if (!file.isHidden()) {
-                final var menuItem = new JMenuItem(new AbstractAction() {
-                    @Override
-                    public void actionPerformed(final ActionEvent e) {
-                        SwingUtilities.invokeLater(() -> handler.onClick(file));
-                    }
-                });
+                final var menuItem =
+                        new JMenuItem(
+                                new AbstractAction() {
+                                    @Override
+                                    public void actionPerformed(final ActionEvent e) {
+                                        SwingUtilities.invokeLater(() -> handler.onClick(file));
+                                    }
+                                });
                 String label = FileName.removeExtension(file, MimaConstants.EXTENSIONS);
                 if (label.isEmpty()) {
                     label = file.getName();
@@ -63,17 +60,18 @@ public class DirectoryTooltip extends ScrollPopupMenu {
     @Override
     public void show(final Component invoker, final int x, final int y) {
         super.show(invoker, x, y);
-        SwingUtilities.invokeLater(() -> {
-            if (getComponentCount() < 1 || !this.isVisible()) {
-                return;
-            }
-            final var c = this.getComponent(0);
-            final Point point = c.getLocationOnScreen();
-            try {
-                final Robot robot = new Robot();
-                robot.mouseMove(point.x + c.getWidth() / 3, point.y + c.getHeight() / 2);
-            } catch (@NotNull final AWTException ignored) {
-            }
-        });
+        SwingUtilities.invokeLater(
+                () -> {
+                    if (getComponentCount() < 1 || !this.isVisible()) {
+                        return;
+                    }
+                    final var c = this.getComponent(0);
+                    final Point point = c.getLocationOnScreen();
+                    try {
+                        final Robot robot = new Robot();
+                        robot.mouseMove(point.x + c.getWidth() / 3, point.y + c.getHeight() / 2);
+                    } catch (@NotNull final AWTException ignored) {
+                    }
+                });
     }
 }

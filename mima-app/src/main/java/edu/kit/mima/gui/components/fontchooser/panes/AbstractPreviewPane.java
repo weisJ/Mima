@@ -1,8 +1,7 @@
 package edu.kit.mima.gui.components.fontchooser.panes;
 
-import java.awt.Dimension;
-import java.awt.Font;
-import javax.swing.JPanel;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * Preview Pane for {@link edu.kit.mima.gui.components.fontchooser.FontChooser}.

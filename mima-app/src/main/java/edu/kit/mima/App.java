@@ -11,8 +11,8 @@ import edu.kit.mima.preferences.PropertyKey;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.SwingUtilities;
-import java.awt.SplashScreen;
+import javax.swing.*;
+import java.io.IOException;
 
 /**
  * Entry point for the Application.
@@ -23,9 +23,13 @@ import java.awt.SplashScreen;
 public final class App {
 
     public static final ConsoleLogger logger = new ConsoleLogger();
-
+    private static final String[] fakeLoadMessages =
+            new String[]{"Loading Icons", "Downloading Viruses", "Sleeping", "Insert stuff to do here"};
     @Nullable
     private static MimaUserInterface frame;
+    private static MimaSplash splash;
+    private static int index = 0;
+    private static Timer timer;
 
     /**
      * Entry point for starting the Mima UI.
@@ -33,24 +37,58 @@ public final class App {
      * @param args command line arguments (ignored)
      */
     public static void main(@Nullable final String[] args) {
-        SplashScreen.getSplashScreen();
-
         System.setProperty("org.apache.batik.warn_destination", "false");
 
-        SwingUtilities.invokeLater(() -> {
-            LafManager.setDefaultTheme(
-                    Preferences.getInstance().readString(PropertyKey.THEME).equals("Dark"));
-            final String filePath = args != null && args.length >= 1 ? args[0] : null;
-            frame = new MimaUserInterface(filePath);
-            logger.setLevel(LogLevel.INFO);
-            MimaCoreDefaults.setLogger(logger);
-            frame.setLocationRelativeTo(null);
-            Icons.loadIcons();
-            frame.setVisible(true);
-            frame.requestFocus();
-            frame.toFront();
-            frame.repaint();
-        });
+        SwingUtilities.invokeLater(
+                () -> {
+                    try {
+                        splash = new MimaSplash();
+                        splash.showSplash();
+                    } catch (IOException ignored) {
+                    }
+                    init(args);
+                    timer =
+                            new Timer(
+                                    200,
+                                    e -> {
+                                        var m = nextMessage();
+                                        if (m != null) {
+                                            splash.showMessage(m);
+                                        } else {
+                                            splash.closeSplash();
+                                            start();
+                                        }
+                                    });
+                    timer.setRepeats(true);
+                    timer.start();
+                });
+    }
+
+    private static String nextMessage() {
+        var m = index >= fakeLoadMessages.length ? null : fakeLoadMessages[index];
+        index++;
+        return m;
+    }
+
+    private static void init(final String[] args) {
+        LafManager.setDefaultTheme(
+                Preferences.getInstance().readString(PropertyKey.THEME).equals("Dark"));
+        final String filePath = args != null && args.length >= 1 ? args[0] : null;
+        frame = new MimaUserInterface(filePath);
+        logger.setLevel(LogLevel.INFO);
+        MimaCoreDefaults.setLogger(logger);
+        frame.setLocationRelativeTo(null);
+        Icons.loadIcons();
+    }
+
+    private static void start() {
+        if (frame == null) {
+            return;
+        }
+        timer.stop();
+        frame.setVisible(true);
+        frame.requestFocus();
+        frame.toFront();
     }
 
     @Contract(pure = true)
@@ -58,4 +96,3 @@ public final class App {
         return frame != null;
     }
 }
-

@@ -9,20 +9,8 @@ import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.AbstractAction;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Toolkit;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.WindowAdapter;
@@ -43,15 +31,17 @@ public final class Settings extends JDialog {
 
     private Settings() {
         backup = Preferences.getInstance().clone();
-        setIconImage(Toolkit.getDefaultToolkit().getImage(
-                getClass().getClassLoader().getResource("images/mima.png")));
+        setIconImage(
+                Toolkit.getDefaultToolkit()
+                        .getImage(getClass().getClassLoader().getResource("images/mima.png")));
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(final WindowEvent e) {
-                hideWindow();
-            }
-        });
+        addWindowListener(
+                new WindowAdapter() {
+                    @Override
+                    public void windowClosing(final WindowEvent e) {
+                        hideWindow();
+                    }
+                });
         setSize((int) SIZE.getWidth() / 3, (int) SIZE.getHeight() / 3);
         setTitle("Settings");
         setLocationRelativeTo(null);
@@ -116,7 +106,6 @@ public final class Settings extends JDialog {
         }
     }
 
-
     private void initializeComponents() {
         setLayout(new BorderLayout());
         var buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -124,37 +113,43 @@ public final class Settings extends JDialog {
         var apply = new JButton();
         var ok = new JButton();
         ok.setDefaultCapable(true);
-        cancel.setAction(new AbstractAction("Cancel") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                hideWindow();
-            }
-        });
-        apply.setAction(new AbstractAction("Apply") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Preferences.getInstance().save(backup);
-            }
-        });
-        ok.setAction(new AbstractAction("Ok") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                apply.doClick();
-                hideWindow();
-            }
-        });
+        cancel.setAction(
+                new AbstractAction("Cancel") {
+                    @Override
+                    public void actionPerformed(final ActionEvent e) {
+                        hideWindow();
+                    }
+                });
+        apply.setAction(
+                new AbstractAction("Apply") {
+                    @Override
+                    public void actionPerformed(final ActionEvent e) {
+                        Preferences.getInstance().save(backup);
+                    }
+                });
+        ok.setAction(
+                new AbstractAction("Ok") {
+                    @Override
+                    public void actionPerformed(final ActionEvent e) {
+                        apply.doClick();
+                        hideWindow();
+                    }
+                });
         buttonPanel.setBorder(new AdaptiveLineBorder(1, 0, 0, 0, "Border.line1"));
         buttonPanel.add(ok);
         buttonPanel.add(cancel);
         buttonPanel.add(apply);
 
-        var content = new CardPanelBuilder().addItem("General").addSetting("Theme",
-                                                                           createThemeChooser())
-                                            .addItem("Editor",
-                         createFontChooserPanel(PropertyKey.EDITOR_FONT, new EditorPreview()))
-                                            .addItem("Console",
-                         createFontChooserPanel(PropertyKey.CONSOLE_FONT, new ConsolePreview())).addItem(
-                        "View").addSetting("Show Binary:", new JCheckBox()).create(this);
+        var content =
+                new CardPanelBuilder()
+                        .addItem("General")
+                        .addSetting("Theme", createThemeChooser())
+                        .addItem("Editor", createFontChooserPanel(PropertyKey.EDITOR_FONT, new EditorPreview()))
+                        .addItem(
+                                "Console", createFontChooserPanel(PropertyKey.CONSOLE_FONT, new ConsolePreview()))
+                        .addItem("View")
+                        .addSetting("Show Binary:", new JCheckBox())
+                        .create(this);
         add(content, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
 
@@ -163,25 +158,27 @@ public final class Settings extends JDialog {
 
     private JComponent createThemeChooser() {
         var combo = new JComboBox<>(new String[]{"Light", "Dark"});
-        combo.addItemListener(e -> {
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-                backup.saveString(PropertyKey.THEME, e.getItem().toString());
-            }
-        });
+        combo.addItemListener(
+                e -> {
+                    if (e.getStateChange() == ItemEvent.SELECTED) {
+                        backup.saveString(PropertyKey.THEME, e.getItem().toString());
+                    }
+                });
         combo.setSelectedItem(Preferences.getInstance().readString(PropertyKey.THEME));
         return combo;
     }
 
     @NotNull
-    private JComponent createFontChooserPanel(@NotNull final PropertyKey key,
-                                              @NotNull final AbstractPreviewPane previewPane) {
-        final FontChooser fontChooser
-                = new FontChooser(Preferences.getInstance().readFont(key), previewPane);
+    private JComponent createFontChooserPanel(
+            @NotNull final PropertyKey key, @NotNull final AbstractPreviewPane previewPane) {
+        final FontChooser fontChooser =
+                new FontChooser(Preferences.getInstance().readFont(key), previewPane);
         fontChooser.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        fontChooser.addChangeListener(event -> {
-            final FontSelectionModel model = (FontSelectionModel) event.getSource();
-            backup.saveFont(key, model.getSelectedFont());
-        });
+        fontChooser.addChangeListener(
+                event -> {
+                    final FontSelectionModel model = (FontSelectionModel) event.getSource();
+                    backup.saveFont(key, model.getSelectedFont());
+                });
         return fontChooser;
     }
 }

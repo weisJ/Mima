@@ -6,7 +6,6 @@ package edu.kit.mima.api.lambda;
  * @author Jannis Weis
  * @since 2018
  */
-
 @FunctionalInterface
 public interface CheckedBiConsumer<T, K, E extends Exception> {
 

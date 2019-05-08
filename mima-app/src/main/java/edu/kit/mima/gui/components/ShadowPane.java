@@ -2,9 +2,8 @@ package edu.kit.mima.gui.components;
 
 import org.jdesktop.swingx.border.DropShadowBorder;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import javax.swing.JPanel;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * JPanel with shadow.
@@ -31,12 +30,8 @@ public class ShadowPane extends JPanel {
     public ShadowPane(final int size, final float opacity, final int cornerSize) {
         setLayout(new BorderLayout());
         setOpaque(false);
-        final DropShadowBorder shadow = new DropShadowBorder(Color.BLACK,
-                                                             size, opacity, cornerSize,
-                                                             false,
-                                                             true,
-                                                             true,
-                                                             true);
+        final DropShadowBorder shadow =
+                new DropShadowBorder(Color.BLACK, size, opacity, cornerSize, false, true, true, true);
         setBorder(shadow);
     }
 }

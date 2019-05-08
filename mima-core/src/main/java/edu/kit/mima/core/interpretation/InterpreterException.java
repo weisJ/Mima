@@ -8,7 +8,6 @@ package edu.kit.mima.core.interpretation;
  */
 public class InterpreterException extends IllegalArgumentException {
 
-
     /**
      * Create new {@link InterpreterException}.
      *

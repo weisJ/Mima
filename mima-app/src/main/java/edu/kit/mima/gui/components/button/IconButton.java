@@ -3,14 +3,8 @@ package edu.kit.mima.gui.components.button;
 import edu.kit.mima.util.HSLColor;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -57,38 +51,39 @@ public class IconButton extends JButton {
         setRolloverEnabled(true);
         setFocusable(false);
         setBorderPainted(false);
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(final MouseEvent e) {
-                hover = true;
-                repaint();
-            }
+        addMouseListener(
+                new MouseAdapter() {
+                    @Override
+                    public void mouseEntered(final MouseEvent e) {
+                        hover = true;
+                        repaint();
+                    }
 
-            @Override
-            public void mouseExited(final MouseEvent e) {
-                hover = false;
-                repaint();
-            }
+                    @Override
+                    public void mouseExited(final MouseEvent e) {
+                        hover = false;
+                        repaint();
+                    }
 
-            @Override
-            public void mousePressed(final MouseEvent e) {
-                clicking = true;
-                repaint();
-            }
+                    @Override
+                    public void mousePressed(final MouseEvent e) {
+                        clicking = true;
+                        repaint();
+                    }
 
-            @Override
-            public void mouseReleased(final MouseEvent e) {
-                clicking = false;
-                repaint();
-            }
+                    @Override
+                    public void mouseReleased(final MouseEvent e) {
+                        clicking = false;
+                        repaint();
+                    }
 
-            @Override
-            public void mouseClicked(final MouseEvent e) {
-                for (final var l : getActionListeners()) {
-                    l.actionPerformed(new ActionEvent(IconButton.this, 0, ""));
-                }
-            }
-        });
+                    @Override
+                    public void mouseClicked(final MouseEvent e) {
+                        for (final var l : getActionListeners()) {
+                            l.actionPerformed(new ActionEvent(IconButton.this, 0, ""));
+                        }
+                    }
+                });
     }
 
     protected Icon currentIcon() {
@@ -114,9 +109,9 @@ public class IconButton extends JButton {
     @NotNull
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension(Math.max(active.getIconWidth(), inactive.getIconWidth()) + 2 * border,
-                             Math.max(active.getIconHeight(), inactive.getIconHeight())
-                             + 2 * border);
+        return new Dimension(
+                Math.max(active.getIconWidth(), inactive.getIconWidth()) + 2 * border,
+                Math.max(active.getIconHeight(), inactive.getIconHeight()) + 2 * border);
     }
 
     @NotNull
@@ -137,24 +132,26 @@ public class IconButton extends JButton {
 
     @Override
     public void setEnabled(final boolean b) {
-        //Remember state for when button is unlocked again.
+        // Remember state for when button is unlocked again.
         nextStatus = b;
         if (!locked) {
             super.setEnabled(b);
             repaint();
             locked = true;
-            //Lock button to prevent spamming
-            new Thread(() -> {
-                synchronized (this) {
-                    try {
-                        wait(300);
-                        locked = false;
-                        super.setEnabled(nextStatus);
-                        repaint();
-                    } catch (InterruptedException ignored) {
-                    }
-                }
-            }).start();
+            // Lock button to prevent spamming
+            new Thread(
+                    () -> {
+                        synchronized (this) {
+                            try {
+                                wait(300);
+                                locked = false;
+                                super.setEnabled(nextStatus);
+                                repaint();
+                            } catch (InterruptedException ignored) {
+                            }
+                        }
+                    })
+                    .start();
         }
     }
 }

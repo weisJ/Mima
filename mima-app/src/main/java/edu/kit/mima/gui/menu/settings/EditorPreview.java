@@ -4,9 +4,7 @@ import edu.kit.mima.gui.components.editor.Editor;
 import edu.kit.mima.gui.components.fontchooser.panes.AbstractPreviewPane;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Font;
+import java.awt.*;
 
 /**
  * Editor Preview Pane.
@@ -42,7 +40,7 @@ public class EditorPreview extends AbstractPreviewPane {
     }
 
     @Override
-    public void setPreferredSize(Dimension preferredSize) {
+    public void setPreferredSize(final Dimension preferredSize) {
         editor.setPreferredSize(preferredSize);
         super.setPreferredSize(preferredSize);
     }
