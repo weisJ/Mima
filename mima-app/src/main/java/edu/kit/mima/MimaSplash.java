@@ -21,7 +21,7 @@ public class MimaSplash extends JWindow {
             AlphaComposite.getInstance(AlphaComposite.SRC_OVER).derive(0.5f);
     private final Icon image;
     private final Icon sum;
-    private String message = "";
+    private final JTextArea messageArea;
 
     /**
      * Create new Mima Splash screen.
@@ -33,25 +33,32 @@ public class MimaSplash extends JWindow {
         var splashDim = new Dimension((int) (dim.width / 2.5), (int) (dim.height / 2.5));
         int size = Math.min(splashDim.width, splashDim.height);
         int iw = splashDim.width / 4 - splashDim.width / 20;
-        image =
-                new SVGIcon(
-                        Objects.requireNonNull(App.class.getClassLoader().getResource("images/mima.svg")),
-                        iw,
-                        iw,
-                        true);
+        image = new SVGIcon(
+                Objects.requireNonNull(App.class.getClassLoader().getResource("images/mima.svg")),
+                iw,
+                iw,
+                true);
         sum = new SVGIcon(Objects.requireNonNull(App.class.getResource(getFileName())), size, size);
-        setLayeredPane(
-                new JLayeredPane() {
-                    @Override
-                    public void paint(final Graphics g) {
-                        paintBackground((Graphics2D) g.create());
-                        paintImage(g);
-                        paintMessage(g);
-                        paintLabel(g);
-                        g.setClip(getWidth() / 4, 0, 3 * getWidth() / 4, getHeight());
-                        paintSum(g);
-                    }
-                });
+        messageArea = new JTextArea();
+        messageArea.setOpaque(false);
+        messageArea.setForeground(Color.WHITE);
+        messageArea.setBounds(splashDim.width / 40,
+                              splashDim.width / 20 + image.getIconHeight(),
+                              splashDim.width / 4 - splashDim.width / 20,
+                              splashDim.height - image.getIconHeight() - splashDim.width / 10);
+        var layer = new JLayeredPane() {
+            @Override
+            public void paint(@NotNull final Graphics g) {
+                paintBackground((Graphics2D) g.create());
+                paintImage(g);
+                paintMessage(g);
+                paintLabel(g);
+                g.setClip(getWidth() / 4, 0, 3 * getWidth() / 4, getHeight());
+                paintSum(g);
+            }
+        };
+        layer.add(messageArea);
+        setLayeredPane(layer);
         setSize(splashDim);
     }
 
@@ -72,21 +79,25 @@ public class MimaSplash extends JWindow {
         dispose();
     }
 
+    /**
+     * Print a message to the splash screen.
+     *
+     * @param message the message to print.
+     */
     public void showMessage(final String message) {
-        this.message = message;
+        messageArea.setText(message);
         repaint();
     }
 
     @NotNull
     private String getFileName() {
         var cal = Calendar.getInstance();
-        return "sum-"
-                       + cal.get(Calendar.DAY_OF_MONTH)
-                       + "-"
-                       + (cal.get(Calendar.MONTH) + 1)
-                       + "-"
-                       + cal.get(Calendar.YEAR) % 100
-                       + ".svg";
+        return "sum-" + cal.get(Calendar.DAY_OF_MONTH)
+               + "-"
+               + (cal.get(Calendar.MONTH) + 1)
+               + "-"
+               + cal.get(Calendar.YEAR) % 100
+               + ".svg";
     }
 
     private void paintSum(final Graphics g) {
@@ -103,13 +114,10 @@ public class MimaSplash extends JWindow {
     }
 
     private void paintMessage(@NotNull final Graphics g) {
-        if (message == null || message.isBlank()) {
-            return;
-        }
-        var font = new Font("Monospaced", Font.PLAIN, 12);
-        g.setColor(Color.WHITE);
-        g.setFont(font);
-        g.drawString(message, getWidth() / 40, getWidth() / 20 + image.getIconHeight());
+        var g2 = g.create();
+        g2.translate(messageArea.getX(), messageArea.getY());
+        messageArea.paint(g2);
+        g2.dispose();
     }
 
     private void paintLabel(@NotNull final Graphics g) {
