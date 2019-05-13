@@ -16,7 +16,7 @@ import java.awt.event.ActionEvent;
  * @since 2019
  */
 @Context(provides = TabFrameTabComponent.class)
-public class TabFrameTabContextProvider {
+public final class TabFrameTabContextProvider {
 
     /**
      * Create and register a context menu for the given {@link TabFrameTabComponent}.

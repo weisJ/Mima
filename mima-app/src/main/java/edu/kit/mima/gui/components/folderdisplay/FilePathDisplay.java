@@ -19,7 +19,7 @@ import java.io.File;
  * @author Jannis Weis
  * @since 2018
  */
-public class FileDisplay extends JPanel {
+public class FilePathDisplay extends JPanel {
     private static final String SEPARATOR =
             FileName.escapeMetaCharacters(System.getProperty("file.separator"));
     private int maxLength = 10;
@@ -33,7 +33,7 @@ public class FileDisplay extends JPanel {
     /**
      * File display panel.
      */
-    public FileDisplay() {
+    public FilePathDisplay() {
         this.handler = f -> {
         };
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
@@ -70,7 +70,7 @@ public class FileDisplay extends JPanel {
             sb.append(s).append(SEPARATOR);
             if (!s.contains(":")) {
                 dirComps[index++] = add(new IconPanel(Icons.DIVIDER));
-                dirComps[index++] = add(new FolderDisplay(s, new File(sb.toString()), handler));
+                dirComps[index++] = add(new FilePathDisplayItem(s, new File(sb.toString()), handler));
             }
         }
         firstVisible = maxLength;
@@ -97,7 +97,7 @@ public class FileDisplay extends JPanel {
         if (sb.length() == 0) {
             root = new IconPanel(Icons.FOLDER_ROOT);
         } else {
-            root = new FolderDisplay(null, new File(sb.toString()), Icons.FOLDER_ROOT, handler);
+            root = new FilePathDisplayItem(null, new File(sb.toString()), Icons.FOLDER_ROOT, handler);
         }
         if (max > 0) {
             add(root, 0);

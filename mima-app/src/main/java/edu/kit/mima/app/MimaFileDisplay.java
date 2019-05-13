@@ -3,7 +3,7 @@ package edu.kit.mima.app;
 import edu.kit.mima.App;
 import edu.kit.mima.core.MimaConstants;
 import edu.kit.mima.core.instruction.InstructionSet;
-import edu.kit.mima.gui.components.folderdisplay.FileDisplay;
+import edu.kit.mima.gui.components.folderdisplay.FilePathDisplay;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +20,7 @@ import java.io.IOException;
 public class MimaFileDisplay {
 
     @NotNull
-    private final FileDisplay fileDisplay;
+    private final FilePathDisplay filePathDisplay;
 
     /**
      * Create File display component for Mima App.
@@ -28,13 +28,13 @@ public class MimaFileDisplay {
      * @param fileActions the file actions.
      */
     public MimaFileDisplay(@NotNull final FileActions fileActions) {
-        fileDisplay = new FileDisplay();
-        fileDisplay.setHandler(
+        filePathDisplay = new FilePathDisplay();
+        filePathDisplay.setHandler(
                 file -> {
-                    fileDisplay.requestFocus();
+                    filePathDisplay.requestFocus();
                     if (file.isDirectory()) {
-                        fileDisplay.setFile(file);
-                        fileDisplay.focusLast();
+                        filePathDisplay.setFile(file);
+                        filePathDisplay.focusLast();
                     } else if (MimaConstants.instructionSetForFile(file) != InstructionSet.EMPTY) {
                         fileActions.openFile(
                                 fm -> {
@@ -46,7 +46,7 @@ public class MimaFileDisplay {
                                 });
                     }
                 });
-        fileDisplay.setFile(new File(Preferences.getInstance().readString(PropertyKey.DIRECTORY_MIMA)));
+        filePathDisplay.setFile(new File(Preferences.getInstance().readString(PropertyKey.DIRECTORY_MIMA)));
     }
 
     /**
@@ -55,7 +55,7 @@ public class MimaFileDisplay {
      * @return the file display component.
      */
     @NotNull
-    public FileDisplay getDisplay() {
-        return fileDisplay;
+    public FilePathDisplay getDisplay() {
+        return filePathDisplay;
     }
 }
