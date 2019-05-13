@@ -12,7 +12,7 @@ import edu.kit.mima.gui.components.FixedScrollTable;
 import edu.kit.mima.gui.components.alignment.Alignment;
 import edu.kit.mima.gui.components.console.Console;
 import edu.kit.mima.gui.components.editor.Editor;
-import edu.kit.mima.gui.components.folderdisplay.FileDisplay;
+import edu.kit.mima.gui.components.folderdisplay.FilePathDisplay;
 import edu.kit.mima.gui.components.listeners.ComponentResizeListener;
 import edu.kit.mima.gui.components.tabbededitor.EditorTabbedPane;
 import edu.kit.mima.gui.components.tabframe.DefaultPopupComponent;
@@ -56,7 +56,7 @@ public final class MimaUserInterface extends JFrame {
             new RunActions(this, new MimaCompiler(), mimaRunner, debugger);
 
     @NotNull
-    private final FileDisplay fileDisplay;
+    private final FilePathDisplay filePathDisplay;
     @NotNull
     private final EditorTabbedPane tabbedEditor;
     @NotNull
@@ -72,7 +72,7 @@ public final class MimaUserInterface extends JFrame {
      * @param filePath path of file to open
      */
     public MimaUserInterface(@Nullable final String filePath) {
-        fileDisplay = new MimaFileDisplay(fileActions).getDisplay();
+        filePathDisplay = new MimaFileDisplay(fileActions).getDisplay();
         tabbedEditor = editorManager.getTabbedEditor();
         console = new Console();
         memoryTable =
@@ -144,7 +144,7 @@ public final class MimaUserInterface extends JFrame {
                                                                     .map(FileManager::getLastFile)
                                                                     .orElse(System.getProperty("SystemDrive")));
 
-                                            fileDisplay.setFile(file);
+                                            filePathDisplay.setFile(file);
                                             EditorHotKeys.setEditor(editor);
                                         }));
     }
@@ -219,19 +219,19 @@ public final class MimaUserInterface extends JFrame {
     private void setupComponents() {
 
         final JPanel controlPanel = new JPanel(new BorderLayout());
-        controlPanel.add(fileDisplay, BorderLayout.WEST);
+        controlPanel.add(filePathDisplay, BorderLayout.WEST);
         var buttonArea = new MimaButtonArea(this, runActions).getPane();
 
         controlPanel.add(buttonArea, BorderLayout.EAST);
         controlPanel.setBorder(new EmptyBorder(2, 2, 2, 2));
-        controlPanel.setComponentZOrder(fileDisplay, 1);
+        controlPanel.setComponentZOrder(filePathDisplay, 1);
         controlPanel.setComponentZOrder(buttonArea, 0);
 
         Runnable resizeAction =
                 () ->
-                        fileDisplay.setMaximumSize(
+                        filePathDisplay.setMaximumSize(
                                 new Dimension(
-                                        buttonArea.getX() - fileDisplay.getX(), controlPanel.getMinimumSize().height));
+                                        buttonArea.getX() - filePathDisplay.getX(), controlPanel.getMinimumSize().height));
         controlPanel.addComponentListener((ComponentResizeListener) e -> resizeAction.run());
         BindingUtil.bind(debugger, resizeAction, Debugger.RUNNING_PROPERTY);
 
@@ -240,7 +240,7 @@ public final class MimaUserInterface extends JFrame {
     subscriptionManager.subscribe(new AbstractSubscriber(debugger) {
         @Override
         public <T> void notifySubscription(String identifier, T value) {
-            fileDisplay.setMaximumSize(new Dimension(buttonArea.getX() - fileDisplay.getX(),
+            filePathDisplay.setMaximumSize(new Dimension(buttonArea.getX() - filePathDisplay.getX(),
                                                      controlPanel.getMinimumSize().height));
         }
     }, Debugger.RUNNING_PROPERTY);
@@ -288,7 +288,7 @@ public final class MimaUserInterface extends JFrame {
      */
     public void fileChanged() {
         Optional.ofNullable(editorManager.currentFileManager()).map(FileManager::getLastFile).stream()
-                .peek(f -> fileDisplay.setFile(new File(f)))
+                .peek(f -> filePathDisplay.setFile(new File(f)))
                 .peek(f -> setTitle(TITLE + ' ' + FileName.shorten(f)))
                 .findFirst()
                 .ifPresent(

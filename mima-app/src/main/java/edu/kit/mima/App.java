@@ -23,8 +23,10 @@ import java.io.IOException;
 public final class App {
 
     public static final ConsoleLogger logger = new ConsoleLogger();
+    //Todo: Have tasks that do heavy static initialization register to run at startup. This prevents the program from
+    // taking a long time before it shows the splash screen.
     private static final String[] fakeLoadMessages =
-            new String[]{"Loading Icons", "Downloading Viruses", "Sleeping", "Insert stuff to do here"};
+            new String[]{"Loading Icons"};
     @Nullable
     private static MimaUserInterface frame;
     private static MimaSplash splash;

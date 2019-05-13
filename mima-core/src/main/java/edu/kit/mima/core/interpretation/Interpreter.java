@@ -107,7 +107,6 @@ public class Interpreter {
     private Value<MachineWord> fail(final String message) {
         exceptionHandler.notifyException(new InterpreterException(message));
         debugController.stop();
-        System.out.println("set fail");
         running = false;
         return VOID;
     }
@@ -333,7 +332,6 @@ public class Interpreter {
      * @param debugController the debug controller to use.
      */
     public void setDebugController(final DebugController debugController) {
-        System.out.println("set " + debugController);
         this.debugController = debugController;
     }
 
