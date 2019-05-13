@@ -47,8 +47,7 @@ public final class App {
                     } catch (IOException ignored) {
                     }
                     init(args);
-                    timer =
-                            new Timer(
+                    timer = new Timer(
                                     200,
                                     e -> {
                                         var m = nextMessage();

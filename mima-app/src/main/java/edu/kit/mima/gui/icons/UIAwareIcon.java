@@ -31,7 +31,6 @@ public class UIAwareIcon implements Icon {
     public UIAwareIcon(final String darkKey, final String lightKey) {
         this.darkKey = darkKey;
         this.lightKey = lightKey;
-        loadIcon();
     }
 
     @Override

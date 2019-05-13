@@ -7,10 +7,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * The Manager for creating application contexts.
+ *
  * @author Jannis Weis
  * @since 2019
  */
-public class ContextManager {
+public final class ContextManager {
 
     private static final Map<Class<?>, Class<?>> menuMap = new HashMap<>();
 
