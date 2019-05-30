@@ -2,6 +2,7 @@ package edu.kit.mima.gui.icons;
 
 import edu.kit.mima.gui.laf.LafManager;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,6 +16,7 @@ import java.awt.*;
  */
 public class UIAwareIcon implements Icon {
 
+    private final UIAwareIcon dual;
     private final String darkKey;
     private final String lightKey;
     private boolean loaded;
@@ -31,6 +33,15 @@ public class UIAwareIcon implements Icon {
     public UIAwareIcon(final String darkKey, final String lightKey) {
         this.darkKey = darkKey;
         this.lightKey = lightKey;
+        this.dual = new UIAwareIcon(this);
+    }
+
+    @Contract(pure = true)
+    private UIAwareIcon(@NotNull final UIAwareIcon dual) {
+        this.darkKey = dual.lightKey;
+        this.lightKey = dual.darkKey;
+        this.dual = dual;
+
     }
 
     @Override
@@ -70,5 +81,9 @@ public class UIAwareIcon implements Icon {
             icon = Icons.loadIcon(lightKey);
         }
         loaded = true;
+    }
+
+    public UIAwareIcon getDual() {
+        return dual;
     }
 }

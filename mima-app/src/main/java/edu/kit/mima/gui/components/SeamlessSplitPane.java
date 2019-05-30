@@ -70,8 +70,9 @@ public class SeamlessSplitPane extends PersistentSplitPane {
         if (!isEnabled()) {
             return new Dimension(0, 0);
         }
-        var leftSize = getLeftComponent().getMinimumSize();
-        var rightSize = getRightComponent().getMinimumSize();
+        var dim = new Dimension(0,0);
+        var leftSize = getLeftComponent() != null ? getLeftComponent().getMinimumSize() : dim;
+        var rightSize = getRightComponent() != null ? getRightComponent().getMinimumSize() : dim;
         if (orientation == JSplitPane.HORIZONTAL_SPLIT) {
             return new Dimension(
                     leftSize.width + rightSize.width, Math.max(leftSize.height, rightSize.height));

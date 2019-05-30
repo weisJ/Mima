@@ -102,19 +102,8 @@ public class TabFrameLayout implements LayoutManager {
             return;
         }
         var tabComponent = new TabFrameTabComponent(title, icon, a, index, this);
-        tabComponent.setOrientation(a);
-        getTab(a).add(tabComponent);
-
+        insertTabComp(tabComponent, a, index);
         compsForAlignment(a).add(index, c);
-
-        var tabs = tabsForAlignment(a);
-        //Adjust indices for tabs.
-        var iterator = tabs.listIterator(index);
-        while (iterator.hasNext()) {
-            var tab = iterator.next();
-            tab.setIndex(tab.getIndex() + 1);
-        }
-        tabs.add(index, tabComponent);
 
         c.setCloseAction(new AbstractAction() {
             @Override
@@ -126,26 +115,67 @@ public class TabFrameLayout implements LayoutManager {
         c.setEnabled(false);
     }
 
+    private void insertTabComp(@NotNull final TabFrameTabComponent tabComp, final Alignment a, final int index) {
+        tabComp.setOrientation(a);
+        getTab(a).add(tabComp);
+        var tabs = tabsForAlignment(a);
+        //Adjust indices for tabs.
+        var iterator = tabs.listIterator(index);
+        while (iterator.hasNext()) {
+            var tab = iterator.next();
+            tab.setIndex(tab.getIndex() + 1);
+        }
+        tabComp.setIndex(index);
+        tabComp.setAlignment(a);
+        tabs.add(index, tabComp);
+    }
+
     public void removeTab(final Alignment a, final int index) {
         try {
             compsForAlignment(a).get(index).close();
-            var tabs = tabsForAlignment(a);
-            //Adjust indices for tabs.
-            var iterator = tabs.listIterator(index);
-            while (iterator.hasNext()) {
-                var tab = iterator.next();
-                tab.setIndex(tab.getIndex() - 1);
-            }
-            var tab = tabs.remove(index);
-            getTab(a).remove(tab);
-            getTab(a).repaint();
+            removeTabComp(a, index);
 
             var comp = compsForAlignment(a).remove(index);
             comp.setCloseAction(EMPTY_ACTION);
             layoutContainer(tabFrame);
+            getTab(a).repaint();
         } catch (IndexOutOfBoundsException e) {
             e.printStackTrace();
         }
+    }
+
+    private void removeTabComp(final Alignment a, final int index) {
+        var tabs = tabsForAlignment(a);
+        //Adjust indices for tabs.
+        var iterator = tabs.listIterator(index);
+        while (iterator.hasNext()) {
+            var tab = iterator.next();
+            tab.setIndex(tab.getIndex() - 1);
+        }
+        var tab = tabs.remove(index);
+        getTab(a).remove(tab);
+    }
+
+    public void moveTab(@NotNull final TabFrameTabComponent tabComp, final Alignment a) {
+        if (a == tabComp.getAlignment()) {
+            return;
+        }
+        boolean oldSelected = tabComp.isSelected();
+        var oldAlign = tabComp.getAlignment();
+        int index = tabComp.getIndex();
+        compsForAlignment(oldAlign).get(index).close();
+        removeTabComp(oldAlign, index);
+
+        var comp = compsForAlignment(oldAlign).remove(index);
+        int newIndex = tabsForAlignment(a).size();
+
+        insertTabComp(tabComp, a, newIndex);
+        compsForAlignment(a).add(newIndex, comp);
+        tabComp.setPopupVisible(oldSelected);
+
+        layoutContainer(tabFrame);
+        getTab(oldAlign).repaint();
+        getTab(a).repaint();
     }
 
     public void addTab(@NotNull final PopupComponent c, final String title, final Icon icon,

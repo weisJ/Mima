@@ -27,7 +27,7 @@ public class TabFrameTabComponent extends IconLabel {
     private boolean selected;
     private boolean hover;
     private int accelerator;
-    private final Alignment alignment;
+    private Alignment alignment;
     private int index;
     private Color selectedColor;
     private Color hoverColor;
@@ -78,6 +78,10 @@ public class TabFrameTabComponent extends IconLabel {
         parent.removeTab(alignment, TabFrameTabComponent.this.index);
     }
 
+    public void moveTo(final Alignment a) {
+        parent.moveTab(this, a);
+    }
+
     public void setPopupVisible(final boolean visible) {
         setSelected(visible);
         parent.notifySelectChange(TabFrameTabComponent.this);
@@ -89,6 +93,10 @@ public class TabFrameTabComponent extends IconLabel {
 
     public void setIndex(final int index) {
         this.index = index;
+    }
+
+    public void setAlignment(final Alignment a) {
+        this.alignment = a;
     }
 
     /**

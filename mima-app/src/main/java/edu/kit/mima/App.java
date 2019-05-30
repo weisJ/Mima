@@ -30,7 +30,6 @@ public final class App {
     // taking a long time before it shows the splash screen.
     private static final String[] fakeLoadMessages =
             new String[]{"Loading Icons"};
-    @Nullable
     private static MimaUserInterface frame;
     private static MimaSplash splash;
     private static int index = 0;
@@ -44,29 +43,26 @@ public final class App {
     public static void main(@Nullable final String[] args) {
         System.setProperty("org.apache.batik.warn_destination", "false");
 
-        SwingUtilities.invokeLater(
-                () -> {
-                    try {
-                        splash = new MimaSplash();
-                        splash.showSplash();
-                    } catch (IOException ignored) {
-                    }
-                    init(args);
-                    timer = new Timer(
-                                    200,
-                                    e -> {
-                                        var m = nextMessage();
-                                        if (m != null) {
-                                            splash.showMessage(m);
-                                        } else {
-                                            timer.stop();
-                                            splash.closeSplash();
-                                            start();
-                                        }
-                                    });
-                    timer.setRepeats(true);
-                    timer.start();
-                });
+        SwingUtilities.invokeLater(() -> {
+            try {
+                splash = new MimaSplash();
+                splash.showSplash();
+            } catch (IOException ignored) {
+            }
+            init(args);
+            timer = new Timer(200, e -> {
+                var m = nextMessage();
+                if (m != null) {
+                    splash.showMessage(m);
+                } else {
+                    timer.stop();
+                    splash.closeSplash();
+                    start();
+                }
+            });
+            timer.setRepeats(true);
+            timer.start();
+        });
     }
 
     private static String nextMessage() {
@@ -93,9 +89,6 @@ public final class App {
     }
 
     private static void start() {
-        if (frame == null) {
-            return;
-        }
         frame.setVisible(true);
         frame.requestFocus();
         frame.toFront();
