@@ -20,7 +20,7 @@ import java.util.Properties;
  * @author Jannis Weis
  * @since 2018
  */
-public class Preferences {
+public final class Preferences {
 
     private static final String directory = System.getProperty("user.home") + "\\.mima";
     private static final String optionsPath = directory + "\\options.properties";
@@ -82,6 +82,8 @@ public class Preferences {
         }
     }
 
+    @NotNull
+    @Contract(" -> new")
     @Override
     public Preferences clone() {
         return new Preferences(options, colorStyle);
@@ -209,6 +211,7 @@ public class Preferences {
      * @param key key to read.
      * @return value at key
      */
+    @Contract("_ -> new")
     @NotNull
     public Color readColor(@NotNull final ColorKey key) {
         return new Color(Integer.parseInt(colorStyle.getProperty(key.toString()), 16));
@@ -220,6 +223,7 @@ public class Preferences {
      * @param key key to read.
      * @return value at key
      */
+    @Contract("_ -> new")
     @NotNull
     public Font readFont(@NotNull final PropertyKey key) {
         try {

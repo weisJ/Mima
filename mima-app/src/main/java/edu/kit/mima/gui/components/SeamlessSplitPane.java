@@ -1,5 +1,6 @@
 package edu.kit.mima.gui.components;
 
+import edu.kit.mima.gui.persist.PersistentSplitPane;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -14,7 +15,7 @@ import java.awt.*;
  * @author Jannis Weis
  * @since 2018
  */
-public class SeamlessSplitPane extends JSplitPane {
+public class SeamlessSplitPane extends PersistentSplitPane {
 
     private static final int DIVIDER_DRAG_SIZE = 9;
     private static final int DIVIDER_DRAG_OFFSET = 4;
@@ -149,7 +150,7 @@ public class SeamlessSplitPane extends JSplitPane {
         }
     }
 
-    private class ZeroSizeDivider extends BasicSplitPaneDivider {
+    private final class ZeroSizeDivider extends BasicSplitPaneDivider {
 
         private ZeroSizeDivider(@NotNull final BasicSplitPaneUI ui) {
             super(ui);

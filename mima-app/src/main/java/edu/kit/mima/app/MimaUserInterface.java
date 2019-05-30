@@ -20,6 +20,7 @@ import edu.kit.mima.gui.components.tabframe.TabFrame;
 import edu.kit.mima.gui.icons.Icons;
 import edu.kit.mima.gui.menu.Help;
 import edu.kit.mima.gui.menu.settings.Settings;
+import edu.kit.mima.gui.persist.PersistenceManager;
 import edu.kit.mima.gui.view.MemoryTableView;
 import edu.kit.mima.loading.FileManager;
 import edu.kit.mima.preferences.Preferences;
@@ -248,6 +249,7 @@ public final class MimaUserInterface extends JFrame {
 
         add(controlPanel, BorderLayout.NORTH);
         var tabFrame = new TabFrame();
+        tabFrame.setPersistable(true, "mainTabFrame");
         tabFrame.setContentPane(tabbedEditor);
         tabFrame.addTab(
                 new DefaultPopupComponent("Memory", Icons.MEMORY, memoryTable),
@@ -272,6 +274,7 @@ public final class MimaUserInterface extends JFrame {
         try {
             editorManager.close();
             Preferences.getInstance().saveOptions();
+            PersistenceManager.getInstance().saveStates();
             dispose();
             Settings.close();
             Help.getInstance().close();

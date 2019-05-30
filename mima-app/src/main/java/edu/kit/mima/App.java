@@ -5,6 +5,7 @@ import edu.kit.mima.app.MimaUserInterface;
 import edu.kit.mima.core.MimaCoreDefaults;
 import edu.kit.mima.gui.icons.Icons;
 import edu.kit.mima.gui.laf.LafManager;
+import edu.kit.mima.gui.persist.PersistenceManager;
 import edu.kit.mima.logger.ConsoleLogger;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
@@ -12,6 +13,8 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.io.IOException;
 
 /**
@@ -56,6 +59,7 @@ public final class App {
                                         if (m != null) {
                                             splash.showMessage(m);
                                         } else {
+                                            timer.stop();
                                             splash.closeSplash();
                                             start();
                                         }
@@ -76,6 +80,12 @@ public final class App {
                 Preferences.getInstance().readString(PropertyKey.THEME).equals("Dark"));
         final String filePath = args != null && args.length >= 1 ? args[0] : null;
         frame = new MimaUserInterface(filePath);
+        frame.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(final ComponentEvent e) {
+                SwingUtilities.invokeLater(() -> PersistenceManager.getInstance().loadStates());
+            }
+        });
         logger.setLevel(LogLevel.INFO);
         MimaCoreDefaults.setLogger(logger);
         frame.setLocationRelativeTo(null);
@@ -86,7 +96,6 @@ public final class App {
         if (frame == null) {
             return;
         }
-        timer.stop();
         frame.setVisible(true);
         frame.requestFocus();
         frame.toFront();

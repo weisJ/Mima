@@ -30,6 +30,10 @@ public class PlaceholderComponent extends PopupComponent {
     public void close() {
     }
 
+    @Override
+    public void setFocus(final boolean focus) {
+    }
+
     @NotNull
     @Override
     public Dimension getMaximumSize() {

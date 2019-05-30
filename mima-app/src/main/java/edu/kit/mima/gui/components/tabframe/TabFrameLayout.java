@@ -44,12 +44,10 @@ public class TabFrameLayout implements LayoutManager {
      * The width/height of the frame.
      */
     private final int size = 24;
-    /**
-     * The increase in capacity if arrays are full.
-     */
     private final TabFrameContent content = new TabFrameContent();
     private final Map<Alignment, List<TabFrameTabComponent>> tabsMap;
     private final Map<Alignment, List<PopupComponent>> compsMap;
+    private final Map<Alignment, Integer> indexMap;
     private Color lineColor = Color.BLACK;
 
     public TabFrameLayout(@NotNull final TabFrame tabFrame) {
@@ -84,6 +82,10 @@ public class TabFrameLayout implements LayoutManager {
 
         tabsMap = new HashMap<>();
         compsMap = new HashMap<>();
+        indexMap = new HashMap<>();
+        for (var a : Alignment.values()) {
+            indexMap.put(a, 0);
+        }
     }
 
     public void setLineColor(final Color lineColor) {
@@ -151,22 +153,26 @@ public class TabFrameLayout implements LayoutManager {
         insertTab(c, title, icon, a, tabsForAlignment(a).size());
     }
 
-    private List<PopupComponent> compsForAlignment(final Alignment a) {
+    public List<PopupComponent> compsForAlignment(final Alignment a) {
         if (!compsMap.containsKey(a)) {
             compsMap.put(a, new LinkedList<>());
         }
         return compsMap.get(a);
     }
 
-    private List<TabFrameTabComponent> tabsForAlignment(final Alignment a) {
+    public List<TabFrameTabComponent> tabsForAlignment(final Alignment a) {
         if (!tabsMap.containsKey(a)) {
             tabsMap.put(a, new LinkedList<>());
         }
         return tabsMap.get(a);
     }
 
+    public int lastSelectedIndex(final Alignment a) {
+        return indexMap.get(a);
+    }
+
     @Contract(pure = true)
-    private JPanel getTab(final Alignment a) {
+    public TabArea getTab(final Alignment a) {
         return switch (a) {
             case NORTH, NORTH_EAST -> topTabs;
             case SOUTH, SOUTH_WEST -> bottomTabs;
@@ -337,13 +343,18 @@ public class TabFrameLayout implements LayoutManager {
         c.setEnabled(selected);
         if (selected) {
             c.open();
+            c.requestFocus();
         }
         content.setPopupComponent(a, c);
         content.setEnabled(a, selected);
         content.updateSizes();
     }
 
-    public void notifySelectChange(@NotNull final TabFrameTabComponent tabComponent) {
+    public void notifySelectChange(final TabFrameTabComponent tabComponent) {
+        if (tabComponent == null) {
+            return;
+        }
+        indexMap.put(tabComponent.getAlignment(), tabComponent.getIndex());
         if (tabComponent.isSelected()) {
             for (var tc : tabsForAlignment(tabComponent.getAlignment())) {
                 if (tc != null && tc != tabComponent) {
@@ -367,6 +378,10 @@ public class TabFrameLayout implements LayoutManager {
         }
     }
 
+    TabFrameContent getTabFrameContent() {
+        return content;
+    }
+
     /**
      * Get a map with all the popup components.
      *
@@ -380,7 +395,7 @@ public class TabFrameLayout implements LayoutManager {
         content.setContentPane(c);
     }
 
-    private final class TabArea extends JPanel {
+    final class TabArea extends JPanel {
 
         private TabArea() {
             setLayout(null);
