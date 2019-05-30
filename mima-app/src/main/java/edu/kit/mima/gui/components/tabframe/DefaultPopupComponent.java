@@ -32,7 +32,6 @@ public class DefaultPopupComponent extends PopupComponent {
     private final JButton closeButton;
     private Color headerFocusBackground;
     private Color headerBackground;
-    private Color borderColor;
     private boolean open;
     private boolean locked = true;
 
@@ -77,11 +76,7 @@ public class DefaultPopupComponent extends PopupComponent {
                     return;
                 }
                 if (event.getID() == MouseEvent.MOUSE_CLICKED && open) {
-                    if (pressed && mouseInside()) {
-                        header.setBackground(headerFocusBackground);
-                    } else {
-                        header.setBackground(headerBackground);
-                    }
+                    setFocus(pressed && mouseInside());
                     pressed = false;
                 } else if (event.getID() == MouseEvent.MOUSE_PRESSED) {
                     pressed = mouseInside();
@@ -125,6 +120,14 @@ public class DefaultPopupComponent extends PopupComponent {
          * highlighting.
          */
         locked = true;
+    }
+
+    public void setFocus(final boolean focus) {
+        if (focus) {
+            header.setBackground(headerFocusBackground);
+        } else {
+            header.setBackground(headerBackground);
+        }
     }
 
     @Override

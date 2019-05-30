@@ -3,6 +3,9 @@ package edu.kit.mima.gui.components.tabframe;
 import edu.kit.mima.gui.components.SeamlessSplitPane;
 import edu.kit.mima.gui.components.alignment.Alignment;
 import edu.kit.mima.gui.components.listeners.AncestorAdapter;
+import edu.kit.mima.gui.persist.Persistable;
+import edu.kit.mima.gui.persist.PersistenceInfo;
+import edu.kit.mima.gui.persist.PersistenceManager;
 import org.apache.poi.sl.usermodel.Insets2D;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,6 +13,7 @@ import javax.swing.*;
 import javax.swing.event.AncestorEvent;
 import java.awt.*;
 import java.util.Arrays;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 /**
@@ -18,10 +22,9 @@ import java.util.function.BiConsumer;
  * @author Jannis Weis
  * @since 2019
  */
-public class TabFrameContent extends JPanel {
+public class TabFrameContent extends JPanel implements Persistable<TabFrameContent> {
     private static final double HORIZONTAL_PROP = 0.2;
     private static final double VERTICAL_PROP = 0.2;
-
 
     private final SeamlessSplitPane topSplit;
     private final SeamlessSplitPane bottomSplit;
@@ -36,7 +39,8 @@ public class TabFrameContent extends JPanel {
     private final boolean[] enabled = new boolean[8];
 
     private JComponent cont = new JPanel();
-
+    private boolean persistable;
+    private String identifier;
 
     public TabFrameContent() {
         super(new BorderLayout());
@@ -344,5 +348,49 @@ public class TabFrameContent extends JPanel {
                 Math.max(s.getDividerLocation(), s.getMinimumDividerLocation())), null);
         setupSplitterPanes((s, o) -> s.setDividerLocation(
                 Math.max(s.getDividerLocation(), s.getMinimumDividerLocation())), null);
+    }
+
+    @Override
+    public PersistenceInfo saveState() {
+        var info = new PersistenceInfo();
+        setupSplitPanes((s, o) -> info.put(s.saveState(), s.getIdentifier()), null);
+        setupSplitterPanes((s, o) -> info.put(s.saveState(), s.getIdentifier()), null);
+        return info;
+    }
+
+    @Override
+    public void loadState(final PersistenceInfo info) {
+        var manager = PersistenceManager.getInstance();
+        setupSplitPanes((s, o) -> s.loadState(manager.getStates(s, identifier)), null);
+        setupSplitterPanes((s, o) -> s.loadState(manager.getStates(s, identifier)), null);
+    }
+
+    @Override
+    public Set<?> getKeys() {
+        return Set.of();
+    }
+
+    @Override
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    @Override
+    public boolean isPersistable() {
+        return persistable;
+    }
+
+    @Override
+    public void setPersistable(final boolean persistable, final String identifier) {
+        this.persistable = persistable;
+        this.identifier = identifier;
+        topSplit.setPersistable(false, "topSplit");
+        bottomSplit.setPersistable(false, "bottomSplit");
+        leftSplit.setPersistable(false, "leftSplit");
+        rightSplit.setPersistable(false, "rightSplit");
+        topSplitter.setPersistable(false, "topSplitter");
+        bottomSplitter.setPersistable(false, "bottomSplitter");
+        leftSplitter.setPersistable(false, "leftSplitter");
+        rightSplitter.setPersistable(false, "rightSplitter");
     }
 }

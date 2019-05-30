@@ -54,4 +54,6 @@ public abstract class PopupComponent extends JPanel {
     public abstract void open();
 
     public abstract void close();
+
+    public abstract void setFocus(final boolean focus);
 }
