@@ -49,6 +49,9 @@ bin/
 # maven
 target/
 
+# Python
+venv/
+
 # Mac
 .DS_Store
 

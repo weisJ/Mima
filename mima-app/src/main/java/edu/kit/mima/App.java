@@ -79,7 +79,7 @@ public final class App {
         frame.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentShown(final ComponentEvent e) {
-                SwingUtilities.invokeLater(() -> PersistenceManager.getInstance().loadStates());
+                SwingUtilities.invokeLater(() -> PersistenceManager.getInstance().loadStates(frame.getName()));
             }
         });
         logger.setLevel(LogLevel.INFO);

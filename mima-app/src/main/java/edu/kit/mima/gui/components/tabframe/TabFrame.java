@@ -2,15 +2,13 @@ package edu.kit.mima.gui.components.tabframe;
 
 import com.bulenkov.iconloader.util.EmptyIcon;
 import edu.kit.mima.gui.components.alignment.Alignment;
-import edu.kit.mima.gui.persist.Persistable;
+import edu.kit.mima.gui.persist.PersistableComponent;
 import edu.kit.mima.gui.persist.PersistenceInfo;
 import edu.kit.mima.gui.persist.PersistenceManager;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Frame that supports plugin components.
@@ -18,20 +16,10 @@ import java.util.Set;
  * @author Jannis Weis
  * @since 2018
  */
-public class TabFrame extends JComponent implements Persistable<TabFrame> {
-
-    private final PersistenceInfo persistenceInfo = new PersistenceInfo();
-    private final Set<String> keys;
-    private String identifier;
-    private boolean persistable;
+public class TabFrame extends PersistableComponent<TabFrame> {
 
     public TabFrame() {
         setUI(new TabFrameUI());
-        keys = new HashSet<>();
-        for (var a : Alignment.values()) {
-            keys.add(a.toString());
-            keys.add(a.toString() + ".index");
-        }
     }
 
     /**
@@ -126,7 +114,7 @@ public class TabFrame extends JComponent implements Persistable<TabFrame> {
             persistenceInfo.putValue(a.toString() + ".index", index);
         }
         var info = ((TabFrameLayout) getLayout()).getTabFrameContent().saveState();
-        info.put(persistenceInfo);
+        info.merge(persistenceInfo);
         return info;
     }
 
@@ -143,11 +131,6 @@ public class TabFrame extends JComponent implements Persistable<TabFrame> {
     }
 
     @Override
-    public Set<?> getKeys() {
-        return keys;
-    }
-
-    @Override
     public String getIdentifier() {
         return identifier;
     }
@@ -159,9 +142,7 @@ public class TabFrame extends JComponent implements Persistable<TabFrame> {
 
     @Override
     public void setPersistable(final boolean persistable, final String identifier) {
+        super.setPersistable(persistable, identifier);
         ((TabFrameLayout) getLayout()).getTabFrameContent().setPersistable(persistable, identifier);
-        this.identifier = identifier;
-        this.persistable = persistable;
-        PersistenceManager.getInstance().updateState(this);
     }
 }

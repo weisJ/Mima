@@ -22,14 +22,16 @@ public final class PersistenceManager {
     private static final String directory = System.getProperty("user.home") + "\\.mima";
     private static final String optionsPath = directory + "\\session_view.properties";
     private static final PersistenceManager instance = new PersistenceManager();
-    private final Map<String, Persistable<?>> persistableViews;
+    private final Map<String, Map<String, Persistable<?>>> persistableViews;
     private final Properties states;
+    private final PersistenceInfo stateInfo;
 
 
     @Contract(pure = true)
     private PersistenceManager() {
         persistableViews = new HashMap<>();
         states = new Properties();
+        stateInfo = new PersistenceInfo();
         loadState();
     }
 
@@ -54,16 +56,23 @@ public final class PersistenceManager {
         } catch (@NotNull final IOException e) {
             e.printStackTrace();
         }
+        for (var entry : states.entrySet()) {
+            stateInfo.putValue(entry.getKey().toString(), entry.getValue());
+        }
     }
 
     /**
      * Register a component to save its state.
      *
      * @param persistable the persistable component to save.
+     * @param frameIdentifier identifier of parent frame.
      */
-    public void registerState(@NotNull final Persistable<?> persistable) {
+    public void registerState(@NotNull final Persistable<?> persistable, final String frameIdentifier) {
         if (persistable.isPersistable()) {
-            persistableViews.put(persistable.getIdentifier(), persistable);
+            if (!persistableViews.containsKey(frameIdentifier)) {
+                persistableViews.put(frameIdentifier, new HashMap<>());
+            }
+            persistableViews.get(frameIdentifier).put(persistable.getIdentifier(), persistable);
         }
     }
 
@@ -71,20 +80,26 @@ public final class PersistenceManager {
      * Stop a component from persisting its state.
      *
      * @param persistable the persistable component to remove.
+     * @param frameIdentifier identifier of parent frame.
      */
-    public void removeState(@NotNull final Persistable<?> persistable) {
-        persistableViews.remove(persistable.getIdentifier());
-        for (var key : persistable.getKeys()) {
-            var k = persistable.getIdentifier() + '.' + key;
-            states.remove(k);
+    public void removeState(@NotNull final Persistable<?> persistable, final String frameIdentifier) {
+        if (persistableViews.containsKey(frameIdentifier)) {
+            persistableViews.get(frameIdentifier).remove(persistable.getIdentifier());
         }
+        stateInfo.remove(persistable.saveState(), persistable.getIdentifier());
     }
 
-    public void updateState(@NotNull final Persistable<?> persistable) {
+    /**
+     * Update the persistence state based on the {@link Persistable#isPersistable()} value.
+     *
+     * @param persistable     the component to persist.
+     * @param frameIdentifier the frame identifier.
+     */
+    public void updateState(@NotNull final Persistable<?> persistable, final String frameIdentifier) {
         if (persistable.isPersistable()) {
-            registerState(persistable);
+            registerState(persistable, frameIdentifier);
         } else {
-            removeState(persistable);
+            removeState(persistable, frameIdentifier);
         }
     }
 
@@ -92,15 +107,15 @@ public final class PersistenceManager {
      * Save all states.
      */
     public void saveStates() {
-        for (var key : persistableViews.keySet()) {
-            var permObj = persistableViews.get(key);
-            if (permObj.isPersistable()) {
-                var info = permObj.saveState();
-                for (var k : info.getKeys()) {
-                    states.put(key + '.' + k, info.getValue(k, ""));
+        for (var permMap : persistableViews.entrySet()) {
+            for (var key : permMap.getValue().keySet()) {
+                var permObj = permMap.getValue().get(key);
+                if (permObj.isPersistable()) {
+                    stateInfo.merge(permObj.saveState(), permMap.getKey() + '.' + key);
                 }
             }
         }
+        states.putAll(stateInfo.directMap());
         try {
             states.store(new FileOutputStream(optionsPath), "Mima Session");
         } catch (IOException e) {
@@ -109,11 +124,24 @@ public final class PersistenceManager {
     }
 
     /**
-     * Load the states.
+     * Load the states for all frames.
      */
     public void loadStates() {
-        for (var perm : persistableViews.values()) {
-            perm.loadState(getStates(perm));
+        for (var frame : persistableViews.keySet()) {
+            loadStates(frame);
+        }
+    }
+
+    /**
+     * Load the state of specified frame.
+     *
+     * @param frameIdentifier the frame identifier.
+     */
+    public void loadStates(final String frameIdentifier) {
+        if (persistableViews.containsKey(frameIdentifier)) {
+            for (var perm : persistableViews.get(frameIdentifier).values()) {
+                perm.loadState(getStates(perm, frameIdentifier));
+            }
         }
     }
 
@@ -137,12 +165,7 @@ public final class PersistenceManager {
      * @return the persistence info for the component.
      */
     public <T> PersistenceInfo getStates(@NotNull final Persistable<T> persistable, @NotNull final String prefix) {
-        PersistenceInfo info = new PersistenceInfo();
-        var pref = prefix.isEmpty() ? "" : prefix + '.';
-        for (var key : persistable.getKeys()) {
-            var k = pref + persistable.getIdentifier() + '.' + key;
-            info.putValue(key.toString(), states.get(k));
-        }
-        return info;
+        String key = prefix.isEmpty() ? persistable.getIdentifier() : prefix + '.' + persistable.getIdentifier();
+        return stateInfo.getSubTree(key);
     }
 }

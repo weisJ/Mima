@@ -13,7 +13,6 @@ import javax.swing.*;
 import javax.swing.event.AncestorEvent;
 import java.awt.*;
 import java.util.Arrays;
-import java.util.Set;
 import java.util.function.BiConsumer;
 
 /**
@@ -358,8 +357,8 @@ public class TabFrameContent extends JPanel implements Persistable<TabFrameConte
     @Override
     public PersistenceInfo saveState() {
         var info = new PersistenceInfo();
-        setupSplitPanes((s, o) -> info.put(s.saveState(), s.getIdentifier()), null);
-        setupSplitterPanes((s, o) -> info.put(s.saveState(), s.getIdentifier()), null);
+        setupSplitPanes((s, o) -> info.merge(s.saveState(), s.getIdentifier()), null);
+        setupSplitterPanes((s, o) -> info.merge(s.saveState(), s.getIdentifier()), null);
         return info;
     }
 
@@ -368,11 +367,6 @@ public class TabFrameContent extends JPanel implements Persistable<TabFrameConte
         var manager = PersistenceManager.getInstance();
         setupSplitPanes((s, o) -> s.loadState(manager.getStates(s, identifier)), null);
         setupSplitterPanes((s, o) -> s.loadState(manager.getStates(s, identifier)), null);
-    }
-
-    @Override
-    public Set<?> getKeys() {
-        return Set.of();
     }
 
     @Override

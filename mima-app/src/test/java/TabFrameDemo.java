@@ -41,15 +41,18 @@ public class TabFrameDemo extends JPanel {
                 }
             }
             var c = new JPanel(new BorderLayout());
-
+            frame.setContentPane(p);
             p.setContentPane(c);
             p.setPersistable(true, "TabFrameDemo_Persist");
 
-            frame.setContentPane(p);
             frame.pack();
             frame.setSize(1000, 500);
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
+
+            var t = new Timer(200, e -> PersistenceManager.getInstance().loadStates(frame.getName()));
+            t.setRepeats(false);
+            t.start();
         });
     }
 }
