@@ -16,7 +16,7 @@ import java.awt.*;
  * @author Jannis Weis
  * @since 2018
  */
-public class TabFrame extends PersistableComponent<TabFrame> {
+public class TabFrame extends PersistableComponent {
 
     public TabFrame() {
         setUI(new TabFrameUI());

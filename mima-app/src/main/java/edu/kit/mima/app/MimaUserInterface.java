@@ -178,10 +178,16 @@ public final class MimaUserInterface extends JFrame {
             final String filesString = Preferences.getInstance().readString(PropertyKey.LAST_FILE);
             final String[] files = filesString.isEmpty() ? new String[0] : filesString.split("/");
             for (final String file : files) {
-                fileActions.openFile(file);
+                openFile(file);
             }
         } else {
-            fileActions.openFile(filePath);
+            openFile(filePath);
+        }
+    }
+
+    public void openFile(final String path) {
+        if (path != null && !path.isEmpty()) {
+            fileActions.openFile(path);
         }
     }
 

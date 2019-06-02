@@ -21,7 +21,7 @@ import java.util.function.BiConsumer;
  * @author Jannis Weis
  * @since 2019
  */
-public class TabFrameContent extends JPanel implements Persistable<TabFrameContent> {
+public class TabFrameContent extends JPanel implements Persistable {
     private static final double HORIZONTAL_PROP = 0.2;
     private static final double VERTICAL_PROP = 0.2;
 
