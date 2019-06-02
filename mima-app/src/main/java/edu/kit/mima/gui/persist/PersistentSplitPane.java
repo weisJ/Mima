@@ -12,7 +12,7 @@ import javax.swing.event.AncestorEvent;
  * @author Jannis Weis
  * @since 2019
  */
-public class PersistentSplitPane extends JSplitPane implements Persistable<JSplitPane> {
+public class PersistentSplitPane extends JSplitPane implements Persistable {
 
     private final PersistenceInfo persistenceInfo;
     private String identifier;

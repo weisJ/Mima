@@ -14,9 +14,9 @@
     <artifactId>mima.app</artifactId>
     <dependencies>
         <dependency>
-            <groupId>org.apfloat</groupId>
-            <artifactId>apfloat</artifactId>
-            <version>1.8.3</version>
+            <groupId>com.j256.simplejmx</groupId>
+            <artifactId>simplejmx</artifactId>
+            <version>1.17</version>
         </dependency>
         <dependency>
             <groupId>org.swinglabs</groupId>

@@ -6,10 +6,12 @@ import javax.swing.*;
 import javax.swing.event.AncestorEvent;
 
 /**
+ * Simple implementation for a JComponent that can be persisted.
+ *
  * @author Jannis Weis
  * @since 2019
  */
-public abstract class PersistableComponent<T> extends JComponent implements Persistable<T> {
+public abstract class PersistableComponent extends JComponent implements Persistable {
 
     protected final PersistenceInfo persistenceInfo = new PersistenceInfo();
     protected String identifier;

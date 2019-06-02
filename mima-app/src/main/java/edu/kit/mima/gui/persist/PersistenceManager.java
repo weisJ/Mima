@@ -22,7 +22,7 @@ public final class PersistenceManager {
     private static final String directory = System.getProperty("user.home") + "\\.mima";
     private static final String optionsPath = directory + "\\session_view.properties";
     private static final PersistenceManager instance = new PersistenceManager();
-    private final Map<String, Map<String, Persistable<?>>> persistableViews;
+    private final Map<String, Map<String, Persistable>> persistableViews;
     private final Properties states;
     private final PersistenceInfo stateInfo;
 
@@ -67,7 +67,7 @@ public final class PersistenceManager {
      * @param persistable the persistable component to save.
      * @param frameIdentifier identifier of parent frame.
      */
-    public void registerState(@NotNull final Persistable<?> persistable, final String frameIdentifier) {
+    public void registerState(@NotNull final Persistable persistable, final String frameIdentifier) {
         if (persistable.isPersistable()) {
             if (!persistableViews.containsKey(frameIdentifier)) {
                 persistableViews.put(frameIdentifier, new HashMap<>());
@@ -82,7 +82,7 @@ public final class PersistenceManager {
      * @param persistable the persistable component to remove.
      * @param frameIdentifier identifier of parent frame.
      */
-    public void removeState(@NotNull final Persistable<?> persistable, final String frameIdentifier) {
+    public void removeState(@NotNull final Persistable persistable, final String frameIdentifier) {
         if (persistableViews.containsKey(frameIdentifier)) {
             persistableViews.get(frameIdentifier).remove(persistable.getIdentifier());
         }
@@ -95,7 +95,7 @@ public final class PersistenceManager {
      * @param persistable     the component to persist.
      * @param frameIdentifier the frame identifier.
      */
-    public void updateState(@NotNull final Persistable<?> persistable, final String frameIdentifier) {
+    public void updateState(@NotNull final Persistable persistable, final String frameIdentifier) {
         if (persistable.isPersistable()) {
             registerState(persistable, frameIdentifier);
         } else {
@@ -152,7 +152,7 @@ public final class PersistenceManager {
      * @param <T>         the type of the component.
      * @return the persistence info for the component.
      */
-    public <T> PersistenceInfo getStates(@NotNull final Persistable<T> persistable) {
+    public <T> PersistenceInfo getStates(@NotNull final Persistable persistable) {
         return getStates(persistable, "");
     }
 
@@ -164,7 +164,7 @@ public final class PersistenceManager {
      * @param <T>         the type of the component.
      * @return the persistence info for the component.
      */
-    public <T> PersistenceInfo getStates(@NotNull final Persistable<T> persistable, @NotNull final String prefix) {
+    public <T> PersistenceInfo getStates(@NotNull final Persistable persistable, @NotNull final String prefix) {
         String key = prefix.isEmpty() ? persistable.getIdentifier() : prefix + '.' + persistable.getIdentifier();
         return stateInfo.getSubTree(key);
     }

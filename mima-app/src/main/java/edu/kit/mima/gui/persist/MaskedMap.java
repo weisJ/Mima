@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * Map that masks the contained values by matching the string representation of the key against a mask.
+ *
  * @author Jannis Weis
  * @since 2019
  */

@@ -1,5 +1,7 @@
 package edu.kit.mima;
 
+import com.j256.simplejmx.client.JmxClient;
+import com.j256.simplejmx.server.JmxServer;
 import edu.kit.mima.api.logging.LogLevel;
 import edu.kit.mima.app.MimaUserInterface;
 import edu.kit.mima.core.MimaCoreDefaults;
@@ -9,13 +11,17 @@ import edu.kit.mima.gui.persist.PersistenceManager;
 import edu.kit.mima.logger.ConsoleLogger;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
+import edu.kit.mima.session.MimaRequestHandler;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
+import javax.management.JMException;
 import javax.swing.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
 
 /**
  * Entry point for the Application.
@@ -25,6 +31,8 @@ import java.io.IOException;
  */
 public final class App {
 
+    private static final int JMX_PORT = 8000;
+    private static final int LOCK_PORT = 65535;
     public static final ConsoleLogger logger = new ConsoleLogger();
     //Todo: Have tasks that do heavy static initialization register to run at startup. This prevents the program from
     // taking a long time before it shows the splash screen.
@@ -35,34 +43,70 @@ public final class App {
     private static int index = 0;
     private static Timer timer;
 
+    /*
+     * Keep reference to the socket to prevent it from being removed by the garbage collector.
+     */
+    @SuppressWarnings("FieldCanBeLocal")
+    private static ServerSocket lockSocket;
+
+
     /**
      * Entry point for starting the Mima UI.
      *
      * @param args command line arguments (ignored)
      */
     public static void main(@Nullable final String[] args) {
-        System.setProperty("org.apache.batik.warn_destination", "false");
+        if (delegateToInstance(args)) {
+            System.setProperty("org.apache.batik.warn_destination", "false");
 
-        SwingUtilities.invokeLater(() -> {
-            try {
-                splash = new MimaSplash();
-                splash.showSplash();
-            } catch (IOException ignored) {
-            }
-            init(args);
-            timer = new Timer(200, e -> {
-                var m = nextMessage();
-                if (m != null) {
-                    splash.showMessage(m);
-                } else {
-                    timer.stop();
-                    splash.closeSplash();
-                    start();
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    splash = new MimaSplash();
+                    splash.showSplash();
+                } catch (IOException ignored) {
                 }
+                init(getFilePath(args));
+                timer = new Timer(200, e -> {
+                    var m = nextMessage();
+                    if (m != null) {
+                        splash.showMessage(m);
+                    } else {
+                        timer.stop();
+                        splash.closeSplash();
+                        start();
+                    }
+                });
+                timer.setRepeats(true);
+                timer.start();
             });
-            timer.setRepeats(true);
-            timer.start();
-        });
+        }
+    }
+
+    private static boolean delegateToInstance(final String[] args) {
+        try {
+            lockSocket = new ServerSocket(LOCK_PORT, 1, InetAddress.getLocalHost());
+        } catch (IOException e) {
+            try {
+                JmxClient client = new JmxClient(JMX_PORT);
+                client.invokeOperation("edu.kit.mima.session", "MimaRequestHandler",
+                                       "openFile", getFilePath(args));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private static void registerWithJmxAgent(final MimaUserInterface frame) {
+        MimaRequestHandler handler = new MimaRequestHandler(frame);
+        try {
+            JmxServer jmxServer = new JmxServer(JMX_PORT);
+            jmxServer.start();
+            jmxServer.register(handler);
+        } catch (JMException e) {
+            e.printStackTrace();
+        }
     }
 
     private static String nextMessage() {
@@ -71,10 +115,14 @@ public final class App {
         return m;
     }
 
-    private static void init(final String[] args) {
+    @Contract(value = "null -> !null", pure = true)
+    private static String getFilePath(final String[] args) {
+        return args != null && args.length >= 1 ? args[0] : "";
+    }
+
+    private static void init(final String filePath) {
         LafManager.setDefaultTheme(
                 Preferences.getInstance().readString(PropertyKey.THEME).equals("Dark"));
-        final String filePath = args != null && args.length >= 1 ? args[0] : null;
         frame = new MimaUserInterface(filePath);
         frame.addComponentListener(new ComponentAdapter() {
             @Override
@@ -86,6 +134,7 @@ public final class App {
         MimaCoreDefaults.setLogger(logger);
         frame.setLocationRelativeTo(null);
         Icons.loadIcons();
+        registerWithJmxAgent(frame);
     }
 
     private static void start() {

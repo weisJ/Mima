@@ -10,7 +10,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Persistence Info Object.
+ * Persistence Info Object. Uses a tree like structure for managing keys and values.
+ * keys are separated by '.'.
+ * Uses a Map for faster key lookups as the tree structure is purely for having faster merging speed and
+ * the ability to create subtree information.
  *
  * @author Jannis Weis
  * @since 2019
@@ -32,6 +35,12 @@ public class PersistenceInfo {
         this.valueMap = valueMap;
     }
 
+    /**
+     * Get the subtree starting with the given prefix.
+     *
+     * @param prefix the prefix.
+     * @return the subtree.
+     */
     public PersistenceInfo getSubTree(@NotNull final String prefix) {
         String[] keys = prefix.isEmpty() ? new String[0] : prefix.split("\\.");
         InfoNode node = traverseToSub(keys, root, keys.length).getFirst();
@@ -70,6 +79,9 @@ public class PersistenceInfo {
         valueMap.put(key, value.toString());
     }
 
+    /*
+     * Create all missing nodes necessary to traverse to full length of the key.
+     */
     private InfoNode createNodes(@NotNull final String key) {
         String[] keys = key.isEmpty() ? new String[0] : key.split("\\.");
         var traverse = traverseToSub(keys, root, keys.length);
@@ -94,6 +106,13 @@ public class PersistenceInfo {
         return valueMap.get(k);
     }
 
+    /**
+     * Remove the intersection of the given PersistenceInfo.
+     *
+     * @param info   the info to remove.
+     * @param prefix the prefix to start the removal process from. All keys in 'info' will be treated as if they
+     *               start with the given prefix.
+     */
     public void remove(@NotNull final PersistenceInfo info, @NotNull final String prefix) {
         String[] keys = prefix.isEmpty() ? new String[0] : prefix.split("\\.");
         InfoNode subTree = traverseToSub(keys, root, keys.length).getFirst();
@@ -134,6 +153,13 @@ public class PersistenceInfo {
         return value != null ? value : defaultValue;
     }
 
+    /**
+     * Get the value associated with the key.
+     *
+     * @param key          the kay.
+     * @param defaultValue default value to use when value could not be loaded.
+     * @return the value.
+     */
     public double getDouble(final String key, final double defaultValue) {
         String value = (String) get(key);
         if (value == null) {
@@ -146,6 +172,13 @@ public class PersistenceInfo {
         }
     }
 
+    /**
+     * Get the value associated with the key.
+     *
+     * @param key          the kay.
+     * @param defaultValue default value to use when value could not be loaded.
+     * @return the value.
+     */
     public int getInt(final String key, final int defaultValue) {
         String value = (String) get(key);
         if (value == null) {
@@ -158,13 +191,37 @@ public class PersistenceInfo {
         }
     }
 
+    /**
+     * Get the value associated with the key.
+     *
+     * @param key          the kay.
+     * @param defaultValue default value to use when value could not be loaded.
+     * @return the value.
+     */
     public boolean getBoolean(final String key, final boolean defaultValue) {
         String value = (String) get(key);
         return value != null ? Boolean.parseBoolean(value) : defaultValue;
     }
 
+    /**
+     * Merge the given information into the tree.
+     *
+     * @param saveState info to merge.
+     */
     public void merge(@NotNull final PersistenceInfo saveState) {
         merge(saveState, saveState.root.getKey());
+    }
+
+    /**
+     * Merge the given information into the tree.
+     *
+     * @param saveState info to merge.
+     * @param prefix    the prefix to start the merge process from. All keys in 'saveState' will be treated as if they
+     *                  start with the given prefix.
+     */
+    public void merge(@NotNull final PersistenceInfo saveState, @NotNull final String prefix) {
+        InfoNode node = createNodes(prefix);
+        merge(saveState.root, node);
     }
 
     private void merge(@NotNull final InfoNode source, @NotNull final InfoNode dest) {
@@ -186,11 +243,11 @@ public class PersistenceInfo {
         }
     }
 
-    public void merge(@NotNull final PersistenceInfo saveState, @NotNull final String prefix) {
-        InfoNode node = createNodes(prefix);
-        merge(saveState.root, node);
-    }
-
+    /**
+     * Get te´he direct mapping for all contained keys.
+     *
+     * @return the map form keys to values.
+     */
     public Map<String, String> directMap() {
         return new MaskedMap<>(valueMap, root.getKey());
     }
