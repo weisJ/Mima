@@ -4,7 +4,8 @@ import edu.kit.mima.core.Mima;
 import edu.kit.mima.core.MimaRunner;
 import edu.kit.mima.core.data.MachineWord;
 import edu.kit.mima.core.interpretation.environment.Environment;
-import edu.kit.mima.gui.components.FixedScrollTable;
+import edu.kit.mima.gui.components.ProtectedScrollTable;
+import edu.kit.mima.gui.icons.Icons;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -29,10 +30,10 @@ public class MemoryTableView implements MemoryView {
 
     private final MimaRunner mimaRunner;
 
-    private final FixedScrollTable table;
+    private final ProtectedScrollTable table;
     private boolean binaryView = false;
 
-    public MemoryTableView(final MimaRunner mimaRunner, final FixedScrollTable table) {
+    public MemoryTableView(final MimaRunner mimaRunner, final ProtectedScrollTable table) {
         this.mimaRunner = mimaRunner;
         this.table = table;
     }
@@ -49,6 +50,8 @@ public class MemoryTableView implements MemoryView {
     @Override
     public void updateView() {
         table.setContent(getMemoryTable());
+        table.clearIcons();
+        table.setIcon(Icons.STACK_POINTER, mimaRunner.getMima().getStackPointer().intValue() + 1, 0);
         table.repaint();
     }
 

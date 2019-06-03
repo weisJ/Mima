@@ -18,7 +18,7 @@ import java.awt.geom.AffineTransform;
  */
 public class IconPanel extends JComponent {
     @NotNull
-    private final Icon icon;
+    private Icon icon;
     private Alignment alignment;
 
     /**
@@ -42,6 +42,15 @@ public class IconPanel extends JComponent {
     @NotNull
     public Icon getIcon() {
         return icon;
+    }
+
+    /**
+     * Set the icon
+     *
+     * @param icon the icon
+     */
+    public void setIcon(@NotNull final Icon icon) {
+        this.icon = icon;
     }
 
     @Override
