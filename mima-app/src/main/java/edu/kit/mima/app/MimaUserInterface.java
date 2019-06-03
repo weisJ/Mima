@@ -8,7 +8,7 @@ import edu.kit.mima.core.MimaCompiler;
 import edu.kit.mima.core.MimaRunner;
 import edu.kit.mima.core.token.Token;
 import edu.kit.mima.gui.EditorHotKeys;
-import edu.kit.mima.gui.components.FixedScrollTable;
+import edu.kit.mima.gui.components.ProtectedScrollTable;
 import edu.kit.mima.gui.components.alignment.Alignment;
 import edu.kit.mima.gui.components.console.Console;
 import edu.kit.mima.gui.components.editor.Editor;
@@ -65,7 +65,7 @@ public final class MimaUserInterface extends JFrame {
     @NotNull
     private final MemoryTableView memoryView;
     @NotNull
-    private final FixedScrollTable memoryTable;
+    private final ProtectedScrollTable memoryTable;
 
     /**
      * Create a new Mima UI window.
@@ -77,7 +77,7 @@ public final class MimaUserInterface extends JFrame {
         tabbedEditor = editorManager.getTabbedEditor();
         console = new Console();
         memoryTable =
-                new FixedScrollTable(new String[]{"Address", "Value"}, 100, new Insets(0, 5, 0, 0));
+                new ProtectedScrollTable(new String[]{"Address", "Value"}, 100, new Insets(0, 5, 0, 0));
         memoryView = new MemoryTableView(mimaRunner, memoryTable);
 
         App.logger.setConsole(console);

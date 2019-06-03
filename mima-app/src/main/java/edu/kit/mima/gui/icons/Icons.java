@@ -35,6 +35,7 @@ public final class Icons {
     public static final UIAwareIcon STOP = create("stop.svg");
     public static final UIAwareIcon STOP_INACTIVE = create("stop_inactive.svg");
     public static final UIAwareIcon DIVIDER = create("divider.svg");
+    public static final Icon STACK_POINTER = create("stack_pointer.svg");
 
     public static final UIAwareIcon FOLDER = create("folder.svg");
     public static final UIAwareIcon FOLDER_ROOT = create("folder_root.svg");

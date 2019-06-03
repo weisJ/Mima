@@ -48,7 +48,7 @@ public class TabFrameTabComponent extends IconLabel {
         this.title = title;
         this.index = index;
         this.parent = parent;
-        label.setFont(label.getFont().deriveFont(11.0f));
+        comp.setFont(comp.getFont().deriveFont(11.0f));
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(final MouseEvent e) {
@@ -178,7 +178,7 @@ public class TabFrameTabComponent extends IconLabel {
      */
     public void setSelected(final boolean selected) {
         this.selected = selected;
-        label.setForeground(selected ? selectedFontColor : defaultFontColor);
+        comp.setForeground(selected ? selectedFontColor : defaultFontColor);
         repaint();
     }
 
@@ -194,11 +194,11 @@ public class TabFrameTabComponent extends IconLabel {
 
     private void updateLabel() {
         if (accelerator >= 0 && accelerator <= 9) {
-            label.setText(accelerator + ':' + title);
-            label.setDisplayedMnemonicIndex(0);
+            comp.setText(accelerator + ':' + title);
+            comp.setDisplayedMnemonicIndex(0);
         } else {
-            label.setText(title);
-            label.setDisplayedMnemonicIndex(1);
+            comp.setText(title);
+            comp.setDisplayedMnemonicIndex(1);
         }
     }
 }
