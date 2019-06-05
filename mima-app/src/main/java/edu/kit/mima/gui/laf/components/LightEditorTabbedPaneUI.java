@@ -1,7 +1,8 @@
 package edu.kit.mima.gui.laf.components;
 
 import edu.kit.mima.annotations.ReflectionCall;
-import edu.kit.mima.gui.components.tabbededitor.EditorTabbedPaneUI;
+import edu.kit.mima.gui.components.tabbedpane.DnDTabbedPane;
+import edu.kit.mima.gui.components.tabbedpane.EditorTabbedPaneUI;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,7 +11,7 @@ import javax.swing.plaf.ComponentUI;
 import java.awt.*;
 
 /**
- * Darcula UI for {@link edu.kit.mima.gui.components.tabbededitor.EditorTabbedPane}.
+ * Darcula UI for {@link DnDTabbedPane}.
  *
  * @author Jannis Weis
  * @since 2018
@@ -32,10 +33,10 @@ public class LightEditorTabbedPaneUI extends EditorTabbedPaneUI {
 
     @Override
     protected void setupColors() {
-        selectedColor = UIManager.getColor("EditorTabbedPane.selectedTab");
+        selectedColor = UIManager.getColor("DnDTabbedPane.selectedTab");
         tabBorderColor = UIManager.getColor("Border.line2");
-        selectedBackground = UIManager.getColor("EditorTabbedPane.selectedTab");
-        dropColor = UIManager.getColor("EditorTabbedPane.dropColor");
+        selectedBackground = UIManager.getColor("DnDTabbedPane.selectedTab");
+        dropColor = UIManager.getColor("DnDTabbedPane.dropColor");
     }
 
     @Override

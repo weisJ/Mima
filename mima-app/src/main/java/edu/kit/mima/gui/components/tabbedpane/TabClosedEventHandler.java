@@ -1,4 +1,4 @@
-package edu.kit.mima.gui.components.tabbededitor;
+package edu.kit.mima.gui.components.tabbedpane;
 
 import java.awt.*;
 

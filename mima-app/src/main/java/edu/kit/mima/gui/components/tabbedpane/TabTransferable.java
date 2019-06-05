@@ -1,4 +1,4 @@
-package edu.kit.mima.gui.components.tabbededitor;
+package edu.kit.mima.gui.components.tabbedpane;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -6,7 +6,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 
 /**
- * Transferable Tab of {@link EditorTabbedPane}.
+ * Transferable Tab of {@link DnDTabbedPane}.
  *
  * @author Jannis Weis
  * @since 2018
@@ -21,7 +21,7 @@ public class TabTransferable implements Transferable {
      * @param tabbedPane tabbed pane of tab.
      * @param tabIndex   index of tab.
      */
-    public TabTransferable(final EditorTabbedPane tabbedPane, final int tabIndex) {
+    public TabTransferable(final DnDTabbedPane tabbedPane, final int tabIndex) {
         transferData = new TabTransferData(tabbedPane, tabIndex);
     }
 
@@ -38,7 +38,7 @@ public class TabTransferable implements Transferable {
     @NotNull
     public DataFlavor[] getTransferDataFlavors() {
         final DataFlavor[] f = new DataFlavor[1];
-        f[0] = EditorTabbedPane.FLAVOR;
+        f[0] = DnDTabbedPane.FLAVOR;
         return f;
     }
 
@@ -49,6 +49,6 @@ public class TabTransferable implements Transferable {
      * @return true if tabs supports given flavour.
      */
     public boolean isDataFlavorSupported(@NotNull final DataFlavor flavor) {
-        return flavor.getHumanPresentableName().equals(EditorTabbedPane.NAME);
+        return flavor.getHumanPresentableName().equals(DnDTabbedPane.NAME);
     }
 }

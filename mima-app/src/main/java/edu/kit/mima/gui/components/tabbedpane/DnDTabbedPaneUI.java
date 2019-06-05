@@ -1,4 +1,4 @@
-package edu.kit.mima.gui.components.tabbededitor;
+package edu.kit.mima.gui.components.tabbedpane;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -9,38 +9,41 @@ import java.beans.PropertyChangeListener;
 import java.util.Objects;
 
 /**
- * Custom UI for {@link EditorTabbedPane}.
+ * UI for DnDTabbedPane.
  *
  * @author Jannis Weis
- * @since 2018
+ * @since 2019
  */
-public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
+public abstract class DnDTabbedPaneUI extends BasicTabbedPaneUI {
 
+    private final Rectangle tabBounds;
     protected Color dropColor;
     protected Color selectedColor;
     protected Color tabBorderColor;
     protected Color selectedBackground;
-    protected EditorTabbedPane tabbedPane;
+    protected Color tabBackground;
+    protected DnDTabbedPane tabbedPane;
     private TabContainer tabContainer;
     private int minVisible;
     private int maxVisible;
     private int currentShift;
-
     private PropertyChangeListener handler;
 
     /**
      * Sy Create Custom Tabbed Pane ui.
      */
-    public EditorTabbedPaneUI() {
+    public DnDTabbedPaneUI() {
+        tabBounds = new Rectangle();
         setupColors();
     }
 
     @Override
     public void installUI(@NotNull final JComponent c) {
-        tabbedPane = (EditorTabbedPane) c;
+        tabbedPane = (DnDTabbedPane) c;
         tabbedPane.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, tabBorderColor));
         super.installUI(c);
         tabbedPane.removePropertyChangeListener(propertyChangeListener);
+        tabBackground = tabbedPane.getBackground();
     }
 
     protected abstract void setupColors();
@@ -51,13 +54,13 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
             return super.createLayoutManager();
         } else {
             /* WRAP_TAB_LAYOUT */
-            return new CustomTabbedPaneLayout();
+            return new DnDTabbedPaneUI.CustomTabbedPaneLayout();
         }
     }
 
     @Override
     protected void installComponents() {
-        tabContainer = new TabContainer(tabbedPane);
+        tabContainer = tabbedPane.createTabContainer();
         for (int i = 0; i < tabPane.getTabCount(); i++) {
             Component tabComponent = tabPane.getTabComponentAt(i);
             if (tabComponent != null) {
@@ -65,20 +68,19 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
             }
         }
         tabbedPane.add(tabContainer);
-        handler =
-                evt -> {
-                    if (Objects.equals(evt.getPropertyName(), "indexForTabComponent")) {
-                        if (tabContainer != null) {
-                            tabContainer.removeUnusedTabComponents();
-                        }
-                        Component c1 = tabPane.getTabComponentAt((Integer) evt.getNewValue());
-                        if (c1 != null) {
-                            tabContainer.add(c1);
-                        }
-                        tabPane.revalidate();
-                        tabPane.repaint();
-                    }
-                };
+        handler = evt -> {
+            if (Objects.equals(evt.getPropertyName(), "indexForTabComponent")) {
+                if (tabContainer != null) {
+                    tabContainer.removeUnusedTabComponents();
+                }
+                Component c1 = tabPane.getTabComponentAt((Integer) evt.getNewValue());
+                if (c1 != null) {
+                    tabContainer.add(c1);
+                }
+                tabPane.revalidate();
+                tabPane.repaint();
+            }
+        };
         tabbedPane.addPropertyChangeListener(handler);
     }
 
@@ -92,7 +94,7 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
 
     @Override
     public Dimension getMinimumSize(final JComponent c) {
-        EditorTabbedPane t = (EditorTabbedPane) c;
+        DnDTabbedPane t = (DnDTabbedPane) c;
         var dim = super.getMinimumSize(c);
         if (t.getTabCount() <= 0) {
             return dim;
@@ -102,8 +104,7 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
     }
 
     @Override
-    protected void paintTabArea(
-            @NotNull final Graphics g, final int tabPlacement, final int selectedIndex) {
+    protected void paintTabArea(@NotNull final Graphics g, final int tabPlacement, final int selectedIndex) {
         if (tabPlacement != EditorTabbedPaneUI.TOP) {
             super.paintTabArea(g, tabPlacement, selectedIndex);
             return;
@@ -113,8 +114,10 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
         if (dropSourceIndex >= 0) {
             tabPane.doLayout();
         }
-        final var sourceBounds =
-                dropSourceIndex >= 0 ? rects[dropSourceIndex] : new Rectangle(0, 0, 0, 0);
+        g.setClip(tabBounds);
+        final var sourceBounds = dropSourceIndex >= 0
+                                         ? rects[dropSourceIndex]
+                                         : new Rectangle(0, 0, 0, 0);
         for (int i = minVisible; i <= maxVisible && i < rects.length; i++) {
             if (i != dropSourceIndex && i != selectedIndex) {
                 drawTab((Graphics2D) g.create(), i, false);
@@ -138,7 +141,7 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
             drawTab((Graphics2D) g.create(), selectedIndex, true);
         }
 
-        if (tabContainer.getStash().isVisible()) {
+        if (tabContainer.getStash().getComponent().isVisible()) {
             drawStash(g);
         }
     }
@@ -157,41 +160,39 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
     }
 
     @Override
-    protected int calculateTabAreaHeight(
-            final int tabPlacement, final int horizRunCount, final int maxTabHeight) {
+    protected Insets getTabAreaInsets(final int tabPlacement) {
+        Insets insets = super.getTabAreaInsets(tabPlacement);
+        Insets tabInsets = tabbedPane.getTabInsets();
+        return new Insets(insets.top + tabInsets.top, insets.left + tabInsets.left,
+                          insets.bottom + tabInsets.bottom, insets.right + tabInsets.right);
+    }
+
+    @Override
+    protected int calculateTabAreaHeight(final int tabPlacement,
+                                         final int horizRunCount,
+                                         final int maxTabHeight) {
         return super.calculateTabAreaHeight(tabPlacement, 1, maxTabHeight);
     }
 
+
     private void drawStash(@NotNull final Graphics g) {
-        var bounds = tabContainer.getStash().getBounds();
-        g.setColor(tabbedPane.getBackground());
-        g.fillRect(bounds.x, 0, tabbedPane.getWidth() - bounds.x, maxTabHeight);
+        var bounds = tabContainer.getStash().getComponent().getBounds();
+        g.setColor(tabBackground);
+        g.fillRect(bounds.x, tabBounds.y, tabBounds.x + tabBounds.width - bounds.x, tabBounds.height);
         g.setColor(tabBorderColor);
-        g.drawLine(bounds.x, 0, bounds.x, maxTabHeight);
+        g.drawLine(bounds.x, tabBounds.y, bounds.x, tabBounds.height);
     }
 
     protected void drawTab(@NotNull final Graphics2D g, final int index, final boolean isSelected) {
         final var bounds = rects[index];
-        final int yOff = bounds.height / 8;
         g.translate(1, 0);
         if (isSelected) {
             g.setColor(selectedBackground);
-            g.fillRect(bounds.x - 1, bounds.y, bounds.width - 1, bounds.height);
+            g.fillRect(bounds.x - 1, bounds.y, bounds.width, bounds.height);
         } else {
-            g.setColor(tabbedPane.getBackground());
-            g.fillRect(bounds.x - 1, bounds.y, bounds.width - 1, bounds.height);
+            g.setColor(tabBackground);
+            g.fillRect(bounds.x - 1, bounds.y, bounds.width, bounds.height);
         }
-        if (isSelected) {
-            g.setColor(selectedColor);
-            g.fillRect(bounds.x - 1, bounds.y + bounds.height - yOff + 1, bounds.width - 1, yOff);
-        }
-        g.translate(-0.5, 0);
-        g.setColor(tabBorderColor);
-        g.drawLine(
-                bounds.x + bounds.width - 2,
-                bounds.y,
-                bounds.x + bounds.width - 2,
-                bounds.y + bounds.height);
         g.dispose();
     }
 
@@ -200,13 +201,13 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
         @Override
         public void layoutContainer(final Container parent) {
             super.layoutContainer(parent);
+            tabContainer.setBounds(tabBounds);
             layoutTabComponents();
-            tabContainer.setBounds(0, 0, tabbedPane.getWidth(), maxTabHeight);
         }
 
         @Override
         protected void calculateTabRects(final int tabPlacement, final int tabCount) {
-            if (tabPlacement != EditorTabbedPane.TOP || tabCount == 0) {
+            if (tabPlacement != DnDTabbedPane.TOP || tabCount == 0) {
                 super.calculateTabRects(tabPlacement, tabCount);
                 return;
             }
@@ -215,23 +216,26 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
             Insets tabAreaInsets = getTabAreaInsets(tabPlacement);
             maxTabHeight = calculateMaxTabHeight(tabPlacement);
             selectedRun = -1;
-            for (int i = 0; i < tabCount; i++) {
-                calculateRect(i);
-            }
+            int minX = insets.left + tabAreaInsets.left;
             int returnAt = size.width - (insets.right + tabAreaInsets.right);
-            if (tabContainer.getStash().isVisible()) {
+
+            for (int i = 0; i < tabCount; i++) {
+                calculateRect(i, minX);
+            }
+            if (tabContainer.getStash().getComponent().isVisible()) {
                 returnAt -= tabContainer.getStash().getStashWidth();
             }
-            shiftTabs(currentShift, returnAt, tabCount, false);
+            shiftTabs(currentShift, minX, returnAt, tabCount, false);
             final var selBounds = rects[tabbedPane.getSelectedIndex()];
             if (selBounds.x + selBounds.width >= returnAt) {
-                shiftTabs(-1 * (selBounds.x + selBounds.width - returnAt), returnAt, tabCount);
-            } else if (selBounds.x < 0) {
-                shiftTabs(-selBounds.x, returnAt, tabCount);
+                shiftTabs(-1 * (selBounds.x + selBounds.width - returnAt), minX, returnAt, tabCount);
+            } else if (selBounds.x < minX) {
+                shiftTabs(minX - selBounds.x, minX, returnAt, tabCount);
             }
-            restoreHiddenTabs(returnAt, tabCount);
-            layoutStash(returnAt, tabCount);
+            restoreHiddenTabs(minX, returnAt, tabCount);
+            layoutStash(minX, returnAt, tabCount);
             adjustForDrop(tabCount);
+            tabBounds.setBounds(minX, 0, returnAt - minX, maxTabHeight + 1);
         }
 
         private void adjustForDrop(final int tabCount) {
@@ -250,71 +254,73 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
             }
         }
 
-        private void restoreHiddenTabs(final int returnAt, final int tabCount) {
+        private void restoreHiddenTabs(final int minX, final int maxX, final int tabCount) {
             if (maxVisible != tabCount - 1 || minVisible == 0) {
                 return;
             }
             int lastPos = rects[tabCount - 1].x + rects[tabCount - 1].width;
-            int extraSpace = returnAt - lastPos;
-            int startPos = rects[minVisible].x >= 0 ? minVisible - 1 : minVisible;
+            int extraSpace = maxX - lastPos;
+            int startPos = rects[minVisible].x >= minX ? minVisible - 1 : minVisible;
             for (int i = startPos; i > 0; i--) {
                 int w = rects[i].width;
                 if (w <= extraSpace) {
-                    shiftTabs(w, returnAt, tabCount);
+                    shiftTabs(w, minX, maxX, tabCount);
                     extraSpace -= w;
                 } else {
                     return;
                 }
             }
-            if (rects[0].x < 0 && rects[0].x <= extraSpace) {
-                shiftTabs(-rects[0].x, returnAt, tabCount);
+            if (rects[0].x < minX && rects[0].x <= extraSpace) {
+                shiftTabs(minX - rects[0].x, minX, maxX, tabCount);
             }
         }
 
-        private void layoutStash(final int returnAt, final int tabCount) {
-            final TabContainer.Stash stash = tabContainer.getStash();
+        private void layoutStash(final int minX, final int returnAt, final int tabCount) {
+            final TabStash stash = tabContainer.getStash();
             int stashWidth = stash.getStashWidth();
             if (minVisible > 0 || maxVisible < tabCount - 1) {
-                if (!stash.isVisible()) {
-                    shiftTabs(-stashWidth, returnAt, tabCount);
+                if (!stash.getComponent().isVisible()) {
+                    shiftTabs(-stashWidth, minX, returnAt, tabCount);
                 }
                 tabContainer.showStash(minVisible, maxVisible);
-            } else if (stash.isVisible()) {
+            } else if (stash.getComponent().isVisible()) {
                 tabContainer.hideStash();
             }
         }
 
-        private void shiftTabs(final int shift, final int returnAt, final int tabCount) {
-            shiftTabs(shift, returnAt, tabCount, true);
+        private void shiftTabs(final int shift, final int minX, final int returnAt, final int tabCount) {
+            shiftTabs(shift, minX, returnAt, tabCount, true);
         }
 
-        private void shiftTabs(
-                final int shift, final int returnAt, final int tabCount, final boolean updateShift) {
-            boolean firstVisible = false;
+        private void shiftTabs(final int shift, final int minX, final int returnAt,
+                               final int tabCount, final boolean updateShift) {
             if (updateShift) {
                 currentShift += shift;
             }
             minVisible = 0;
             maxVisible = tabCount - 1;
+            boolean firstVisible = false;
             for (int i = 0; i < tabCount; i++) {
                 rects[i].x += shift;
-                if (rects[i].x + rects[i].width < 0 || rects[i].x >= returnAt && firstVisible) {
-                    maxVisible = i - 1;
-                } else if (!firstVisible) {
-                    firstVisible = true;
-                    minVisible = i;
+                if (rects[i].x + rects[i].width >= minX && rects[i].x + rects[i].width < returnAt
+                    || rects[i].x >= minX && rects[i].x < returnAt) {
+                    if (!firstVisible) {
+                        minVisible = i;
+                        firstVisible = true;
+                    }
+                    maxVisible = i;
                 }
             }
         }
 
-        private void calculateRect(final int i) {
+        private void calculateRect(final int i, final int minX) {
             final Rectangle rect = rects[i];
             if (i > 0) {
                 rect.x = rects[i - 1].x + rects[i - 1].width;
             } else {
                 tabRuns[0] = 0;
                 maxTabWidth = 0;
-                rect.x = 0;
+                rect.x = minX;
             }
             rect.width = tabbedPane.getTabComponentAt(i).getPreferredSize().width;
             maxTabWidth = Math.max(maxTabWidth, rect.width);
@@ -338,12 +344,12 @@ public abstract class EditorTabbedPaneUI extends BasicTabbedPaneUI {
                 int x = rects[i].x + (rects[i].width - preferredSize.width) / 2;
                 final int y = rects[i].y + (rects[i].height - preferredSize.height) / 2;
                 final boolean isSelected = i == tabPane.getSelectedIndex();
-                c.setBounds(
-                        x + getTabLabelShiftX(tabPane.getTabPlacement(), i, isSelected),
-                        y + getTabLabelShiftY(tabPane.getTabPlacement(), i, isSelected),
-                        preferredSize.width,
-                        preferredSize.height);
+                c.setBounds(x + getTabLabelShiftX(tabPane.getTabPlacement(), i, isSelected) - tabContainer.getX(),
+                            y + getTabLabelShiftY(tabPane.getTabPlacement(), i, isSelected) - tabContainer.getY(),
+                            preferredSize.width,
+                            preferredSize.height);
             }
         }
+
     }
 }

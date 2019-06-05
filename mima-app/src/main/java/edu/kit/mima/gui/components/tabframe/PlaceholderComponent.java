@@ -1,6 +1,7 @@
 package edu.kit.mima.gui.components.tabframe;
 
 import edu.kit.mima.gui.components.alignment.Alignment;
+import edu.kit.mima.gui.components.tabframe.popuptab.PopupComponent;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -15,7 +16,7 @@ import java.awt.*;
 public class PlaceholderComponent extends PopupComponent {
 
     @Override
-    protected void setAlignment(final Alignment a, final boolean[] info) {
+    public void setAlignment(final Alignment a, final boolean[] info) {
     }
 
     @Override

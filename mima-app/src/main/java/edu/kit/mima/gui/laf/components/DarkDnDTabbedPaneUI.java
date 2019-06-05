@@ -1,8 +1,7 @@
 package edu.kit.mima.gui.laf.components;
 
 import edu.kit.mima.annotations.ReflectionCall;
-import edu.kit.mima.gui.components.tabbedpane.DnDTabbedPane;
-import edu.kit.mima.gui.components.tabbedpane.EditorTabbedPaneUI;
+import edu.kit.mima.gui.components.tabbedpane.DnDTabbedPaneUI;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,12 +9,12 @@ import javax.swing.*;
 import javax.swing.plaf.ComponentUI;
 
 /**
- * Darcula UI for {@link DnDTabbedPane}.
+ * Dark version of DnD TabbedPaneUI.
  *
  * @author Jannis Weis
- * @since 2018
+ * @since 2019
  */
-public class DarkEditorTabbedPaneUI extends EditorTabbedPaneUI {
+public class DarkDnDTabbedPaneUI extends DnDTabbedPaneUI {
 
     /**
      * Create a UI.
@@ -27,7 +26,7 @@ public class DarkEditorTabbedPaneUI extends EditorTabbedPaneUI {
     @Contract("_ -> new")
     @ReflectionCall
     public static ComponentUI createUI(final JComponent c) {
-        return new DarkEditorTabbedPaneUI();
+        return new DarkDnDTabbedPaneUI();
     }
 
     @Override

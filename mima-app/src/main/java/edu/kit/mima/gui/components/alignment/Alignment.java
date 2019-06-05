@@ -75,12 +75,12 @@ public enum Alignment {
             return hint;
         }
         for (var alignment : Alignment.values()) {
-            if (alignment != Alignment.CENTER && alignment != hint
+            if (alignment != CENTER && alignment != hint
                         && alignment.canBeAligned(point, size, outerBounds)) {
                 return alignment;
             }
         }
-        return Alignment.CENTER;
+        return CENTER;
     }
 
     /**

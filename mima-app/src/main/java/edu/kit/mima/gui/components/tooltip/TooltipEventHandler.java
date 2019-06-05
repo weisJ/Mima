@@ -19,7 +19,7 @@ import java.util.function.BiConsumer;
 public class TooltipEventHandler extends MouseAdapter {
 
     @NotNull
-    private final TooltipComponent tooltipComponent;
+    private final TooltipComponent<?> tooltipComponent;
     private final int showDelay;
     private final int vanishingDelay;
     @NotNull
@@ -39,7 +39,7 @@ public class TooltipEventHandler extends MouseAdapter {
      * @param showDelay        delay to wait before showing.
      * @param vanishingDelay   delay to wait before vanishing.
      */
-    public TooltipEventHandler(@NotNull final TooltipComponent tooltipComponent,
+    public TooltipEventHandler(@NotNull final TooltipComponent<?> tooltipComponent,
                                final int showDelay, final int vanishingDelay) {
         this.tooltipComponent = tooltipComponent;
         this.showDelay = showDelay;
@@ -53,8 +53,7 @@ public class TooltipEventHandler extends MouseAdapter {
             }
         });
         this.propagator = new EventPropagator();
-        Toolkit.getDefaultToolkit().addAWTEventListener(this::atAwtEvent,
-                AWTEvent.MOUSE_EVENT_MASK);
+        Toolkit.getDefaultToolkit().addAWTEventListener(this::atAwtEvent, AWTEvent.MOUSE_EVENT_MASK);
         tooltipComponent.tooltip.addMouseListener(propagator);
     }
 
@@ -118,6 +117,7 @@ public class TooltipEventHandler extends MouseAdapter {
         inside = true;
         thread = new Thread(this::showThread);
         thread.start();
+        e.consume();
     }
 
     private void showThread() {
@@ -144,16 +144,22 @@ public class TooltipEventHandler extends MouseAdapter {
 
     @Override
     public void mouseExited(@NotNull final MouseEvent e) {
-        if (!active) {
+        if (!active || !inside) {
             return;
         }
+        checkExit(e);
+    }
+
+    private void checkExit(@NotNull final MouseEvent e) {
         /*
          * As entering the tooltip causes the container to think the mouse has left we need to
          * check if it really has left. If not tooltip shouldn't be hidden.
          */
         if (isOnContainer(e.getPoint())) {
-            propagator.mouseEntered(e);
-            overContainer = true;
+            if (!overContainer) {
+                propagator.mouseEntered(e);
+                overContainer = true;
+            }
             moved = true;
             return;
         }
@@ -162,12 +168,12 @@ public class TooltipEventHandler extends MouseAdapter {
         overContainer = false;
         inside = false;
         //If mouse has left component hide immediately.
+        tooltipComponent.hideTooltip();
         if (thread != null && thread.isAlive()) {
             synchronized (this) {
                 thread.interrupt();
             }
         }
-        tooltipComponent.hideTooltip();
     }
 
     /*
@@ -175,39 +181,34 @@ public class TooltipEventHandler extends MouseAdapter {
      */
     private boolean isOnContainer(@NotNull final Point p) {
         final Point point = SwingUtilities.convertPoint(tooltipComponent.container, p,
-                tooltipComponent.container.getParent());
+                                                        tooltipComponent.container.getParent());
         return point.x > tooltipComponent.container.getX()
-                       && point.x < tooltipComponent.container.getX()
-                                            + tooltipComponent.container.getWidth()
-                       && point.y > tooltipComponent.container.getY()
-                       && point.y < tooltipComponent.container.getY()
-                                            + tooltipComponent.container.getHeight();
+               && point.x < tooltipComponent.container.getX() + tooltipComponent.container.getWidth()
+               && point.y > tooltipComponent.container.getY()
+               && point.y < tooltipComponent.container.getY() + tooltipComponent.container.getHeight();
     }
 
     private void contentMouseMovedEvent(@NotNull final MouseEvent e) {
-        if (overContainer) {
-            mouseExited(SwingUtilities.convertMouseEvent(tooltipComponent.tooltip, e,
-                    tooltipComponent.container));
+        if (overContainer && active) {
+            checkExit(SwingUtilities.convertMouseEvent(tooltipComponent.tooltip, e,
+                                                         tooltipComponent.container));
         }
     }
 
     private class EventPropagator implements MouseListener {
-        private final BiConsumer<BiConsumer<MouseListener, MouseEvent>, MouseEvent> propagate =
-                (c, e) -> {
-                    if (overContainer) {
-                        for (final var ml : tooltipComponent.container.getMouseListeners()) {
-                            if (ml != TooltipEventHandler.this && ml != null) {
-                                try {
-                                    c.accept(ml, e);
-                                } catch (ClassCastException ignored) {
-                                    /*
-                                     * The listener can't handle the event.
-                                     */
-                                }
-                            }
-                        }
+        private final BiConsumer<BiConsumer<MouseListener, MouseEvent>, MouseEvent> propagate = (c, e) -> {
+            for (final var ml : tooltipComponent.container.getMouseListeners()) {
+                if (ml != TooltipEventHandler.this && ml != null) {
+                    try {
+                        c.accept(ml, e);
+                    } catch (ClassCastException ignored) {
+                        /*
+                         * The listener can't handle the event.
+                         */
                     }
-                };
+                }
+            }
+        };
 
         @Override
         public void mouseClicked(final MouseEvent e) {

@@ -1,4 +1,4 @@
-package edu.kit.mima.gui.components.tabbededitor;
+package edu.kit.mima.gui.components.tabbedpane;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -60,7 +60,7 @@ public final class DnDUtil {
     @Nullable
     private static TabTransferData getData(@NotNull final Transferable transferable) {
         try {
-            return (TabTransferData) transferable.getTransferData(EditorTabbedPane.FLAVOR);
+            return (TabTransferData) transferable.getTransferData(DnDTabbedPane.FLAVOR);
         } catch (@NotNull final Exception e) {
             e.printStackTrace();
         }

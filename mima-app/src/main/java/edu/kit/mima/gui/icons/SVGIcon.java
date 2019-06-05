@@ -91,6 +91,8 @@ public class SVGIcon implements Icon {
 
     private void renderIcon(@NotNull final Graphics2D gc,
                             final double width, final double height, final double angleRadians) {
+        gc.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        gc.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         double scaleX = width / this.width;
         double scaleY = height / this.height;
         if (width < 0 || height < 0) {

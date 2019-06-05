@@ -5,7 +5,7 @@ import edu.kit.mima.api.util.ValueTuple;
 import edu.kit.mima.core.MimaConstants;
 import edu.kit.mima.gui.EditorHotKeys;
 import edu.kit.mima.gui.components.editor.Editor;
-import edu.kit.mima.gui.components.tabbededitor.EditorTabbedPane;
+import edu.kit.mima.gui.components.tabbedpane.EditorTabbedPane;
 import edu.kit.mima.gui.icons.Icons;
 import edu.kit.mima.highlighter.MimaHighlighter;
 import edu.kit.mima.loading.FileManager;

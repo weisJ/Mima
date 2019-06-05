@@ -356,7 +356,7 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
             }
 
             // CustomUI classes.
-            defaults.put("EditorTabbedPane", "edu.kit.mima.gui.laf.components.DarkEditorTabbedPaneUI");
+            defaults.put("DnDTabbedPane", "edu.kit.mima.gui.laf.components.DarkDnDTabbedPaneUI");
         } catch (@NotNull final IOException e) {
             LOGGER.log(Level.SEVERE, e.toString(), e);
         }

@@ -2,6 +2,7 @@ package edu.kit.mima.gui.components.tabframe;
 
 import com.bulenkov.iconloader.util.EmptyIcon;
 import edu.kit.mima.gui.components.alignment.Alignment;
+import edu.kit.mima.gui.components.tabframe.popuptab.PopupComponent;
 import edu.kit.mima.gui.persist.PersistableComponent;
 import edu.kit.mima.gui.persist.PersistenceInfo;
 import edu.kit.mima.gui.persist.PersistenceManager;

@@ -3,6 +3,7 @@ package edu.kit.mima.gui.components.tabframe;
 import edu.kit.mima.gui.components.SeamlessSplitPane;
 import edu.kit.mima.gui.components.alignment.Alignment;
 import edu.kit.mima.gui.components.listeners.AncestorAdapter;
+import edu.kit.mima.gui.components.tabframe.popuptab.PopupComponent;
 import edu.kit.mima.gui.persist.Persistable;
 import edu.kit.mima.gui.persist.PersistenceInfo;
 import edu.kit.mima.gui.persist.PersistenceManager;

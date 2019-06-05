@@ -2,6 +2,7 @@ package edu.kit.mima.gui.components.tabframe;
 
 import edu.kit.mima.gui.components.alignment.Alignment;
 import edu.kit.mima.gui.components.border.MutableLineBorder;
+import edu.kit.mima.gui.components.tabframe.popuptab.PopupComponent;
 import org.jdesktop.jxlayer.JXLayer;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -102,6 +103,7 @@ public class TabFrameLayout implements LayoutManager {
             return;
         }
         var tabComponent = new TabFrameTabComponent(title, icon, a, index, this);
+        tabComponent.updateUI();
         insertTabComp(tabComponent, a, index);
         compsForAlignment(a).add(index, c);
 
@@ -410,15 +412,6 @@ public class TabFrameLayout implements LayoutManager {
 
     TabFrameContent getTabFrameContent() {
         return content;
-    }
-
-    /**
-     * Get a map with all the popup components.
-     *
-     * @return map from alignment to popup components.
-     */
-    public Map<Alignment, List<PopupComponent>> getPopupComponents() {
-        return compsMap;
     }
 
     public void setContent(final JComponent c) {

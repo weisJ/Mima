@@ -48,14 +48,17 @@ public class TabFrameUI extends ComponentUI {
      */
     public void updateUI() {
         layout.setLineColor(UIManager.getColor("TabFrame.line"));
-        var compMap = layout.getPopupComponents();
         for (var a : Alignment.values()) {
-            var list = compMap.get(a);
-            if (list != null) {
-                for (var pc : compMap.get(a)) {
+            var compList = layout.compsForAlignment(a);
+            for (var pc : compList) {
                     if (pc != null) {
                         SwingUtilities.updateComponentTreeUI(pc);
                     }
+                }
+            var tabList = layout.tabsForAlignment(a);
+            for (var tc : tabList) {
+                if (tc != null) {
+                    SwingUtilities.updateComponentTreeUI(tc);
                 }
             }
         }
