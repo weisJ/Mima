@@ -1,6 +1,7 @@
-package edu.kit.mima.gui.components.tabframe;
+package edu.kit.mima.gui.components.tabframe.popuptab;
 
 import edu.kit.mima.gui.components.alignment.Alignment;
+import edu.kit.mima.gui.components.tabframe.TabFrame;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,7 +31,7 @@ public abstract class PopupComponent extends JPanel {
         }
     }
 
-    protected abstract void setAlignment(final Alignment a, final boolean[] info);
+    public abstract void setAlignment(final Alignment a, final boolean[] info);
 
     protected Dimension getMinimumSizeImpl() {
         return super.getMinimumSize();

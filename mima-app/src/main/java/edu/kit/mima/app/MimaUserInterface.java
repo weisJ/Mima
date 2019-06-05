@@ -9,13 +9,14 @@ import edu.kit.mima.core.MimaRunner;
 import edu.kit.mima.core.token.Token;
 import edu.kit.mima.gui.EditorHotKeys;
 import edu.kit.mima.gui.components.ProtectedScrollTable;
+import edu.kit.mima.gui.components.tabframe.popuptab.TerminalPopupComponent;
 import edu.kit.mima.gui.components.alignment.Alignment;
 import edu.kit.mima.gui.components.console.Console;
 import edu.kit.mima.gui.components.editor.Editor;
 import edu.kit.mima.gui.components.folderdisplay.FilePathDisplay;
 import edu.kit.mima.gui.components.listeners.ComponentResizeListener;
-import edu.kit.mima.gui.components.tabbededitor.EditorTabbedPane;
-import edu.kit.mima.gui.components.tabframe.DefaultPopupComponent;
+import edu.kit.mima.gui.components.tabbedpane.EditorTabbedPane;
+import edu.kit.mima.gui.components.tabframe.popuptab.DefaultPopupComponent;
 import edu.kit.mima.gui.components.tabframe.TabFrame;
 import edu.kit.mima.gui.icons.Icons;
 import edu.kit.mima.gui.menu.Help;
@@ -76,8 +77,8 @@ public final class MimaUserInterface extends JFrame {
         filePathDisplay = new MimaFileDisplay(fileActions).getDisplay();
         tabbedEditor = editorManager.getTabbedEditor();
         console = new Console();
-        memoryTable =
-                new ProtectedScrollTable(new String[]{"Address", "Value"}, 100, new Insets(0, 5, 0, 0));
+        memoryTable = new ProtectedScrollTable(new String[]{"Address", "Value"},
+                                               100, new Insets(0, 5, 0, 0));
         memoryView = new MemoryTableView(mimaRunner, memoryTable);
 
         App.logger.setConsole(console);
@@ -196,35 +197,33 @@ public final class MimaUserInterface extends JFrame {
      */
     private void setupWindow() {
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        addWindowListener(
-                new WindowAdapter() {
-                    @Override
-                    public void windowClosing(final WindowEvent e) {
-                        quit();
-                    }
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(final WindowEvent e) {
+                quit();
+            }
 
-                    @Override
-                    public void windowActivated(final WindowEvent e) {
-                        if (Settings.isOpen()) {
-                            Settings.getInstance().toFront();
-                            Settings.getInstance().repaint();
-                        }
-                    }
-                });
+            @Override
+            public void windowActivated(final WindowEvent e) {
+                if (Settings.isOpen()) {
+                    Settings.getInstance().toFront();
+                    Settings.getInstance().repaint();
+                }
+            }
+        });
         setResizable(true);
-        final var dimension =
-                new Dimension((int) FULLSCREEN.getWidth() / 2, (int) FULLSCREEN.getHeight() / 2);
+        final var dimension = new Dimension((int) FULLSCREEN.getWidth() / 2,
+                                            (int) FULLSCREEN.getHeight() / 2);
         setSize(dimension);
         setPreferredSize(dimension);
         setTitle(TITLE);
-        var image =
-                Toolkit.getDefaultToolkit()
-                        .getImage(getClass().getClassLoader().getResource("images/mima.png"));
+        var image = Toolkit.getDefaultToolkit()
+                            .getImage(getClass().getClassLoader().getResource("images/mima.png"));
         setIconImage(image);
     }
 
     private void setupComponents() {
-
+        final JPanel contentPane = new JPanel(new BorderLayout());
         final JPanel controlPanel = new JPanel(new BorderLayout());
         controlPanel.add(filePathDisplay, BorderLayout.WEST);
         var buttonArea = new MimaButtonArea(this, runActions).getPane();
@@ -235,10 +234,8 @@ public final class MimaUserInterface extends JFrame {
         controlPanel.setComponentZOrder(buttonArea, 0);
 
         Runnable resizeAction =
-                () ->
-                        filePathDisplay.setMaximumSize(
-                                new Dimension(
-                                        buttonArea.getX() - filePathDisplay.getX(), controlPanel.getMinimumSize().height));
+                () -> filePathDisplay.setMaximumSize(new Dimension(buttonArea.getX() - filePathDisplay.getX(),
+                                                                   controlPanel.getMinimumSize().height));
         controlPanel.addComponentListener((ComponentResizeListener) e -> resizeAction.run());
         BindingUtil.bind(debugger, resizeAction, Debugger.RUNNING_PROPERTY);
 
@@ -253,22 +250,21 @@ public final class MimaUserInterface extends JFrame {
     }, Debugger.RUNNING_PROPERTY);
     */
 
-        add(controlPanel, BorderLayout.NORTH);
+        contentPane.add(controlPanel, BorderLayout.NORTH);
         var tabFrame = new TabFrame();
         tabFrame.setPersistable(true, "mainTabFrame");
         tabFrame.setContentPane(tabbedEditor);
-        tabFrame.addTab(
-                new DefaultPopupComponent("Memory", Icons.MEMORY, memoryTable),
-                "Memory",
-                Icons.MEMORY,
-                Alignment.NORTH_WEST);
-        tabFrame.addTab(
-                new DefaultPopupComponent("Console", Icons.CONSOLE, console),
-                "Console",
-                Icons.CONSOLE,
-                Alignment.SOUTH_WEST);
-
-        add(tabFrame, BorderLayout.CENTER);
+        tabFrame.addTab(new DefaultPopupComponent("Memory", Icons.MEMORY, memoryTable),
+                        "Memory",
+                        Icons.MEMORY,
+                        Alignment.NORTH_WEST);
+        tabFrame.addTab(new DefaultPopupComponent("Console", Icons.CONSOLE, console),
+                        "Console",
+                        Icons.CONSOLE,
+                        Alignment.SOUTH_WEST);
+        tabFrame.addTab(new TerminalPopupComponent(), "Terminal", Icons.TERMINAL, Alignment.SOUTH_WEST);
+        contentPane.add(tabFrame, BorderLayout.CENTER);
+        setContentPane(contentPane);
         pack();
         setJMenuBar(new MimaMenuBar(this, fileActions).getMenuBar());
     }
@@ -300,15 +296,14 @@ public final class MimaUserInterface extends JFrame {
                 .peek(f -> filePathDisplay.setFile(new File(f)))
                 .peek(f -> setTitle(TITLE + ' ' + FileName.shorten(f)))
                 .findFirst()
-                .ifPresent(
-                        f -> {
-                            final File parent = new File(f).getParentFile();
-                            final var pref = Preferences.getInstance();
-                            final String workDir =
-                                    parent != null
-                                            ? parent.getAbsolutePath()
-                                            : pref.readString(PropertyKey.DIRECTORY_MIMA);
-                            pref.saveString(PropertyKey.DIRECTORY_WORKING, workDir);
-                        });
+                .ifPresent(f -> {
+                    final File parent = new File(f).getParentFile();
+                    final var pref = Preferences.getInstance();
+                    final String workDir =
+                            parent != null
+                                    ? parent.getAbsolutePath()
+                                    : pref.readString(PropertyKey.DIRECTORY_MIMA);
+                    pref.saveString(PropertyKey.DIRECTORY_WORKING, workDir);
+                });
     }
 }

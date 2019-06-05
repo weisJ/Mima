@@ -1,4 +1,4 @@
-package edu.kit.mima.gui.components.tabbededitor;
+package edu.kit.mima.gui.components.tabbedpane;
 
 import edu.kit.mima.api.event.SubscriptionManager;
 import edu.kit.mima.api.event.SubscriptionService;
@@ -16,19 +16,19 @@ import java.util.List;
  * @author Jannis Weis
  * @since 2018
  */
-public class EditorTabbedPane extends JTabbedPane {
+public class DnDTabbedPane extends JTabbedPane {
     public static final String SELECTED_TAB_PROPERTY = "selectedTab";
     static final String NAME = "TabTransferData";
     static final DataFlavor FLAVOR = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType, NAME);
     private static final SubscriptionService<Integer> SUBSCRIPTION_SERVICE =
-            new SubscriptionService<>(EditorTabbedPane.class);
+            new SubscriptionService<>(DnDTabbedPane.class);
 
     static {
         SubscriptionManager.getCurrentManager()
                 .offerSubscription(SUBSCRIPTION_SERVICE, SELECTED_TAB_PROPERTY);
     }
 
-    private final EditorDragSupport dragSupport;
+    private final TabbedPaneDragSupport dragSupport;
 
     private final List<TabClosedEventHandler> handlerList = new ArrayList<>();
     private int selectedTab;
@@ -37,23 +37,23 @@ public class EditorTabbedPane extends JTabbedPane {
     /**
      * Create new Editor Tabbed Pane.
      */
-    public EditorTabbedPane() {
+    public DnDTabbedPane() {
         setFocusable(false); // Prevent focus dotted line from appearing
         super.setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
         addChangeListener(
                 e -> {
                     firePropertyChange(SELECTED_TAB_PROPERTY, selectedTab, getSelectedIndex());
                     SUBSCRIPTION_SERVICE.notifyEvent(
-                            SELECTED_TAB_PROPERTY, getSelectedIndex(), EditorTabbedPane.this);
+                            SELECTED_TAB_PROPERTY, getSelectedIndex(), DnDTabbedPane.this);
                     selectedTab = getSelectedIndex();
                 });
-        dragSupport = new EditorDragSupport(this);
+        dragSupport = new TabbedPaneDragSupport(this);
     }
 
     @NotNull
     @Override
     public String getUIClassID() {
-        return "EditorTabbedPaneUI";
+        return "DnDTabbedPaneUI";
     }
 
     @Override
@@ -106,11 +106,11 @@ public class EditorTabbedPane extends JTabbedPane {
     }
 
     /**
-     * Get the EditorDragSupport.
+     * Get the TabbedPaneDragSupport.
      *
      * @return the drag support.
      */
-    public EditorDragSupport getDragSupport() {
+    public TabbedPaneDragSupport getDragSupport() {
         return dragSupport;
     }
 
@@ -141,5 +141,13 @@ public class EditorTabbedPane extends JTabbedPane {
     public Rectangle getTabAreaBound() {
         final Rectangle firstTab = getUI().getTabBounds(this, 0);
         return new Rectangle(0, 0, getWidth(), firstTab.y + firstTab.height);
+    }
+
+    public TabContainer createTabContainer() {
+        return new TabContainer(this);
+    }
+
+    public Insets getTabInsets() {
+        return new Insets(0,0,0,0);
     }
 }

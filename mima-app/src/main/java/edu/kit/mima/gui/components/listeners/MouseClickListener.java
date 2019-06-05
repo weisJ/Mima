@@ -15,18 +15,18 @@ public interface MouseClickListener extends MouseListener {
     void mouseClicked(MouseEvent e);
 
     @Override
-    default void mousePressed(MouseEvent e) {
+    default void mousePressed(final MouseEvent e) {
     }
 
     @Override
-    default void mouseReleased(MouseEvent e) {
+    default void mouseReleased(final MouseEvent e) {
     }
 
     @Override
-    default void mouseEntered(MouseEvent e) {
+    default void mouseEntered(final MouseEvent e) {
     }
 
     @Override
-    default void mouseExited(MouseEvent e) {
+    default void mouseExited(final MouseEvent e) {
     }
 }

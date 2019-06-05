@@ -182,6 +182,7 @@ public class ProtectedScrollTable extends BorderlessScrollPane {
             final var iconComp = new IconComponent<>(c, icon, IconComponent.LEFT, 3, iconGap);
             borderSetup(iconComp, row);
             iconComp.setBackground(c.getBackground());
+            iconComp.setOpaque(true);
             return iconComp;
         }
 

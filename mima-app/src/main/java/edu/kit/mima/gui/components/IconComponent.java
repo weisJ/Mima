@@ -93,8 +93,10 @@ public class IconComponent<T extends Component> extends JComponent {
 
     @Override
     protected void paintComponent(@NotNull final Graphics g) {
-        g.setColor(getBackground());
-        g.fillRect(0,0,getWidth(), getHeight());
+        if (isOpaque()) {
+            g.setColor(getBackground());
+            g.fillRect(0,0,getWidth(), getHeight());
+        }
     }
 
     @Override

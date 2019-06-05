@@ -1,4 +1,4 @@
-package edu.kit.mima.gui.components.tabbededitor;
+package edu.kit.mima.gui.components.tabbedpane;
 
 import edu.kit.mima.gui.components.dragging.DragListener;
 import edu.kit.mima.gui.components.dragging.SnapDraggingSupport;
@@ -21,22 +21,22 @@ import java.awt.dnd.DragSourceListener;
 import java.awt.dnd.InvalidDnDOperationException;
 
 /**
- * Drag Source Listener for {@link EditorTabbedPane}.
+ * Drag Source Listener for {@link DnDTabbedPane}.
  *
  * @author Jannis Weis
  * @since 2018
  */
-public class EditorDragSupport
+public class TabbedPaneDragSupport
         implements DragSourceListener, DragGestureListener, SnapListener, DragListener {
 
-    private final EditorTabbedPane tabbedPane;
+    private final DnDTabbedPane tabbedPane;
     private boolean dragging;
     private final SnapDraggingSupport draggingSupport;
     private int dropTargetIndex = -1;
     private int dropSourceIndex = -1;
 
     @Contract(pure = true)
-    public EditorDragSupport(final EditorTabbedPane tabbedPane) {
+    public TabbedPaneDragSupport(final DnDTabbedPane tabbedPane) {
         this.tabbedPane = tabbedPane;
         dragging = false;
         draggingSupport =
@@ -109,7 +109,7 @@ public class EditorDragSupport
             dge.startDrag(
                     Cursor.getDefaultCursor(),
                     new TabTransferable(tabbedPane, dragTabIndex),
-                    EditorDragSupport.this);
+                    TabbedPaneDragSupport.this);
         } catch (@NotNull final InvalidDnDOperationException ignored) {
         }
     }

@@ -1,9 +1,10 @@
-package edu.kit.mima.gui.components.tabbededitor;
+package edu.kit.mima.gui.components.tabbedpane;
 
 import edu.kit.mima.gui.components.button.IconButton;
 import edu.kit.mima.gui.components.listeners.PopupListener;
 import edu.kit.mima.gui.components.popupmenu.ScrollPopupMenu;
 import edu.kit.mima.gui.icons.Icons;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -13,23 +14,22 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 
 /**
- * Tab container for {@link EditorTabbedPane}.
+ * Tab container for {@link DnDTabbedPane}.
  *
  * @author Jannis Weis
  * @since 2019
  */
 public class TabContainer extends JPanel implements UIResource {
-    private final EditorTabbedPane tabPane;
+    private final DefaultStash stash;
     private final PopupListener listener;
-    private final Stash stash;
+    private final DnDTabbedPane tabPane;
     private boolean notifyTabbedPane;
-    private int stashWidth;
 
-    public TabContainer(final EditorTabbedPane tabPane) {
+    public TabContainer(final DnDTabbedPane tabPane) {
         super(null);
         setOpaque(false);
         this.tabPane = tabPane;
-        stash = new Stash();
+        stash = new DefaultStash();
         listener = new PopupListener(null, MouseEvent.BUTTON1, true, true);
         stash.addMouseListener(listener);
         add(stash);
@@ -72,22 +72,22 @@ public class TabContainer extends JPanel implements UIResource {
     public void paint(@NotNull final Graphics g) {
         final var oldClip = new Rectangle(g.getClipBounds());
         var clip = new Rectangle(oldClip);
-        clip.width -= stashWidth;
+        clip.width -= getStash().getStashWidth();
         g.setClip(clip);
         super.paint(g);
-        if (stash.isVisible()) {
+        if (getStash().getComponent().isVisible()) {
             g.setClip(oldClip);
-            var b = stash.getBounds();
+            var b = getStash().getComponent().getBounds();
             g.translate(b.x, b.y);
-            stash.paint(g);
+            getStash().getComponent().paint(g);
         }
     }
 
     @Override
     public Dimension getMinimumSize() {
         var rect = tabPane.getBoundsAt(tabPane.getSelectedIndex());
-        if (stash.isVisible()) {
-            rect.width += stash.getPreferredSize().width;
+        if (getStash().getComponent().isVisible()) {
+            rect.width += getStash().getComponent().getPreferredSize().width;
             rect.width += 2 * (tabPane.getWidth() - stash.getX() - stash.getStashWidth());
         }
         return rect.getSize();
@@ -109,19 +109,18 @@ public class TabContainer extends JPanel implements UIResource {
             var tc = (TabComponent) tabPane.getTabComponentAt(i);
             menu.add(createStashItem(i, tc));
         }
-        int w = stash.getPreferredSize().width;
-        stash.setBounds(getWidth() - stash.getStashWidth(), (getHeight() - w) / 2 + 1, w, w);
+        int w = getStash().getComponent().getPreferredSize().width;
+        getStash().getComponent().setBounds(getWidth() - getStash().getStashWidth(),
+                                            (getHeight() - w) / 2 + 1, w, w);
         listener.setPopupMenu(menu);
-        stash.setVisible(true);
-        stashWidth = stash.getStashWidth();
+        getStash().getComponent().setVisible(true);
     }
 
     /**
      * Hide the stash.
      */
     public void hideStash() {
-        stashWidth = 0;
-        stash.setVisible(false);
+        getStash().getComponent().setVisible(false);
     }
 
     /**
@@ -129,30 +128,28 @@ public class TabContainer extends JPanel implements UIResource {
      *
      * @return the stash.s
      */
-    public Stash getStash() {
+    public TabStash getStash() {
         return stash;
     }
 
     @NotNull
     private JMenuItem createStashItem(final int index, @NotNull final TabComponent c) {
-        var item =
-                new JMenuItem(
-                        new AbstractAction() {
-                            @Override
-                            public void actionPerformed(final ActionEvent e) {
-                                tabPane.setSelectedIndex(index);
-                            }
-                        });
+        var item = new JMenuItem(new AbstractAction() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                tabPane.setSelectedIndex(index);
+            }
+        });
         item.setText(c.getTitle());
         item.setIcon(c.getIcon());
         return item;
     }
 
     /**
-     * Stash button.
+     * DefaultStash button.
      */
-    public class Stash extends IconButton implements UIResource {
-        private Stash() {
+    public final class DefaultStash extends IconButton implements UIResource, TabStash {
+        private DefaultStash() {
             super(Icons.MORE_TABS);
             setRolloverEnabled(false);
             setVisible(false);
@@ -160,6 +157,17 @@ public class TabContainer extends JPanel implements UIResource {
 
         public int getStashWidth() {
             return getPreferredSize().width + 2;
+        }
+
+        @Override
+        public int getStashHeight() {
+            return getPreferredSize().height;
+        }
+
+        @Contract(value = " -> this", pure = true)
+        @Override
+        public Component getComponent() {
+            return this;
         }
     }
 }

@@ -8,7 +8,7 @@ import edu.kit.mima.core.MimaRunner;
 import edu.kit.mima.gui.components.button.ButtonPanelBuilder;
 import edu.kit.mima.gui.components.button.IconButton;
 import edu.kit.mima.gui.components.button.RunnableIconButton;
-import edu.kit.mima.gui.components.tabbededitor.EditorTabbedPane;
+import edu.kit.mima.gui.components.tabbedpane.EditorTabbedPane;
 import edu.kit.mima.gui.icons.Icons;
 import org.jetbrains.annotations.NotNull;
 
@@ -54,12 +54,12 @@ public class MimaButtonArea {
                     var editor = mimaUI.currentEditor();
                     undo.setEnabled(editor != null && editor.canUndo());
                 })), History.POSITION_PROPERTY, History.LENGTH_PROPERTY,
-                EditorTabbedPane.SELECTED_TAB_PROPERTY);
+                     EditorTabbedPane.SELECTED_TAB_PROPERTY);
         sm.subscribe(new SimpleSubscriber(((identifier, value) -> {
                     var editor = mimaUI.currentEditor();
                     redo.setEnabled(editor != null && editor.canRedo());
                 })), History.POSITION_PROPERTY, History.LENGTH_PROPERTY,
-                EditorTabbedPane.SELECTED_TAB_PROPERTY);
+                     EditorTabbedPane.SELECTED_TAB_PROPERTY);
         return new ButtonPanelBuilder()
                        // Pause
                        .addButton(new IconButton(Icons.PAUSE_INACTIVE, Icons.PAUSE)).bindVisible(

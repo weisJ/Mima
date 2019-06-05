@@ -3,6 +3,7 @@ package edu.kit.mima.gui.components.tabframe;
 import edu.kit.mima.annotations.ContextManager;
 import edu.kit.mima.gui.components.IconLabel;
 import edu.kit.mima.gui.components.alignment.Alignment;
+import edu.kit.mima.gui.components.listeners.HoverListener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,11 +22,11 @@ public class TabFrameTabComponent extends IconLabel {
 
     @NotNull
     private final TabFrameLayout parent;
+    private final HoverListener hoverListener;
     private Color defaultFontColor;
     private Color selectedFontColor;
     private String title;
     private boolean selected;
-    private boolean hover;
     private int accelerator;
     private Alignment alignment;
     private int index;
@@ -48,6 +49,7 @@ public class TabFrameTabComponent extends IconLabel {
         this.title = title;
         this.index = index;
         this.parent = parent;
+        setOpaque(true);
         comp.setFont(comp.getFont().deriveFont(11.0f));
         addMouseListener(new MouseAdapter() {
             @Override
@@ -57,19 +59,9 @@ public class TabFrameTabComponent extends IconLabel {
                     parent.notifySelectChange(TabFrameTabComponent.this);
                 }
             }
-
-            @Override
-            public void mouseEntered(final MouseEvent e) {
-                hover = true;
-                repaint();
-            }
-
-            @Override
-            public void mouseExited(final MouseEvent e) {
-                hover = false;
-                repaint();
-            }
         });
+        hoverListener = new HoverListener(this);
+        addMouseListener(hoverListener);
         ContextManager.createContext(this);
         setOrientation(Alignment.WEST);
     }
@@ -150,7 +142,7 @@ public class TabFrameTabComponent extends IconLabel {
     public Color getBackground() {
         return selected && selectedColor != null
                        ? selectedColor
-                       : hover && hoverColor != null ? hoverColor : super.getBackground();
+                       : hoverListener.isHover() && hoverColor != null ? hoverColor : super.getBackground();
     }
 
     @Override

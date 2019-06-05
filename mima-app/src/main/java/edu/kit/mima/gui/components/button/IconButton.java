@@ -1,5 +1,8 @@
 package edu.kit.mima.gui.components.button;
 
+import edu.kit.mima.gui.components.listeners.HoverListener;
+import edu.kit.mima.gui.components.tooltip.TooltipAware;
+import edu.kit.mima.gui.components.tooltip.TooltipEventHandler;
 import edu.kit.mima.util.HSLColor;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,16 +18,18 @@ import java.awt.event.MouseEvent;
  * @author Jannis Weis
  * @since 2018
  */
-public class IconButton extends JButton {
+public class IconButton extends JButton implements TooltipAware {
     protected final int border = 3;
     private final Color highlight;
     private final Color highlightClick;
     protected Icon inactive;
     protected Icon active;
-    private boolean hover;
+    private final HoverListener hoverListener;
     private boolean clicking;
     private boolean locked;
     private boolean nextStatus;
+    private boolean tooltipShown;
+    private TooltipEventHandler tooltipEventHandler;
 
     /**
      * Create Button with always the same icon.
@@ -51,67 +56,75 @@ public class IconButton extends JButton {
         setRolloverEnabled(true);
         setFocusable(false);
         setBorderPainted(false);
-        addMouseListener(
-                new MouseAdapter() {
-                    @Override
-                    public void mouseEntered(final MouseEvent e) {
-                        hover = true;
-                        repaint();
-                    }
+        hoverListener = new HoverListener(this);
+        addMouseListener(hoverListener);
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(final MouseEvent e) {
+                clicking = true;
+                repaint();
+            }
 
-                    @Override
-                    public void mouseExited(final MouseEvent e) {
-                        hover = false;
-                        repaint();
-                    }
+            @Override
+            public void mouseReleased(final MouseEvent e) {
+                clicking = false;
+                repaint();
+            }
 
-                    @Override
-                    public void mousePressed(final MouseEvent e) {
-                        clicking = true;
-                        repaint();
-                    }
+            @Override
+            public void mouseClicked(final MouseEvent e) {
+                for (final var l : getActionListeners()) {
+                    l.actionPerformed(new ActionEvent(IconButton.this, 0, ""));
+                }
+            }
+        });
+    }
 
-                    @Override
-                    public void mouseReleased(final MouseEvent e) {
-                        clicking = false;
-                        repaint();
-                    }
-
-                    @Override
-                    public void mouseClicked(final MouseEvent e) {
-                        for (final var l : getActionListeners()) {
-                            l.actionPerformed(new ActionEvent(IconButton.this, 0, ""));
-                        }
-                    }
-                });
+    @Override
+    protected void processMouseEvent(final MouseEvent e) {
+        if (!tooltipShown) {
+            super.processMouseEvent(e);
+        } else {
+            if (tooltipEventHandler != null) {
+                int id = e.getID();
+                switch (id) {
+                    case MouseEvent.MOUSE_PRESSED -> tooltipEventHandler.mousePressed(e);
+                    case MouseEvent.MOUSE_RELEASED -> tooltipEventHandler.mouseReleased(e);
+                    case MouseEvent.MOUSE_CLICKED -> tooltipEventHandler.mouseClicked(e);
+                    case MouseEvent.MOUSE_EXITED -> tooltipEventHandler.mouseExited(e);
+                    case MouseEvent.MOUSE_ENTERED -> tooltipEventHandler.mouseEntered(e);
+                }
+            }
+        }
     }
 
     protected Icon currentIcon() {
         return isEnabled() ? active : inactive;
     }
 
+    protected boolean isHover() {
+        return hoverListener != null && hoverListener.isHover();
+    }
+
     @Override
     protected void paintComponent(@NotNull final Graphics g) {
-        final Graphics2D g2 = (Graphics2D) g.create();
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        if (isEnabled() && isRolloverEnabled() && hover) {
+        ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        if (isEnabled() && isRolloverEnabled() && isHover()) {
             if (clicking) {
-                g2.setColor(highlightClick);
+                g.setColor(highlightClick);
             } else {
-                g2.setColor(highlight);
+                g.setColor(highlight);
             }
-            g2.fillRoundRect(0, 0, getWidth(), getHeight(), 5, 5);
+            g.fillRoundRect(0, 0, getWidth(), getHeight(), 5, 5);
         }
-        currentIcon().paintIcon(this, g2, border, border);
-        g2.dispose();
+        currentIcon().paintIcon(this, g, border, border);
     }
 
     @NotNull
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension(
-                Math.max(active.getIconWidth(), inactive.getIconWidth()) + 2 * border,
-                Math.max(active.getIconHeight(), inactive.getIconHeight()) + 2 * border);
+        return new Dimension(Math.max(active.getIconWidth(), inactive.getIconWidth()) + 2 * border,
+                             Math.max(active.getIconHeight(), inactive.getIconHeight()) + 2 * border);
     }
 
     @NotNull
@@ -130,6 +143,10 @@ public class IconButton extends JButton {
     public void updateUI() {
     }
 
+    protected void setEnabledDirect(final boolean enabled) {
+        super.setEnabled(enabled);
+    }
+
     @Override
     public void setEnabled(final boolean b) {
         // Remember state for when button is unlocked again.
@@ -139,19 +156,23 @@ public class IconButton extends JButton {
             repaint();
             locked = true;
             // Lock button to prevent spamming
-            new Thread(
-                    () -> {
-                        synchronized (this) {
-                            try {
-                                wait(300);
-                                locked = false;
-                                super.setEnabled(nextStatus);
-                                repaint();
-                            } catch (InterruptedException ignored) {
-                            }
-                        }
-                    })
-                    .start();
+            new Thread(() -> {
+                synchronized (this) {
+                    try {
+                        wait(300);
+                        locked = false;
+                        setEnabledDirect(nextStatus);
+                        repaint();
+                    } catch (InterruptedException ignored) {
+                    }
+                }
+            }).start();
         }
+    }
+
+    @Override
+    public void setTooltipVisible(final boolean visible, final TooltipEventHandler eventHandler) {
+        this.tooltipShown = visible;
+        this.tooltipEventHandler = eventHandler;
     }
 }

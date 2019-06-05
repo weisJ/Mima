@@ -12,11 +12,11 @@ import java.util.Optional;
  */
 public class SubscriptionService<T> {
 
-    private final Class[] owner;
+    private final Class<?>[] owner;
     private SubscriptionDelegate<T> sendDelegate;
 
     @Contract(pure = true)
-    public SubscriptionService(final Class... owner) {
+    public SubscriptionService(final Class<?>... owner) {
         this.owner = owner == null ? new Class[0] : owner;
     }
 
@@ -48,7 +48,7 @@ public class SubscriptionService<T> {
                 final String identification,
                 T value,
                 final SubscriptionService<T> service,
-                final Class[] serviceOwner,
+                final Class<?>[] serviceOwner,
                 final Object invoker);
     }
 }

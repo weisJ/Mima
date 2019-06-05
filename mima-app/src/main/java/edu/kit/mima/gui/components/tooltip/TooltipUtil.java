@@ -24,10 +24,8 @@ public final class TooltipUtil {
         assert false : "utility class constructor";
     }
 
-    public static <T extends TooltipWindow> void createDefaultTooltip(
-            final JComponent c, final T tooltip) {
-        new TooltipComponent<>(c, tooltip, DELAY, VANISH_DELAY, AlignPolicy.COMPONENT_BOTH)
-                .setActive(true);
+    public static <T extends TooltipWindow> void createDefaultTooltip(final JComponent c, final T tooltip) {
+        new TooltipComponent<>(c, tooltip, DELAY, VANISH_DELAY, AlignPolicy.COMPONENT_BOTH).setActive(true);
     }
 
     /**
@@ -69,11 +67,10 @@ public final class TooltipUtil {
      * @param alignAt   alignment of tooltip relative to mouse/component.
      * @param <T>       DefaultTooltipWindow type.
      */
-    public static <T extends TooltipWindow> void showTooltip(
-            @NotNull final T tooltip,
-            @NotNull final JComponent container,
-            final Point p,
-            final AlignPolicy alignAt) {
+    public static <T extends TooltipWindow> void showTooltip(@NotNull final T tooltip,
+                                                             @NotNull final JComponent container,
+                                                             final Point p,
+                                                             final AlignPolicy alignAt) {
         final var tooltipComponent = new TooltipComponent<>(container, tooltip, 0, 2000, alignAt);
         tooltipComponent.showOnce(p);
     }

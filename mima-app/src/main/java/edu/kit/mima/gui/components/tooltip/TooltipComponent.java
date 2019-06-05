@@ -15,8 +15,7 @@ import java.awt.event.MouseAdapter;
  * @author Jannis Weis
  * @since 2018
  */
-public class TooltipComponent<T extends TooltipWindow> extends MouseAdapter
-        implements TooltipConstants {
+public class TooltipComponent<T extends TooltipWindow> extends MouseAdapter implements TooltipConstants {
 
     /*default*/
     @NotNull
@@ -42,12 +41,11 @@ public class TooltipComponent<T extends TooltipWindow> extends MouseAdapter
      * @param vanishingDelay vanishing delay or {@link TooltipConstants#PERSISTENT}.
      * @param centerAt       one of {@link AlignPolicy}.
      */
-    public TooltipComponent(
-            @NotNull final JComponent container,
-            @NotNull final T tooltip,
-            final int delay,
-            final int vanishingDelay,
-            final AlignPolicy centerAt) {
+    public TooltipComponent(@NotNull final JComponent container,
+                            @NotNull final T tooltip,
+                            final int delay,
+                            final int vanishingDelay,
+                            final AlignPolicy centerAt) {
         this.centerAt = centerAt;
         this.container = container;
         this.tooltip = tooltip;
@@ -80,8 +78,7 @@ public class TooltipComponent<T extends TooltipWindow> extends MouseAdapter
     public void showOnce(final Point p) {
         showOnce = true;
         mousePos = p;
-        eventHandler.setActive(true);
-        mouseEntered(null);
+        showTooltipInternal();
     }
 
     /**
@@ -105,12 +102,18 @@ public class TooltipComponent<T extends TooltipWindow> extends MouseAdapter
         }
         tooltip.hideTooltip();
         tooltip.setVisible(false); // Ensure it's hidden
+        if (container instanceof TooltipAware) {
+            ((TooltipAware)container).setTooltipVisible(false, eventHandler);
+        }
     }
 
     /*
      * Make the tooltip visible.
      */
     private void showTooltipInternal() {
+        if (container instanceof TooltipAware) {
+            ((TooltipAware)container).setTooltipVisible(true, eventHandler);
+        }
         tooltip.setVisible(true);
         eventHandler.setActive(true);
         var size = tooltip.getPreferredSize();
@@ -134,6 +137,7 @@ public class TooltipComponent<T extends TooltipWindow> extends MouseAdapter
         SwingUtilities.convertPointFromScreen(mousePos, c);
         var pos = centerAt.calculatePosition(mousePos, containerPos);
         Alignment alignment = Alignment.getAlignment(pos, size, c.getBounds(), Alignment.SOUTH);
+        alignment = alignment == Alignment.CENTER ? Alignment.SOUTH : alignment;
         tooltip.setAlignment(alignment);
         return alignment.relativePos(size, pos);
     }
