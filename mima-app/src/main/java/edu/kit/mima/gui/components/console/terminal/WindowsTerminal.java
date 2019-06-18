@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.util.Objects;
 
 /**
@@ -31,18 +32,20 @@ import java.util.Objects;
 public class WindowsTerminal extends BorderlessScrollPane implements Terminal {
 
     private static final byte[] INPUT_INDICATOR = "|<< ".getBytes();
+    private static final int PADDING = 100;
     private final MessageConsole messageConsole;
     private final PrintWriter stdin;
     private final History<StringBuilder> input;
-    private final JTextArea textArea;
+    private final JEditorPane textArea;
     private final Process process;
 
     public WindowsTerminal() throws IOException {
-        textArea = new JTextArea();
+        textArea = new JEditorPane();
         textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         textArea.setBackground(UIManager.getColor("Terminal.background"));
+        textArea.setMargin(new Insets(0, 0, PADDING, 0));
 
-        messageConsole = new MessageConsole(textArea);
+        messageConsole = new MessageConsole(textArea, Charset.forName("Cp850"));
         messageConsole.setMessageLines(1000);
         input = new History<>(50);
         input.add(new StringBuilder());
@@ -60,9 +63,12 @@ public class WindowsTerminal extends BorderlessScrollPane implements Terminal {
                 WindowsTerminal.this.keyTyped(e);
             }
         });
-        getScrollPane().setViewportView(textArea);
-        getScrollPane().getVerticalScrollBar().setUnitIncrement(12);
+
+        var scrollPane = getScrollPane();
+        scrollPane.setViewportView(textArea);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(12);
     }
+
 
     private void keyTyped(@NotNull final KeyEvent e) {
         int pos = textArea.getCaretPosition() - messageConsole.getLastPos() + 1;
