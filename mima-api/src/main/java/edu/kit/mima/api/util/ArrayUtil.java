@@ -31,7 +31,7 @@ public final class ArrayUtil {
 
     @SuppressWarnings("unchecked")
     @NotNull
-    public static <T> T[] toArray(@NotNull final Collection<T> c, final Class klass) {
+    public static <T> T[] toArray(@NotNull final Collection<T> c, final Class<?> klass) {
         return toArray(c, (T[]) Array.newInstance(klass, c.size()));
     }
 

@@ -44,7 +44,7 @@ public class TabFrameLayout implements LayoutManager {
     /**
      * The width/height of the frame.
      */
-    private final int size = 24;
+    private static final int SIZE = 24;
     private final TabFrameContent content = new TabFrameContent();
     private final Map<Alignment, List<TabFrameTabComponent>> tabsMap;
     private final Map<Alignment, List<PopupComponent>> compsMap;
@@ -267,7 +267,7 @@ public class TabFrameLayout implements LayoutManager {
 
     private void layoutTopTab(final Dimension dim, final int topSize, final int leftSize, final int rightSize) {
         if (topSize > 0) {
-            topTabs.setBounds(0, 0, dim.width, size);
+            topTabs.setBounds(0, 0, dim.width, SIZE);
             layoutHorizontal(dim, Alignment.NORTH, Alignment.NORTH_EAST, 0, leftSize, rightSize);
         } else {
             topTabs.setBounds(0, 0, 0, 0);
@@ -276,7 +276,7 @@ public class TabFrameLayout implements LayoutManager {
 
     private void layoutBottomTab(final Dimension dim, final int bottomSize, final int leftSize, final int rightSize) {
         if (bottomSize > 0) {
-            bottomTabs.setBounds(0, dim.height - size, dim.width, size);
+            bottomTabs.setBounds(0, dim.height - SIZE, dim.width, SIZE);
             layoutHorizontal(dim, Alignment.SOUTH_WEST, Alignment.SOUTH, 1, leftSize, rightSize);
         } else {
             bottomTabs.setBounds(0, 0, 0, 0);
@@ -285,10 +285,10 @@ public class TabFrameLayout implements LayoutManager {
 
     private void layoutHorizontal(final Dimension dim, final Alignment left, final Alignment right,
                                   final int yOff, final int leftSize, final int rightSize) {
-        var start = new Point(leftSize > 0 ? size : 0, yOff);
-        int leftEnd = layoutTabArea(start, left, true, size - 1);
-        start.x = rightSize > 0 ? dim.width - size : dim.width;
-        int rightStart = layoutTabArea(start, right, false, size - 1);
+        var start = new Point(leftSize > 0 ? SIZE : 0, yOff);
+        int leftEnd = layoutTabArea(start, left, true, SIZE - 1);
+        start.x = rightSize > 0 ? dim.width - SIZE : dim.width;
+        int rightStart = layoutTabArea(start, right, false, SIZE - 1);
         if (rightStart < leftEnd) {
             shift(leftEnd - rightStart, right);
         }
@@ -296,7 +296,7 @@ public class TabFrameLayout implements LayoutManager {
 
     private void layoutLeftTab(final Dimension dim, final int leftSize) {
         if (leftSize > 0) {
-            rotatePaneLeft.setBounds(0, topTabs.getHeight(), size,
+            rotatePaneLeft.setBounds(0, topTabs.getHeight(), SIZE,
                     dim.height - topTabs.getHeight() - bottomTabs.getHeight()
                             + (dim.height - topTabs.getHeight() - bottomTabs.getHeight())
                                       % 2);
@@ -304,9 +304,9 @@ public class TabFrameLayout implements LayoutManager {
                     new Dimension(rotatePaneLeft.getHeight(), rotatePaneLeft.getWidth()));
             leftTabs.setSize(leftTabs.getPreferredSize());
             var start = new Point(rotatePaneLeft.getHeight(), 0);
-            int topStart = layoutTabArea(start, Alignment.NORTH_WEST, false, size - 1);
+            int topStart = layoutTabArea(start, Alignment.NORTH_WEST, false, SIZE - 1);
             start.x = 0;
-            int bottomEnd = layoutTabArea(start, Alignment.WEST, true, size - 1);
+            int bottomEnd = layoutTabArea(start, Alignment.WEST, true, SIZE - 1);
             if (bottomEnd > topStart) {
                 shift(topStart - bottomEnd, Alignment.WEST);
             }
@@ -318,16 +318,16 @@ public class TabFrameLayout implements LayoutManager {
 
     private void layoutRightTab(final Dimension dim, final int rightSize) {
         if (rightSize > 0) {
-            rotatePaneRight.setBounds(dim.width - size, topTabs.getHeight(), size,
+            rotatePaneRight.setBounds(dim.width - SIZE, topTabs.getHeight(), SIZE,
                     dim.height - topTabs.getHeight() - bottomTabs.getHeight()
                             + (dim.height - topTabs.getHeight() - bottomTabs.getHeight()) % 2);
             rightTabs.setPreferredSize(
                     new Dimension(rotatePaneRight.getHeight(), rotatePaneRight.getWidth()));
             rightTabs.setSize(rightTabs.getPreferredSize());
             var start = new Point(0, 0);
-            int topEnd = layoutTabArea(start, Alignment.EAST, true, size - 1);
+            int topEnd = layoutTabArea(start, Alignment.EAST, true, SIZE - 1);
             start.x = rightTabs.getWidth();
-            var bottomStart = layoutTabArea(start, Alignment.SOUTH_EAST, false, size - 1);
+            var bottomStart = layoutTabArea(start, Alignment.SOUTH_EAST, false, SIZE - 1);
             if (bottomStart < topEnd) {
                 shift(topEnd - bottomStart, Alignment.SOUTH_EAST);
             }

@@ -3,6 +3,7 @@ package edu.kit.mima.gui.components.text;
 import edu.kit.mima.api.lambda.LambdaUtil;
 import edu.kit.mima.api.util.Tuple;
 import edu.kit.mima.api.util.ValueTuple;
+import edu.kit.mima.gui.components.text.nonwrapping.NonWrappingTextPane;
 import edu.kit.mima.util.DocumentUtil;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.jetbrains.annotations.NotNull;

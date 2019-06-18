@@ -2,7 +2,7 @@ package edu.kit.mima.app;
 
 import edu.kit.mima.App;
 import edu.kit.mima.api.lambda.CheckedConsumer;
-import edu.kit.mima.gui.components.editor.Editor;
+import edu.kit.mima.gui.components.text.editor.Editor;
 import edu.kit.mima.loading.FileManager;
 import edu.kit.mima.logger.LoadingIndicator;
 import edu.kit.mima.util.FileName;

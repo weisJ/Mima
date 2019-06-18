@@ -40,13 +40,11 @@ public class DnDTabbedPane extends JTabbedPane {
     public DnDTabbedPane() {
         setFocusable(false); // Prevent focus dotted line from appearing
         super.setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
-        addChangeListener(
-                e -> {
-                    firePropertyChange(SELECTED_TAB_PROPERTY, selectedTab, getSelectedIndex());
-                    SUBSCRIPTION_SERVICE.notifyEvent(
-                            SELECTED_TAB_PROPERTY, getSelectedIndex(), DnDTabbedPane.this);
-                    selectedTab = getSelectedIndex();
-                });
+        addChangeListener(e -> {
+            firePropertyChange(SELECTED_TAB_PROPERTY, selectedTab, getSelectedIndex());
+            SUBSCRIPTION_SERVICE.notifyEvent(SELECTED_TAB_PROPERTY, getSelectedIndex(), DnDTabbedPane.this);
+            selectedTab = getSelectedIndex();
+        });
         dragSupport = new TabbedPaneDragSupport(this);
     }
 
@@ -57,12 +55,9 @@ public class DnDTabbedPane extends JTabbedPane {
     }
 
     @Override
-    public void insertTab(
-            final String title,
-            final Icon icon,
-            final Component component,
-            final String tip,
-            final int index) {
+    public void insertTab(final String title, final Icon icon,
+                          final Component component, final String tip,
+                          final int index) {
         super.insertTab(title, icon, component, tip, index);
         final TabComponent tabComponent = new TabComponent(title, icon, this::closeTab);
         setTabComponentAt(index, tabComponent);
@@ -139,8 +134,11 @@ public class DnDTabbedPane extends JTabbedPane {
 
     @NotNull
     public Rectangle getTabAreaBound() {
-        final Rectangle firstTab = getUI().getTabBounds(this, 0);
-        return new Rectangle(0, 0, getWidth(), firstTab.y + firstTab.height);
+        return ((DnDTabbedPaneUI) getUI()).getTabAreaBounds();
+    }
+
+    public Dimension getMinimumTabAreaSize() {
+        return new Dimension(0, 0);
     }
 
     public TabContainer createTabContainer() {
@@ -150,4 +148,5 @@ public class DnDTabbedPane extends JTabbedPane {
     public Insets getTabInsets() {
         return new Insets(0,0,0,0);
     }
+
 }

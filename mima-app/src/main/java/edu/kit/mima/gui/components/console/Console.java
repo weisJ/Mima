@@ -1,7 +1,7 @@
 package edu.kit.mima.gui.components.console;
 
 import edu.kit.mima.gui.components.BorderlessScrollPane;
-import edu.kit.mima.gui.components.text.NonWrappingTextPane;
+import edu.kit.mima.gui.components.text.nonwrapping.NonWrappingEditorPane;
 import edu.kit.mima.preferences.ColorKey;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
@@ -9,10 +9,12 @@ import edu.kit.mima.preferences.UserPreferenceChangedListener;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Style;
+import javax.swing.text.Document;
+import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
+import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
@@ -26,9 +28,9 @@ import java.awt.event.AdjustmentListener;
 public class Console extends BorderlessScrollPane implements UserPreferenceChangedListener {
 
     @NotNull
-    private final JTextPane textPane;
-    private final StyledDocument document;
-    private final Style style;
+    private final JEditorPane editorPane;
+    private final Document document;
+    private final StyleContext styleContext;
 
     private Color textColor;
 
@@ -40,17 +42,18 @@ public class Console extends BorderlessScrollPane implements UserPreferenceChang
     public Console() {
         Preferences.registerUserPreferenceChangedListener(this);
         final var pref = Preferences.getInstance();
-        textPane = new NonWrappingTextPane();
-        textPane.setBackground(pref.readColor(ColorKey.CONSOLE_BACKGROUND));
-        textPane.setFont(pref.readFont(PropertyKey.CONSOLE_FONT));
-        textPane.setEditable(false);
-        document = textPane.getStyledDocument();
+        editorPane = new NonWrappingEditorPane();
+        editorPane.setBackground(pref.readColor(ColorKey.CONSOLE_BACKGROUND));
+        editorPane.setFont(pref.readFont(PropertyKey.CONSOLE_FONT));
+        editorPane.setEditable(false);
+        document = editorPane.getDocument();
 
         textColor = pref.readColor(ColorKey.CONSOLE_TEXT_INFO);
 
-        style = textPane.addStyle("Color", null);
-        StyleConstants.setForeground(style, textColor);
-        scrollPane.setViewportView(textPane);
+        styleContext = StyleContext.getDefaultStyleContext();
+        styleContext.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, textColor);
+
+        scrollPane.setViewportView(editorPane);
     }
 
     /**
@@ -89,9 +92,10 @@ public class Console extends BorderlessScrollPane implements UserPreferenceChang
      */
     public void replaceLast(@NotNull final String message, final Color color) {
         try {
-            StyleConstants.setForeground(style, color);
+            AttributeSet attributeSet = styleContext.addAttribute(SimpleAttributeSet.EMPTY,
+                                                                  StyleConstants.Foreground, color);
             document.remove(document.getLength() - lastMessageLength, lastMessageLength);
-            document.insertString(document.getLength(), message, style);
+            document.insertString(document.getLength(), message, attributeSet);
         } catch (@NotNull final BadLocationException ignored) {
         }
         scrollToBottom();
@@ -134,8 +138,9 @@ public class Console extends BorderlessScrollPane implements UserPreferenceChang
      */
     public void print(@NotNull final String message, final Color color) {
         try {
-            StyleConstants.setForeground(style, color);
-            document.insertString(document.getLength(), message, style);
+            AttributeSet attributeSet = styleContext.addAttribute(SimpleAttributeSet.EMPTY,
+                                                                  StyleConstants.Foreground, color);
+            document.insertString(document.getLength(), message, attributeSet);
         } catch (@NotNull final BadLocationException ignored) {
         }
         scrollToBottom();
@@ -146,7 +151,7 @@ public class Console extends BorderlessScrollPane implements UserPreferenceChang
      * Clear all text from console.
      */
     public void clear() {
-        textPane.setText("");
+        editorPane.setText("");
         scrollToTop();
     }
 
@@ -156,7 +161,7 @@ public class Console extends BorderlessScrollPane implements UserPreferenceChang
      * @return current font
      */
     public Font getConsoleFont() {
-        return textPane.getFont();
+        return editorPane.getFont();
     }
 
     /**
@@ -165,7 +170,7 @@ public class Console extends BorderlessScrollPane implements UserPreferenceChang
      * @param font font to use
      */
     public void setConsoleFont(final Font font) {
-        textPane.setFont(font);
+        editorPane.setFont(font);
         repaint();
     }
 
@@ -191,7 +196,7 @@ public class Console extends BorderlessScrollPane implements UserPreferenceChang
      * Scroll to the bottom of the console
      */
     private void scrollToBottom() {
-        textPane.selectAll();
+        editorPane.selectAll();
         repaint();
     }
 

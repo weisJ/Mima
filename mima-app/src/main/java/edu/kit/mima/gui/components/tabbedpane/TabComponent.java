@@ -60,7 +60,7 @@ public class TabComponent extends JPanel {
         });
         TooltipUtil.createDefaultTooltip(button, new DefaultTooltipWindow("Close"));
         add(button);
-        setBorder(new EmptyBorder(3, 0, 2, 5));
+        setBorder(new EmptyBorder(0, 0, 0, 5));
         setOpaque(false);
     }
 

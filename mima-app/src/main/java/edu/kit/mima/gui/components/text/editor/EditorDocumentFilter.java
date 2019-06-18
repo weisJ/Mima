@@ -1,4 +1,4 @@
-package edu.kit.mima.gui.components.editor;
+package edu.kit.mima.gui.components.text.editor;
 
 import org.jetbrains.annotations.NotNull;
 

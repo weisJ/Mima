@@ -20,7 +20,7 @@ import java.util.Iterator;
 public class MimaFormatter implements Formatter {
 
     private static final String TAB = "    ";
-    private SyntaxToken[] tokens;
+    private SyntaxToken<?>[] tokens;
 
     /**
      * Format String.
@@ -151,7 +151,7 @@ public class MimaFormatter implements Formatter {
      */
     private void maybeJump(@NotNull final Iterator<SyntaxNode> iterator,
                            @NotNull final StringBuilder sb,
-                           @NotNull SyntaxNode current) {
+                           @NotNull final SyntaxNode current) {
         SyntaxNode current1 = current;
         sb.append(printNode(current1));
         if (current1.getType() == NodeType.JUMP) {
@@ -196,7 +196,7 @@ public class MimaFormatter implements Formatter {
      */
     @NotNull
     private String printLeaf(@NotNull final SyntaxNode node) {
-        final SyntaxToken token = tokens[node.getBegin()];
+        final SyntaxToken<?> token = tokens[node.getBegin()];
         return switch (token.getType()) {
             case JUMP_POINT, KEYWORD -> token.getValue().toString() + ' ';
             case PUNCTUATION -> printPunctuation(token.getValue().toString().charAt(0));

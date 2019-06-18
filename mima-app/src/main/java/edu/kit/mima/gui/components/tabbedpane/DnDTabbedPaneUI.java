@@ -27,6 +27,7 @@ public abstract class DnDTabbedPaneUI extends BasicTabbedPaneUI {
     private int minVisible;
     private int maxVisible;
     private int currentShift;
+    private int stashWidth;
     private PropertyChangeListener handler;
 
     /**
@@ -114,16 +115,29 @@ public abstract class DnDTabbedPaneUI extends BasicTabbedPaneUI {
         if (dropSourceIndex >= 0) {
             tabPane.doLayout();
         }
-        g.setClip(tabBounds);
-        final var sourceBounds = dropSourceIndex >= 0
-                                         ? rects[dropSourceIndex]
-                                         : new Rectangle(0, 0, 0, 0);
+        g.setColor(tabBackground);
+        g.fillRect(0, 0, tabbedPane.getWidth(), maxTabHeight);
+        var oldClip = g.getClip();
+        g.setClip(tabBounds.x, 0, tabBounds.width, tabBounds.height);
+
         for (int i = minVisible; i <= maxVisible && i < rects.length; i++) {
             if (i != dropSourceIndex && i != selectedIndex) {
-                drawTab((Graphics2D) g.create(), i, false);
+                drawTab((Graphics2D) g, i, false);
             }
         }
+        paintDrop(g, dropTargetIndex, dropSourceIndex, selectedIndex);
+        paintTabBorder(g, oldClip);
+
+        g.setClip(oldClip);
+        drawStash(g);
+    }
+
+    private void paintDrop(final Graphics g, final int dropTargetIndex, final int dropSourceIndex,
+                           final int selectedIndex) {
         if (dropTargetIndex >= 0) {
+            final var sourceBounds = dropSourceIndex >= 0
+                                     ? rects[dropSourceIndex]
+                                     : new Rectangle(0, 0, 0, 0);
             g.setColor(dropColor);
             if (dropTargetIndex < tabbedPane.getTabCount()) {
                 var b = rects[dropTargetIndex];
@@ -133,17 +147,44 @@ public abstract class DnDTabbedPaneUI extends BasicTabbedPaneUI {
                 g.fillRect(b.x + b.width, b.y, sourceBounds.width, sourceBounds.height);
             }
         }
-        var g2 = (Graphics2D) g.create();
-        g2.setColor(tabBorderColor);
-        g2.drawLine(0, maxTabHeight, tabbedPane.getWidth() - 1, maxTabHeight);
-        g2.dispose();
-        if (dropSourceIndex != selectedIndex) {
-            drawTab((Graphics2D) g.create(), selectedIndex, true);
-        }
 
-        if (tabContainer.getStash().getComponent().isVisible()) {
-            drawStash(g);
+        if (dropSourceIndex != selectedIndex) {
+            drawTab((Graphics2D) g, selectedIndex, true);
         }
+    }
+
+    private void drawStash(@NotNull final Graphics g) {
+        if (stashWidth <= 0) {
+            return;
+        }
+        g.setColor(tabBackground);
+        int x = tabBounds.x + tabBounds.width - stashWidth;
+        g.fillRect(x, tabBounds.y, stashWidth, tabBounds.height);
+        g.setColor(tabBorderColor);
+        g.drawLine(x, tabBounds.y, x, tabBounds.y + tabBounds.height);
+        g.drawLine(x, maxTabHeight, x + stashWidth, maxTabHeight);
+    }
+
+    protected void drawTab(@NotNull final Graphics2D g, final int index, final boolean isSelected) {
+        final var bounds = rects[index];
+        if (isSelected) {
+            g.setColor(selectedBackground);
+            g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+        } else {
+            g.setColor(tabBackground);
+            g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+        }
+    }
+
+    private void paintTabBorder(@NotNull final Graphics g, final Shape oldClip) {
+        var g2 = (Graphics2D) g.create();
+        g2.translate(0, 0.5);
+        g2.setColor(tabBorderColor);
+        if (Boolean.TRUE.equals(tabbedPane.getClientProperty("lineThrough"))) {
+            g2.setClip(oldClip);
+        }
+        g2.drawLine(0, maxTabHeight, tabbedPane.getWidth(), maxTabHeight);
+        g2.dispose();
     }
 
     @Override
@@ -168,32 +209,13 @@ public abstract class DnDTabbedPaneUI extends BasicTabbedPaneUI {
     }
 
     @Override
-    protected int calculateTabAreaHeight(final int tabPlacement,
-                                         final int horizRunCount,
-                                         final int maxTabHeight) {
+    protected int calculateTabAreaHeight(final int tabPlacement, final int horizRunCount, final int maxTabHeight) {
         return super.calculateTabAreaHeight(tabPlacement, 1, maxTabHeight);
     }
 
 
-    private void drawStash(@NotNull final Graphics g) {
-        var bounds = tabContainer.getStash().getComponent().getBounds();
-        g.setColor(tabBackground);
-        g.fillRect(bounds.x, tabBounds.y, tabBounds.x + tabBounds.width - bounds.x, tabBounds.height);
-        g.setColor(tabBorderColor);
-        g.drawLine(bounds.x, tabBounds.y, bounds.x, tabBounds.height);
-    }
-
-    protected void drawTab(@NotNull final Graphics2D g, final int index, final boolean isSelected) {
-        final var bounds = rects[index];
-        g.translate(1, 0);
-        if (isSelected) {
-            g.setColor(selectedBackground);
-            g.fillRect(bounds.x - 1, bounds.y, bounds.width, bounds.height);
-        } else {
-            g.setColor(tabBackground);
-            g.fillRect(bounds.x - 1, bounds.y, bounds.width, bounds.height);
-        }
-        g.dispose();
+    public Rectangle getTabAreaBounds() {
+        return tabBounds;
     }
 
     private class CustomTabbedPaneLayout extends BasicTabbedPaneUI.TabbedPaneLayout {
@@ -201,13 +223,18 @@ public abstract class DnDTabbedPaneUI extends BasicTabbedPaneUI {
         @Override
         public void layoutContainer(final Container parent) {
             super.layoutContainer(parent);
+            var visibleComp = getVisibleComponent();
+            if (visibleComp != null) {
+                var selX = visibleComp.getBounds().x;
+                visibleComp.setLocation(selX, maxTabHeight + 1);
+            }
             tabContainer.setBounds(tabBounds);
             layoutTabComponents();
         }
 
         @Override
         protected void calculateTabRects(final int tabPlacement, final int tabCount) {
-            if (tabPlacement != DnDTabbedPane.TOP || tabCount == 0) {
+            if (tabPlacement != DnDTabbedPane.TOP) {
                 super.calculateTabRects(tabPlacement, tabCount);
                 return;
             }
@@ -218,13 +245,18 @@ public abstract class DnDTabbedPaneUI extends BasicTabbedPaneUI {
             selectedRun = -1;
             int minX = insets.left + tabAreaInsets.left;
             int returnAt = size.width - (insets.right + tabAreaInsets.right);
+            var minBounds = tabbedPane.getMinimumTabAreaSize();
+            maxTabHeight = Math.max(maxTabHeight, minBounds.height - 1);
+            tabBounds.setBounds(minX, 0, Math.max(minBounds.width, returnAt - minX), maxTabHeight + 1);
+
+            if (tabCount == 0) {
+                return;
+            }
 
             for (int i = 0; i < tabCount; i++) {
                 calculateRect(i, minX);
             }
-            if (tabContainer.getStash().getComponent().isVisible()) {
-                returnAt -= tabContainer.getStash().getStashWidth();
-            }
+
             shiftTabs(currentShift, minX, returnAt, tabCount, false);
             final var selBounds = rects[tabbedPane.getSelectedIndex()];
             if (selBounds.x + selBounds.width >= returnAt) {
@@ -232,10 +264,63 @@ public abstract class DnDTabbedPaneUI extends BasicTabbedPaneUI {
             } else if (selBounds.x < minX) {
                 shiftTabs(minX - selBounds.x, minX, returnAt, tabCount);
             }
+
             restoreHiddenTabs(minX, returnAt, tabCount);
+            layoutAddons(minX, returnAt, tabCount);
             layoutStash(minX, returnAt, tabCount);
             adjustForDrop(tabCount);
-            tabBounds.setBounds(minX, 0, returnAt - minX, maxTabHeight + 1);
+        }
+
+        private void calculateRect(final int i, final int minX) {
+            final Rectangle rect = rects[i];
+            if (i > 0) {
+                rect.x = rects[i - 1].x + rects[i - 1].width;
+            } else {
+                tabRuns[0] = 0;
+                maxTabWidth = 0;
+                rect.x = minX;
+            }
+            rect.width = tabbedPane.getTabComponentAt(i).getPreferredSize().width;
+            maxTabWidth = Math.max(maxTabWidth, rect.width);
+            rect.y = 0;
+            rect.height = maxTabHeight;
+            selectedRun = 0;
+        }
+
+        private void restoreHiddenTabs(final int minX, final int maxX, final int tabCount) {
+            int space = Math.max(maxX - rects[maxVisible].x - rects[maxVisible].width, 0);
+            int shift = Math.min(minX - rects[0].x, space);
+            shiftTabs(shift, minX, maxX, tabCount);
+        }
+
+        private void layoutAddons(final int minX, final int returnAt, final int tabCount) {
+            tabContainer.layoutAddons();
+            stashWidth = 0;
+            for (TabAddon addon : tabContainer.getAddons()) {
+                int width = addon.getAddonWidth();
+                int maxX = rects[tabCount - 1].x + rects[tabCount - 1].width + stashWidth;
+                if (addon.getPlacement() == TabAddon.RIGHT) {
+                    stashWidth += width;
+                    if (maxX + width > returnAt) {
+                        shiftTabs(-maxX - width + returnAt, minX, returnAt, tabCount);
+                    }
+                } else if (addon.getPlacement() == TabAddon.LEFT) {
+                    if (maxX + width > returnAt) {
+                        shiftTabs(-maxX - width + returnAt, minX, returnAt, tabCount);
+                    }
+                }
+            }
+        }
+
+        private void layoutStash(final int minX, final int returnAt, final int tabCount) {
+            final TabAddon stash = tabContainer.getStash();
+            if (minVisible > 0 || maxVisible < tabCount - 1) {
+                shiftTabs(-tabContainer.getStash().getAddonWidth(), minX, returnAt, tabCount);
+                stashWidth += tabContainer.getStash().getAddonWidth();
+                tabContainer.showStash(minVisible, maxVisible);
+            } else if (stash.isVisible()) {
+                tabContainer.hideStash();
+            }
         }
 
         private void adjustForDrop(final int tabCount) {
@@ -254,40 +339,6 @@ public abstract class DnDTabbedPaneUI extends BasicTabbedPaneUI {
             }
         }
 
-        private void restoreHiddenTabs(final int minX, final int maxX, final int tabCount) {
-            if (maxVisible != tabCount - 1 || minVisible == 0) {
-                return;
-            }
-            int lastPos = rects[tabCount - 1].x + rects[tabCount - 1].width;
-            int extraSpace = maxX - lastPos;
-            int startPos = rects[minVisible].x >= minX ? minVisible - 1 : minVisible;
-            for (int i = startPos; i > 0; i--) {
-                int w = rects[i].width;
-                if (w <= extraSpace) {
-                    shiftTabs(w, minX, maxX, tabCount);
-                    extraSpace -= w;
-                } else {
-                    return;
-                }
-            }
-            if (rects[0].x < minX && rects[0].x <= extraSpace) {
-                shiftTabs(minX - rects[0].x, minX, maxX, tabCount);
-            }
-        }
-
-        private void layoutStash(final int minX, final int returnAt, final int tabCount) {
-            final TabStash stash = tabContainer.getStash();
-            int stashWidth = stash.getStashWidth();
-            if (minVisible > 0 || maxVisible < tabCount - 1) {
-                if (!stash.getComponent().isVisible()) {
-                    shiftTabs(-stashWidth, minX, returnAt, tabCount);
-                }
-                tabContainer.showStash(minVisible, maxVisible);
-            } else if (stash.getComponent().isVisible()) {
-                tabContainer.hideStash();
-            }
-        }
-
         private void shiftTabs(final int shift, final int minX, final int returnAt, final int tabCount) {
             shiftTabs(shift, minX, returnAt, tabCount, true);
         }
@@ -298,12 +349,13 @@ public abstract class DnDTabbedPaneUI extends BasicTabbedPaneUI {
                 currentShift += shift;
             }
             minVisible = 0;
-            maxVisible = tabCount - 1;
+            maxVisible = 0;
             boolean firstVisible = false;
             for (int i = 0; i < tabCount; i++) {
                 rects[i].x += shift;
-                if (rects[i].x + rects[i].width >= minX && rects[i].x + rects[i].width < returnAt
-                    || rects[i].x >= minX && rects[i].x < returnAt) {
+                int begin = rects[i].x;
+                int end = rects[i].x + rects[i].width;
+                if (Math.max(begin, minX) < Math.min(end, returnAt)) {
                     if (!firstVisible) {
                         minVisible = i;
                         firstVisible = true;
@@ -311,22 +363,6 @@ public abstract class DnDTabbedPaneUI extends BasicTabbedPaneUI {
                     maxVisible = i;
                 }
             }
-        }
-
-        private void calculateRect(final int i, final int minX) {
-            final Rectangle rect = rects[i];
-            if (i > 0) {
-                rect.x = rects[i - 1].x + rects[i - 1].width;
-            } else {
-                tabRuns[0] = 0;
-                maxTabWidth = 0;
-                rect.x = minX;
-            }
-            rect.width = tabbedPane.getTabComponentAt(i).getPreferredSize().width;
-            maxTabWidth = Math.max(maxTabWidth, rect.width);
-            rect.y = 0;
-            rect.height = maxTabHeight;
-            selectedRun = 0;
         }
 
         private void layoutTabComponents() {

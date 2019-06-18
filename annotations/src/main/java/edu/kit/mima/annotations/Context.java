@@ -19,5 +19,5 @@ public @interface Context {
      *
      * @return the class this context supports.
      */
-    Class[] provides();
+    Class<?>[] provides();
 }

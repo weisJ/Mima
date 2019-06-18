@@ -58,6 +58,25 @@ public final class LambdaUtil {
     }
 
     /**
+     * Wrap checked Runnable.
+     *
+     * @param checkedRunnable checked runnable to wrap.
+     * @param <E>             exception type.
+     * @return wrapped runnable.
+     */
+    @NotNull
+    @Contract(pure = true)
+    public static <E extends Exception> Runnable wrap(@NotNull final CheckedRunnable<E> checkedRunnable) {
+        return () -> {
+            try {
+                checkedRunnable.run();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    /**
      * Wrap checked consumer to normal function.
      *
      * @param checkedFunction checked consumer to wrap.

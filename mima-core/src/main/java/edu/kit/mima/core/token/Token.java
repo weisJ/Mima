@@ -36,7 +36,7 @@ public interface Token<T> extends FileObject {
      *
      * @return stream of token
      */
-    default Stream<Token> stream() {
+    default Stream<Token<?>> stream() {
         return stream(true);
     }
 
@@ -46,7 +46,7 @@ public interface Token<T> extends FileObject {
      * @param includeChildren whether to include child tokens.
      * @return stream of token
      */
-    Stream<Token> stream(final boolean includeChildren);
+    Stream<Token<?>> stream(final boolean includeChildren);
 
     /**
      * Get a string representation of the token.

@@ -21,6 +21,17 @@ public class SyntaxTokenStream extends TokenStream {
      * Create SyntaxTokenStream from strings.
      *
      * @param input string input
+     * @param start start index.
+     * @param stop  stop index.
+     */
+    public SyntaxTokenStream(final String input, final int start, final int stop) {
+        super(input, start, stop);
+    }
+
+    /**
+     * Create SyntaxTokenStream from strings.
+     *
+     * @param input string input
      */
     public SyntaxTokenStream(final String input) {
         super(input);
@@ -28,25 +39,25 @@ public class SyntaxTokenStream extends TokenStream {
 
     @Override
     public @Nullable
-    SyntaxToken next() {
-        return (SyntaxToken) super.next();
+    SyntaxToken<?> next() {
+        return (SyntaxToken<?>) super.next();
     }
 
     @Override
     public @Nullable
-    SyntaxToken peek() {
-        return (SyntaxToken) super.peek();
+    SyntaxToken<?> peek() {
+        return (SyntaxToken<?>) super.peek();
     }
 
     @Override
     protected @Nullable
-    SyntaxToken readNext() {
+    SyntaxToken<?> readNext() {
         readWhile(c -> isWhitespace(c) && c != NEW_LINE);
         if (input.isEmpty()) {
             return null;
         }
         final char c = input.peek();
-        SyntaxToken token = null;
+        SyntaxToken<?> token = null;
         if (c == NEW_LINE) {
             input.next();
             token =
@@ -80,7 +91,7 @@ public class SyntaxTokenStream extends TokenStream {
 
     @NotNull
     @Contract(" -> new")
-    private SyntaxToken readComment() {
+    private SyntaxToken<?> readComment() {
         final int startIndex = getPosition();
         String comment = "" + input.next();
         comment += readWhile(c -> c != NEW_LINE && c != Punctuation.COMMENT);
@@ -94,7 +105,7 @@ public class SyntaxTokenStream extends TokenStream {
 
     @NotNull
     @Contract(" -> new")
-    private SyntaxToken readNumber() {
+    private SyntaxToken<?> readNumber() {
         final int startIndex = getPosition();
         String number = "" + input.next();
         number += readWhile(TokenStream::isDigit);
@@ -105,7 +116,7 @@ public class SyntaxTokenStream extends TokenStream {
 
     @NotNull
     @Contract(" -> new")
-    private SyntaxToken readBinary() {
+    private SyntaxToken<?> readBinary() {
         final int startIndex = getPosition();
         String binary = "" + input.next();
         binary += readWhile(c -> c == '0' || c == '1');
@@ -116,7 +127,7 @@ public class SyntaxTokenStream extends TokenStream {
 
     @NotNull
     @Contract(" -> new")
-    private SyntaxToken readIdentification() {
+    private SyntaxToken<?> readIdentification() {
         final int startIndex = getPosition();
         final String identifier = readWhile(TokenStream::isIdentification);
         final int stopIndex = getPosition();
@@ -131,7 +142,7 @@ public class SyntaxTokenStream extends TokenStream {
 
     @NotNull
     @Contract(" -> new")
-    private SyntaxToken readString() {
+    private SyntaxToken<?> readString() {
         final int startIndex = getPosition();
         String string = "" + input.next();
         string += readWhile(c -> c != Punctuation.STRING && c != NEW_LINE);

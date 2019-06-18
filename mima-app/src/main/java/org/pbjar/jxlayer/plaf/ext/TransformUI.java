@@ -143,12 +143,11 @@ public class TransformUI extends MouseEventUI<JComponent> {
             value = false;
         }
         delegatePossible = value;
-        System.out.println(
-                "Java "
-                        + System.getProperty("java.version")
-                        + " "
-                        + System.getProperty("java.vm.version")
-                        + (delegatePossible
+        System.out.println("Java "
+                           + System.getProperty("java.version")
+                           + " "
+                           + System.getProperty("java.vm.version")
+                           + (delegatePossible
                                    ? ": RepaintManager delegate facility for JavaFX will be used."
                                    : ": RepaintManager.setCurrentManager() will be used."));
     }

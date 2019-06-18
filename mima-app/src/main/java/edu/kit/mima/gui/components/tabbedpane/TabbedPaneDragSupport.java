@@ -3,7 +3,7 @@ package edu.kit.mima.gui.components.tabbedpane;
 import edu.kit.mima.gui.components.dragging.DragListener;
 import edu.kit.mima.gui.components.dragging.SnapDraggingSupport;
 import edu.kit.mima.gui.components.dragging.SnapListener;
-import edu.kit.mima.gui.components.editor.Editor;
+import edu.kit.mima.gui.components.text.editor.Editor;
 import edu.kit.mima.util.ImageUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;

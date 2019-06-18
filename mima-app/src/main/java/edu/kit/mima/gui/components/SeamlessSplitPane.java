@@ -1,6 +1,7 @@
 package edu.kit.mima.gui.components;
 
 import edu.kit.mima.gui.persist.PersistentSplitPane;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -23,6 +24,7 @@ public class SeamlessSplitPane extends PersistentSplitPane {
     private int disabledPos = 0;
     private int disabledMax = -1;
     private boolean resizable = true;
+    private boolean lastEnabled = true;
 
     /**
      * Create new Zero With split pane.
@@ -107,8 +109,12 @@ public class SeamlessSplitPane extends PersistentSplitPane {
     public void setResizable(final boolean resizable) {
         this.resizable = resizable;
         if (!resizable) {
+            lastEnabled = isEnabled();
+            setEnabled(false);
             disabledPos = super.getDividerLocation();
             disabledMax = getMaximumDividerLocation();
+        } else {
+            setEnabled(lastEnabled);
         }
     }
 
@@ -128,9 +134,33 @@ public class SeamlessSplitPane extends PersistentSplitPane {
 
     @Override
     public void setDividerLocation(final int location) {
-        if (resizable || disabledPos == disabledMax) {
+        if (resizable) {
             super.setDividerLocation(location);
+        } else if (disabledPos == disabledMax) {
+            super.setDividerLocation(getMaximumDividerLocation());
         }
+    }
+
+    @Override
+    public int getMaximumDividerLocation() {
+        var comp = getRightComponent();
+        int max = getOrientation() == HORIZONTAL_SPLIT ? getWidth() : getHeight();
+        if (comp != null) {
+            if (getOrientation() == HORIZONTAL_SPLIT) {
+                max -= comp.getMinimumSize().width;
+            } else {
+                max -= comp.getMinimumSize().height;
+            }
+        }
+        return Math.max(max, getMinimumDividerLocation());
+    }
+
+    @Override
+    public int getMinimumDividerLocation() {
+        var comp = getRightComponent();
+        return comp == null ? 0 : getOrientation() == HORIZONTAL_SPLIT
+                                  ? comp.getMinimumSize().width
+                                  : comp.getMinimumSize().height;
     }
 
     @Override
@@ -174,6 +204,7 @@ public class SeamlessSplitPane extends PersistentSplitPane {
             }
         }
 
+        @Contract(pure = true)
         @Override
         public int getDividerSize() {
             return showBorder ? 1 : 0;

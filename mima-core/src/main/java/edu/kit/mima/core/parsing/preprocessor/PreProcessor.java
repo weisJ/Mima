@@ -31,7 +31,7 @@ import java.util.Set;
  * @author Jannis Weis
  * @since 2018
  */
-public final class PreProcessor extends Processor<Token, TokenStream> {
+public final class PreProcessor extends Processor<Token<?>, TokenStream> {
 
     @NotNull
     private final String workingDirectory;
@@ -155,7 +155,7 @@ public final class PreProcessor extends Processor<Token, TokenStream> {
      * Process inputFile.
      */
     private void processInput() {
-        final Token token = input.peek();
+        final Token<?> token = input.peek();
         if (token != null && token.getType() == TokenType.STRING) {
             input.next();
             if (!recursive) {
@@ -241,7 +241,7 @@ public final class PreProcessor extends Processor<Token, TokenStream> {
 
     @Nullable
     @Override
-    protected Token parseDelimiter() {
+    protected Token<?> parseDelimiter() {
         return input.next();
     }
 }

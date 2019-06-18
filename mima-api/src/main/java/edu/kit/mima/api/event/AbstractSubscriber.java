@@ -10,17 +10,17 @@ import org.jetbrains.annotations.Contract;
  */
 public abstract class AbstractSubscriber implements Subscriber {
 
-    private final Class classFilter;
+    private final Class<?> classFilter;
     private final Object invokerFilter;
 
     @Contract(pure = true)
-    public AbstractSubscriber(final Class classFilter, final Object invokerFilter) {
+    public AbstractSubscriber(final Class<?> classFilter, final Object invokerFilter) {
         this.invokerFilter = invokerFilter;
         this.classFilter = classFilter;
     }
 
     @Contract(pure = true)
-    public AbstractSubscriber(final Class classFilter) {
+    public AbstractSubscriber(final Class<?> classFilter) {
         this(classFilter, null);
     }
 
@@ -48,7 +48,7 @@ public abstract class AbstractSubscriber implements Subscriber {
     }
 
     @Override
-    public Class getOwnerFilter(final String identification) {
+    public Class<?> getOwnerFilter(final String identification) {
         return classFilter;
     }
 

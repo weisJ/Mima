@@ -38,14 +38,12 @@ public class DirectoryTooltip extends ScrollPopupMenu {
         setBorder(new LineBorder(new HSLColor(getBackground()).adjustTone(60).getRGB(), 1));
         for (final var file : children) {
             if (!file.isHidden()) {
-                final var menuItem =
-                        new JMenuItem(
-                                new AbstractAction() {
-                                    @Override
-                                    public void actionPerformed(final ActionEvent e) {
-                                        SwingUtilities.invokeLater(() -> handler.onClick(file));
-                                    }
-                                });
+                final var menuItem = new JMenuItem(new AbstractAction() {
+                    @Override
+                    public void actionPerformed(final ActionEvent e) {
+                        SwingUtilities.invokeLater(() -> handler.onClick(file));
+                    }
+                });
                 String label = FileName.removeExtension(file, MimaConstants.EXTENSIONS);
                 if (label.isEmpty()) {
                     label = file.getName();

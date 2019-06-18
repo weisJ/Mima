@@ -14,13 +14,13 @@ public class SimpleSubscriber extends AbstractSubscriber {
 
     @Contract(pure = true)
     public SimpleSubscriber(
-            final Class classFilter, final Object invokerFilter, final SubscriberEventHandler handler) {
+            final Class<?> classFilter, final Object invokerFilter, final SubscriberEventHandler handler) {
         super(classFilter, invokerFilter);
         this.handler = handler;
     }
 
     @Contract(pure = true)
-    public SimpleSubscriber(final Class classFilter, final SubscriberEventHandler handler) {
+    public SimpleSubscriber(final Class<?> classFilter, final SubscriberEventHandler handler) {
         this(classFilter, null, handler);
     }
 

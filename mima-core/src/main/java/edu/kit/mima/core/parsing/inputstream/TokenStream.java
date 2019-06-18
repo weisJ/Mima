@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
  * @since 2018
  */
 public class TokenStream {
-    protected static final Token EMPTY = new EmptyToken();
+    private static final Token<?> EMPTY = new EmptyToken();
     protected static final char NEW_LINE = '\n';
     private static final List<String> KEYWORDS = List.of(Keyword.getKeywords());
     private static final Pattern WHITESPACE = Pattern.compile("[ \t\n\r\f]");
@@ -34,7 +34,20 @@ public class TokenStream {
     @NotNull
     protected final CharInputStream input;
 
-    private @Nullable Token current;
+    private @Nullable Token<?> current;
+
+    /**
+     * Create TokenStream from string.
+     *
+     * @param input string input
+     * @param start start index.
+     * @param stop  stop index.
+     */
+    @Contract(pure = true)
+    public TokenStream(final String input, final int start, final int stop) {
+        this.input = new CharInputStream(input, start, stop);
+        current = null;
+    }
 
     /**
      * Create TokenStream from string.
@@ -122,8 +135,8 @@ public class TokenStream {
      *
      * @return next token
      */
-    public @Nullable Token next() {
-        final Token token = current;
+    public @Nullable Token<?> next() {
+        final Token<?> token = current;
         current = null;
         return token != null ? token : readNext();
     }
@@ -133,8 +146,8 @@ public class TokenStream {
      *
      * @return next token
      */
-    public @Nullable Token peek() {
-        final Token token = current != null ? current : readNext();
+    public @Nullable Token<?> peek() {
+        final Token<?> token = current != null ? current : readNext();
         current = token;
         return token;
     }
@@ -202,13 +215,13 @@ public class TokenStream {
     /*
      * Read the next token
      */
-    protected @Nullable Token readNext() {
+    protected @Nullable Token<?> readNext() {
         readWhile(TokenStream::isWhitespace);
         if (input.isEmpty()) {
             return EMPTY;
         }
         final char c = input.peek();
-        Token token = null;
+        Token<?> token = null;
         if (c == Punctuation.COMMENT) {
             input.next();
             skipComment();
@@ -239,7 +252,7 @@ public class TokenStream {
      * Read a number value
      */
     @NotNull
-    private Token readNumber() {
+    private Token<?> readNumber() {
         final String number = input.next() + readWhile(TokenStream::isDigit);
         return new AtomToken<>(TokenType.NUMBER, number);
     }
@@ -248,7 +261,7 @@ public class TokenStream {
      * Read an binary number
      */
     @NotNull
-    private Token readBinary() {
+    private Token<?> readBinary() {
         final String binary = readWhile(c -> c == '0' || c == '1');
         return new AtomToken<>(TokenType.BINARY, binary);
     }
@@ -259,7 +272,7 @@ public class TokenStream {
      */
     @NotNull
     @Contract(" -> new")
-    private Token readIdentification() {
+    private Token<?> readIdentification() {
         final String identifier = readWhile(TokenStream::isIdentification);
         if (isKeyword(identifier)) {
             return new AtomToken<>(TokenType.KEYWORD, identifier);
@@ -273,7 +286,7 @@ public class TokenStream {
      */
     @NotNull
     @Contract(" -> new")
-    private Token readString() {
+    private Token<?> readString() {
         final String string = readWhile(c -> c != Punctuation.STRING && c != NEW_LINE);
         input.next();
         return new AtomToken<>(TokenType.STRING, string);

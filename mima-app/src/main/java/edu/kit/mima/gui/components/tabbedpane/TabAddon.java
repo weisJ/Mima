@@ -8,11 +8,18 @@ import java.awt.*;
  * @author Jannis Weis
  * @since 2019
  */
-public interface TabStash {
+public interface TabAddon {
 
-    int getStashWidth();
+    int LEFT = 0;
+    int RIGHT = 1;
 
-    int getStashHeight();
+    int getPlacement();
+
+    int getAddonWidth();
+
+    int getAddonHeight();
 
     Component getComponent();
+
+    boolean isVisible();
 }

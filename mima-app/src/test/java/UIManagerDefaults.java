@@ -576,7 +576,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
      *  Change the LAF and recreate the UIManagerDefaults so that the properties
      *  of the new LAF are correctly displayed.
      */
-    private class ChangeLookAndFeelAction extends AbstractAction {
+    private final class ChangeLookAndFeelAction extends AbstractAction {
         private final UIManagerDefaults defaults;
         private final String laf;
 
@@ -618,7 +618,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
     /*
      *	Close the frame
      */
-    private class ExitAction extends AbstractAction {
+    private final class ExitAction extends AbstractAction {
         private ExitAction() {
             putValue(Action.NAME, "Exit");
             putValue(Action.SHORT_DESCRIPTION, getValue(Action.NAME));

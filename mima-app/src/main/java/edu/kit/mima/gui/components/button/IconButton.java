@@ -47,7 +47,6 @@ public class IconButton extends JButton implements TooltipAware {
      * @param active   active icon.
      */
     public IconButton(@NotNull final Icon inactive, @NotNull final Icon active) {
-        super();
         this.inactive = inactive;
         this.active = active;
         highlight = new HSLColor(new JPanel().getBackground()).adjustTone(30).getRGB();

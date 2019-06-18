@@ -63,6 +63,7 @@ public class ProtectedScrollTable extends BorderlessScrollPane {
         table.setDragEnabled(false);
         table.getTableHeader().setReorderingAllowed(false);
         table.setFillsViewportHeight(true);
+        table.setRowHeight(20);
 
         scrollPane.setViewportView(table);
         setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);

@@ -28,7 +28,7 @@ public class InstructionTools {
      * @param expectedArgumentNumber expected number of arguments
      */
     public static void checkArgNumber(
-            @NotNull final List<Value> args, final int expectedArgumentNumber) {
+            @NotNull final List<Value<?>> args, final int expectedArgumentNumber) {
         if (args.size() != expectedArgumentNumber) {
             fail("invalid number of arguments");
         }
@@ -41,7 +41,7 @@ public class InstructionTools {
      * @param index     index of argument
      * @return reference argument value
      */
-    public static Value getReferenceValue(@NotNull final List<Value> arguments, final int index) {
+    public static Value<?> getReferenceValue(@NotNull final List<Value<?>> arguments, final int index) {
         final var argument = arguments.get(index);
         if (argument.getType() != ValueType.CONSTANT && argument.getType() != ValueType.NUMBER) {
             fail("can't pass a reference");
@@ -56,7 +56,7 @@ public class InstructionTools {
      * @param index     index of argument in list
      * @return Value with memory reference
      */
-    public static Value getMemoryReference(@NotNull final List<Value> arguments, final int index) {
+    public static Value<?> getMemoryReference(@NotNull final List<Value<?>> arguments, final int index) {
         final var argument = arguments.get(index);
         if (argument == null
                     || !(argument.getType() == ValueType.NUMBER
@@ -78,7 +78,7 @@ public class InstructionTools {
      * @param index     index of argument in argument list
      * @return jump reference
      */
-    public static Value getJumpReference(@NotNull final List<Value> arguments, final int index) {
+    public static Value<?> getJumpReference(@NotNull final List<Value<?>> arguments, final int index) {
         final var argument = arguments.get(index);
         if (argument.getType() != ValueType.JUMP_REFERENCE) {
             throw new IllegalArgumentException("must pass jump reference");

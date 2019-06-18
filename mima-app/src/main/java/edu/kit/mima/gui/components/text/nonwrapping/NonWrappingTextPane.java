@@ -1,4 +1,4 @@
-package edu.kit.mima.gui.components.text;
+package edu.kit.mima.gui.components.text.nonwrapping;
 
 import javax.swing.*;
 import javax.swing.plaf.ComponentUI;

@@ -19,8 +19,10 @@ public class CharInputStream {
      * Empty character.
      */
     public static final char EMPTY_CHAR = Character.MIN_VALUE;
+    public static final int END_OF_FILE = -1;
 
     private final String input;
+    private final int stop;
 
     private int position;
     private int line;
@@ -29,13 +31,27 @@ public class CharInputStream {
     /**
      * Create CharInputStream from string.
      *
-     * @param input input string
+     * @param input input string.
+     * @param start start index.
+     * @param stop  stop index.
      */
-    public CharInputStream(final String input) {
+    @Contract(pure = true)
+    public CharInputStream(final String input, final int start, final int stop) {
         this.input = input;
-        position = 0;
+        this.stop = stop < -1 ? END_OF_FILE : stop;
+        position = Math.max(start, 0);
         line = 0;
         col = 0;
+    }
+
+    /**
+     * Create CharInputStream from string.
+     *
+     * @param input input string.
+     */
+    @Contract(pure = true)
+    public CharInputStream(final String input) {
+        this(input, 0, END_OF_FILE);
     }
 
     /**
@@ -61,10 +77,10 @@ public class CharInputStream {
      * @return next character
      */
     public char peek() {
-        try {
-            return input.charAt(position);
-        } catch (@NotNull final IndexOutOfBoundsException e) {
+        if (position >= input.length() || (position > stop && stop != END_OF_FILE)) {
             return EMPTY_CHAR;
+        } else {
+            return input.charAt(position);
         }
     }
 

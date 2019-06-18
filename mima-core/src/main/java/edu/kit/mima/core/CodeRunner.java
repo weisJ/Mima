@@ -16,7 +16,7 @@ public interface CodeRunner {
     @NotNull
     Debugger debugger();
 
-    void start(Consumer<Value> callback);
+    void start(Consumer<Value<?>> callback);
 
     void stop();
 

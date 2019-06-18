@@ -11,7 +11,7 @@ import java.util.stream.Stream;
  * @author Jannis Weis
  * @since 2018
  */
-public class EmptyToken extends FileObjectAdapter implements Token {
+public class EmptyToken extends FileObjectAdapter implements Token<Object> {
 
     @NotNull
     @Override
@@ -27,7 +27,7 @@ public class EmptyToken extends FileObjectAdapter implements Token {
 
     @NotNull
     @Override
-    public Stream<Token> stream(boolean includeChildren) {
+    public Stream<Token<?>> stream(final boolean includeChildren) {
         return Stream.empty();
     }
 

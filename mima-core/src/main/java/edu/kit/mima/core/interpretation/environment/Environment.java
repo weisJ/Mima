@@ -83,7 +83,7 @@ public class Environment {
     }
 
     /**
-     * Get the program Token of this environment.
+     * Get the program Token<?> of this environment.
      *
      * @return programToken of this environment
      */

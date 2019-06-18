@@ -67,7 +67,7 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
      *
      * @param callback callback to execute with accumulator after program execution.
      */
-    public void start(final Consumer<Value> callback) {
+    public void start(final Consumer<Value<?>> callback) {
         mima.reset();
         setupInterpreter(callback);
         threadDebugController.setBreaks(Collections.emptyList());
@@ -97,7 +97,7 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
      *
      * @param callback callback to execute with accumulator after program execution.
      */
-    private void createGlobalEnvironment(final Consumer<Value> callback) {
+    private void createGlobalEnvironment(final Consumer<Value<?>> callback) {
         final InstructionSet instructionSet = program.getInstructionSet();
         mima = new Mima(instructionSet.getWordLength(), instructionSet.getConstWordLength());
         globalEnvironment =
@@ -114,7 +114,7 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
      *
      * @param callback callback to execute with accumulator after program execution.
      */
-    private void setupInterpreter(final Consumer<Value> callback) {
+    private void setupInterpreter(final Consumer<Value<?>> callback) {
         if (program == null) {
             throw new IllegalStateException("must parse program before starting");
         }
@@ -166,7 +166,7 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
      * @return current token
      */
     @Nullable
-    public Token getCurrentStatement() {
+    public Token<?> getCurrentStatement() {
         return interpreter.getCurrentToken();
     }
 
@@ -231,7 +231,7 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
 
         @Override
         public void start(
-                final Consumer<Value> callback, @NotNull final Collection<Breakpoint> breakpoints) {
+                final Consumer<Value<?>> callback, @NotNull final Collection<Breakpoint> breakpoints) {
             active = true;
             paused = false;
 

@@ -21,7 +21,7 @@ import java.util.stream.IntStream;
 public class SyntaxTree {
 
     @NotNull
-    private final SyntaxToken[] tokens;
+    private final SyntaxToken<?>[] tokens;
     @NotNull
     private final SyntaxNode root;
 
@@ -30,7 +30,7 @@ public class SyntaxTree {
      *
      * @param tokens tokens to build tree from
      */
-    public SyntaxTree(@NotNull final SyntaxToken[] tokens) {
+    public SyntaxTree(@NotNull final SyntaxToken<?>[] tokens) {
         this.tokens = tokens;
         this.root = new SimpleSyntaxNode(NodeType.ROOT, 0, tokens.length, null);
         build();
@@ -282,7 +282,7 @@ public class SyntaxTree {
      * @return Syntax Node
      */
     @NotNull
-    private SyntaxNode tokenToNode(@NotNull final SyntaxToken token, final int index) {
+    private SyntaxNode tokenToNode(@NotNull final SyntaxToken<?> token, final int index) {
         final SyntaxNode node = new LeafNode(NodeType.LEAF, index, null);
         switch (token.getType()) {
             case PUNCTUATION:

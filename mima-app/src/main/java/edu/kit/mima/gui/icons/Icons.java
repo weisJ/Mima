@@ -52,6 +52,9 @@ public final class Icons {
     public static final UIAwareIcon MEMORY = create("memory.svg");
     public static final UIAwareIcon CONSOLE = create("console.svg");
     public static final UIAwareIcon TERMINAL = create("terminal.svg");
+    public static final UIAwareIcon BUILD_GREY = create("build.svg");
+
+
 
     public static final UIAwareIcon SEARCH = create("search.svg");
     public static final UIAwareIcon SEARCH_WITH_HISTORY = create("searchWithHistory.svg");
@@ -60,6 +63,8 @@ public final class Icons {
     public static final UIAwareIcon COLLAPSE = create("collapse.svg");
     public static final Icon MORE_TABS = loadIcon("moreTabs.svg", 20, 20);
     public static final Icon CLEAR = loadIcon("clear.svg", 12, 12);
+    public static final UIAwareIcon ADD = create("add.svg");
+
 
     public static final UIAwareIcon MOVE_TOP_LEFT = create("moveToTopLeft.svg");
     public static final UIAwareIcon MOVE_TOP_RIGHT = create("moveToTopRight.svg");

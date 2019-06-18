@@ -30,7 +30,7 @@ import java.util.function.Supplier;
  * @author Jannis Weis
  * @since 2018
  */
-public final class Parser extends Processor<Token, TokenStream> {
+public final class Parser extends Processor<Token<?>, TokenStream> {
 
     @NotNull
     private final Set<ParserException> errors;
@@ -69,7 +69,7 @@ public final class Parser extends Processor<Token, TokenStream> {
     @NotNull
     @Contract(" -> new")
     private Tuple<ProgramToken, List<ParserException>> parseTopLevel() {
-        final List<Token> program = new ArrayList<>();
+        final List<Token<?>> program = new ArrayList<>();
         scopeIndex++;
         tokenIndexStack.push(0);
         errors.addAll(skipError());
@@ -79,7 +79,7 @@ public final class Parser extends Processor<Token, TokenStream> {
             try {
                 skipEndOfInstruction = true;
                 if (!isPunctuation(Punctuation.INSTRUCTION_END)) {
-                    final Token token = maybeJumpAssociation(this::parseExpression);
+                    final Token<?> token = maybeJumpAssociation(this::parseExpression);
                     if (token.getType() == TokenType.SCOPE_END) {
                         finishedScope = true;
                         skipEndOfInstruction = false;
@@ -99,14 +99,14 @@ public final class Parser extends Processor<Token, TokenStream> {
         }
         tokenIndexStack.pop();
         return new ValueTuple<>(
-                new ProgramToken(program.toArray(new Token[0]), line), new ArrayList<>(errors));
+                new ProgramToken(program.toArray(new Token<?>[0]), line), new ArrayList<>(errors));
     }
 
     /*
      * Parses an expression. Expressions may be function calls
      */
     @NotNull
-    private Token parseExpression() {
+    private Token<?> parseExpression() {
         return maybeCall(this::parseAtomic);
     }
 
@@ -114,14 +114,14 @@ public final class Parser extends Processor<Token, TokenStream> {
      * Parse atomic values
      */
     @NotNull
-    private Token parseAtomic() {
+    private Token<?> parseAtomic() {
         return maybeCall(
                 () -> {
                     if (isPunctuation(Punctuation.SCOPE_OPEN)) {
                         input.next();
                         final var parsed = parseTopLevel();
                         errors.addAll(parsed.getSecond());
-                        final Token program = parsed.getFirst();
+                        final Token<?> program = parsed.getFirst();
                         if (isPunctuation(Punctuation.INSTRUCTION_END)) {
                             input.next();
                         }
@@ -134,7 +134,7 @@ public final class Parser extends Processor<Token, TokenStream> {
                     }
                     if (isPunctuation(Punctuation.OPEN_BRACKET)) {
                         input.next();
-                        final Token expression = parseExpression();
+                        final Token<?> expression = parseExpression();
                         skipPunctuation(Punctuation.CLOSED_BRACKET);
                         return expression;
                     }
@@ -142,7 +142,7 @@ public final class Parser extends Processor<Token, TokenStream> {
                         input.next();
                         return parseDefinition();
                     }
-                    final Token token = input.peek();
+                    final Token<?> token = input.peek();
                     if (token != null
                                 && (token.getType() == TokenType.IDENTIFICATION
                                             || token.getType() == TokenType.BINARY
@@ -157,8 +157,8 @@ public final class Parser extends Processor<Token, TokenStream> {
     /*
      * Parses an expression that may have an jump instruction preceding it.
      */
-    private Token maybeJumpAssociation(@NotNull final Supplier<Token> supplier) {
-        final Token expression = supplier.get();
+    private Token<?> maybeJumpAssociation(@NotNull final Supplier<Token<?>> supplier) {
+        final Token<?> expression = supplier.get();
         final int line = input.getLine();
         if (isPunctuation(Punctuation.JUMP_DELIMITER)) {
             input.next();
@@ -176,8 +176,8 @@ public final class Parser extends Processor<Token, TokenStream> {
      * Parses an expression that mey be a function call
      */
     @NotNull
-    private Token maybeCall(@NotNull final Supplier<Token> supplier) {
-        final Token expression = supplier.get();
+    private Token<?> maybeCall(@NotNull final Supplier<Token<?>> supplier) {
+        final Token<?> expression = supplier.get();
         return isPunctuation(Punctuation.OPEN_BRACKET) ? parseCall(expression) : expression;
     }
 
@@ -185,7 +185,7 @@ public final class Parser extends Processor<Token, TokenStream> {
      * Parse a function call
      */
     @NotNull
-    private Token parseCall(@NotNull final Token reference) {
+    private Token<?> parseCall(@NotNull final Token<?> reference) {
         final int line = input.getLine();
         return new BinaryToken<>(
                 TokenType.CALL,
@@ -203,7 +203,7 @@ public final class Parser extends Processor<Token, TokenStream> {
      */
     @NotNull
     @Contract(" -> new")
-    private Token parseDefinition() {
+    private Token<?> parseDefinition() {
         skipKeyword(Keyword.DEFINITION);
         final int line = input.getLine();
         return new AtomToken<>(
@@ -218,7 +218,7 @@ public final class Parser extends Processor<Token, TokenStream> {
 
     @NotNull
     @Contract(" -> new")
-    private Token maybeConstant() {
+    private Token<?> maybeConstant() {
         if (isKeyword(Keyword.CONSTANT)) {
             skipKeyword(Keyword.CONSTANT);
             return parseConstant();
@@ -232,12 +232,12 @@ public final class Parser extends Processor<Token, TokenStream> {
      */
     @NotNull
     @Contract(" -> new")
-    private BinaryToken parseConstant() {
-        final Token reference = input.next();
+    private BinaryToken<?, ?> parseConstant() {
+        final Token<?> reference = input.next();
         final int line = input.getLine();
         if (reference != null && reference.getType() == TokenType.IDENTIFICATION) {
             skipPunctuation(Punctuation.DEFINITION_DELIMITER);
-            final Token value = parseExpression();
+            final Token<?> value = parseExpression();
             return new BinaryToken<>(TokenType.CONSTANT, reference, value, tokenIndexStack.peek(), line);
         }
         return input.error("expected identifier");
@@ -247,13 +247,13 @@ public final class Parser extends Processor<Token, TokenStream> {
      * Parse a reference. May have a value
      */
     @NotNull
-    private BinaryToken parseReference() {
-        final Token reference = input.next();
+    private BinaryToken<?, ?> parseReference() {
+        final Token<?> reference = input.next();
         final int line = input.getLine();
         if (reference != null && reference.getType() == TokenType.IDENTIFICATION) {
             if (isPunctuation(Punctuation.DEFINITION_DELIMITER)) {
                 skipPunctuation(Punctuation.DEFINITION_DELIMITER);
-                final Token value = parseExpression();
+                final Token<?> value = parseExpression();
                 return new BinaryToken<>(
                         TokenType.REFERENCE, reference, value, tokenIndexStack.peek(), line);
             }
@@ -265,7 +265,7 @@ public final class Parser extends Processor<Token, TokenStream> {
 
     @Nullable
     @Override
-    protected Token parseDelimiter() {
+    protected Token<?> parseDelimiter() {
         return Optional.ofNullable(input.peek())
                        .map(t -> t.getType() == TokenType.PUNCTUATION)
                        .orElse(false)
