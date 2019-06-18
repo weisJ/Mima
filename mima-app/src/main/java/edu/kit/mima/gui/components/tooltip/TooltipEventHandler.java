@@ -194,7 +194,7 @@ public class TooltipEventHandler extends MouseAdapter {
     private void contentMouseMovedEvent(@NotNull final MouseEvent e) {
         if (overContainer && active) {
             checkExit(SwingUtilities.convertMouseEvent(tooltipComponent.tooltip, e,
-                                                         tooltipComponent.container));
+                                                       tooltipComponent.container));
         }
     }
 

@@ -60,7 +60,7 @@ public class TextBubbleBorder extends AbstractBorder {
         this.pointerWidth = pointerSize;
 
         hints = new RenderingHints(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
+                                   RenderingHints.VALUE_ANTIALIAS_ON);
         insets = new Insets(0, 0, 0, 0);
         setThickness(thickness);
     }

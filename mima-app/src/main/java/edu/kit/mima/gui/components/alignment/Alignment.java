@@ -16,31 +16,31 @@ import static edu.kit.mima.gui.components.alignment.AlignmentHelper.*;
  */
 public enum Alignment {
     NORTH(AlignmentHelper.align(HOR_CENTER_INSIDE, VERT_TOP_INSIDE),
-            AlignmentHelper.align(HOR_CENTER_OUTSIDE, VERT_TOP_OUTSIDE), 0
+          AlignmentHelper.align(HOR_CENTER_OUTSIDE, VERT_TOP_OUTSIDE), 0
     ),
     SOUTH(AlignmentHelper.align(HOR_CENTER_INSIDE, VERT_BOTTOM_INSIDE),
-            AlignmentHelper.align(HOR_CENTER_OUTSIDE, VERT_BOTTOM_OUTSIDE), 1
+          AlignmentHelper.align(HOR_CENTER_OUTSIDE, VERT_BOTTOM_OUTSIDE), 1
     ),
     EAST(AlignmentHelper.align(HOR_RIGHT_INSIDE, VERT_CENTER_INSIDE),
-            AlignmentHelper.align(HOR_RIGHT_OUTSIDE, VERT_CENTER_OUTSIDE), 2
+         AlignmentHelper.align(HOR_RIGHT_OUTSIDE, VERT_CENTER_OUTSIDE), 2
     ),
     WEST(AlignmentHelper.align(HOR_LEFT_INSIDE, VERT_CENTER_INSIDE),
-            AlignmentHelper.align(HOR_LEFT_OUTSIDE, VERT_CENTER_OUTSIDE), 3
+         AlignmentHelper.align(HOR_LEFT_OUTSIDE, VERT_CENTER_OUTSIDE), 3
     ),
     NORTH_EAST(AlignmentHelper.align(HOR_RIGHT_INSIDE, VERT_TOP_INSIDE),
-            AlignmentHelper.align(HOR_RIGHT_OUTSIDE, VERT_TOP_OUTSIDE), 4
+               AlignmentHelper.align(HOR_RIGHT_OUTSIDE, VERT_TOP_OUTSIDE), 4
     ),
     NORTH_WEST(AlignmentHelper.align(HOR_LEFT_INSIDE, VERT_TOP_INSIDE),
-            AlignmentHelper.align(HOR_LEFT_OUTSIDE, VERT_TOP_OUTSIDE), 5
+               AlignmentHelper.align(HOR_LEFT_OUTSIDE, VERT_TOP_OUTSIDE), 5
     ),
     SOUTH_EAST(AlignmentHelper.align(HOR_RIGHT_INSIDE, VERT_BOTTOM_INSIDE),
-            AlignmentHelper.align(HOR_RIGHT_OUTSIDE, VERT_BOTTOM_OUTSIDE), 6
+               AlignmentHelper.align(HOR_RIGHT_OUTSIDE, VERT_BOTTOM_OUTSIDE), 6
     ),
     SOUTH_WEST(AlignmentHelper.align(HOR_LEFT_INSIDE, VERT_BOTTOM_INSIDE),
-            AlignmentHelper.align(HOR_LEFT_OUTSIDE, VERT_BOTTOM_OUTSIDE), 7
+               AlignmentHelper.align(HOR_LEFT_OUTSIDE, VERT_BOTTOM_OUTSIDE), 7
     ),
     CENTER(AlignmentHelper.align(HOR_CENTER_INSIDE, VERT_CENTER_INSIDE),
-            AlignmentHelper.align(HOR_CENTER_OUTSIDE, VERT_CENTER_OUTSIDE), 8
+           AlignmentHelper.align(HOR_CENTER_OUTSIDE, VERT_CENTER_OUTSIDE), 8
     );
 
 
@@ -76,7 +76,7 @@ public enum Alignment {
         }
         for (var alignment : Alignment.values()) {
             if (alignment != CENTER && alignment != hint
-                        && alignment.canBeAligned(point, size, outerBounds)) {
+                && alignment.canBeAligned(point, size, outerBounds)) {
                 return alignment;
             }
         }
@@ -191,8 +191,8 @@ public enum Alignment {
                                 @NotNull final Rectangle outerBounds) {
         var p = relativePos(size, point);
         return p.x >= outerBounds.x && p.y >= outerBounds.y
-                       && p.x + size.width < outerBounds.x + outerBounds.width
-                       && p.y + size.height < outerBounds.x + outerBounds.height;
+               && p.x + size.width < outerBounds.x + outerBounds.width
+               && p.y + size.height < outerBounds.x + outerBounds.height;
     }
 
     /**

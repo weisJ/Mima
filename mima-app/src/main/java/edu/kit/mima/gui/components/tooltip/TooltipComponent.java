@@ -108,7 +108,7 @@ public class TooltipComponent<T extends TooltipWindow> extends MouseAdapter impl
         tooltip.hideTooltip();
         tooltip.setVisible(false); // Ensure it's hidden
         if (container instanceof TooltipAware) {
-            ((TooltipAware)container).setTooltipVisible(false, eventHandler);
+            ((TooltipAware) container).setTooltipVisible(false, eventHandler);
         }
     }
 
@@ -117,7 +117,7 @@ public class TooltipComponent<T extends TooltipWindow> extends MouseAdapter impl
      */
     private boolean showTooltipInternal() {
         if (container instanceof TooltipAware) {
-            ((TooltipAware)container).setTooltipVisible(true, eventHandler);
+            ((TooltipAware) container).setTooltipVisible(true, eventHandler);
         }
         tooltip.setVisible(true);
         eventHandler.setActive(true);
@@ -138,7 +138,7 @@ public class TooltipComponent<T extends TooltipWindow> extends MouseAdapter impl
     private Point calculatePositionIn(
             @NotNull final Component c, @NotNull final Dimension size, @NotNull final Point mousePos) {
         final var containerPos = SwingUtilities.convertPoint(
-                        container, new Point(container.getWidth() / 2, container.getHeight() / 2), c);
+                container, new Point(container.getWidth() / 2, container.getHeight() / 2), c);
         SwingUtilities.convertPointFromScreen(mousePos, c);
         var pos = centerAt.calculatePosition(mousePos, containerPos);
         Alignment alignment = Alignment.getAlignment(pos, size, c.getBounds(), Alignment.SOUTH);

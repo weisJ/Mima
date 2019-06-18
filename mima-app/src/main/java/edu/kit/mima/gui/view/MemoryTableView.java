@@ -6,6 +6,7 @@ import edu.kit.mima.core.data.MachineWord;
 import edu.kit.mima.core.interpretation.environment.Environment;
 import edu.kit.mima.gui.components.ProtectedScrollTable;
 import edu.kit.mima.gui.icons.Icons;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -33,6 +34,7 @@ public class MemoryTableView implements MemoryView {
     private final ProtectedScrollTable table;
     private boolean binaryView = false;
 
+    @Contract(pure = true)
     public MemoryTableView(final MimaRunner mimaRunner, final ProtectedScrollTable table) {
         this.mimaRunner = mimaRunner;
         this.table = table;
@@ -49,10 +51,11 @@ public class MemoryTableView implements MemoryView {
 
     @Override
     public void updateView() {
-        table.setContent(getMemoryTable());
-        table.clearIcons();
-        table.setIcon(Icons.STACK_POINTER, mimaRunner.getMima().getStackPointer().intValue() + 1, 0);
-        table.repaint();
+        SwingUtilities.invokeLater(() -> {
+            table.setContent(getMemoryTable());
+            table.clearIcons();
+            table.setIcon(Icons.STACK_POINTER, mimaRunner.getMima().getStackPointer().intValue() + 1, 0);
+        });
     }
 
     /**
@@ -113,15 +116,15 @@ public class MemoryTableView implements MemoryView {
         for (final Map.Entry<Integer, MachineWord> entry : entryList) {
             final String valueString =
                     binaryView
-                            ? entry.getValue().binaryRepresentation()
-                            : String.valueOf(entry.getValue().intValue());
+                    ? entry.getValue().binaryRepresentation()
+                    : String.valueOf(entry.getValue().intValue());
             final Object[] element =
                     associations.containsValue(entry.getKey())
-                            ? new Object[]{
+                    ? new Object[]{
                             entry.getKey() + " (" + getAssociation(associations, entry.getKey()) + ')',
                             valueString
                     }
-                            : new Object[]{entry.getKey(), valueString};
+                    : new Object[]{entry.getKey(), valueString};
             boolean skip;
             try {
                 final int value = Integer.parseInt(element[0].toString());

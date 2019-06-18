@@ -30,8 +30,8 @@ public class TabbedPaneDragSupport
         implements DragSourceListener, DragGestureListener, SnapListener, DragListener {
 
     private final DnDTabbedPane tabbedPane;
-    private boolean dragging;
     private final SnapDraggingSupport draggingSupport;
+    private boolean dragging;
     private int dropTargetIndex = -1;
     private int dropSourceIndex = -1;
 

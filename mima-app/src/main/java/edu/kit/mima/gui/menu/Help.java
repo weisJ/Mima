@@ -44,13 +44,11 @@ public final class Help extends JFrame {
 
     @NotNull
     private static final Help instance = new Help();
-
+    private final JEditorPane panel;
+    private final HTMLEditorKit kit;
     @Nullable
     private Thread loadSource;
     private boolean loadedFromWeb;
-
-    private final JEditorPane panel;
-    private final HTMLEditorKit kit;
     @Nullable
     private String source;
 

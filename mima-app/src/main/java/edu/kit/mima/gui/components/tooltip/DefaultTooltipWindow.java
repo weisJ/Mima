@@ -178,8 +178,8 @@ public class DefaultTooltipWindow extends TooltipWindow {
                     timer.cancel();
                 }
                 alpha = start < end
-                                ? Math.min(alpha + increment, end)
-                                : Math.max(alpha + increment, end);
+                        ? Math.min(alpha + increment, end)
+                        : Math.max(alpha + increment, end);
                 if (alpha == 0) {
                     setVisible(false);
                 }
@@ -209,10 +209,10 @@ public class DefaultTooltipWindow extends TooltipWindow {
             //Move shadow according to alignment.
             Rectangle rect = switch (alignment) {
                 case NORTH, NORTH_EAST, NORTH_WEST -> new Rectangle(0, 0, getWidth(),
-                        getHeight() - pointerSize);
+                                                                    getHeight() - pointerSize);
                 case EAST -> new Rectangle(pointerSize, 0, getWidth() - pointerSize, getHeight());
                 case SOUTH, SOUTH_EAST, SOUTH_WEST -> new Rectangle(0, pointerSize, getWidth(),
-                        getHeight() - pointerSize);
+                                                                    getHeight() - pointerSize);
                 case WEST -> new Rectangle(0, 0, getWidth() - pointerSize, getHeight());
                 default -> new Rectangle(0, 0, getWidth(), getHeight());
             };

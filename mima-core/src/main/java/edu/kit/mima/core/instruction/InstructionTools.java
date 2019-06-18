@@ -59,13 +59,13 @@ public class InstructionTools {
     public static Value<?> getMemoryReference(@NotNull final List<Value<?>> arguments, final int index) {
         final var argument = arguments.get(index);
         if (argument == null
-                    || !(argument.getType() == ValueType.NUMBER
-                                 || argument.getType() == ValueType.CONSTANT
-                                 || argument.getType() == ValueType.MEMORY_REFERENCE)) {
+            || !(argument.getType() == ValueType.NUMBER
+                 || argument.getType() == ValueType.CONSTANT
+                 || argument.getType() == ValueType.MEMORY_REFERENCE)) {
             fail("must pass a memory address");
         }
         if (!(argument.getType() == ValueType.MEMORY_REFERENCE)
-                    && ((MachineWord) (argument.getValue())).intValue() < 0) {
+            && ((MachineWord) (argument.getValue())).intValue() < 0) {
             fail("illegal memory address");
         }
         return argument;

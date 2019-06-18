@@ -30,11 +30,20 @@ public class DarkScrollBarUI extends DarculaScrollBarUI {
     protected static final float THUMB_ALPHA = 0.6f;
     private static final float MAX_ALPHA = 0.3f;
     protected final AlphaComposite composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER);
+    @NotNull
+    private final MouseWheelListener wheelListener =
+            e -> {
+                if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
+                    scrollbar.setValueIsAdjusting(true);
+                    scrollbar.setValue(
+                            scrollbar.getValue()
+                            + Integer.signum(e.getUnitsToScroll()) * scrollbar.getUnitIncrement());
+                    scrollbar.setValueIsAdjusting(false);
+                }
+            };
     private Animator trackAnimator;
     private float alpha;
     private boolean inside;
-    private boolean dragging;
-
     @NotNull
     private final MouseListener listener =
             new MouseAdapter() {
@@ -66,7 +75,7 @@ public class DarkScrollBarUI extends DarculaScrollBarUI {
                     scrollbar.repaint();
                 }
             };
-
+    private boolean dragging;
     @NotNull
     private final AdjustmentListener adjustmentListener =
             new AdjustmentListener() {
@@ -82,18 +91,6 @@ public class DarkScrollBarUI extends DarculaScrollBarUI {
                         listener.mouseExited(null);
                         dragging = false;
                     }
-                }
-            };
-
-    @NotNull
-    private final MouseWheelListener wheelListener =
-            e -> {
-                if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
-                    scrollbar.setValueIsAdjusting(true);
-                    scrollbar.setValue(
-                            scrollbar.getValue()
-                                    + Integer.signum(e.getUnitsToScroll()) * scrollbar.getUnitIncrement());
-                    scrollbar.setValueIsAdjusting(false);
                 }
             };
 

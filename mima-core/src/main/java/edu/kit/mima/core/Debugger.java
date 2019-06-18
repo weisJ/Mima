@@ -13,8 +13,8 @@ import java.util.function.Consumer;
  * @since 2018
  */
 public interface Debugger {
-    String RUNNING_PROPERTY = "running";
-    String PAUSE_PROPERTY = "paused";
+    String RUNNING_PROPERTY = "debugger.running";
+    String PAUSE_PROPERTY = "debugger.paused";
 
     void start(Consumer<Value<?>> callback, Collection<Breakpoint> breakpoints);
 

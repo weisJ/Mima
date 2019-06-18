@@ -72,7 +72,7 @@ public class DraggingSupport implements AWTEventListener {
                             final Point p = MouseInfo.getPointerInfo().getLocation();
                             extended =
                                     !SwingUtilities.getWindowAncestor(component).getBounds().contains(p)
-                                            && extendedImage != null;
+                                    && extendedImage != null;
                             dragWindow.setOpacity(extended ? opacityOutside : opacityInside);
                             timerTask(e, p);
                             notifyListeners(DragListener::onDrag, listenerList, p);

@@ -36,6 +36,12 @@ public final class ButtonPanelBuilder {
         this.layoutManager = new BoxLayout(panel, BoxLayout.X_AXIS);
     }
 
+    @NotNull
+    @Contract(" -> new")
+    public static Separator createSeparator() {
+        return new Separator();
+    }
+
     /**
      * Add Button to the ButtonPanel.
      *
@@ -58,6 +64,35 @@ public final class ButtonPanelBuilder {
     @Contract("_ -> new")
     public ButtonBuilder addButton(final JButton button) {
         return new ButtonBuilder(button, this);
+    }
+
+    public static class Separator extends Spacer {
+        @Override
+        protected void paintComponent(@NotNull final Graphics g) {
+            super.paintComponent(g);
+            g.setColor(new HSLColor(UIManager.getColor("Button.light")).adjustShade(20).getRGB());
+            g.drawLine(getWidth() / 2, 0, getWidth() / 2, getHeight());
+        }
+    }
+
+    private static class Spacer extends JButton {
+        private Spacer() {
+            setOpaque(false);
+            setEnabled(false);
+            setFocusable(false);
+            setBorderPainted(false);
+        }
+
+        @NotNull
+        @Override
+        public Dimension getPreferredSize() {
+            final var size = super.getPreferredSize();
+            return new Dimension(size.width / 2, size.height);
+        }
+
+        @Override
+        protected void paintComponent(final Graphics g) {
+        }
     }
 
     public final class ButtonBuilder {
@@ -194,6 +229,13 @@ public final class ButtonPanelBuilder {
             return new ButtonBuilder(new Separator(), parent);
         }
 
+        @NotNull
+        @Contract("_ -> new")
+        public ButtonBuilder addSeparator(final Separator separator) {
+            parent.buttons.offer(button);
+            return new ButtonBuilder(separator, parent);
+        }
+
         /**
          * Construct the ButtonPanel. Buttons are added in the order they were configured.
          *
@@ -219,39 +261,9 @@ public final class ButtonPanelBuilder {
 
         private void setAccelerator(final String accelerator) {
             final Action clickAction = new ClickAction(button);
-            button
-                    .getInputMap(JButton.WHEN_IN_FOCUSED_WINDOW)
+            button.getInputMap(JButton.WHEN_IN_FOCUSED_WINDOW)
                     .put(KeyStroke.getKeyStroke(accelerator), accelerator);
             button.getActionMap().put(accelerator, clickAction);
-        }
-    }
-
-    private class Separator extends Spacer {
-        @Override
-        protected void paintComponent(@NotNull final Graphics g) {
-            super.paintComponent(g);
-            g.setColor(new HSLColor(UIManager.getColor("Button.light")).adjustShade(20).getRGB());
-            g.drawLine(getWidth() / 2, 0, getWidth() / 2, getHeight());
-        }
-    }
-
-    private class Spacer extends JButton {
-        private Spacer() {
-            setOpaque(false);
-            setEnabled(false);
-            setFocusable(false);
-            setBorderPainted(false);
-        }
-
-        @NotNull
-        @Override
-        public Dimension getPreferredSize() {
-            final var size = super.getPreferredSize();
-            return new Dimension(size.width / 2, size.height);
-        }
-
-        @Override
-        protected void paintComponent(final Graphics g) {
         }
     }
 }

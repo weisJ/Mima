@@ -112,9 +112,9 @@ public final class SubscriptionManager {
         for (var subscriber :
                 Optional.ofNullable(subscriberMap.get(identification)).orElse(List.of())) {
             if (subscriber.useOwnerFilter()
-                        && !Arrays.asList(owner).contains(subscriber.getOwnerFilter(identification))
-                        || subscriber.useInvokeFilter()
-                                   && invoker != subscriber.getInvokerFilter(identification)) {
+                && !Arrays.asList(owner).contains(subscriber.getOwnerFilter(identification))
+                || subscriber.useInvokeFilter()
+                   && invoker != subscriber.getInvokerFilter(identification)) {
                 continue;
             }
             subscriber.notifySubscription(identification, value);

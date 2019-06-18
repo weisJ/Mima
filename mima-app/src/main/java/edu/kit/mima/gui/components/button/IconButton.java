@@ -22,9 +22,9 @@ public class IconButton extends JButton implements TooltipAware {
     protected final int border = 3;
     private final Color highlight;
     private final Color highlightClick;
+    private final HoverListener hoverListener;
     protected Icon inactive;
     protected Icon active;
-    private final HoverListener hoverListener;
     private boolean clicking;
     private boolean locked;
     private boolean nextStatus;

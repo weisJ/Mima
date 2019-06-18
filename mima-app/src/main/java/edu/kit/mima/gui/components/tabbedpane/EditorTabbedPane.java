@@ -1,5 +1,6 @@
 package edu.kit.mima.gui.components.tabbedpane;
 
+import edu.kit.mima.gui.components.text.editor.Editor;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -8,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
  * @author Jannis Weis
  * @since 2019
  */
-public class EditorTabbedPane extends DnDTabbedPane {
+public class EditorTabbedPane extends DnDTabbedPane<Editor> {
 
     @NotNull
     @Override

@@ -190,7 +190,7 @@ public class MachineWord {
      */
     public void setValue(final int value) {
         assert (!(value > (Math.pow(2, wordLength - 1) - 1)))
-                       && (!(value < (-1 * Math.pow(2, wordLength - 1))))
+               && (!(value < (-1 * Math.pow(2, wordLength - 1))))
                 : "value must be > 0 for unsigned data";
         bits = new boolean[wordLength];
         final boolean isNegative = value < 0;

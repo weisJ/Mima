@@ -93,7 +93,7 @@ public class ProtectedScrollTable extends BorderlessScrollPane {
 
     public void setIcon(final Icon icon, final int row, final int column) {
         iconMap.put(new Pair<>(row, column), icon);
-        maxIconSize.put(column,Math.max(icon.getIconWidth(),maxIconSize.getOrDefault(column, 0)));
+        maxIconSize.put(column, Math.max(icon.getIconWidth(), maxIconSize.getOrDefault(column, 0)));
     }
 
     /**
@@ -150,7 +150,7 @@ public class ProtectedScrollTable extends BorderlessScrollPane {
             if (isFocusOwner()) {
                 return super.getSelectionBackground();
             } else {
-               return UIManager.getColor("Table.selectedBackground.noFocus");
+                return UIManager.getColor("Table.selectedBackground.noFocus");
             }
         }
 

@@ -87,10 +87,6 @@ public class TabFrameTabComponent extends IconLabel {
         this.index = index;
     }
 
-    public void setAlignment(final Alignment a) {
-        this.alignment = a;
-    }
-
     /**
      * Get the alignment.
      *
@@ -98,6 +94,10 @@ public class TabFrameTabComponent extends IconLabel {
      */
     public Alignment getAlignment() {
         return alignment;
+    }
+
+    public void setAlignment(final Alignment a) {
+        this.alignment = a;
     }
 
     /**
@@ -141,8 +141,8 @@ public class TabFrameTabComponent extends IconLabel {
     @Override
     public Color getBackground() {
         return selected && selectedColor != null
-                       ? selectedColor
-                       : hoverListener.isHover() && hoverColor != null ? hoverColor : super.getBackground();
+               ? selectedColor
+               : hoverListener.isHover() && hoverColor != null ? hoverColor : super.getBackground();
     }
 
     @Override

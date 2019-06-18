@@ -99,8 +99,8 @@ public class DarkTextFieldUI extends DarculaTextFieldUI {
         Point p = this.getSearchIconCoord();
         Icon searchIcon =
                 this.getComponent().getClientProperty("JTextField.Search.FindPopup") instanceof JPopupMenu
-                        ? Icons.SEARCH_WITH_HISTORY
-                        : Icons.SEARCH;
+                ? Icons.SEARCH_WITH_HISTORY
+                : Icons.SEARCH;
         searchIcon.paintIcon(null, g, p.x, p.y);
     }
 }

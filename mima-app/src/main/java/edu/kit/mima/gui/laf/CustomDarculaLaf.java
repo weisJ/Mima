@@ -234,7 +234,7 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
                     new IconUIResource(
                             IconLoader.getIcon("/com/bulenkov/darcula/icons/option_pane_error.png")));
             if (SystemInfo.isMac
-                        && !"true".equalsIgnoreCase(System.getProperty("apple.laf.useScreenMenuBar", "false"))) {
+                && !"true".equalsIgnoreCase(System.getProperty("apple.laf.useScreenMenuBar", "false"))) {
                 defaults.put("MenuBarUI", "com.bulenkov.darcula.ui.DarculaMenuBarUI");
                 defaults.put("MenuUI", "javax.swing.plaf.basic.BasicMenuUI");
             }

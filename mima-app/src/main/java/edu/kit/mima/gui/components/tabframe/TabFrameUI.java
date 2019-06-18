@@ -51,10 +51,10 @@ public class TabFrameUI extends ComponentUI {
         for (var a : Alignment.values()) {
             var compList = layout.compsForAlignment(a);
             for (var pc : compList) {
-                    if (pc != null) {
-                        SwingUtilities.updateComponentTreeUI(pc);
-                    }
+                if (pc != null) {
+                    SwingUtilities.updateComponentTreeUI(pc);
                 }
+            }
             var tabList = layout.tabsForAlignment(a);
             for (var tc : tabList) {
                 if (tc != null) {

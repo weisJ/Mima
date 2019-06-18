@@ -137,8 +137,8 @@ public class HighlightTextPane extends NonWrappingTextPane implements ChangeList
      */
     private void drawSelection(@NotNull final Graphics g, final int height) {
         if (selectionStart != null
-                    && selectionEnd != null
-                    && (!selectionStart.equals(selectionEnd) || lineSelected)) {
+            && selectionEnd != null
+            && (!selectionStart.equals(selectionEnd) || lineSelected)) {
             if (selectionStart.y > selectionEnd.y) {
                 final var tmp = selectionEnd;
                 selectionEnd = selectionStart;

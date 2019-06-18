@@ -64,8 +64,8 @@ public class ToolTipDemo extends JTextPane {
                         textPane.setContentType("text/html");
                         textPane.setText(
                                 "<html><h1><font size='2'>TEST "
-                                        + (index + 1)
-                                        + "</font></h1><font size='1'>A tool tip text</font></html>");
+                                + (index + 1)
+                                + "</font></h1><font size='1'>A tool tip text</font></html>");
 
                         content.add(textPane);
                     }

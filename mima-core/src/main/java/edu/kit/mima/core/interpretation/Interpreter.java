@@ -34,7 +34,7 @@ import java.util.function.Consumer;
 public class Interpreter {
 
     private static final Value<MachineWord> VOID = new Value<>(ValueType.VOID,
-            new MachineWord(0, 0));
+                                                               new MachineWord(0, 0));
 
     private final int wordLength;
     @NotNull
@@ -136,9 +136,9 @@ public class Interpreter {
             case BINARY -> callback.accept(evaluateBinary((String) expression.getValue()));
             case IDENTIFICATION -> callback.accept(evaluateIdentification(expression, environment));
             case CALL -> evaluateFunction((BinaryToken<Token<?>, ListToken<Token<?>>>) expression,
-                    environment, callback);
+                                          environment, callback);
             case JUMP_POINT -> evaluate(((Tuple<Token<?>, Token<?>>) expression).getSecond(),
-                    environment, callback);
+                                        environment, callback);
             default -> fail("Unexpected: " + expression);
         }
     }
@@ -219,7 +219,7 @@ public class Interpreter {
                     fail("Can't have negative memory references");
                 }
                 environment.defineVariable(definition.getFirst().getValue().toString(),
-                        (MachineWord) v.getValue());
+                                           (MachineWord) v.getValue());
                 continuation.run();
             });
         }
@@ -236,7 +236,7 @@ public class Interpreter {
                 fail("Not a definition body: " + definition.getSecond());
             }
             environment.defineConstant(definition.getFirst().getValue().toString(),
-                    (MachineWord) v.getValue()
+                                       (MachineWord) v.getValue()
             );
             continuation.run();
         });
@@ -288,7 +288,7 @@ public class Interpreter {
      */
     @NotNull
     private Value<?> evaluateIdentification(@NotNull final Token<?> token,
-                                         @NotNull final Environment environment) {
+                                            @NotNull final Environment environment) {
         final MachineWord value;
         final ValueType type;
         final String name = token.getValue().toString();

@@ -106,7 +106,7 @@ public final class HideCursorUI extends GeneralLayerUI<JComponent, HideCursorUI.
                         model.setMinimum(0);
                         spinner.setValue(timeout);
                         if (JOptionPane.OK_OPTION
-                                    == JOptionPane.showConfirmDialog(
+                            == JOptionPane.showConfirmDialog(
                                 layer, spinner, "Change cursor timeout", JOptionPane.OK_CANCEL_OPTION)) {
                             timeout = (Integer) spinner.getValue();
                             state.setTimeout(timeout);

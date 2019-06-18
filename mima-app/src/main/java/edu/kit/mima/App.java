@@ -30,9 +30,9 @@ import java.net.ServerSocket;
  */
 public final class App {
 
+    public static final ConsoleLogger logger = new ConsoleLogger();
     private static final int JMX_PORT = 8000;
     private static final int LOCK_PORT = 65535;
-    public static final ConsoleLogger logger = new ConsoleLogger();
     //Todo: Have tasks that do heavy static initialization register to run at startup. This prevents the program from
     // taking a long time before it shows the splash screen.
     private static final String[] fakeLoadMessages =

@@ -20,9 +20,9 @@ import java.awt.event.MouseEvent;
  */
 public abstract class SimplePopupComponent extends PopupComponent {
 
+    protected final JButton closeButton;
     protected Color headerFocusBackground;
     protected Color headerBackground;
-    protected final JButton closeButton;
     private boolean open;
     private boolean locked = true;
 
@@ -40,7 +40,7 @@ public abstract class SimplePopupComponent extends PopupComponent {
 
             @Override
             public void eventDispatched(@NotNull final AWTEvent event) {
-                if (!SwingUtilities.isLeftMouseButton((MouseEvent)event)) {
+                if (!SwingUtilities.isLeftMouseButton((MouseEvent) event)) {
                     return;
                 }
                 if (locked) {

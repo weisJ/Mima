@@ -22,8 +22,8 @@ import java.util.regex.Pattern;
  * @since 2018
  */
 public class TokenStream {
-    private static final Token<?> EMPTY = new EmptyToken();
     protected static final char NEW_LINE = '\n';
+    private static final Token<?> EMPTY = new EmptyToken();
     private static final List<String> KEYWORDS = List.of(Keyword.getKeywords());
     private static final Pattern WHITESPACE = Pattern.compile("[ \t\n\r\f]");
     private static final Pattern NUMBER_START = Pattern.compile(Symbol.NUMBER_SIGNED);

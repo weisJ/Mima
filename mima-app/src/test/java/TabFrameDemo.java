@@ -1,6 +1,6 @@
 import edu.kit.mima.gui.components.alignment.Alignment;
-import edu.kit.mima.gui.components.tabframe.popuptab.DefaultPopupComponent;
 import edu.kit.mima.gui.components.tabframe.TabFrame;
+import edu.kit.mima.gui.components.tabframe.popuptab.DefaultPopupComponent;
 import edu.kit.mima.gui.icons.Icons;
 import edu.kit.mima.gui.laf.LafManager;
 import edu.kit.mima.gui.persist.PersistenceManager;

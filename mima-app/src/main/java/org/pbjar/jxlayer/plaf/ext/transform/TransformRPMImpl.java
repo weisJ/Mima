@@ -93,11 +93,11 @@ public final class TransformRPMImpl {
                 Point point = aComponent.getLocationOnScreen();
                 SwingUtilities.convertPointFromScreen(point, layer);
                 Rectangle transformPortRegion = ui.transform(new Rectangle(x
-                                                                                   + point.x, y + point.y, w, h),
-                        (JXLayer<JComponent>) layer);
+                                                                           + point.x, y + point.y, w, h),
+                                                             (JXLayer<JComponent>) layer);
                 manager.addDirtyRegion(layer,
-                        transformPortRegion.x, transformPortRegion.y,
-                        transformPortRegion.width, transformPortRegion.height);
+                                       transformPortRegion.x, transformPortRegion.y,
+                                       transformPortRegion.width, transformPortRegion.height);
                 return true;
             }
         }
@@ -135,7 +135,7 @@ public final class TransformRPMImpl {
                                                            .get(sourceManager);
 
                 fieldBufferStrategyType.set(destinationManager,
-                        bufferStrategyType);
+                                            bufferStrategyType);
                 fieldPaintManager.set(destinationManager, paintManager);
 
                 fieldBufferStrategyType.setAccessible(false);
@@ -143,19 +143,19 @@ public final class TransformRPMImpl {
                 methodGetPaintManager.setAccessible(false);
 
                 System.out.println("Copied paintManager of type: "
-                                           + paintManager.getClass().getName());
+                                   + paintManager.getClass().getName());
                 switch (bufferStrategyType) {
                     case (0) -> System.out.println("Copied bufferStrategyType "
-                                                           + bufferStrategyType
-                                                           + ": BUFFER_STRATEGY_NOT_SPECIFIED");
+                                                   + bufferStrategyType
+                                                   + ": BUFFER_STRATEGY_NOT_SPECIFIED");
                     case (1) -> System.out.println("Copied bufferStrategyType "
-                                                           + bufferStrategyType
-                                                           + ": BUFFER_STRATEGY_SPECIFIED_ON");
+                                                   + bufferStrategyType
+                                                   + ": BUFFER_STRATEGY_SPECIFIED_ON");
                     case (2) -> System.out.println("Copied bufferStrategyType "
-                                                           + bufferStrategyType
-                                                           + ": BUFFER_STRATEGY_SPECIFIED_OFF");
+                                                   + bufferStrategyType
+                                                   + ": BUFFER_STRATEGY_SPECIFIED_OFF");
                     default -> System.out.println("Copied bufferStrategyType "
-                                                          + bufferStrategyType + ": ???");
+                                                  + bufferStrategyType + ": ???");
                 }
             } catch (Throwable t) {
                 t.printStackTrace(System.out);

@@ -112,7 +112,7 @@ public class MouseEventUI<V extends JComponent> extends AbstractLayerUI<V> {
                  * may be set to specific dragging cursors.
                  */
                 if (MouseEvent.MOUSE_ENTERED == mouseEvent.getID()
-                            || MouseEvent.MOUSE_EXITED == mouseEvent.getID()) {
+                    || MouseEvent.MOUSE_EXITED == mouseEvent.getID()) {
                     layer.getGlassPane().setCursor(null);
                 } else {
                     Component component = mouseEvent.getComponent();
@@ -129,7 +129,7 @@ public class MouseEventUI<V extends JComponent> extends AbstractLayerUI<V> {
     @Override
     public long getLayerEventMask() {
         return AWTEvent.MOUSE_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK
-                       | AWTEvent.MOUSE_WHEEL_EVENT_MASK;
+               | AWTEvent.MOUSE_WHEEL_EVENT_MASK;
     }
 
     /**
@@ -145,7 +145,7 @@ public class MouseEventUI<V extends JComponent> extends AbstractLayerUI<V> {
         super.installUI(component);
         if (installedLayer != null) {
             throw new IllegalStateException(this.getClass().getName()
-                                                    + " cannot be shared between multiple layers");
+                                            + " cannot be shared between multiple layers");
         }
         installedLayer = (JXLayer<? extends V>) component;
     }
@@ -189,16 +189,16 @@ public class MouseEventUI<V extends JComponent> extends AbstractLayerUI<V> {
     private MouseWheelEvent createMouseWheelEvent(
             @NotNull final MouseWheelEvent mouseWheelEvent, @NotNull final Point point, @NotNull final Component target) {
         return new MouseWheelEvent(target, //
-                mouseWheelEvent.getID(), //
-                mouseWheelEvent.getWhen(), //
-                mouseWheelEvent.getModifiersEx(), //
-                point.x, //
-                point.y, //
-                mouseWheelEvent.getClickCount(), //
-                mouseWheelEvent.isPopupTrigger(), //
-                mouseWheelEvent.getScrollType(), //
-                mouseWheelEvent.getScrollAmount(), //
-                mouseWheelEvent.getWheelRotation() //
+                                   mouseWheelEvent.getID(), //
+                                   mouseWheelEvent.getWhen(), //
+                                   mouseWheelEvent.getModifiersEx(), //
+                                   point.x, //
+                                   point.y, //
+                                   mouseWheelEvent.getClickCount(), //
+                                   mouseWheelEvent.isPopupTrigger(), //
+                                   mouseWheelEvent.getScrollType(), //
+                                   mouseWheelEvent.getScrollAmount(), //
+                                   mouseWheelEvent.getWheelRotation() //
         );
     }
 
@@ -235,10 +235,10 @@ public class MouseEventUI<V extends JComponent> extends AbstractLayerUI<V> {
                                          @NotNull final MouseEvent originalEvent, final Component newTarget, @NotNull final Point realPoint) {
         if (lastEnteredTarget != newTarget) {
             dispatchMouseEvent(transformMouseEvent(layer, originalEvent,
-                    lastEnteredTarget, realPoint, MouseEvent.MOUSE_EXITED));
+                                                   lastEnteredTarget, realPoint, MouseEvent.MOUSE_EXITED));
             lastEnteredTarget = newTarget;
             dispatchMouseEvent(transformMouseEvent(layer, originalEvent,
-                    lastEnteredTarget, realPoint, MouseEvent.MOUSE_ENTERED));
+                                                   lastEnteredTarget, realPoint, MouseEvent.MOUSE_ENTERED));
         }
     }
 
@@ -280,7 +280,7 @@ public class MouseEventUI<V extends JComponent> extends AbstractLayerUI<V> {
          * returned as well.
          */
         if (component.getMouseMotionListeners().length > 0
-                    || component.getMouseListeners().length > 0) {
+            || component.getMouseListeners().length > 0) {
             return component;
         } else {
             Container parent = component.getParent();
@@ -313,9 +313,9 @@ public class MouseEventUI<V extends JComponent> extends AbstractLayerUI<V> {
             return null;
         } else {
             Point viewPoint = SwingUtilities.convertPoint(layer, targetPoint,
-                    view);
+                                                          view);
             return SwingUtilities.getDeepestComponentAt(view, viewPoint.x,
-                    viewPoint.y);
+                                                        viewPoint.y);
         }
     }
 
@@ -381,7 +381,7 @@ public class MouseEventUI<V extends JComponent> extends AbstractLayerUI<V> {
     private MouseEvent transformMouseEvent(@NotNull final JXLayer<? extends V> layer,
                                            @NotNull final MouseEvent mouseEvent, final Component target, @NotNull final Point realPoint) {
         return transformMouseEvent(layer, mouseEvent, target, realPoint,
-                mouseEvent.getID());
+                                   mouseEvent.getID());
     }
 
     @Nullable
@@ -394,14 +394,14 @@ public class MouseEventUI<V extends JComponent> extends AbstractLayerUI<V> {
             SwingUtilities.convertPointToScreen(newPoint, layer);
             SwingUtilities.convertPointFromScreen(newPoint, target);
             return new MouseEvent(target, //
-                    id, //
-                    mouseEvent.getWhen(), //
-                    mouseEvent.getModifiersEx(), //
-                    newPoint.x, //
-                    newPoint.y, //
-                    mouseEvent.getClickCount(), //
-                    mouseEvent.isPopupTrigger(), //
-                    mouseEvent.getButton());
+                                  id, //
+                                  mouseEvent.getWhen(), //
+                                  mouseEvent.getModifiersEx(), //
+                                  newPoint.x, //
+                                  newPoint.y, //
+                                  mouseEvent.getClickCount(), //
+                                  mouseEvent.isPopupTrigger(), //
+                                  mouseEvent.getButton());
         }
     }
 
@@ -414,9 +414,9 @@ public class MouseEventUI<V extends JComponent> extends AbstractLayerUI<V> {
             target = layer;
         }
         Point point = SwingUtilities.convertPoint(mouseWheelEvent.getComponent(),
-                mouseWheelEvent.getPoint(), target);
+                                                  mouseWheelEvent.getPoint(), target);
         return createMouseWheelEvent(mouseWheelEvent,
-                point, target);
+                                     point, target);
     }
 
     @NotNull
@@ -467,12 +467,12 @@ public class MouseEventUI<V extends JComponent> extends AbstractLayerUI<V> {
              * Convert the location relative to the new target
              */
             Point point = SwingUtilities.convertPoint(event.getComponent(),
-                    event.getPoint(), newTarget);
+                                                      event.getPoint(), newTarget);
             /*
              * Create a new event and dispatch it.
              */
             newTarget.dispatchEvent(createMouseWheelEvent(event, point,
-                    newTarget));
+                                                          newTarget));
         }
     }
 

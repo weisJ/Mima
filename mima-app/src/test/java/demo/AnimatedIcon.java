@@ -44,11 +44,9 @@ public class AnimatedIcon implements Icon {
 
     @NotNull
     private final Map<Component, Object> componentMap = new WeakHashMap<>();
-
-    private double radius = 0;
-
     @NotNull
     private final Ellipse2D dot = new Ellipse2D.Float();
+    private double radius = 0;
 
     public AnimatedIcon() {
 

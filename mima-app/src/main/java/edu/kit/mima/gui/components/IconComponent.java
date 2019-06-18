@@ -95,7 +95,7 @@ public class IconComponent<T extends Component> extends JComponent {
     protected void paintComponent(@NotNull final Graphics g) {
         if (isOpaque()) {
             g.setColor(getBackground());
-            g.fillRect(0,0,getWidth(), getHeight());
+            g.fillRect(0, 0, getWidth(), getHeight());
         }
     }
 

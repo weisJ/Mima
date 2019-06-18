@@ -64,7 +64,7 @@ public final class PersistenceManager {
     /**
      * Register a component to save its state.
      *
-     * @param persistable the persistable component to save.
+     * @param persistable     the persistable component to save.
      * @param frameIdentifier identifier of parent frame.
      */
     public void registerState(@NotNull final Persistable persistable, final String frameIdentifier) {
@@ -79,7 +79,7 @@ public final class PersistenceManager {
     /**
      * Stop a component from persisting its state.
      *
-     * @param persistable the persistable component to remove.
+     * @param persistable     the persistable component to remove.
      * @param frameIdentifier identifier of parent frame.
      */
     public void removeState(@NotNull final Persistable persistable, final String frameIdentifier) {

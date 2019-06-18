@@ -28,11 +28,11 @@ public class FileHistoryObject {
     /**
      * FileHistoryObject for use with Editor.
      *
-     * @param textComponent      the textComponent the change happened
-     * @param caretOffset position of caret at begin of edit
-     * @param newText     new text
-     * @param oldText     old text
-     * @param type        Type of Document change
+     * @param textComponent the textComponent the change happened
+     * @param caretOffset   position of caret at begin of edit
+     * @param newText       new text
+     * @param oldText       old text
+     * @param type          Type of Document change
      */
     @Contract(pure = true)
     public FileHistoryObject(@NotNull final JTextComponent textComponent,

@@ -25,8 +25,8 @@ public final class ArrayUtil {
     @NotNull
     public static <T> T[] toArray(@NotNull final Collection<T> c, @NotNull final T[] a) {
         return c.size() > a.length
-                       ? c.toArray((T[]) Array.newInstance(a.getClass().getComponentType(), c.size()))
-                       : c.toArray(a);
+               ? c.toArray((T[]) Array.newInstance(a.getClass().getComponentType(), c.size()))
+               : c.toArray(a);
     }
 
     @SuppressWarnings("unchecked")

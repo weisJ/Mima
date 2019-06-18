@@ -1,5 +1,5 @@
-import edu.kit.mima.gui.components.text.editor.Editor;
 import edu.kit.mima.gui.components.tabbedpane.DnDTabbedPane;
+import edu.kit.mima.gui.components.text.editor.Editor;
 import edu.kit.mima.gui.laf.LafManager;
 
 import javax.swing.*;

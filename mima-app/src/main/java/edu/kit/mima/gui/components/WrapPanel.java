@@ -15,8 +15,8 @@ public class WrapPanel extends JScrollPane {
 
     @NotNull
     private final Box box;
-    private int width = 0;
     private final Map<Integer, CPanel> panelList;
+    private int width = 0;
 
     /**
      * Create new WrapPanel.

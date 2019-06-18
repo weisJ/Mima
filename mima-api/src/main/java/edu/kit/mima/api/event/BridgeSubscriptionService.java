@@ -28,7 +28,7 @@ public class BridgeSubscriptionService<T> extends SubscriptionService<T> impleme
     @Override
     void initService(@NotNull final String... identifiers) {
         for (var s : identifiers) {
-                ((JComponent) observed).addPropertyChangeListener(s, this);
+            ((JComponent) observed).addPropertyChangeListener(s, this);
         }
     }
 
