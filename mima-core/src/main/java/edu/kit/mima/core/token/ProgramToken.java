@@ -22,15 +22,15 @@ import java.util.stream.Stream;
  * @author Jannis Weis
  * @since 2018
  */
-public class ProgramToken extends FileObjectAdapter implements Token<Token[]> {
+public class ProgramToken extends FileObjectAdapter implements Token<Token<?>[]> {
 
     private static final Pattern INDENT = Pattern.compile("\n");
     private static final String INDENT_REPLACEMENT = "\n\t";
     private final int filePos;
     @NotNull
-    private final Map<Token, Integer> jumpMap;
+    private final Map<Token<?>, Integer> jumpMap;
     @NotNull
-    private final Token[] program;
+    private final Token<?>[] program;
 
     /**
      * Program token that holds an array of Tokens.
@@ -38,7 +38,7 @@ public class ProgramToken extends FileObjectAdapter implements Token<Token[]> {
      * @param program token array
      * @param filePos position in file
      */
-    public ProgramToken(@NotNull final Token[] program, final int filePos) {
+    public ProgramToken(@NotNull final Token<?>[] program, final int filePos) {
         this.program = program;
         this.filePos = filePos;
         jumpMap = new HashMap<>();
@@ -49,12 +49,12 @@ public class ProgramToken extends FileObjectAdapter implements Token<Token[]> {
      * Create jump map for program token
      */
     private void resolveJumps() {
-        final List<Token> tokens =
+        final List<Token<?>> tokens =
                 ((ProgramQueryResult)
                          new ProgramQuery(this).whereEqual(Token::getType, TokenType.JUMP_POINT))
                         .get(false);
         for (final var token : tokens) {
-            jumpMap.put((Token) token.getValue(), token.getLineIndex());
+            jumpMap.put((Token<?>) token.getValue(), token.getLineIndex());
         }
     }
 
@@ -64,13 +64,13 @@ public class ProgramToken extends FileObjectAdapter implements Token<Token[]> {
      * @return Map that with tokens as key and their program index as value
      */
     @NotNull
-    public Map<Token, Integer> getJumps() {
+    public Map<Token<?>, Integer> getJumps() {
         return jumpMap;
     }
 
     @NotNull
     @Override
-    public Token[] getValue() {
+    public Token<?>[] getValue() {
         return program;
     }
 
@@ -81,7 +81,7 @@ public class ProgramToken extends FileObjectAdapter implements Token<Token[]> {
     }
 
     @Override
-    public Stream<Token> stream(final boolean includeChildren) {
+    public Stream<Token<?>> stream(final boolean includeChildren) {
         if (includeChildren) {
             return Arrays.stream(program).flatMap(Token::stream);
         } else {
@@ -110,7 +110,7 @@ public class ProgramToken extends FileObjectAdapter implements Token<Token[]> {
         return print(Token::simpleName, "");
     }
 
-    private String print(@NotNull final Function<Token, String> mapping, final String prefix) {
+    private String print(@NotNull final Function<Token<?>, String> mapping, final String prefix) {
         return Arrays.stream(program)
                        .map(t -> '\t' + INDENT.matcher(mapping.apply(t)).replaceAll(INDENT_REPLACEMENT) + '\n')
                        .collect(Collectors.joining("", prefix + "{\n", "}"));

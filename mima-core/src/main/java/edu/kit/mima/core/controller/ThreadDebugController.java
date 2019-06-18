@@ -101,7 +101,7 @@ public class ThreadDebugController implements DebugController {
     }
 
     @Override
-    public void afterInstruction(final Token currentInstruction) {
+    public void afterInstruction(final Token<?> currentInstruction) {
         if (shouldDie || breaks == null) {
             return;
         }

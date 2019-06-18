@@ -74,10 +74,10 @@ public class AtomToken<T> extends ValueTuple<T, TokenType> implements Token<T> {
     @NotNull
     @Override
     @SuppressWarnings("unchecked")
-    public Stream<Token> stream(final boolean includeChildren) {
-        Stream<Token> stream = Stream.of(this);
+    public Stream<Token<?>> stream(final boolean includeChildren) {
+        Stream<Token<?>> stream = Stream.of(this);
         if (includeChildren && getValue() instanceof Token) {
-            stream = Stream.concat(stream, ((Token) (getValue())).stream());
+            stream = Stream.concat(stream, ((Token<?>) (getValue())).stream());
         }
         return stream;
     }
@@ -87,7 +87,7 @@ public class AtomToken<T> extends ValueTuple<T, TokenType> implements Token<T> {
     public String simpleName() {
         final String prefix = getType().getPrefix();
         if (getValue() instanceof Token) {
-            return prefix + ((Token) getValue()).simpleName();
+            return prefix + ((Token<?>) getValue()).simpleName();
         } else {
             return prefix + getValue().toString();
         }

@@ -9,15 +9,16 @@ import edu.kit.mima.core.MimaRunner;
 import edu.kit.mima.core.token.Token;
 import edu.kit.mima.gui.EditorHotKeys;
 import edu.kit.mima.gui.components.ProtectedScrollTable;
-import edu.kit.mima.gui.components.tabframe.popuptab.TerminalPopupComponent;
 import edu.kit.mima.gui.components.alignment.Alignment;
 import edu.kit.mima.gui.components.console.Console;
-import edu.kit.mima.gui.components.editor.Editor;
+import edu.kit.mima.gui.components.console.SystemConsole;
+import edu.kit.mima.gui.components.text.editor.Editor;
 import edu.kit.mima.gui.components.folderdisplay.FilePathDisplay;
 import edu.kit.mima.gui.components.listeners.ComponentResizeListener;
 import edu.kit.mima.gui.components.tabbedpane.EditorTabbedPane;
-import edu.kit.mima.gui.components.tabframe.popuptab.DefaultPopupComponent;
 import edu.kit.mima.gui.components.tabframe.TabFrame;
+import edu.kit.mima.gui.components.tabframe.popuptab.DefaultPopupComponent;
+import edu.kit.mima.gui.components.tabframe.popuptab.TerminalPopupComponent;
 import edu.kit.mima.gui.icons.Icons;
 import edu.kit.mima.gui.menu.Help;
 import edu.kit.mima.gui.menu.settings.Settings;
@@ -120,32 +121,23 @@ public final class MimaUserInterface extends JFrame {
     }, MimaRunner.RUNNING_PROPERTY);
     */
 
-        BindingUtil.bind(
-                debugger,
-                () -> {
-                    int index =
-                            Optional.ofNullable(mimaRunner.getCurrentStatement())
-                                    .map(Token::getOffset)
-                                    .orElse(-1);
+        BindingUtil.bind(debugger, () -> {
+                             int index = Optional.ofNullable(mimaRunner.getCurrentStatement())
+                                                 .map(Token::getOffset)
+                                                 .orElse(-1);
 
-                    editorManager.currentEditor().markLine(index);
-                    memoryView.updateView();
-                },
-                Debugger.PAUSE_PROPERTY);
+                             editorManager.currentEditor().markLine(index);
+                             memoryView.updateView();
+                         },
+                         Debugger.PAUSE_PROPERTY);
 
         BindingUtil.bind(mimaRunner, memoryView::updateView, MimaRunner.RUNNING_PROPERTY);
         BindingUtil.bind(debugger, () -> currentEditor().markLine(-1), Debugger.RUNNING_PROPERTY);
-        tabbedEditor.addChangeListener(
-                e ->
-                        Optional.ofNullable((Editor) tabbedEditor.getSelectedComponent())
-                                .ifPresent(
-                                        editor -> {
-                                            var file =
-                                                    new File(
-                                                            Optional.ofNullable(editorManager.managerForEditor(editor))
+        tabbedEditor.addChangeListener(e -> Optional.ofNullable((Editor) tabbedEditor.getSelectedComponent())
+                                                    .ifPresent(editor -> {
+                                                        var file = new File(Optional.ofNullable(editorManager.managerForEditor(editor))
                                                                     .map(FileManager::getLastFile)
                                                                     .orElse(System.getProperty("SystemDrive")));
-
                                             filePathDisplay.setFile(file);
                                             EditorHotKeys.setEditor(editor);
                                         }));
@@ -262,11 +254,16 @@ public final class MimaUserInterface extends JFrame {
                         "Console",
                         Icons.CONSOLE,
                         Alignment.SOUTH_WEST);
-        tabFrame.addTab(new TerminalPopupComponent(), "Terminal", Icons.TERMINAL, Alignment.SOUTH_WEST);
+        tabFrame.addTab(new TerminalPopupComponent("Terminal"),
+                        "Terminal",
+                        Icons.TERMINAL, Alignment.SOUTH_WEST);
+        tabFrame.addTab(new DefaultPopupComponent("Developer Console", Icons.BUILD_GREY, new SystemConsole()),
+                        "Developer",
+                        Icons.BUILD_GREY, Alignment.SOUTH);
         contentPane.add(tabFrame, BorderLayout.CENTER);
         setContentPane(contentPane);
-        pack();
         setJMenuBar(new MimaMenuBar(this, fileActions).getMenuBar());
+        pack();
     }
 
     /**

@@ -4,7 +4,7 @@ import edu.kit.mima.api.util.Tuple;
 import edu.kit.mima.api.util.ValueTuple;
 import edu.kit.mima.core.MimaConstants;
 import edu.kit.mima.gui.EditorHotKeys;
-import edu.kit.mima.gui.components.editor.Editor;
+import edu.kit.mima.gui.components.text.editor.Editor;
 import edu.kit.mima.gui.components.tabbedpane.EditorTabbedPane;
 import edu.kit.mima.gui.icons.Icons;
 import edu.kit.mima.highlighter.MimaHighlighter;
@@ -152,19 +152,16 @@ public class MimaEditorManager implements AutoCloseable {
     private void setupHotKeys(@NotNull final Editor editor) {
         EditorHotKeys.setEditor(editor);
         for (final EditorHotKeys key : EditorHotKeys.values()) {
-            editor
-                    .getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+            editor.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
                     .put(KeyStroke.getKeyStroke(key.getAccelerator()), key.toString());
-            editor
-                    .getActionMap()
-                    .put(
-                            key.toString(),
-                            new AbstractAction() {
-                                @Override
-                                public void actionPerformed(final ActionEvent e) {
-                                    key.actionPerformed(e);
-                                }
-                            });
+            editor.getActionMap().put(
+                    key.toString(),
+                    new AbstractAction() {
+                        @Override
+                        public void actionPerformed(final ActionEvent e) {
+                            key.actionPerformed(e);
+                        }
+                    });
         }
     }
 

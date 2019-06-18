@@ -1,4 +1,4 @@
-package edu.kit.mima.gui.components.numberedpane;
+package edu.kit.mima.gui.components.text.numberedpane;
 
 import edu.kit.mima.gui.components.BorderlessScrollPane;
 import edu.kit.mima.gui.components.IndexComponent;
@@ -41,14 +41,13 @@ public class NumberedTextPane extends JPanel {
         super(new BorderLayout());
         listenerList = new ArrayList<>();
         // Add number rendering to panel.
-        pane =
-                new HighlightTextPane(this) {
-                    @Override
-                    public void paintComponent(@NotNull final Graphics g) {
-                        super.paintComponent(g);
-                        numberingPane.repaint();
-                    }
-                };
+        pane = new HighlightTextPane(this) {
+            @Override
+            public void paintComponent(@NotNull final Graphics g) {
+                super.paintComponent(g);
+                numberingPane.repaint();
+            }
+        };
         var borderedPane = new BorderlessScrollPane(pane);
         scrollPane = borderedPane.getScrollPane();
         scrollPane.getVerticalScrollBar().setUnitIncrement(2 * getFont().getSize());
@@ -58,28 +57,26 @@ public class NumberedTextPane extends JPanel {
         add(numberingPane, BorderLayout.LINE_START);
         add(borderedPane, BorderLayout.CENTER);
 
-        numberingPane.addMouseListener(
-                (MouseClickListener)
-                        e -> {
-                            if (e.getButton() == MouseEvent.BUTTON1) {
-                                final Point p = e.getPoint();
-                                try {
-                                    p.y += scrollPane.getViewport().getViewPosition().getY();
-                                    final int index = DocumentUtil.getLineOfOffset(pane, pane.viewToModel2D(p));
-                                    if (numberingPane.getActionArea().contains(e.getPoint())) {
-                                        for (final var listener : listenerList) {
-                                            if (listener != null) {
-                                                listener.indexClicked(index);
-                                            }
-                                            repaint();
-                                        }
-                                    } else {
-                                        pane.selectLine(index);
-                                    }
-                                } catch (@NotNull final BadLocationException ignored) {
-                                }
+        numberingPane.addMouseListener((MouseClickListener) e -> {
+            if (e.getButton() == MouseEvent.BUTTON1) {
+                final Point p = e.getPoint();
+                try {
+                    p.y += scrollPane.getViewport().getViewPosition().getY();
+                    final int index = DocumentUtil.getLineOfOffset(pane, pane.viewToModel2D(p));
+                    if (numberingPane.getActionArea().contains(e.getPoint())) {
+                        for (final var listener : listenerList) {
+                            if (listener != null) {
+                                listener.indexClicked(index);
                             }
-                        });
+                            repaint();
+                        }
+                    } else {
+                        pane.selectLine(index);
+                    }
+                } catch (@NotNull final BadLocationException ignored) {
+                }
+            }
+        });
     }
 
     public void scrollToIndex(final int index) {
@@ -102,7 +99,7 @@ public class NumberedTextPane extends JPanel {
      *
      * @return the text pane.
      */
-    public JTextPane getTextPane() {
+    public JEditorPane getTextPane() {
         return pane;
     }
 

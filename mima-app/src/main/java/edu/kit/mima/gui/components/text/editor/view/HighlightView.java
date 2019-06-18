@@ -1,4 +1,4 @@
-package edu.kit.mima.gui.components.editor.view;
+package edu.kit.mima.gui.components.text.editor.view;
 
 /**
  * Keys for Highlighting.

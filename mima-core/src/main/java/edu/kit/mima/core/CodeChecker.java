@@ -58,13 +58,13 @@ public final class CodeChecker {
         final ProgramQuery query = new ProgramQuery(token);
         final List<String> referencesJump =
                 query.whereEqual(Token::getType, TokenType.JUMP_POINT).stream()
-                        .map(t -> ((Token<Token>) t).getValue().getValue().toString())
+                        .map(t -> ((Token<Token<?>>) t).getValue().getValue().toString())
                         .collect(Collectors.toList());
         addWarnings(warnings, referencesJump);
         final List<String> referencesVar =
                 query.whereEqual(Token::getType, TokenType.CONSTANT).or()
                         .whereEqual(Token::getType, TokenType.REFERENCE).stream()
-                        .map(t -> ((Token<Token>) t).getValue().getValue().toString())
+                        .map(t -> ((Token<Token<?>>) t).getValue().getValue().toString())
                         .collect(Collectors.toList());
         addWarnings(warnings, referencesVar);
         return warnings;

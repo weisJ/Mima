@@ -4,15 +4,13 @@ import edu.kit.mima.api.history.FileHistoryObject;
 import edu.kit.mima.api.loading.FileEventHandler;
 import edu.kit.mima.core.MimaConstants;
 import edu.kit.mima.core.instruction.InstructionSet;
-import edu.kit.mima.core.parsing.Parser;
-import edu.kit.mima.core.parsing.ParserException;
-import edu.kit.mima.core.parsing.preprocessor.PreProcessor;
 import edu.kit.mima.core.token.SyntaxToken;
-import edu.kit.mima.gui.components.editor.view.HighlightView;
+import edu.kit.mima.gui.components.text.editor.view.HighlightView;
 import edu.kit.mima.preferences.ColorKey;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
 import edu.kit.mima.preferences.UserPreferenceChangedListener;
+import edu.kit.mima.syntax.SyntaxColor;
 import edu.kit.mima.syntax.SyntaxParser;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,7 +21,6 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 import java.awt.*;
-import java.util.List;
 
 /**
  * Highlighter for Mima Code.
@@ -57,7 +54,7 @@ public class MimaHighlighter implements Highlighter, FileEventHandler,
             case REPLACE -> fhs.getOldText().isBlank() && fhs.getText().isBlank();
         };
         if (update) {
-            update(textPane);
+            new HighlightWorker(textPane).execute();
         }
     }
 
@@ -69,7 +66,9 @@ public class MimaHighlighter implements Highlighter, FileEventHandler,
         final StyledDocument document = textPane.getStyledDocument();
         final StyleContext context = new StyleContext();
         final Style standard = context.addStyle("Default", null);
+        final Style error = context.addStyle("Error", null);
         standard.addAttribute(StyleConstants.Foreground, textColor);
+        error.addAttribute(HighlightView.JAGGED_UNDERLINE, errorColor);
         document.setCharacterAttributes(0, document.getLength(), standard, true);
 
         try {
@@ -77,27 +76,16 @@ public class MimaHighlighter implements Highlighter, FileEventHandler,
 
             textPane.getHighlighter().removeAllHighlights();
 
-            final SyntaxToken[] tokens = new SyntaxParser(text, currentInstructionSet).parse();
+            final SyntaxToken<?>[] tokens = new SyntaxParser(text, currentInstructionSet).parse();
             for (final var token : tokens) {
-                final Style style = context.addStyle(token.toString(), null);
-                StyleConstants.setForeground(style, token.getColor());
+                final Style style;
+                if (token.getColor() == SyntaxColor.ERROR) {
+                    style = error;
+                } else {
+                    style = context.addStyle(token.toString(), null);
+                    StyleConstants.setForeground(style, token.getColor());
+                }
                 document.setCharacterAttributes(token.getOffset(), token.getLength(), style, true);
-            }
-
-            var pref = Preferences.getInstance();
-            final var processed = new PreProcessor(text, "",
-                    pref.readString(PropertyKey.DIRECTORY_WORKING),
-                    pref.readString(PropertyKey.DIRECTORY_MIMA),
-                    false).process();
-            final var parsed = new Parser(processed.getFirst()).parse();
-
-            final List<ParserException> errors = processed.getSecond();
-            errors.addAll(parsed.getSecond());
-
-            final Style errorStyle = context.addStyle("Error", null);
-            errorStyle.addAttribute(HighlightView.JAGGED_UNDERLINE, errorColor);
-            for (final var error : errors) {
-                document.setCharacterAttributes(error.getPosition() - 1, 1, errorStyle, false);
             }
         } catch (@NotNull final BadLocationException e) {
             e.printStackTrace();
@@ -128,6 +116,21 @@ public class MimaHighlighter implements Highlighter, FileEventHandler,
             final var pref = Preferences.getInstance();
             textColor = pref.readColor(ColorKey.EDITOR_TEXT);
             errorColor = pref.readColor(ColorKey.SYNTAX_ERROR);
+        }
+    }
+
+    private final class HighlightWorker extends SwingWorker<Object, Object> {
+
+        private final JTextPane textPane;
+
+        private HighlightWorker(final JTextPane textPane) {
+            this.textPane = textPane;
+        }
+
+        @Override
+        protected Object doInBackground() {
+            update(textPane);
+            return 0;
         }
     }
 }

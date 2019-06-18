@@ -41,7 +41,7 @@ public class Interpreter {
     private final StackGuard stackGuard;
     private final ExceptionHandler exceptionHandler;
     private DebugController debugController;
-    private Token currentToken;
+    private Token<?> currentToken;
     private Environment currentScope;
     private boolean running;
 
@@ -115,8 +115,8 @@ public class Interpreter {
      * Evaluate different tokens
      */
     @SuppressWarnings("unchecked") /*Construction of tokens guarantees these types*/
-    private void evaluate(@NotNull final Token expression, @NotNull final Environment environment,
-                          @NotNull final Consumer<Value> callback) throws Continuation {
+    private void evaluate(@NotNull final Token<?> expression, @NotNull final Environment environment,
+                          @NotNull final Consumer<Value<?>> callback) throws Continuation {
         stackGuard.guard(() -> evaluate(expression, environment, callback));
         switch (expression.getType()) {
             case PROGRAM -> {
@@ -128,16 +128,16 @@ public class Interpreter {
                 evaluateProgram(programToken, scope, callback);
             }
             case DEFINITION -> {
-                final var defToken = (ListToken<Token>) expression.getValue();
+                final var defToken = (ListToken<Token<?>>) expression.getValue();
                 evaluateDefinition(defToken, environment, callback);
             }
             case NUMBER -> callback.accept(evaluateNumber((String) expression.getValue()));
             case EMPTY -> callback.accept(VOID);
             case BINARY -> callback.accept(evaluateBinary((String) expression.getValue()));
             case IDENTIFICATION -> callback.accept(evaluateIdentification(expression, environment));
-            case CALL -> evaluateFunction((BinaryToken<Token, ListToken<Token>>) expression,
+            case CALL -> evaluateFunction((BinaryToken<Token<?>, ListToken<Token<?>>>) expression,
                     environment, callback);
-            case JUMP_POINT -> evaluate(((Tuple<Token, Token>) expression).getSecond(),
+            case JUMP_POINT -> evaluate(((Tuple<Token<?>, Token<?>>) expression).getSecond(),
                     environment, callback);
             default -> fail("Unexpected: " + expression);
         }
@@ -145,19 +145,19 @@ public class Interpreter {
 
     public void jump(@NotNull final Environment toEnvironment,
                      final int instructionIndex,
-                     @NotNull final Consumer<Value> callback) {
+                     @NotNull final Consumer<Value<?>> callback) {
         toEnvironment.setExpressionIndex(instructionIndex);
         evaluateProgram(toEnvironment.getProgramToken(), toEnvironment, callback);
     }
 
     private void evaluateProgram(@NotNull final ProgramToken programToken,
                                  @NotNull final Environment environment,
-                                 @NotNull final Consumer<Value> callback) throws Continuation {
+                                 @NotNull final Consumer<Value<?>> callback) throws Continuation {
         stackGuard.guard(() -> evaluateProgram(programToken, environment, callback));
-        final Token[] tokens = programToken.getValue();
+        final Token<?>[] tokens = programToken.getValue();
         currentScope = environment;
         final int startIndex = environment.getExpressionIndex();
-        final BiConsumer<Value, Integer> loop = LambdaUtil.createRecursive(func -> (last, i) -> {
+        final BiConsumer<Value<?>, Integer> loop = LambdaUtil.createRecursive(func -> (last, i) -> {
             if (!isRunning()) {
                 return;
             }
@@ -177,14 +177,14 @@ public class Interpreter {
     }
 
     @SuppressWarnings("unchecked") /*Construction of tokens guarantees these types*/
-    private void evaluateDefinition(@NotNull final ListToken<Token> token,
+    private void evaluateDefinition(@NotNull final ListToken<Token<?>> token,
                                     @NotNull final Environment environment,
-                                    @NotNull final Consumer<Value> callback) throws Continuation {
+                                    @NotNull final Consumer<Value<?>> callback) throws Continuation {
         stackGuard.guard(() -> evaluateDefinition(token, environment, callback));
-        List<Token> tokens = token.getValue();
+        List<Token<?>> tokens = token.getValue();
         BiConsumer<Environment, Integer> loop = LambdaUtil.createRecursive(func -> (env, i) -> {
             if (i < tokens.size()) {
-                BinaryToken<Token, Token> definition = ((BinaryToken<Token, Token>) tokens.get(i));
+                BinaryToken<Token<?>, Token<?>> definition = ((BinaryToken<Token<?>, Token<?>>) tokens.get(i));
                 Runnable continuation = () -> func.accept(env, i + 1);
                 switch (definition.getType()) {
                     case CONSTANT -> evaluateConstant(definition, env, continuation);
@@ -201,7 +201,7 @@ public class Interpreter {
     /*
      * Definition of reference.
      */
-    private void evaluateReference(@NotNull final BinaryToken<Token, Token> definition,
+    private void evaluateReference(@NotNull final BinaryToken<Token<?>, Token<?>> definition,
                                    @NotNull final Environment environment,
                                    @NotNull final Runnable continuation) {
         if (definition.getSecond().getType() == TokenType.EMPTY) {
@@ -228,7 +228,7 @@ public class Interpreter {
     /*
      * Definition of constant.
      */
-    private void evaluateConstant(@NotNull final BinaryToken<Token, Token> definition,
+    private void evaluateConstant(@NotNull final BinaryToken<Token<?>, Token<?>> definition,
                                   @NotNull final Environment environment,
                                   @NotNull final Runnable continuation) {
         evaluate(definition.getSecond(), environment, v -> {
@@ -245,12 +245,12 @@ public class Interpreter {
     /*
      * Evaluate a function call
      */
-    private void evaluateFunction(@NotNull final BinaryToken<Token, ListToken<Token>> value,
+    private void evaluateFunction(@NotNull final BinaryToken<Token<?>, ListToken<Token<?>>> value,
                                   @NotNull final Environment environment,
-                                  final Consumer<Value> callback) throws Continuation {
+                                  final Consumer<Value<?>> callback) throws Continuation {
         stackGuard.guard(() -> evaluateFunction(value, environment, callback));
-        List<Token> arguments = value.getSecond().getValue();
-        BiConsumer<List<Value>, Integer> loop = LambdaUtil.createRecursive(func -> (args, i) -> {
+        List<Token<?>> arguments = value.getSecond().getValue();
+        BiConsumer<List<Value<?>>, Integer> loop = LambdaUtil.createRecursive(func -> (args, i) -> {
             if (i < arguments.size()) {
                 evaluate(arguments.get(i), environment, v2 -> {
                     args.add(v2);
@@ -287,7 +287,7 @@ public class Interpreter {
      * Evaluate a Identification reference
      */
     @NotNull
-    private Value evaluateIdentification(@NotNull final Token token,
+    private Value<?> evaluateIdentification(@NotNull final Token<?> token,
                                          @NotNull final Environment environment) {
         final MachineWord value;
         final ValueType type;
@@ -341,7 +341,7 @@ public class Interpreter {
      * @return current Token
      */
     @Nullable
-    public Token getCurrentToken() {
+    public Token<?> getCurrentToken() {
         return currentToken;
     }
 

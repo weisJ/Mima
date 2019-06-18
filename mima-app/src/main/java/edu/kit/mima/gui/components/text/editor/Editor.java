@@ -1,11 +1,11 @@
-package edu.kit.mima.gui.components.editor;
+package edu.kit.mima.gui.components.text.editor;
 
 import edu.kit.mima.api.history.FileHistoryObject;
 import edu.kit.mima.core.interpretation.Breakpoint;
 import edu.kit.mima.core.interpretation.SimpleBreakpoint;
 import edu.kit.mima.gui.components.BreakpointComponent;
-import edu.kit.mima.gui.components.editor.view.HighlightViewFactory;
-import edu.kit.mima.gui.components.numberedpane.NumberedTextPane;
+import edu.kit.mima.gui.components.text.editor.view.HighlightViewFactory;
+import edu.kit.mima.gui.components.text.numberedpane.NumberedTextPane;
 import edu.kit.mima.highlighter.Highlighter;
 import edu.kit.mima.preferences.ColorKey;
 import edu.kit.mima.preferences.Preferences;
@@ -40,8 +40,7 @@ import java.util.Set;
  * @author Jannis Weis
  * @since 2018
  */
-public class Editor extends NumberedTextPane
-        implements UserPreferenceChangedListener, AutoCloseable {
+public class Editor extends NumberedTextPane implements UserPreferenceChangedListener, AutoCloseable {
 
     private static final Preferences PREF = Preferences.getInstance();
     @NotNull
@@ -65,47 +64,43 @@ public class Editor extends NumberedTextPane
 
         final Font font = PREF.readFont(PropertyKey.EDITOR_FONT);
         breakpoints = new HashSet<>();
-        addIndexListener(
-                index -> {
-                    if (hasComponentAt(index)) {
-                        pane.removeMark(index, "break");
-                        removeComponentAt(index);
-                        breakpoints.remove(new SimpleBreakpoint(index));
-                    } else {
-                        var comp = new BreakpointComponent(index);
-                        pane.markLine(index, "break", comp.getLineColor());
-                        addComponentAt(comp, index);
-                        breakpoints.add(new SimpleBreakpoint(index));
-                    }
-                });
+        addIndexListener(index -> {
+            if (hasComponentAt(index)) {
+                pane.removeMark(index, "break");
+                removeComponentAt(index);
+                breakpoints.remove(new SimpleBreakpoint(index));
+            } else {
+                var comp = new BreakpointComponent(index);
+                pane.markLine(index, "break", comp.getLineColor());
+                addComponentAt(comp, index);
+                breakpoints.add(new SimpleBreakpoint(index));
+            }
+        });
 
         pane.setFont(font);
-        pane.setEditorKit(
-                new StyledEditorKit() {
-                    @NotNull
-                    public ViewFactory getViewFactory() {
-                        return new HighlightViewFactory();
-                    }
-                });
-        pane.addMouseListener(
-                new MouseAdapter() {
-                    @Override
-                    public void mouseEntered(final MouseEvent e) {
-                        setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
-                    }
+        pane.setEditorKit(new StyledEditorKit() {
+            @NotNull
+            public ViewFactory getViewFactory() {
+                return new HighlightViewFactory();
+            }
+        });
+        pane.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(final MouseEvent e) {
+                setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
+            }
 
-                    @Override
-                    public void mouseExited(final MouseEvent e) {
-                        setCursor(Cursor.getDefaultCursor());
-                    }
-                });
+            @Override
+            public void mouseExited(final MouseEvent e) {
+                setCursor(Cursor.getDefaultCursor());
+            }
+        });
         historyController = new TextHistoryController(pane, 100);
         editEventHandlers = new ArrayList<>();
         repaint = true;
 
         final StyledDocument document = pane.getStyledDocument();
-        ((AbstractDocument) document)
-                .setDocumentFilter(new EditorDocumentFilter(this, historyController));
+        ((AbstractDocument) document).setDocumentFilter(new EditorDocumentFilter(this, historyController));
         pane.setBackground(PREF.readColor(ColorKey.EDITOR_BACKGROUND));
         pane.setCaretColor(PREF.readColor(ColorKey.EDITOR_TEXT));
     }
@@ -141,11 +136,10 @@ public class Editor extends NumberedTextPane
         historyController.setActive(false);
         final int caret = pane.getCaretPosition();
         if (highlighter != null) {
-            var fhs =
-                    historyController.isActive()
-                            ? historyController.getHistory().getCurrent()
-                            : new FileHistoryObject(
-                            getPane(), 0, getText(), "", FileHistoryObject.ChangeType.INSERT);
+            var fhs = historyController.isActive()
+                      ? historyController.getHistory().getCurrent()
+                      : new FileHistoryObject(getPane(), 0, getText(),
+                                              "", FileHistoryObject.ChangeType.INSERT);
             highlighter.updateHighlighting(pane, fhs);
         }
         setCaretPosition(caret);

@@ -25,7 +25,7 @@ import java.util.function.Consumer;
  */
 public class GlobalEnvironment extends Environment {
 
-    private final Consumer<Value> callback;
+    private final Consumer<Value<?>> callback;
     private final Interpreter interpreter;
     @NotNull
     private final Mima mima;
@@ -42,7 +42,7 @@ public class GlobalEnvironment extends Environment {
             final ProgramToken programToken,
             @NotNull final Mima mima,
             final Interpreter interpreter,
-            final Consumer<Value> callback) {
+            final Consumer<Value<?>> callback) {
         super(null, programToken);
         this.mima = mima;
         this.interpreter = interpreter;
@@ -100,7 +100,7 @@ public class GlobalEnvironment extends Environment {
 
     @NotNull
     private Tuple<Environment, Integer> getJumpInformation(
-            @NotNull final List<Value> args, @NotNull final Environment env) {
+            @NotNull final List<Value<?>> args, @NotNull final Environment env) {
         final var argument = InstructionTools.getJumpReference(args, 0);
         final Environment jumpEnv = env.lookupJump(argument.getValue().toString());
         final int jumpIndex = env.getJump(argument.getValue().toString());

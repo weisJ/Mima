@@ -54,14 +54,32 @@ public final class DocumentUtil {
      */
     public static int getLineStartOffset(@NotNull final JTextComponent comp, final int line)
             throws BadLocationException {
+        return getLineElement(comp, line).getStartOffset();
+    }
+
+    /**
+     * Get the offset in document of where a given line ends.
+     *
+     * @param comp text component.
+     * @param line line in document.
+     * @return index of last character in line.
+     * @throws BadLocationException if offset it outside of document range.
+     */
+    public static int getLineEndOffset(@NotNull final JTextComponent comp, final int line)
+            throws BadLocationException {
+        return getLineElement(comp, line).getEndOffset();
+    }
+
+    @NotNull
+    private static Element getLineElement(@NotNull final JTextComponent comp, final int line)
+            throws BadLocationException {
         final Element map = comp.getDocument().getDefaultRootElement();
         if (line < 0) {
             throw new BadLocationException("Negative line", -1);
         } else if (line >= map.getElementCount()) {
             throw new BadLocationException("No such line", comp.getDocument().getLength() + 1);
         } else {
-            final Element lineElem = map.getElement(line);
-            return lineElem.getStartOffset();
+            return map.getElement(line);
         }
     }
 

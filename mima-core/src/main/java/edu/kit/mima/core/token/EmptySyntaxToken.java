@@ -11,7 +11,7 @@ import java.awt.*;
  * @author Jannis Weis
  * @since 2018
  */
-public class EmptySyntaxToken extends EmptyToken implements SyntaxToken {
+public class EmptySyntaxToken extends EmptyToken implements SyntaxToken<Object> {
 
     @Override
     public int getOffset() {

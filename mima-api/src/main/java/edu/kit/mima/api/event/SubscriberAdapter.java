@@ -22,7 +22,7 @@ public abstract class SubscriberAdapter implements Subscriber {
     }
 
     @Override
-    public Class getOwnerFilter(final String ident) {
+    public Class<?> getOwnerFilter(final String ident) {
         return null;
     }
 

@@ -65,9 +65,9 @@ public class ListToken<T> extends FileObjectAdapter implements Token<List<T>> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Stream<Token> stream(final boolean includeChildren) {
+    public Stream<Token<?>> stream(final boolean includeChildren) {
         if (includeChildren && !values.isEmpty() && values.get(0) instanceof Token) {
-            return values.stream().flatMap(t -> ((Token) t).stream());
+            return values.stream().flatMap(t -> ((Token<?>) t).stream());
         } else {
             return Stream.of(this);
         }
@@ -100,7 +100,7 @@ public class ListToken<T> extends FileObjectAdapter implements Token<List<T>> {
     @Override
     public String simpleName() {
         if (!values.isEmpty() && values.get(0) instanceof Token) {
-            final List<Token> tokens = (List<Token>) values;
+            final List<Token<?>> tokens = (List<Token<?>>) values;
             return '(' + tokens.stream().map(Token::simpleName).collect(Collectors.joining(", ")) + ')';
         } else {
             return '(' + values.stream().map(Object::toString).collect(Collectors.joining(", ")) + ')';

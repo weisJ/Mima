@@ -1,4 +1,4 @@
-package edu.kit.mima.gui.components.numberedpane;
+package edu.kit.mima.gui.components.text.numberedpane;
 
 import edu.kit.mima.gui.components.IndexComponent;
 import edu.kit.mima.gui.components.text.HighlightTextPane;

@@ -14,7 +14,7 @@ public interface Subscriber {
 
     boolean useInvokeFilter();
 
-    Class getOwnerFilter(final String identification);
+    Class<?> getOwnerFilter(final String identification);
 
     Object getInvokerFilter(final String identification);
 }

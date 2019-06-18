@@ -27,7 +27,7 @@ public enum MimaXInstruction implements Instruction {
     ADC("ADC", 1) {
         @Override
         protected MachineWord applyInternal(
-                @NotNull final List<Value> arguments, final Environment environment) {
+                @NotNull final List<Value<?>> arguments, final Environment environment) {
             final var argument = InstructionTools.getReferenceValue(arguments, 0);
             mima.setAccumulator(
                     arithmeticLogicUnit.add(mima.getAccumulator(), (MachineWord) argument.getValue()));
@@ -40,7 +40,7 @@ public enum MimaXInstruction implements Instruction {
     LDSP("LDSP", 0) {
         @Override
         protected MachineWord applyInternal(
-                final List<Value> arguments, final Environment environment) {
+                final List<Value<?>> arguments, final Environment environment) {
             mima.setAccumulator(mima.getStackPointer().clone());
             return null;
         }
@@ -51,7 +51,7 @@ public enum MimaXInstruction implements Instruction {
     STSP("STSP", 0) {
         @Override
         protected MachineWord applyInternal(
-                final List<Value> arguments, final Environment environment) {
+                final List<Value<?>> arguments, final Environment environment) {
             final int address = mima.getAccumulator().intValue();
             mima.storeValue(address, mima.loadValue(address));
             mima.setStackPointer(address);
@@ -64,7 +64,7 @@ public enum MimaXInstruction implements Instruction {
     SP("SP", 0) {
         @Override
         protected MachineWord applyInternal(
-                final List<Value> arguments, final Environment environment) {
+                final List<Value<?>> arguments, final Environment environment) {
             return mima.getStackPointer().clone();
         }
     },
@@ -74,7 +74,7 @@ public enum MimaXInstruction implements Instruction {
     STVR("STVR", 2) {
         @Override
         protected MachineWord applyInternal(
-                @NotNull final List<Value> arguments, final Environment environment) {
+                @NotNull final List<Value<?>> arguments, final Environment environment) {
             final int address = getOffsetAddress(arguments);
             mima.storeValue(address, mima.getAccumulator());
             return null;
@@ -86,7 +86,7 @@ public enum MimaXInstruction implements Instruction {
     LDVR("LDVR", 2) {
         @Override
         protected MachineWord applyInternal(
-                @NotNull final List<Value> arguments, final Environment environment) {
+                @NotNull final List<Value<?>> arguments, final Environment environment) {
             final int address = getOffsetAddress(arguments);
             mima.setAccumulator(mima.loadValue(address));
             return null;
@@ -124,7 +124,7 @@ public enum MimaXInstruction implements Instruction {
      * @param arguments argument list. first index, second offset
      * @return absolute index
      */
-    protected int getOffsetAddress(@NotNull final List<Value> arguments) {
+    protected int getOffsetAddress(@NotNull final List<Value<?>> arguments) {
         final var first = InstructionTools.getReferenceValue(arguments, 0);
         final var second = InstructionTools.getReferenceValue(arguments, 1);
         final int address =
@@ -142,9 +142,9 @@ public enum MimaXInstruction implements Instruction {
 
     @Override
     public void apply(
-            @NotNull final List<Value> arguments,
+            @NotNull final List<Value<?>> arguments,
             final Environment environment,
-            @NotNull final Consumer<Value> callback) {
+            @NotNull final Consumer<Value<?>> callback) {
         InstructionTools.checkArgNumber(arguments, this.argNum);
         callback.accept(new Value<>(ValueType.NUMBER, this.applyInternal(arguments, environment)));
     }
@@ -156,6 +156,5 @@ public enum MimaXInstruction implements Instruction {
      * @param environment execution environment
      * @return return value of instruction
      */
-    protected abstract @Nullable MachineWord applyInternal(
-            List<Value> arguments, Environment environment);
+    protected abstract @Nullable MachineWord applyInternal(List<Value<?>> arguments, Environment environment);
 }

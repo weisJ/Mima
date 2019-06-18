@@ -126,7 +126,10 @@ public class TooltipEventHandler extends MouseAdapter {
                 wait(showDelay);
                 //Only show tooltip if mouse is inside component.
                 if (inside) {
-                    tooltipComponent.showTooltip();
+                    if (!tooltipComponent.showTooltip()) {
+                        return;
+                    }
+
                     //Hide tooltip after time has passed.
                     if (vanishingDelay > 0) {
                         do {

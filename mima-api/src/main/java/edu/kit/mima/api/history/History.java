@@ -80,6 +80,19 @@ public class History<T> extends ClassObservable {
     }
 
     /**
+     * Add element to the front of the history.
+     * Moves the head of the history to the added element.
+     *
+     * @param element element to add.
+     */
+    public void addFront(final T element) {
+        final int prevSize = length();
+        history.addFirst(element);
+        head = 0;
+        fireLengthChange(prevSize);
+    }
+
+    /**
      * Get the length of the history.
      *
      * @return length of history
@@ -184,7 +197,7 @@ public class History<T> extends ClassObservable {
      * @return number of previous states.
      */
     public int previous() {
-        return length() - head - preserved;
+        return length() - head - preserved - 1;
     }
 
     /**

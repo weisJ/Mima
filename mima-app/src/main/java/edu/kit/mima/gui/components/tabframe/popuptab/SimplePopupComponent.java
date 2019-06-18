@@ -9,6 +9,7 @@ import edu.kit.mima.gui.icons.Icons;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import javax.swing.plaf.UIResource;
 import java.awt.*;
 import java.awt.event.AWTEventListener;
 import java.awt.event.MouseEvent;
@@ -26,7 +27,7 @@ public abstract class SimplePopupComponent extends PopupComponent {
     private boolean locked = true;
 
     public SimplePopupComponent() {
-        closeButton = new IconButton(Icons.COLLAPSE);
+        closeButton = new PopupButton(Icons.COLLAPSE);
         closeButton.addActionListener(e -> open = false);
         var accelerator = "shift pressed ESCAPE";
         getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -122,6 +123,13 @@ public abstract class SimplePopupComponent extends PopupComponent {
             default -> {
                 return new Insets(0, 0, 0, 0);
             }
+        }
+    }
+
+    private final class PopupButton extends IconButton implements UIResource {
+
+        private PopupButton(@NotNull final Icon icon) {
+            super(icon);
         }
     }
 }

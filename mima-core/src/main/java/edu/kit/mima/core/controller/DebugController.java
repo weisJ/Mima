@@ -36,5 +36,5 @@ public interface DebugController {
      *
      * @param nextInstruction next Instruction
      */
-    void afterInstruction(Token nextInstruction);
+    void afterInstruction(Token<?> nextInstruction);
 }

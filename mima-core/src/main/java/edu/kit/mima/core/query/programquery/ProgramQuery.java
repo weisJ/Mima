@@ -18,11 +18,11 @@ import java.util.function.Predicate;
  * @author Jannis Weis
  * @since 2018
  */
-public class ProgramQuery implements Query<Token> {
+public class ProgramQuery implements Query<Token<?>> {
 
     private final ProgramToken program;
-    private Predicate<Token> filter;
-    private BiFunction<Predicate<Token>, Predicate<Token>, Predicate<Token>> joiningFunction;
+    private Predicate<Token<?>> filter;
+    private BiFunction<Predicate<Token<?>>, Predicate<Token<?>>, Predicate<Token<?>>> joiningFunction;
 
     /**
      * Create query from program.
@@ -42,7 +42,7 @@ public class ProgramQuery implements Query<Token> {
      *
      * @return current filter
      */
-    /* default */ Predicate<Token> getFilter() {
+    /* default */ Predicate<Token<?>> getFilter() {
         return filter;
     }
 
@@ -52,7 +52,7 @@ public class ProgramQuery implements Query<Token> {
      *
      * @param filter new Filter
      */
-    /* default */ void setFilter(final Predicate<Token> filter) {
+    /* default */ void setFilter(final Predicate<Token<?>> filter) {
         this.filter = filter;
     }
 
@@ -74,44 +74,44 @@ public class ProgramQuery implements Query<Token> {
      */
     // @formatter:off
     /* default */ void setJoiningFunction(
-            final BiFunction<Predicate<Token>, Predicate<Token>, Predicate<Token>> joiningFunction) {
+            final BiFunction<Predicate<Token<?>>, Predicate<Token<?>>, Predicate<Token<?>>> joiningFunction) {
         // @formatter:on
         this.joiningFunction = joiningFunction;
     }
 
     @NotNull
     @Override
-    public <K> QueryResult<Token> whereEqual(
-            @NotNull final Function<Token, K> function, final K compare) {
+    public <K> QueryResult<Token<?>> whereEqual(
+            @NotNull final Function<Token<?>, K> function, final K compare) {
         filter = joiningFunction.apply(filter, item -> Objects.equals(function.apply(item), compare));
         return new ProgramQueryResult(this);
     }
 
     @NotNull
     @Override
-    public <K> QueryResult<Token> whereNotEqual(
-            @NotNull final Function<Token, K> function, final K compare) {
+    public <K> QueryResult<Token<?>> whereNotEqual(
+            @NotNull final Function<Token<?>, K> function, final K compare) {
         filter = joiningFunction.apply(filter, item -> !Objects.equals(function.apply(item), compare));
         return new ProgramQueryResult(this);
     }
 
     @NotNull
     @Override
-    public QueryResult<Token> where(final Predicate<Token> predicate) {
+    public QueryResult<Token<?>> where(final Predicate<Token<?>> predicate) {
         filter = joiningFunction.apply(filter, predicate);
         return new ProgramQueryResult(this);
     }
 
     @NotNull
     @Override
-    public QueryResult<Token> whereNot(@NotNull final Predicate<Token> predicate) {
+    public QueryResult<Token<?>> whereNot(@NotNull final Predicate<Token<?>> predicate) {
         filter = joiningFunction.apply(filter, predicate.negate());
         return new ProgramQueryResult(this);
     }
 
     @NotNull
     @Override
-    public QueryResult<Token> all() {
+    public QueryResult<Token<?>> all() {
         return new ProgramQueryResult(this);
     }
 

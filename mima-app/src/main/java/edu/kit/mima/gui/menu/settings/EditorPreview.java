@@ -1,6 +1,6 @@
 package edu.kit.mima.gui.menu.settings;
 
-import edu.kit.mima.gui.components.editor.Editor;
+import edu.kit.mima.gui.components.text.editor.Editor;
 import edu.kit.mima.gui.components.fontchooser.panes.AbstractPreviewPane;
 import org.jetbrains.annotations.NotNull;
 

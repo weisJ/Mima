@@ -38,12 +38,11 @@ public class BinaryToken<T, K> extends FileObjectAdapter implements Token<T>, Im
      * @param index   index of token
      * @param filePos position in file
      */
-    public BinaryToken(
-            @NotNull final TokenType type,
-            @NotNull final T first,
-            @NotNull final K second,
-            final int index,
-            final int filePos) {
+    public BinaryToken(@NotNull final TokenType type,
+                       @NotNull final T first,
+                       @NotNull final K second,
+                       final int index,
+                       final int filePos) {
         this.type = type;
         this.first = first;
         this.second = second;
@@ -94,15 +93,14 @@ public class BinaryToken<T, K> extends FileObjectAdapter implements Token<T>, Im
 
     @NotNull
     @Override
-    @SuppressWarnings("unchecked")
-    public Stream<Token> stream(final boolean includeChildren) {
-        Stream<Token> stream = Stream.of(this);
+    public Stream<Token<?>> stream(final boolean includeChildren) {
+        Stream<Token<?>> stream = Stream.of(this);
         if (includeChildren) {
-            if (first instanceof Token) {
-                stream = Stream.concat(stream, ((Token) first).stream());
+            if (first instanceof Token<?>) {
+                stream = Stream.concat(stream, ((Token<?>) first).stream());
             }
             if (second instanceof Token) {
-                stream = Stream.concat(stream, ((Token) second).stream());
+                stream = Stream.concat(stream, ((Token<?>) second).stream());
             }
         }
         return stream;
@@ -134,9 +132,9 @@ public class BinaryToken<T, K> extends FileObjectAdapter implements Token<T>, Im
     @Override
     public String simpleName() {
         final String firstName =
-                first instanceof Token ? ((Token) first).simpleName() : first.toString();
+                first instanceof Token<?> ? ((Token<?>) first).simpleName() : first.toString();
         final String secondName =
-                second instanceof Token ? ((Token) second).simpleName() : second.toString();
+                second instanceof Token<?> ? ((Token<?>) second).simpleName() : second.toString();
         return type.getPrefix() + firstName + ' ' + secondName;
     }
 

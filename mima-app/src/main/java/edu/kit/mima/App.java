@@ -60,24 +60,25 @@ public final class App {
             System.setProperty("org.apache.batik.warn_destination", "false");
 
             SwingUtilities.invokeLater(() -> {
-                try {
-                    splash = new MimaSplash();
-                    splash.showSplash();
-                } catch (IOException ignored) {
-                }
+//                try {
+//                    splash = new MimaSplash();
+//                    splash.showSplash();
+//                } catch (IOException ignored) {
+//                }
                 init(getFilePath(args));
-                timer = new Timer(200, e -> {
-                    var m = nextMessage();
-                    if (m != null) {
-                        splash.showMessage(m);
-                    } else {
-                        timer.stop();
-                        splash.closeSplash();
-                        start();
-                    }
-                });
-                timer.setRepeats(true);
-                timer.start();
+//                timer = new Timer(200, e -> {
+//                    var m = nextMessage();
+//                    if (m != null) {
+//                        splash.showMessage(m);
+//                    } else {
+//                        timer.stop();
+//                        splash.closeSplash();
+//                        start();
+//                    }
+//                });
+                start();
+//                timer.setRepeats(true);
+//                timer.start();
             });
         }
     }
@@ -127,7 +128,10 @@ public final class App {
         frame.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentShown(final ComponentEvent e) {
-                SwingUtilities.invokeLater(() -> PersistenceManager.getInstance().loadStates(frame.getName()));
+                SwingUtilities.invokeLater(() -> {
+                    PersistenceManager.getInstance().loadStates(frame.getName());
+                    frame.setSize(frame.getSize());
+                });
             }
         });
         logger.setLevel(LogLevel.INFO);

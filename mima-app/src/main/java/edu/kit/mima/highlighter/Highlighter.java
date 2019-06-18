@@ -5,7 +5,7 @@ import edu.kit.mima.api.history.FileHistoryObject;
 import javax.swing.*;
 
 /**
- * Highlighter for {@link edu.kit.mima.gui.components.editor.Editor}.
+ * Highlighter for {@link edu.kit.mima.gui.components.text.editor.Editor}.
  *
  * @author Jannis Weis
  * @since 2018

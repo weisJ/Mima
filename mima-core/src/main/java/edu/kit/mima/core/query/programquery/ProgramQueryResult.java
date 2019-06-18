@@ -25,7 +25,7 @@ import java.util.stream.Stream;
  * @author Jannis Weis
  * @since 2018
  */
-public class ProgramQueryResult implements QueryResult<Token> {
+public class ProgramQueryResult implements QueryResult<Token<?>> {
 
     private final ProgramQuery query;
 
@@ -43,20 +43,20 @@ public class ProgramQueryResult implements QueryResult<Token> {
      * Commands used for filter chaining
      */
     @Override
-    public Query<Token> and() {
+    public Query<Token<?>> and() {
         query.setJoiningFunction(Predicate::and);
         return query;
     }
 
     @Override
-    public Query<Token> or() {
+    public Query<Token<?>> or() {
         query.setJoiningFunction(Predicate::or);
         return query;
     }
 
     @NotNull
     @Override
-    public QueryResult<Token> invert() {
+    public QueryResult<Token<?>> invert() {
         query.setFilter(query.getFilter().negate());
         return this;
     }
@@ -69,7 +69,7 @@ public class ProgramQueryResult implements QueryResult<Token> {
      * {@inheritDoc } Resets the query
      */
     @Override
-    public List<Token> get() {
+    public List<Token<?>> get() {
         return get(true);
     }
 
@@ -79,7 +79,7 @@ public class ProgramQueryResult implements QueryResult<Token> {
      * @param recursive whether to recursively include program tokens
      * @return List of tokens matching query
      */
-    public List<Token> get(final boolean recursive) {
+    public List<Token<?>> get(final boolean recursive) {
         final var result =
                 createTokenStream(query.getTokens(), recursive)
                         .filter(query.getFilter())
@@ -92,7 +92,7 @@ public class ProgramQueryResult implements QueryResult<Token> {
      * {@inheritDoc } Resets the query.
      */
     @Override
-    public Stream<Token> stream() {
+    public Stream<Token<?>> stream() {
         final var stream = createTokenStream(query.getTokens(), true).filter(query.getFilter());
         query.reset();
         return stream;
@@ -102,7 +102,7 @@ public class ProgramQueryResult implements QueryResult<Token> {
      * {@inheritDoc } Resets the query.
      */
     @Override
-    public List<Token> getSorted(final Comparator<? super Token> comparator) {
+    public List<Token<?>> getSorted(final Comparator<? super Token<?>> comparator) {
         final var result =
                 createTokenStream(query.getTokens(), true)
                         .filter(query.getFilter())
@@ -116,13 +116,13 @@ public class ProgramQueryResult implements QueryResult<Token> {
      * {@inheritDoc } Resets the query.
      */
     @Override
-    public void forEach(final Consumer<Token> consumer) {
+    public void forEach(final Consumer<Token<?>> consumer) {
         createTokenStream(query.getTokens(), true).filter(query.getFilter()).forEach(consumer);
         query.reset();
     }
 
     @Override
-    public QueryItem<Token> findFirst() {
+    public QueryItem<Token<?>> findFirst() {
         return createTokenStream(query.getTokens(), true)
                        .filter(query.getFilter())
                        .findFirst()
@@ -153,7 +153,7 @@ public class ProgramQueryResult implements QueryResult<Token> {
     /*
      * Create Token stream from program Token flattening all nested program occurrences.
      */
-    private Stream<Token> createTokenStream(
+    private Stream<Token<?>> createTokenStream(
             @NotNull final ProgramToken programToken, final boolean recursive) {
         // The types work out perfectly but it gets erased.
         //noinspection unchecked
@@ -164,14 +164,14 @@ public class ProgramQueryResult implements QueryResult<Token> {
      * QueryItem of a Database Query. Acts like an Optional object, but gives the ability to add items
      * to the original Database
      */
-    private final class ProgramQueryItem implements QueryItem<Token> {
+    private final class ProgramQueryItem implements QueryItem<Token<?>> {
 
         @Nullable
-        private final Token optionalResult;
+        private final Token<?> optionalResult;
         private final boolean isPresent;
 
         @Contract(pure = true)
-        private ProgramQueryItem(@Nullable final Token optionalResult) {
+        private ProgramQueryItem(@Nullable final Token<?> optionalResult) {
             isPresent = optionalResult != null;
             this.optionalResult = optionalResult;
         }
@@ -190,7 +190,7 @@ public class ProgramQueryResult implements QueryResult<Token> {
          */
         @NotNull
         @Override
-        public Token orElseAdd(final Token item) {
+        public Token<?> orElseAdd(final Token<?> item) {
             query.reset();
             throw new UnsupportedOperationException("Can't add to Program");
         }
@@ -200,7 +200,7 @@ public class ProgramQueryResult implements QueryResult<Token> {
          */
         @Nullable
         @Override
-        public Token get() throws IllegalRequestException {
+        public Token<?> get() throws IllegalRequestException {
             query.reset();
             if (isPresent) {
                 return optionalResult;
@@ -214,7 +214,7 @@ public class ProgramQueryResult implements QueryResult<Token> {
          */
         @Nullable
         @Override
-        public <X extends Throwable> Token orElseThrow(@NotNull final Supplier<X> exceptionSupplier)
+        public <X extends Throwable> Token<?> orElseThrow(@NotNull final Supplier<X> exceptionSupplier)
                 throws X {
             query.reset();
             if (isPresent) {

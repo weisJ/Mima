@@ -3,8 +3,8 @@ package edu.kit.mima.api.history;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.JTextComponent;
 import javax.swing.text.SimpleAttributeSet;
 
 /**
@@ -16,7 +16,7 @@ import javax.swing.text.SimpleAttributeSet;
 public class FileHistoryObject {
 
     @NotNull
-    private final JTextPane editor;
+    private final JTextComponent textComponent;
     @NotNull
     private final String text;
     @NotNull
@@ -28,19 +28,19 @@ public class FileHistoryObject {
     /**
      * FileHistoryObject for use with Editor.
      *
-     * @param editor      the editor the change happened
+     * @param textComponent      the textComponent the change happened
      * @param caretOffset position of caret at begin of edit
      * @param newText     new text
      * @param oldText     old text
      * @param type        Type of Document change
      */
     @Contract(pure = true)
-    public FileHistoryObject(@NotNull final JTextPane editor,
+    public FileHistoryObject(@NotNull final JTextComponent textComponent,
                              final int caretOffset,
                              @NotNull final String newText,
                              @NotNull final String oldText,
                              @NotNull final ChangeType type) {
-        this.editor = editor;
+        this.textComponent = textComponent;
         this.caretOffset = caretOffset;
         text = newText;
         old = oldText;
@@ -91,7 +91,7 @@ public class FileHistoryObject {
      */
     public void undo() {
         try {
-            editor.setCaretPosition(switch (type) {
+            textComponent.setCaretPosition(switch (type) {
                 case INSERT -> removeText(text);
                 case REMOVE -> insertText(old);
                 case REPLACE -> replaceText(text, old);
@@ -106,7 +106,7 @@ public class FileHistoryObject {
      */
     public void redo() {
         try {
-            editor.setCaretPosition(switch (type) {
+            textComponent.setCaretPosition(switch (type) {
                 case INSERT -> insertText(text);
                 case REMOVE -> removeText(old);
                 case REPLACE -> replaceText(old, text);
@@ -138,7 +138,7 @@ public class FileHistoryObject {
      * @throws BadLocationException if text can't be inserted.
      */
     private int insertText(@NotNull final String text) throws BadLocationException {
-        editor.getStyledDocument().insertString(caretOffset, text, new SimpleAttributeSet());
+        textComponent.getDocument().insertString(caretOffset, text, new SimpleAttributeSet());
         return caretOffset + text.length();
     }
 
@@ -150,7 +150,7 @@ public class FileHistoryObject {
      * @throws BadLocationException if text can't be removed.
      */
     private int removeText(@NotNull final String text) throws BadLocationException {
-        editor.getStyledDocument().remove(caretOffset, text.length());
+        textComponent.getDocument().remove(caretOffset, text.length());
         return caretOffset;
     }
 

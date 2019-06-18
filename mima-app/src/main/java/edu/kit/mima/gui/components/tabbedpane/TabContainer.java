@@ -12,6 +12,7 @@ import javax.swing.plaf.UIResource;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
+import java.util.List;
 
 /**
  * Tab container for {@link DnDTabbedPane}.
@@ -20,20 +21,22 @@ import java.awt.event.MouseEvent;
  * @since 2019
  */
 public class TabContainer extends JPanel implements UIResource {
-    private final DefaultStash stash;
+    protected final DnDTabbedPane tabPane;
     private final PopupListener listener;
-    private final DnDTabbedPane tabPane;
+    private final DefaultAddon stash;
+    private final List<TabAddon> addons;
     private boolean notifyTabbedPane;
 
     public TabContainer(final DnDTabbedPane tabPane) {
         super(null);
         setOpaque(false);
         this.tabPane = tabPane;
-        stash = new DefaultStash();
+        stash = new DefaultAddon();
         listener = new PopupListener(null, MouseEvent.BUTTON1, true, true);
         stash.addMouseListener(listener);
         add(stash);
         notifyTabbedPane = true;
+        addons = List.of();
     }
 
     public void setNotifyTabbedPane(final boolean notifyTabbedPane) {
@@ -72,10 +75,12 @@ public class TabContainer extends JPanel implements UIResource {
     public void paint(@NotNull final Graphics g) {
         final var oldClip = new Rectangle(g.getClipBounds());
         var clip = new Rectangle(oldClip);
-        clip.width -= getStash().getStashWidth();
+        if (getStash().isVisible()) {
+            clip.width -= getStash().getAddonWidth();
+        }
         g.setClip(clip);
         super.paint(g);
-        if (getStash().getComponent().isVisible()) {
+        if (getStash().isVisible()) {
             g.setClip(oldClip);
             var b = getStash().getComponent().getBounds();
             g.translate(b.x, b.y);
@@ -88,7 +93,7 @@ public class TabContainer extends JPanel implements UIResource {
         var rect = tabPane.getBoundsAt(tabPane.getSelectedIndex());
         if (getStash().getComponent().isVisible()) {
             rect.width += getStash().getComponent().getPreferredSize().width;
-            rect.width += 2 * (tabPane.getWidth() - stash.getX() - stash.getStashWidth());
+            rect.width += 2 * (tabPane.getWidth() - stash.getX() - stash.getAddonWidth());
         }
         return rect.getSize();
     }
@@ -109,9 +114,6 @@ public class TabContainer extends JPanel implements UIResource {
             var tc = (TabComponent) tabPane.getTabComponentAt(i);
             menu.add(createStashItem(i, tc));
         }
-        int w = getStash().getComponent().getPreferredSize().width;
-        getStash().getComponent().setBounds(getWidth() - getStash().getStashWidth(),
-                                            (getHeight() - w) / 2 + 1, w, w);
         listener.setPopupMenu(menu);
         getStash().getComponent().setVisible(true);
     }
@@ -128,8 +130,12 @@ public class TabContainer extends JPanel implements UIResource {
      *
      * @return the stash.s
      */
-    public TabStash getStash() {
+    public TabAddon getStash() {
         return stash;
+    }
+
+    public List<TabAddon> getAddons() {
+        return addons;
     }
 
     @NotNull
@@ -145,23 +151,36 @@ public class TabContainer extends JPanel implements UIResource {
         return item;
     }
 
+    public void layoutAddons() {
+        int w = getStash().getComponent().getPreferredSize().width;
+        getStash().getComponent().setBounds(getWidth() - getStash().getAddonWidth(),
+                                            (getHeight() - w) / 2 + 1, w, w);
+    }
+
     /**
-     * DefaultStash button.
+     * DefaultAddon button.
      */
-    public final class DefaultStash extends IconButton implements UIResource, TabStash {
-        private DefaultStash() {
+    public final class DefaultAddon extends IconButton implements UIResource, TabAddon {
+
+        private DefaultAddon() {
             super(Icons.MORE_TABS);
             setRolloverEnabled(false);
             setVisible(false);
         }
 
-        public int getStashWidth() {
+        @Override
+        public int getAddonWidth() {
             return getPreferredSize().width + 2;
         }
 
         @Override
-        public int getStashHeight() {
+        public int getAddonHeight() {
             return getPreferredSize().height;
+        }
+
+        @Override
+        public int getPlacement() {
+            return TabAddon.RIGHT;
         }
 
         @Contract(value = " -> this", pure = true)
@@ -169,5 +188,6 @@ public class TabContainer extends JPanel implements UIResource {
         public Component getComponent() {
             return this;
         }
+
     }
 }

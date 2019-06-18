@@ -1,12 +1,12 @@
-package edu.kit.mima.gui.components.editor;
+package edu.kit.mima.gui.components.text.editor;
 
 import edu.kit.mima.api.history.FileHistoryObject;
 import edu.kit.mima.api.history.FileHistoryObject.ChangeType;
 import edu.kit.mima.api.history.History;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.JTextComponent;
 
 /**
  * Controls the change history of {@link Editor}.
@@ -17,7 +17,7 @@ import javax.swing.text.BadLocationException;
 public class TextHistoryController {
 
     private static final int MAXIMUM_AMEND_LENGTH = 10;
-    private final JTextPane editorPane;
+    private final JTextComponent textComponent;
     @NotNull
     private final History<FileHistoryObject> history;
     private boolean active;
@@ -25,11 +25,11 @@ public class TextHistoryController {
     /**
      * History Controller that controls the creation of HistoryObjects.
      *
-     * @param editorPane    editor pane to control
+     * @param textComponent    editor pane to control
      * @param historyLength how many events the history should date back
      */
-    public TextHistoryController(final JTextPane editorPane, final int historyLength) {
-        this.editorPane = editorPane;
+    public TextHistoryController(final JTextComponent textComponent, final int historyLength) {
+        this.textComponent = textComponent;
         history = new History<>(historyLength);
         active = true;
     }
@@ -47,14 +47,14 @@ public class TextHistoryController {
         if (!active) {
             return;
         }
-        if (offset >= editorPane.getDocument().getLength()) {
+        if (offset >= textComponent.getDocument().getLength()) {
             addInsertHistory(offset, text);
         } else {
-            final String old = editorPane.getDocument().getText(offset, length);
+            final String old = textComponent.getDocument().getText(offset, length);
             if (old.isEmpty()) {
                 addInsertHistory(offset, text);
             } else {
-                history.add(new FileHistoryObject(editorPane, offset, text, old, ChangeType.REPLACE));
+                history.add(new FileHistoryObject(textComponent, offset, text, old, ChangeType.REPLACE));
             }
         }
     }
@@ -76,9 +76,9 @@ public class TextHistoryController {
                     && (offset == (fhs.getCaretOffset() + fhs.getText().length()))) {
             history.setCurrent(
                     new FileHistoryObject(
-                            editorPane, fhs.getCaretOffset(), fhs.getText() + text, "", ChangeType.INSERT));
+                            textComponent, fhs.getCaretOffset(), fhs.getText() + text, "", ChangeType.INSERT));
         } else {
-            history.add(new FileHistoryObject(editorPane, offset, text, "", ChangeType.INSERT));
+            history.add(new FileHistoryObject(textComponent, offset, text, "", ChangeType.INSERT));
         }
     }
 
@@ -102,7 +102,7 @@ public class TextHistoryController {
         final FileHistoryObject fhs = history.getCurrent();
         String text = null;
         try {
-            text = editorPane.getDocument().getText(offset, length);
+            text = textComponent.getDocument().getText(offset, length);
         } catch (@NotNull final BadLocationException e) {
             e.printStackTrace();
         }
@@ -113,9 +113,9 @@ public class TextHistoryController {
                     && ((offset + length) == fhs.getCaretOffset())) {
             history.setCurrent(
                     new FileHistoryObject(
-                            editorPane, offset, "", text + fhs.getOldText(), ChangeType.REMOVE));
+                            textComponent, offset, "", text + fhs.getOldText(), ChangeType.REMOVE));
         } else {
-            history.add(new FileHistoryObject(editorPane, offset, "", text, ChangeType.REMOVE));
+            history.add(new FileHistoryObject(textComponent, offset, "", text, ChangeType.REMOVE));
         }
     }
 
@@ -180,7 +180,7 @@ public class TextHistoryController {
      * @param initial the initial text.
      */
     public void reset(final String initial) {
-        history.reset(new FileHistoryObject(editorPane, 0, initial, "", ChangeType.INSERT));
+        history.reset(new FileHistoryObject(textComponent, 0, initial, "", ChangeType.INSERT));
     }
 
     /**

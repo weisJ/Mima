@@ -15,18 +15,17 @@ public abstract class EditorTabbedPaneUI extends DnDTabbedPaneUI {
     protected abstract void setupColors();
 
     protected void drawTab(@NotNull final Graphics2D g, final int index, final boolean isSelected) {
-        super.drawTab((Graphics2D) g.create(), index, isSelected);
+        super.drawTab(g, index, isSelected);
         final var bounds = rects[index];
         final int yOff = bounds.height / 8;
-        g.translate(1, 0);
         if (isSelected) {
             g.setColor(selectedColor);
-            g.fillRect(bounds.x - 1, bounds.y + bounds.height - yOff + 1, bounds.width - 1, yOff);
+            g.fillRect(bounds.x, bounds.y + bounds.height - yOff + 1, bounds.width, yOff);
         }
         g.translate(-0.5, 0);
         g.setColor(tabBorderColor);
-        g.drawLine(bounds.x + bounds.width - 2, bounds.y,
-                   bounds.x + bounds.width - 2, bounds.y + bounds.height);
-        g.dispose();
+        g.drawLine(bounds.x + bounds.width, bounds.y,
+                   bounds.x + bounds.width, bounds.y + bounds.height);
+        g.translate(0.5, 0);
     }
 }

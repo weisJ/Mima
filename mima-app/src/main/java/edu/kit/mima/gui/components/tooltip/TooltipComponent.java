@@ -84,11 +84,16 @@ public class TooltipComponent<T extends TooltipWindow> extends MouseAdapter impl
     /**
      * Show DefaultTooltipWindow at mousePosition.
      */
-    public void showTooltip() {
+    public boolean showTooltip() {
         if (!showOnce) {
             mousePos = MouseInfo.getPointerInfo().getLocation();
         }
-        showTooltipInternal();
+        if (SwingUtilities.getWindowAncestor(container) == null) {
+            //container isn't connected to the hierarchy anymore. Remove the tooltip.
+            uninstall();
+            return false;
+        }
+        return showTooltipInternal();
     }
 
     /**
@@ -110,7 +115,7 @@ public class TooltipComponent<T extends TooltipWindow> extends MouseAdapter impl
     /*
      * Make the tooltip visible.
      */
-    private void showTooltipInternal() {
+    private boolean showTooltipInternal() {
         if (container instanceof TooltipAware) {
             ((TooltipAware)container).setTooltipVisible(true, eventHandler);
         }
@@ -122,6 +127,7 @@ public class TooltipComponent<T extends TooltipWindow> extends MouseAdapter impl
         SwingUtilities.convertPointToScreen(pos, container.getRootPane());
         tooltip.setBounds(pos.x, pos.y, size.width, size.height);
         tooltip.showTooltip();
+        return true;
     }
 
     /*
@@ -131,8 +137,7 @@ public class TooltipComponent<T extends TooltipWindow> extends MouseAdapter impl
     @Contract("_, _, _ -> new")
     private Point calculatePositionIn(
             @NotNull final Component c, @NotNull final Dimension size, @NotNull final Point mousePos) {
-        final var containerPos =
-                SwingUtilities.convertPoint(
+        final var containerPos = SwingUtilities.convertPoint(
                         container, new Point(container.getWidth() / 2, container.getHeight() / 2), c);
         SwingUtilities.convertPointFromScreen(mousePos, c);
         var pos = centerAt.calculatePosition(mousePos, containerPos);

@@ -50,13 +50,16 @@ public final class TabFrameTabContextProvider {
         menu.addSeparator();
         var moveToMenu = new JMenu("Move to");
         Map<Alignment, JMenuItem> others = new HashMap<>();
-        for (var a : Alignment.values()) {
-            if (a != Alignment.CENTER) {
-                var item = moveToEntry(a, target, others);
-                others.put(a, item);
-                moveToMenu.add(item);
-            }
-        }
+
+        Alignment a = Alignment.NORTH;
+        do {
+            var item = moveToEntry(a, target, others);
+            others.put(a, item);
+            moveToMenu.add(item);
+            a = a.clockwise();
+        } while (a != Alignment.NORTH);
+
+
         menu.add(moveToMenu);
         menu.addSeparator();
         menu.add(hide);

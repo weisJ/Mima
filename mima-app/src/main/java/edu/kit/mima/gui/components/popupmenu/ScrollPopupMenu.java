@@ -41,7 +41,7 @@ public class ScrollPopupMenu extends JPopupMenu implements MouseWheelListener {
      */
     private static void doNotCancelPopupHack(@NotNull final JComponent component) {
         try {
-            final Class clazz = javax.swing.plaf.basic.BasicComboBoxUI.class;
+            final Class<?> clazz = javax.swing.plaf.basic.BasicComboBoxUI.class;
             final Field field = clazz.getDeclaredField("HIDE_POPUP_KEY"); // NOI18N
             field.setAccessible(true);
             component.putClientProperty("doNotCancelPopup", field.get(null)); // NOI18N

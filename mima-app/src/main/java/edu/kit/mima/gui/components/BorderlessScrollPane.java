@@ -57,38 +57,34 @@ public class BorderlessScrollPane extends JLayeredPane {
      */
     public BorderlessScrollPane(final JComponent view, final int vsbPolicy, final int hsbPolicy) {
         setBorder(null);
-        scrollPane =
-                new JScrollPane(view, vsbPolicy, hsbPolicy) {
-                    /*
-                     * Ensure the correct background.
-                     */
-                    public void setUI(final ScrollPaneUI ui) {
-                        super.setUI(ui);
-                        SwingUtilities.invokeLater(
-                                () -> {
-                                    Component component = getViewport().getView();
-                                    if (component != null) {
-                                        getViewport().setBackground(component.getBackground());
-                                    }
-                                });
+        scrollPane = new JScrollPane(view, vsbPolicy, hsbPolicy) {
+            /*
+             * Ensure the correct background.
+             */
+            public void setUI(final ScrollPaneUI ui) {
+                super.setUI(ui);
+                SwingUtilities.invokeLater(() -> {
+                    Component component = getViewport().getView();
+                    if (component != null) {
+                        getViewport().setBackground(component.getBackground());
                     }
-                };
+                });
+            }
+        };
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         add(scrollPane, JLayeredPane.DEFAULT_LAYER);
 
         controlPanel = new ControlPanel(scrollPane);
         add(controlPanel, JLayeredPane.PALETTE_LAYER);
 
-        addComponentListener(
-                (ComponentResizeListener)
-                        e -> {
-                            // listen to changes of JLayeredPane size
-                            scrollPane.setSize(getSize());
-                            scrollPane.getViewport().revalidate();
-                            controlPanel.setSize(getSize());
-                            updateInsets();
-                            controlPanel.revalidate();
-                        });
+        addComponentListener((ComponentResizeListener) e -> {
+            // listen to changes of JLayeredPane size
+            scrollPane.setSize(getSize());
+            scrollPane.getViewport().revalidate();
+            controlPanel.setSize(getSize());
+            updateInsets();
+            controlPanel.revalidate();
+        });
         setBarInsets(new Insets(0, 0, 0, 0));
     }
 
@@ -141,12 +137,12 @@ public class BorderlessScrollPane extends JLayeredPane {
         controlPanel.showHorizontalScrollBar(policy != JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     }
 
-    private class ControlPanel extends JPanel {
+    private final class ControlPanel extends JPanel {
 
         @NotNull
-        private final JMyScrollBar verticalScrollBar;
+        private final PopupScrollBar verticalScrollBar;
         @NotNull
-        private final JMyScrollBar horizontalScrollBar;
+        private final PopupScrollBar horizontalScrollBar;
         private boolean showVertical;
         private boolean showHorizontal;
 
@@ -154,7 +150,7 @@ public class BorderlessScrollPane extends JLayeredPane {
             setLayout(null);
             setOpaque(false);
 
-            verticalScrollBar = new JMyScrollBar(JScrollBar.VERTICAL);
+            verticalScrollBar = new PopupScrollBar(JScrollBar.VERTICAL);
             scrollPane.setVerticalScrollBar(verticalScrollBar);
             scrollPane.remove(verticalScrollBar);
             if (scrollPane.getVerticalScrollBarPolicy() != JScrollPane.VERTICAL_SCROLLBAR_NEVER) {
@@ -162,7 +158,7 @@ public class BorderlessScrollPane extends JLayeredPane {
                 add(verticalScrollBar);
             }
 
-            horizontalScrollBar = new JMyScrollBar(JScrollBar.HORIZONTAL);
+            horizontalScrollBar = new PopupScrollBar(JScrollBar.HORIZONTAL);
             scrollPane.setHorizontalScrollBar(horizontalScrollBar);
             scrollPane.remove(horizontalScrollBar);
             if (scrollPane.getHorizontalScrollBarPolicy() != JScrollPane.HORIZONTAL_SCROLLBAR_NEVER) {
@@ -206,13 +202,12 @@ public class BorderlessScrollPane extends JLayeredPane {
         }
     }
 
-    private class JMyScrollBar extends JScrollBar {
+    private final class PopupScrollBar extends JScrollBar {
 
-        private JMyScrollBar(final int direction) {
+        private PopupScrollBar(final int direction) {
             super(direction);
             this.putClientProperty("scrollBar.updateBackground", Boolean.FALSE);
-            this.putClientProperty(
-                    "scrollBar.updateAction", (Runnable) () -> scrollPane.getViewport().repaint());
+            this.putClientProperty("scrollBar.updateAction", (Runnable) () -> scrollPane.getViewport().repaint());
             setOpaque(false);
         }
 

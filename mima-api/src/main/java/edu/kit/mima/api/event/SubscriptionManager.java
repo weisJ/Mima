@@ -18,12 +18,12 @@ import java.util.Set;
  * @author Jannis Weis
  * @since 2019
  */
-public class SubscriptionManager {
+public final class SubscriptionManager {
 
     private static final SubscriptionManager instance = new SubscriptionManager();
 
     private final Set<String> allServices;
-    private final Map<SubscriptionService, Set<String>> offeredSubscriptions;
+    private final Map<SubscriptionService<?>, Set<String>> offeredSubscriptions;
     private final Map<String, List<Subscriber>> subscriberMap;
 
     @Contract(pure = true)
@@ -97,12 +97,11 @@ public class SubscriptionManager {
         }
     }
 
-    private <T> void notifySubscribers(
-            final String identification,
-            final T value,
-            final SubscriptionService<T> service,
-            final Class[] owner,
-            final Object invoker) {
+    private <T> void notifySubscribers(final String identification,
+                                       final T value,
+                                       final SubscriptionService<T> service,
+                                       final Class<?>[] owner,
+                                       final Object invoker) {
         /*
          * Ensure the notification sender also is the provider of the subscription.
          */
