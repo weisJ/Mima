@@ -20,12 +20,9 @@ public abstract class EditorTabbedPaneUI extends DnDTabbedPaneUI {
         final int yOff = bounds.height / 8;
         if (isSelected) {
             g.setColor(selectedColor);
-            g.fillRect(bounds.x, bounds.y + bounds.height - yOff + 1, bounds.width, yOff);
+            g.fillRect(bounds.x, bounds.y + bounds.height - yOff + 1, bounds.width - 1, yOff);
         }
-        g.translate(-0.5, 0);
         g.setColor(tabBorderColor);
-        g.drawLine(bounds.x + bounds.width, bounds.y,
-                   bounds.x + bounds.width, bounds.y + bounds.height);
-        g.translate(0.5, 0);
+        g.fillRect(bounds.x + bounds.width - 1, bounds.y, 1, bounds.height);
     }
 }

@@ -125,15 +125,18 @@ public abstract class DnDTabbedPaneUI extends BasicTabbedPaneUI {
                 drawTab((Graphics2D) g, i, false);
             }
         }
-        paintDrop(g, dropTargetIndex, dropSourceIndex, selectedIndex);
+        paintDrop(g, dropTargetIndex, dropSourceIndex);
         paintTabBorder(g, oldClip);
+
+        if (dropSourceIndex != selectedIndex) {
+            drawTab((Graphics2D) g, selectedIndex, true);
+        }
 
         g.setClip(oldClip);
         drawStash(g);
     }
 
-    private void paintDrop(final Graphics g, final int dropTargetIndex, final int dropSourceIndex,
-                           final int selectedIndex) {
+    private void paintDrop(final Graphics g, final int dropTargetIndex, final int dropSourceIndex) {
         if (dropTargetIndex >= 0) {
             final var sourceBounds = dropSourceIndex >= 0
                                      ? rects[dropSourceIndex]
@@ -147,10 +150,6 @@ public abstract class DnDTabbedPaneUI extends BasicTabbedPaneUI {
                 g.fillRect(b.x + b.width, b.y, sourceBounds.width, sourceBounds.height);
             }
         }
-
-        if (dropSourceIndex != selectedIndex) {
-            drawTab((Graphics2D) g, selectedIndex, true);
-        }
     }
 
     private void drawStash(@NotNull final Graphics g) {
@@ -161,8 +160,10 @@ public abstract class DnDTabbedPaneUI extends BasicTabbedPaneUI {
         int x = tabBounds.x + tabBounds.width - stashWidth;
         g.fillRect(x, tabBounds.y, stashWidth, tabBounds.height);
         g.setColor(tabBorderColor);
-        g.drawLine(x, tabBounds.y, x, tabBounds.y + tabBounds.height);
-        g.drawLine(x, maxTabHeight, x + stashWidth, maxTabHeight);
+        //Vertical line
+        g.fillRect(x, tabBounds.y, 1, tabBounds.height);
+        //Horizontal Line
+        g.fillRect(x, maxTabHeight, stashWidth, 1);
     }
 
     protected void drawTab(@NotNull final Graphics2D g, final int index, final boolean isSelected) {
@@ -177,14 +178,11 @@ public abstract class DnDTabbedPaneUI extends BasicTabbedPaneUI {
     }
 
     private void paintTabBorder(@NotNull final Graphics g, final Shape oldClip) {
-        var g2 = (Graphics2D) g.create();
-        g2.translate(0, 0.5);
-        g2.setColor(tabBorderColor);
+        g.setColor(tabBorderColor);
         if (Boolean.TRUE.equals(tabbedPane.getClientProperty("lineThrough"))) {
-            g2.setClip(oldClip);
+            g.setClip(oldClip);
         }
-        g2.drawLine(0, maxTabHeight, tabbedPane.getWidth(), maxTabHeight);
-        g2.dispose();
+        g.fillRect(0, maxTabHeight, tabbedPane.getWidth(), 1);
     }
 
     @Override
