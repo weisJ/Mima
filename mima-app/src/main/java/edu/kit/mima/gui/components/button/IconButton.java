@@ -60,20 +60,26 @@ public class IconButton extends JButton implements TooltipAware {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(final MouseEvent e) {
-                clicking = true;
-                repaint();
+                if (SwingUtilities.isLeftMouseButton(e)) {
+                    clicking = true;
+                    repaint();
+                }
             }
 
             @Override
             public void mouseReleased(final MouseEvent e) {
-                clicking = false;
-                repaint();
+                if (SwingUtilities.isLeftMouseButton(e)) {
+                    clicking = false;
+                    repaint();
+                }
             }
 
             @Override
             public void mouseClicked(final MouseEvent e) {
-                for (final var l : getActionListeners()) {
-                    l.actionPerformed(new ActionEvent(IconButton.this, 0, ""));
+                if (SwingUtilities.isLeftMouseButton(e)) {
+                    for (final var l : getActionListeners()) {
+                        l.actionPerformed(new ActionEvent(IconButton.this, 0, ""));
+                    }
                 }
             }
         });

@@ -40,6 +40,9 @@ public abstract class SimplePopupComponent extends PopupComponent {
 
             @Override
             public void eventDispatched(@NotNull final AWTEvent event) {
+                if (!SwingUtilities.isLeftMouseButton((MouseEvent)event)) {
+                    return;
+                }
                 if (locked) {
                     requestFocus();
                     locked = false;

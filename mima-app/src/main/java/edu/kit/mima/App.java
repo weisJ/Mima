@@ -5,7 +5,6 @@ import com.j256.simplejmx.server.JmxServer;
 import edu.kit.mima.api.logging.LogLevel;
 import edu.kit.mima.app.MimaUserInterface;
 import edu.kit.mima.core.MimaCoreDefaults;
-import edu.kit.mima.gui.icons.Icons;
 import edu.kit.mima.gui.laf.LafManager;
 import edu.kit.mima.gui.persist.PersistenceManager;
 import edu.kit.mima.logger.ConsoleLogger;
@@ -137,7 +136,6 @@ public final class App {
         logger.setLevel(LogLevel.INFO);
         MimaCoreDefaults.setLogger(logger);
         frame.setLocationRelativeTo(null);
-        Icons.loadIcons();
         registerWithJmxAgent(frame);
     }
 
