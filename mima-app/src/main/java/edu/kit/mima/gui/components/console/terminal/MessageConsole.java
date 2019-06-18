@@ -1,7 +1,7 @@
 package edu.kit.mima.gui.components.console.terminal;
 
 import edu.kit.mima.gui.components.text.protectedarea.ProtectedTextComponent;
-import edu.kit.mima.util.DocumentUtil;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.event.DocumentListener;
@@ -14,6 +14,7 @@ import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.nio.charset.Charset;
 
 /*
  *  Create a simple console to display text messages.
@@ -34,50 +35,77 @@ public class MessageConsole {
     private final boolean isAppend;
     private final ConsoleOutputStream consoleOutputStream;
     private final ConsoleOutputStream consoleErrorStream;
+    private final Charset charset;
     private DocumentListener limitLinesListener;
     private int lastPos;
 
-    public MessageConsole(final JTextComponent textComponent) {
-        this(textComponent, true);
+    /**
+     * Use the text component specified as a simply console to display
+     * text messages.
+     * The messages can either be appended to the end of the console or
+     * inserted as the first line of the console.
+     *
+     * @param textComponent text component to display on.
+     * @param charset       charset of the content written to the stream.
+     */
+    public MessageConsole(final JTextComponent textComponent, final Charset charset) {
+        this(textComponent, charset, true);
     }
 
-    /*
-     *  Use the text component specified as a simply console to display
-     *  text messages.
+    /**
+     * Use the text component specified as a simply console to display
+     * text messages.
+     * The messages can either be appended to the end of the console or
+     * inserted as the first line of the console.
      *
-     *  The messages can either be appended to the end of the console or
-     *  inserted as the first line of the console.
+     * @param textComponent text component to display on.
+     * @param charset charset of the content written to the stream.
+     * @param isAppend whether content should be appended.
      */
-    public MessageConsole(@NotNull final JTextComponent textComponent, final boolean isAppend) {
+    public MessageConsole(@NotNull final JTextComponent textComponent, final Charset charset, final boolean isAppend) {
         this.textComponent = textComponent;
         this.document = textComponent.getDocument();
         this.isAppend = isAppend;
+        this.charset = charset;
         protectedTextComponent = new ProtectedTextComponent(textComponent);
         consoleOutputStream = new ConsoleOutputStream(null, null);
         consoleErrorStream = new ConsoleOutputStream(Color.RED, null);
     }
 
+    /**
+     * Get the output stream connected with the content of this console.
+     *
+     * @return the output stream.
+     */
     public OutputStream getOutputStream() {
         return consoleOutputStream;
     }
 
+    /**
+     * Get the error stream connected with the content of this console.
+     *
+     * @return the error stream.
+     */
     public OutputStream getErrorStream() {
         return consoleErrorStream;
     }
 
-    /*
+    /**
      *  Redirect the output from the standard output to the console
-     *  using the default text color and null PrintStream
+     *  using the default text color and null PrintStream.
      */
     public void redirectOut() {
         redirectOut(null, null);
     }
 
-    /*
-     *  Redirect the output from the standard output to the console
-     *  using the specified color and PrintStream. When a PrintStream
-     *  is specified the message will be added to the Document before
-     *  it is also written to the PrintStream.
+    /**
+     * Redirect the output from the standard output to the console
+     * using the specified color and PrintStream. When a PrintStream
+     * is specified the message will be added to the Document before
+     * it is also written to the PrintStream.
+     *
+     * @param textColor text color to use.
+     * @param printStream print stream to redirect.
      */
     public void redirectOut(final Color textColor, final PrintStream printStream) {
         consoleOutputStream.setTextColor(textColor);
@@ -85,19 +113,22 @@ public class MessageConsole {
         System.setOut(new PrintStream(consoleOutputStream, true));
     }
 
-    /*
-     *  Redirect the output from the standard error to the console
-     *  using the default text color and null PrintStream
+    /**
+     * Redirect the output from the standard error to the console
+     * using the default text color and null PrintStream
      */
     public void redirectErr() {
         redirectErr(null, null);
     }
 
-    /*
-     *  Redirect the output from the standard error to the console
-     *  using the specified color and PrintStream. When a PrintStream
-     *  is specified the message will be added to the Document before
-     *  it is also written to the PrintStream.
+    /**
+     * Redirect the output from the standard error to the console
+     * using the specified color and PrintStream. When a PrintStream
+     * is specified the message will be added to the Document before
+     * it is also written to the PrintStream.
+     *
+     * @param textColor text color to use.
+     * @param printStream print stream to redirect.
      */
     public void redirectErr(final Color textColor, final PrintStream printStream) {
         consoleErrorStream.setTextColor(textColor);
@@ -105,12 +136,13 @@ public class MessageConsole {
         System.setErr(new PrintStream(consoleErrorStream, true));
     }
 
-    /*
-     *  To prevent memory from being used up you can control the number of
-     *  lines to display in the console
+    /**
+     * To prevent memory from being used up you can control the number of
+     * lines to display in the console
+     * This number can be dynamically changed, but the console will only
+     * be updated the next time the Document is updated.
      *
-     *  This number can be dynamically changed, but the console will only
-     *  be updated the next time the Document is updated.
+     * @param lines number of lines to display.
      */
     public void setMessageLines(final int lines) {
         if (limitLinesListener != null) {
@@ -121,10 +153,18 @@ public class MessageConsole {
         document.addDocumentListener(limitLinesListener);
     }
 
+    /**
+     * Get the position of the last write to the console through the stream.
+     *
+     * @return position from last write.
+     */
     public int getLastPos() {
         return lastPos;
     }
 
+    /**
+     * Delete the last unprotected part of the text.
+     */
     public void deleteLast() {
         try {
             if (document.getLength() > lastPos) {
@@ -135,26 +175,9 @@ public class MessageConsole {
         }
     }
 
-    public int getLineCount() {
-        return textComponent.getDocument().getDefaultRootElement().getElementCount();
-    }
-
-    public void deleteLine(final int line) {
-        protectedTextComponent.setProtect(false);
-        try {
-            int off = DocumentUtil.getLineStartOffset(textComponent, line) - 1;
-            int endOff = DocumentUtil.getLineEndOffset(textComponent, line) - 1;
-            textComponent.getDocument().remove(off, endOff - off);
-            if (off <= lastPos) {
-                lastPos = textComponent.getDocument().getLength();
-            }
-        } catch (final BadLocationException e) {
-            e.printStackTrace();
-        } finally {
-            protectedTextComponent.setProtect(true);
-        }
-    }
-
+    /**
+     * Protect all the content.
+     */
     public void protect() {
         protectedTextComponent.protectText(0, document.getLength() - 1);
     }
@@ -166,7 +189,7 @@ public class MessageConsole {
      *  The text displayed in the Document can be color coded to indicate
      *  the output source.
      */
-    class ConsoleOutputStream extends ByteArrayOutputStream {
+    private final class ConsoleOutputStream extends ByteArrayOutputStream {
         private final StringBuffer buffer = new StringBuffer(80);
         private SimpleAttributeSet attributes;
         private PrintStream printStream;
@@ -175,7 +198,7 @@ public class MessageConsole {
         /*
          *  Specify the option text color and PrintStream
          */
-        public ConsoleOutputStream(final Color textColor, final PrintStream printStream) {
+        private ConsoleOutputStream(final Color textColor, final PrintStream printStream) {
             setTextColor(textColor);
             setPrintStream(printStream);
 
@@ -185,14 +208,15 @@ public class MessageConsole {
             }
         }
 
-        public void setTextColor(final Color textColor) {
+
+        private void setTextColor(final Color textColor) {
             if (textColor != null) {
                 attributes = new SimpleAttributeSet();
                 StyleConstants.setForeground(attributes, textColor);
             }
         }
 
-        public void setPrintStream(final PrintStream printStream) {
+        private void setPrintStream(final PrintStream printStream) {
             this.printStream = printStream;
         }
 
@@ -206,6 +230,7 @@ public class MessageConsole {
          *  The message will be treated differently depending on whether the line
          *  will be appended or inserted into the Document
          */
+        @Override
         public void flush() {
             String message = toString();
 
@@ -220,6 +245,13 @@ public class MessageConsole {
             }
 
             reset();
+        }
+
+        @NotNull
+        @Contract(value = " -> new", pure = true)
+        @Override
+        public synchronized String toString() {
+            return new String(buf, 0, count, charset);
         }
 
         /*
