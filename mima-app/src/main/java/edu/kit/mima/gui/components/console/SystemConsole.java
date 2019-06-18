@@ -15,6 +15,9 @@ import java.nio.charset.Charset;
  */
 public class SystemConsole extends BorderlessScrollPane {
 
+    /**
+     * Create System console that displays the Standard out and error stream.
+     */
     public SystemConsole() {
         var textArea = new JEditorPane();
         textArea.setEditable(false);
