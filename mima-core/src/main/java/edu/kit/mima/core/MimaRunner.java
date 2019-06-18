@@ -2,7 +2,6 @@ package edu.kit.mima.core;
 
 import edu.kit.mima.api.event.SubscriptionManager;
 import edu.kit.mima.api.event.SubscriptionService;
-import edu.kit.mima.api.observing.AbstractObservable;
 import edu.kit.mima.core.controller.ThreadDebugController;
 import edu.kit.mima.core.instruction.InstructionSet;
 import edu.kit.mima.core.instruction.MimaInstruction;
@@ -17,7 +16,6 @@ import edu.kit.mima.core.token.Token;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
@@ -30,7 +28,7 @@ import java.util.function.Consumer;
  * @author Jannis Weis
  * @since 2018
  */
-public class MimaRunner extends AbstractObservable implements ExceptionHandler, CodeRunner {
+public class MimaRunner implements ExceptionHandler, CodeRunner {
 
     public static final String RUNNING_PROPERTY = "running";
     @NotNull
@@ -58,8 +56,7 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
         debugger = new MimaDebugger();
         interpreter = new Interpreter(0, null, null);
         sharedException = new AtomicReference<>();
-        mima =
-                new Mima(InstructionSet.MIMA_X.getWordLength(), InstructionSet.MIMA_X.getConstWordLength());
+        mima = new Mima(InstructionSet.MIMA_X.getWordLength(), InstructionSet.MIMA_X.getConstWordLength());
     }
 
     /**
@@ -72,12 +69,12 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
         setupInterpreter(callback);
         threadDebugController.setBreaks(Collections.emptyList());
         threadDebugController.start();
-        getPropertyChangeSupport().firePropertyChange(RUNNING_PROPERTY, false, true);
+        subscriptionService.notifyEvent(RUNNING_PROPERTY, true, this);
         do {
             threadDebugController.resume();
             checkForException();
         } while (threadDebugController.isActive() && isRunning());
-        getPropertyChangeSupport().firePropertyChange(RUNNING_PROPERTY, true, false);
+        subscriptionService.notifyEvent(RUNNING_PROPERTY, false, this);
     }
 
     /**
@@ -89,7 +86,6 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
         Optional.ofNullable(threadDebugController).ifPresent(ThreadDebugController::stop);
         interpreter.setRunning(false);
         subscriptionService.notifyEvent(RUNNING_PROPERTY, false, this);
-        getPropertyChangeSupport().firePropertyChange(RUNNING_PROPERTY, running, false);
     }
 
     /**
@@ -100,8 +96,7 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
     private void createGlobalEnvironment(final Consumer<Value<?>> callback) {
         final InstructionSet instructionSet = program.getInstructionSet();
         mima = new Mima(instructionSet.getWordLength(), instructionSet.getConstWordLength());
-        globalEnvironment =
-                new GlobalEnvironment(program.getProgramToken(), mima, interpreter, callback);
+        globalEnvironment = new GlobalEnvironment(program.getProgramToken(), mima, interpreter, callback);
         globalEnvironment.setupGlobalFunctions(MimaInstruction.values());
         if (instructionSet == InstructionSet.MIMA_X) {
             globalEnvironment.setupExtendedInstructionSet();
@@ -121,9 +116,7 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
         sharedException.set(null);
         interpreter = new Interpreter(program.getInstructionSet().getConstWordLength(), null, this);
         createGlobalEnvironment(callback);
-        threadDebugController =
-                new ThreadDebugController(
-                        new Thread(
+        threadDebugController = new ThreadDebugController(new Thread(
                                 () -> interpreter.evaluateTopLevel(program.getProgramToken(), globalEnvironment)));
         interpreter.setDebugController(threadDebugController);
     }
@@ -220,12 +213,10 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
             if (!threadDebugController.isActive()) {
                 paused = true;
                 subscriptionService.notifyEvent(PAUSE_PROPERTY, true, this);
-                getPropertyChangeSupport().firePropertyChange(Debugger.PAUSE_PROPERTY, false, true);
             }
             if (!isRunning()) {
                 active = false;
                 subscriptionService.notifyEvent(RUNNING_PROPERTY, false, this);
-                getPropertyChangeSupport().firePropertyChange(RUNNING_PROPERTY, true, false);
             }
         }
 
@@ -236,7 +227,6 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
             paused = false;
 
             subscriptionService.notifyEvent(PAUSE_PROPERTY, true, this);
-            getPropertyChangeSupport().firePropertyChange(Debugger.PAUSE_PROPERTY, false, true);
 
             mima.reset();
             setupInterpreter(callback);
@@ -244,7 +234,6 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
             threadDebugController.start();
 
             subscriptionService.notifyEvent(RUNNING_PROPERTY, true, this);
-            getPropertyChangeSupport().firePropertyChange(RUNNING_PROPERTY, false, true);
 
             continueExecution();
         }
@@ -255,7 +244,6 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
             threadDebugController.pause();
 
             subscriptionService.notifyEvent(PAUSE_PROPERTY, true, this);
-            getPropertyChangeSupport().firePropertyChange(Debugger.PAUSE_PROPERTY, false, true);
         }
 
         @Override
@@ -271,7 +259,6 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
             threadDebugController.setAutoPause(true);
 
             subscriptionService.notifyEvent(PAUSE_PROPERTY, false, this);
-            getPropertyChangeSupport().firePropertyChange(Debugger.PAUSE_PROPERTY, true, false);
             continueExecution();
         }
 
@@ -283,28 +270,6 @@ public class MimaRunner extends AbstractObservable implements ExceptionHandler, 
         @Override
         public boolean isPaused() {
             return active && paused;
-        }
-
-        @Override
-        public void addPropertyChangeListener(
-                final String property, final PropertyChangeListener listener) {
-            MimaRunner.this.addPropertyChangeListener(property, listener);
-        }
-
-        @Override
-        public void addPropertyChangeListener(final PropertyChangeListener listener) {
-            MimaRunner.this.addPropertyChangeListener(listener);
-        }
-
-        @Override
-        public void removePropertyChangeListener(
-                final String property, final PropertyChangeListener listener) {
-            MimaRunner.this.removePropertyChangeListener(property, listener);
-        }
-
-        @Override
-        public void removePropertyChangeListener(final PropertyChangeListener listener) {
-            MimaRunner.this.removePropertyChangeListener(listener);
         }
     }
 }

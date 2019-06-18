@@ -1,8 +1,8 @@
 package edu.kit.mima.app;
 
 import edu.kit.mima.App;
+import edu.kit.mima.api.event.AbstractSubscriber;
 import edu.kit.mima.api.event.SubscriptionManager;
-import edu.kit.mima.api.observing.BindingUtil;
 import edu.kit.mima.core.Debugger;
 import edu.kit.mima.core.MimaCompiler;
 import edu.kit.mima.core.MimaRunner;
@@ -12,13 +12,12 @@ import edu.kit.mima.gui.components.ProtectedScrollTable;
 import edu.kit.mima.gui.components.alignment.Alignment;
 import edu.kit.mima.gui.components.console.Console;
 import edu.kit.mima.gui.components.console.SystemConsole;
-import edu.kit.mima.gui.components.text.editor.Editor;
 import edu.kit.mima.gui.components.folderdisplay.FilePathDisplay;
-import edu.kit.mima.gui.components.listeners.ComponentResizeListener;
 import edu.kit.mima.gui.components.tabbedpane.EditorTabbedPane;
 import edu.kit.mima.gui.components.tabframe.TabFrame;
 import edu.kit.mima.gui.components.tabframe.popuptab.DefaultPopupComponent;
 import edu.kit.mima.gui.components.tabframe.popuptab.TerminalPopupComponent;
+import edu.kit.mima.gui.components.text.editor.Editor;
 import edu.kit.mima.gui.icons.Icons;
 import edu.kit.mima.gui.menu.Help;
 import edu.kit.mima.gui.menu.settings.Settings;
@@ -68,6 +67,8 @@ public final class MimaUserInterface extends JFrame {
     private final MemoryTableView memoryView;
     @NotNull
     private final ProtectedScrollTable memoryTable;
+    private JPanel buttonArea;
+    private JPanel controlPanel;
 
     /**
      * Create a new Mima UI window.
@@ -83,64 +84,53 @@ public final class MimaUserInterface extends JFrame {
         memoryView = new MemoryTableView(mimaRunner, memoryTable);
 
         App.logger.setConsole(console);
-        createBinding();
+        createSubscriptions();
         setupWindow();
         setupComponents();
         startSession(filePath);
         memoryView.updateView();
     }
 
-    private void createBinding() {
+    private void createSubscriptions() {
         final var subscriptionManager = SubscriptionManager.getCurrentManager();
 
-    /*subscriptionManager.subscribe(new AbstractSubscriber(debugger) {
-        @Override
-        public <T> void notifySubscription(String identifier, T value) {
-            int index = Optional.ofNullable(mimaRunner.getCurrentStatement())
-                                .map(Token::getOffset)
-                                .orElse(-1);
+        subscriptionManager.subscribe(new AbstractSubscriber(debugger) {
+            @Override
+            public <T> void notifySubscription(final String identifier, final T value) {
+                int index = Optional.ofNullable(mimaRunner.getCurrentStatement())
+                                    .map(Token::getOffset)
+                                    .orElse(-1);
+                editorManager.currentEditor().markLine(index);
+                memoryView.updateView();
+            }
+        }, Debugger.PAUSE_PROPERTY);
 
-            editorManager.currentEditor().markLine(index);
-            memoryView.updateView();
-        }
-    }, Debugger.PAUSE_PROPERTY);
+        subscriptionManager.subscribe(new AbstractSubscriber(mimaRunner) {
+            @Override
+            public <T> void notifySubscription(final String identifier, final T value) {
+                memoryView.updateView();
+            }
+        }, MimaRunner.RUNNING_PROPERTY);
 
-    subscriptionManager.subscribe(new AbstractSubscriber(mimaRunner) {
-        @Override
-        public <T> void notifySubscription(String identifier, T value) {
+        subscriptionManager.subscribe(new AbstractSubscriber(debugger) {
+            @Override
+            public <T> void notifySubscription(final String identifier, final T value) {
+                currentEditor().markLine(-1);
+                memoryView.updateView();
+                filePathDisplay.setMaximumSize(new Dimension(buttonArea.getX() - filePathDisplay.getX(),
+                                                             controlPanel.getMinimumSize().height));
+            }
+        }, MimaRunner.RUNNING_PROPERTY);
 
-        }
-    }, MimaRunner.RUNNING_PROPERTY);
-
-    subscriptionManager.subscribe(new AbstractSubscriber(debugger) {
-        @Override
-        public <T> void notifySubscription(String identifier, T value) {
-            currentEditor().markLine(-1);
-            memoryView.updateView();
-        }
-    }, MimaRunner.RUNNING_PROPERTY);
-    */
-
-        BindingUtil.bind(debugger, () -> {
-                             int index = Optional.ofNullable(mimaRunner.getCurrentStatement())
-                                                 .map(Token::getOffset)
-                                                 .orElse(-1);
-
-                             editorManager.currentEditor().markLine(index);
-                             memoryView.updateView();
-                         },
-                         Debugger.PAUSE_PROPERTY);
-
-        BindingUtil.bind(mimaRunner, memoryView::updateView, MimaRunner.RUNNING_PROPERTY);
-        BindingUtil.bind(debugger, () -> currentEditor().markLine(-1), Debugger.RUNNING_PROPERTY);
-        tabbedEditor.addChangeListener(e -> Optional.ofNullable((Editor) tabbedEditor.getSelectedComponent())
-                                                    .ifPresent(editor -> {
-                                                        var file = new File(Optional.ofNullable(editorManager.managerForEditor(editor))
-                                                                    .map(FileManager::getLastFile)
-                                                                    .orElse(System.getProperty("SystemDrive")));
-                                            filePathDisplay.setFile(file);
-                                            EditorHotKeys.setEditor(editor);
-                                        }));
+        tabbedEditor.addChangeListener(
+                e -> Optional.ofNullable((Editor) tabbedEditor.getSelectedComponent())
+                             .ifPresent(editor -> {
+                                 var file = new File(Optional.ofNullable(editorManager.managerForEditor(editor))
+                                                             .map(FileManager::getLastFile)
+                                                             .orElse(System.getProperty("SystemDrive")));
+                                 filePathDisplay.setFile(file);
+                                 EditorHotKeys.setEditor(editor);
+                             }));
     }
 
     /**
@@ -216,31 +206,14 @@ public final class MimaUserInterface extends JFrame {
 
     private void setupComponents() {
         final JPanel contentPane = new JPanel(new BorderLayout());
-        final JPanel controlPanel = new JPanel(new BorderLayout());
+        controlPanel = new JPanel(new BorderLayout());
         controlPanel.add(filePathDisplay, BorderLayout.WEST);
-        var buttonArea = new MimaButtonArea(this, runActions).getPane();
+        buttonArea = new MimaButtonArea(this, runActions).getPane();
 
         controlPanel.add(buttonArea, BorderLayout.EAST);
         controlPanel.setBorder(new EmptyBorder(2, 2, 2, 2));
         controlPanel.setComponentZOrder(filePathDisplay, 1);
         controlPanel.setComponentZOrder(buttonArea, 0);
-
-        Runnable resizeAction =
-                () -> filePathDisplay.setMaximumSize(new Dimension(buttonArea.getX() - filePathDisplay.getX(),
-                                                                   controlPanel.getMinimumSize().height));
-        controlPanel.addComponentListener((ComponentResizeListener) e -> resizeAction.run());
-        BindingUtil.bind(debugger, resizeAction, Debugger.RUNNING_PROPERTY);
-
-    /*
-    var subscriptionManager = SubscriptionManager.getCurrentManager();
-    subscriptionManager.subscribe(new AbstractSubscriber(debugger) {
-        @Override
-        public <T> void notifySubscription(String identifier, T value) {
-            filePathDisplay.setMaximumSize(new Dimension(buttonArea.getX() - filePathDisplay.getX(),
-                                                     controlPanel.getMinimumSize().height));
-        }
-    }, Debugger.RUNNING_PROPERTY);
-    */
 
         contentPane.add(controlPanel, BorderLayout.NORTH);
         var tabFrame = new TabFrame();

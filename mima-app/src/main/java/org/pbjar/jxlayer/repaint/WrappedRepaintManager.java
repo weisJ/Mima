@@ -81,6 +81,7 @@ public class WrappedRepaintManager extends RepaintManager {
      */
     @Override
     @Deprecated
+    @SuppressWarnings("deprecation")
     public void addDirtyRegion(final Applet applet, final int x, final int y, final int w, final int h) {
         delegate.addDirtyRegion(applet, x, y, w, h);
     }

@@ -1,8 +1,5 @@
 package edu.kit.mima.gui.components.button;
 
-import edu.kit.mima.api.observing.BindingUtil;
-import edu.kit.mima.api.observing.ClassObservable;
-import edu.kit.mima.api.observing.Observable;
 import edu.kit.mima.gui.components.tooltip.DefaultTooltipWindow;
 import edu.kit.mima.gui.components.tooltip.TooltipUtil;
 import edu.kit.mima.gui.components.tooltip.TooltipWindow;
@@ -14,7 +11,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.function.Supplier;
 
 /**
  * Builder for creating a button panel.
@@ -131,174 +127,6 @@ public final class ButtonPanelBuilder {
             return this;
         }
 
-        /**
-         * Bind an action to an property event occurring in the observed instance.
-         *
-         * @param observed observed object
-         * @param binding  binding method to run
-         * @param property properties to listen to
-         * @param <T>      observed object must extend {@link JComponent}
-         * @return this
-         */
-        @Contract("_, _, _ -> this")
-        @NotNull
-        public <T extends JComponent> ButtonBuilder bind(
-                @NotNull final T observed,
-                @NotNull final Runnable binding,
-                @NotNull final String... property) {
-            BindingUtil.bind(observed, binding, property);
-            return this;
-        }
-
-        /**
-         * Bind an action to an property event occurring in the observed instance.
-         *
-         * @param observed observed object
-         * @param binding  binding method to run
-         * @param property properties to listen to
-         * @param <T>      observed object must extend {@link Observable}
-         * @return this
-         */
-        @Contract("_, _, _ -> this")
-        @NotNull
-        public <T extends Observable> ButtonBuilder bind(
-                @NotNull final T observed,
-                @NotNull final Runnable binding,
-                @NotNull final String... property) {
-            BindingUtil.bind(observed, binding, property);
-            return this;
-        }
-
-        /**
-         * Bind an action to an property event occurring in the observed class.
-         *
-         * @param clazz    class to observe
-         * @param binding  binding method to run
-         * @param property properties to listen to
-         * @param <T>      observed class must extend {@link ClassObservable}
-         * @return this
-         */
-        @Contract("_, _, _ -> this")
-        @NotNull
-        public <T extends ClassObservable> ButtonBuilder bindClass(
-                final Class<T> clazz, @NotNull final Runnable binding, @NotNull final String... property) {
-            BindingUtil.bindClass(clazz, binding, property);
-            return this;
-        }
-
-        /**
-         * Bind the visibility to an property event occurring in the observed instance.
-         *
-         * @param observed observed object
-         * @param binding  binding method to determine status
-         * @param property properties to listen to
-         * @param <T>      observed object must extend {@link JComponent}
-         * @return this
-         */
-        @Contract("_, _, _ -> this")
-        @NotNull
-        public <T extends JComponent> ButtonBuilder bindVisible(
-                @NotNull final T observed,
-                @NotNull final Supplier<Boolean> binding,
-                @NotNull final String... property) {
-            BindingUtil.bind(observed, () -> button.setVisible(binding.get()), property);
-            return this;
-        }
-
-        /**
-         * Bind the visibility to an property event occurring in the observed instance.
-         *
-         * @param observed observed object
-         * @param binding  binding method to determine status
-         * @param property properties to listen to
-         * @param <T>      observed object must extend {@link Observable}
-         * @return this
-         */
-        @Contract("_, _, _ -> this")
-        @NotNull
-        public <T extends Observable> ButtonBuilder bindVisible(
-                @NotNull final T observed,
-                @NotNull final Supplier<Boolean> binding,
-                @NotNull final String... property) {
-            BindingUtil.bind(observed, () -> button.setVisible(binding.get()), property);
-            return this;
-        }
-
-        /**
-         * Bind the enabled to an property event occurring in the observed instance.
-         *
-         * @param observed observed object
-         * @param binding  binding method to determine status
-         * @param property properties to listen to
-         * @param <T>      observed object must extend {@link JComponent}
-         * @return this
-         */
-        @Contract("_, _, _ -> this")
-        @NotNull
-        public <T extends JComponent> ButtonBuilder bindEnabled(
-                @NotNull final T observed,
-                @NotNull final Supplier<Boolean> binding,
-                @NotNull final String... property) {
-            BindingUtil.bind(observed, () -> button.setEnabled(binding.get()), property);
-            return this;
-        }
-
-        /**
-         * Bind the enabled to an property event occurring in the observed instance.
-         *
-         * @param observed observed object
-         * @param binding  binding method to determine status
-         * @param property properties to listen to
-         * @param <T>      observed object must extend {@link Observable}
-         * @return this
-         */
-        @Contract("_, _, _ -> this")
-        @NotNull
-        public <T extends Observable> ButtonBuilder bindEnabled(
-                @NotNull final T observed,
-                @NotNull final Supplier<Boolean> binding,
-                @NotNull final String... property) {
-            BindingUtil.bind(observed, () -> button.setEnabled(binding.get()), property);
-            return this;
-        }
-
-        /**
-         * Bind the visibility status to an property event occurring in the observed class.
-         *
-         * @param clazz    class to observe
-         * @param binding  binding method to determine status
-         * @param property properties to listen to
-         * @param <T>      observed class must extend {@link ClassObservable}
-         * @return this
-         */
-        @Contract("_, _, _ -> this")
-        @NotNull
-        public <T extends ClassObservable> ButtonBuilder bindClassVisible(
-                final Class<T> clazz,
-                @NotNull final Supplier<Boolean> binding,
-                @NotNull final String... property) {
-            BindingUtil.bindClass(clazz, () -> button.setVisible(binding.get()), property);
-            return this;
-        }
-
-        /**
-         * Bind the enabled status to an property event occurring in the observed class.
-         *
-         * @param clazz    class to observe
-         * @param binding  binding method to determine status
-         * @param property properties to listen to
-         * @param <T>      observed class must extend {@link ClassObservable}
-         * @return this
-         */
-        @Contract("_, _, _ -> this")
-        @NotNull
-        public <T extends ClassObservable> ButtonBuilder bindClassEnabled(
-                final Class<T> clazz,
-                @NotNull final Supplier<Boolean> binding,
-                @NotNull final String... property) {
-            BindingUtil.bindClass(clazz, () -> button.setEnabled(binding.get()), property);
-            return this;
-        }
 
         /**
          * Set tooltip component.

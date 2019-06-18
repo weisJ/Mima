@@ -2,7 +2,6 @@ package edu.kit.mima.api.history;
 
 import edu.kit.mima.api.event.SubscriptionManager;
 import edu.kit.mima.api.event.SubscriptionService;
-import edu.kit.mima.api.observing.ClassObservable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +13,7 @@ import java.util.LinkedList;
  * @author Jannis Weis
  * @since 2018
  */
-public class History<T> extends ClassObservable {
+public class History<T> {
 
     public static final String LENGTH_PROPERTY = "historyLength";
     public static final String POSITION_PROPERTY = "historyPosition";
@@ -45,7 +44,6 @@ public class History<T> extends ClassObservable {
         preserved = 0;
         firePositionChange(head);
         fireLengthChange(0);
-        History.INSTANCES.add(this);
     }
 
     /**
@@ -211,11 +209,9 @@ public class History<T> extends ClassObservable {
 
     private void fireLengthChange(final int prevSize) {
         SUBSCRIPTION_SERVICE.notifyEvent(LENGTH_PROPERTY, length(), this);
-        getPropertyChangeSupport().firePropertyChange(LENGTH_PROPERTY, prevSize, length());
     }
 
     private void firePositionChange(final int prevPos) {
         SUBSCRIPTION_SERVICE.notifyEvent(POSITION_PROPERTY, head, this);
-        getPropertyChangeSupport().firePropertyChange(POSITION_PROPERTY, prevPos, head);
     }
 }
