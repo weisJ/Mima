@@ -1,6 +1,5 @@
 package edu.kit.mima.core;
 
-import edu.kit.mima.api.observing.Observable;
 import edu.kit.mima.core.interpretation.Breakpoint;
 import edu.kit.mima.core.interpretation.Value;
 
@@ -13,7 +12,7 @@ import java.util.function.Consumer;
  * @author Jannis Weis
  * @since 2018
  */
-public interface Debugger extends Observable {
+public interface Debugger {
     String RUNNING_PROPERTY = "running";
     String PAUSE_PROPERTY = "paused";
 
