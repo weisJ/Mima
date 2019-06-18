@@ -36,16 +36,16 @@ public final class TabFrameTabContextProvider {
         remove.setAction(new AbstractAction("Remove from Sidebar") {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                        target.removeFromParent();
-                    }
+                target.removeFromParent();
+            }
         });
         menu.add(remove);
         var hide = new JMenuItem();
         hide.setAction(new AbstractAction("Hide") {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                        target.setPopupVisible(false);
-                    }
+                target.setPopupVisible(false);
+            }
         });
         menu.addSeparator();
         var moveToMenu = new JMenu("Move to");

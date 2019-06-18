@@ -2,6 +2,7 @@ package edu.kit.mima.gui.components.console;
 
 import edu.kit.mima.gui.components.BorderlessScrollPane;
 import edu.kit.mima.gui.components.console.terminal.MessageConsole;
+import edu.kit.mima.syntax.SyntaxColor;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,7 +20,7 @@ public class SystemConsole extends BorderlessScrollPane {
      * Create System console that displays the Standard out and error stream.
      */
     public SystemConsole() {
-        var textArea = new JEditorPane();
+        var textArea = new JTextPane();
         textArea.setEditable(false);
         textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         textArea.setBackground(UIManager.getColor("Terminal.background"));
@@ -27,8 +28,7 @@ public class SystemConsole extends BorderlessScrollPane {
         var messageConsole = new MessageConsole(textArea, Charset.defaultCharset());
         messageConsole.setMessageLines(1000);
         messageConsole.redirectOut(null, System.out);
-        messageConsole.redirectErr(null, System.err);
-
+        messageConsole.redirectErr(SyntaxColor.ERROR, System.err);
         getScrollPane().setViewportView(textArea);
     }
 }

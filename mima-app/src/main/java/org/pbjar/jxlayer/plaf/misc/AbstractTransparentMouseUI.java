@@ -105,7 +105,7 @@ public abstract class AbstractTransparentMouseUI<V extends JComponent, S> extend
     @Override
     public long getLayerEventMask() {
         return AWTEvent.MOUSE_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK
-                       | AWTEvent.MOUSE_WHEEL_EVENT_MASK;
+               | AWTEvent.MOUSE_WHEEL_EVENT_MASK;
     }
 
     @NotNull
@@ -116,7 +116,7 @@ public abstract class AbstractTransparentMouseUI<V extends JComponent, S> extend
         Rectangle layerBounds = layer.getBounds();
         Container parent = layer.getParent();
         Rectangle parentRectangle = new Rectangle(-layerBounds.x, -layerBounds.y,
-                parent.getWidth(), parent.getHeight());
+                                                  parent.getWidth(), parent.getHeight());
         SwingUtilities.convertPointToScreen(point, mouseEvent.getComponent());
         SwingUtilities.convertPointFromScreen(point, view);
         if (parentRectangle.contains(point)) {
@@ -198,7 +198,7 @@ public abstract class AbstractTransparentMouseUI<V extends JComponent, S> extend
          * returned as well.
          */
         if (component.getMouseMotionListeners().length > 0
-                    || component.getMouseListeners().length > 0) {
+            || component.getMouseListeners().length > 0) {
             return component;
         } else {
             Container parent = component.getParent();
@@ -231,9 +231,9 @@ public abstract class AbstractTransparentMouseUI<V extends JComponent, S> extend
             return null;
         } else {
             Point viewPoint = SwingUtilities.convertPoint(layer.getView(),
-                    targetPoint, userTopLevel);
+                                                          targetPoint, userTopLevel);
             return SwingUtilities.getDeepestComponentAt(userTopLevel,
-                    viewPoint.x, viewPoint.y);
+                                                        viewPoint.x, viewPoint.y);
         }
     }
 
@@ -319,7 +319,7 @@ public abstract class AbstractTransparentMouseUI<V extends JComponent, S> extend
                                            @NotNull final Component target,
                                            @NotNull final Point realPoint) {
         return transformMouseEvent(layer, mouseEvent, target, realPoint,
-                mouseEvent.getID());
+                                   mouseEvent.getID());
     }
 
     @Nullable
@@ -334,14 +334,14 @@ public abstract class AbstractTransparentMouseUI<V extends JComponent, S> extend
             SwingUtilities.convertPointToScreen(newPoint, layer.getView());
             SwingUtilities.convertPointFromScreen(newPoint, target);
             return new MouseEvent(target, //
-                    id, //
-                    mouseEvent.getWhen(), //
-                    mouseEvent.getModifiersEx(), //
-                    newPoint.x, //
-                    newPoint.y, //
-                    mouseEvent.getClickCount(), //
-                    mouseEvent.isPopupTrigger(), //
-                    mouseEvent.getButton());
+                                  id, //
+                                  mouseEvent.getWhen(), //
+                                  mouseEvent.getModifiersEx(), //
+                                  newPoint.x, //
+                                  newPoint.y, //
+                                  mouseEvent.getClickCount(), //
+                                  mouseEvent.isPopupTrigger(), //
+                                  mouseEvent.getButton());
         }
     }
 
@@ -363,18 +363,18 @@ public abstract class AbstractTransparentMouseUI<V extends JComponent, S> extend
             target = layer;
         }
         Point point = SwingUtilities.convertPoint(mouseWheelEvent.getComponent(),
-                mouseWheelEvent.getPoint(), target);
+                                                  mouseWheelEvent.getPoint(), target);
         return new MouseWheelEvent(target, //
-                mouseWheelEvent.getID(), //
-                mouseWheelEvent.getWhen(), //
-                mouseWheelEvent.getModifiersEx(), //
-                point.x, //
-                point.y, //
-                mouseWheelEvent.getClickCount(), //
-                mouseWheelEvent.isPopupTrigger(), //
-                mouseWheelEvent.getScrollType(), //
-                mouseWheelEvent.getScrollAmount(), //
-                mouseWheelEvent.getWheelRotation() //
+                                   mouseWheelEvent.getID(), //
+                                   mouseWheelEvent.getWhen(), //
+                                   mouseWheelEvent.getModifiersEx(), //
+                                   point.x, //
+                                   point.y, //
+                                   mouseWheelEvent.getClickCount(), //
+                                   mouseWheelEvent.isPopupTrigger(), //
+                                   mouseWheelEvent.getScrollType(), //
+                                   mouseWheelEvent.getScrollAmount(), //
+                                   mouseWheelEvent.getWheelRotation() //
         );
     }
 

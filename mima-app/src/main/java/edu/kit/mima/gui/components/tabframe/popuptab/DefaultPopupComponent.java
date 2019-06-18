@@ -41,7 +41,7 @@ public class DefaultPopupComponent extends SimplePopupComponent {
         header.add(Box.createGlue());
         header.add(closeButton);
         header.add(Box.createHorizontalStrut(1));
-        header.setBorder(new EmptyBorder(1,0,1,0));
+        header.setBorder(new EmptyBorder(1, 0, 1, 0));
 
         this.content = new JPanel(new BorderLayout());
         this.content.add(content, BorderLayout.CENTER);
@@ -59,9 +59,9 @@ public class DefaultPopupComponent extends SimplePopupComponent {
     public void setAlignment(@NotNull final Alignment a, final boolean[] info) {
         var insets = getBorderSize(a, info);
         headerCont.setBorder(new AdaptiveLineBorder(insets.top, insets.left, 1, insets.right,
-                "TabFramePopup.borderColor"));
+                                                    "TabFramePopup.borderColor"));
         content.setBorder(new AdaptiveLineBorder(0, insets.left, insets.bottom, insets.right,
-                "TabFramePopup.borderColor"));
+                                                 "TabFramePopup.borderColor"));
     }
 
     @Override

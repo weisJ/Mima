@@ -34,9 +34,9 @@ public final class Parser extends Processor<Token<?>, TokenStream> {
 
     @NotNull
     private final Set<ParserException> errors;
+    private final Stack<Integer> tokenIndexStack;
     private boolean skipEndOfInstruction;
     private int scopeIndex;
-    private final Stack<Integer> tokenIndexStack;
 
     /**
      * Create parser from string input.
@@ -144,9 +144,9 @@ public final class Parser extends Processor<Token<?>, TokenStream> {
                     }
                     final Token<?> token = input.peek();
                     if (token != null
-                                && (token.getType() == TokenType.IDENTIFICATION
-                                            || token.getType() == TokenType.BINARY
-                                            || token.getType() == TokenType.NUMBER)) {
+                        && (token.getType() == TokenType.IDENTIFICATION
+                            || token.getType() == TokenType.BINARY
+                            || token.getType() == TokenType.NUMBER)) {
                         input.next();
                         return token;
                     }
@@ -269,7 +269,7 @@ public final class Parser extends Processor<Token<?>, TokenStream> {
         return Optional.ofNullable(input.peek())
                        .map(t -> t.getType() == TokenType.PUNCTUATION)
                        .orElse(false)
-                       ? input.next()
-                       : new EmptyToken();
+               ? input.next()
+               : new EmptyToken();
     }
 }

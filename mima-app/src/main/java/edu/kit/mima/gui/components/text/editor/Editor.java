@@ -33,14 +33,12 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Editor that supports highlighting and text history. If the instance of an Editor isn't used
- * anymore the {@link #close} method should be called to prevent the history from remaining in
- * memory.
+ * Editor that supports highlighting and text history.
  *
  * @author Jannis Weis
  * @since 2018
  */
-public class Editor extends NumberedTextPane implements UserPreferenceChangedListener, AutoCloseable {
+public class Editor extends NumberedTextPane implements UserPreferenceChangedListener {
 
     private static final Preferences PREF = Preferences.getInstance();
     @NotNull
@@ -208,9 +206,11 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
      */
     public void markLine(final int index) {
         pane.removeMark(currentMark, "debug");
-        pane.markLine(index, "debug", markColor);
-        currentMark = index;
-        scrollToIndex(index);
+        if (index > 0) {
+            pane.markLine(index, "debug", markColor);
+            currentMark = index;
+            scrollToIndex(index);
+        }
     }
 
     /**
@@ -387,10 +387,6 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
         }
     }
 
-    @Override
-    public void close() {
-        historyController.getHistory().close();
-    }
 
     /**
      * Get preview Image of editor content.

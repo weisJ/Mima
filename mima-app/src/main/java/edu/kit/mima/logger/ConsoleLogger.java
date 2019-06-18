@@ -163,8 +163,8 @@ public final class ConsoleLogger implements Logger {
             }
         }
 
-        private Color color;
         private final ColorKey key;
+        private Color color;
 
         @Contract(pure = true)
         LogColor(final Color color, final ColorKey key) {

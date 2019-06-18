@@ -184,8 +184,8 @@ public class HSLColor {
 
         final float q =
                 luminance < 0.5
-                        ? luminance * (1 + saturation)
-                        : (luminance + saturation) - (saturation * luminance);
+                ? luminance * (1 + saturation)
+                : (luminance + saturation) - (saturation * luminance);
         final float p = 2 * luminance - q;
 
         final float r = Math.min(Math.max(0, hueToRGB(p, q, hue + (1.0f / 3.0f))), 1.0f);

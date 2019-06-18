@@ -143,8 +143,8 @@ class NumberingPane extends JPanel {
         try {
             startingY =
                     (((int) pane.modelToView2D(start).getY() - scrollPane.getViewport().getViewPosition().y)
-                             + fontMetrics.getHeight())
-                            - fontMetrics.getDescent();
+                     + fontMetrics.getHeight())
+                    - fontMetrics.getDescent();
         } catch (@NotNull final BadLocationException ignored) {
         }
         return new Triple<>(startLine, endLine, startingY);

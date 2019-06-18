@@ -26,6 +26,17 @@ public class MimaButtonArea {
     private final RunActions runActions;
     @NotNull
     private final JPanel panel;
+    private final RunnableIconButton runButton;
+    private final RunnableIconButton debugButton;
+    private final IconButton pause;
+    private final IconButton resume;
+    private final IconButton undo;
+    private final IconButton redo;
+    private final IconButton step;
+    private final IconButton stop;
+    private final ButtonPanelBuilder.Separator separator;
+    private final Debugger debugger;
+    private final MimaRunner mimaRunner;
 
     /**
      * Button area for Mima App.
@@ -36,80 +47,94 @@ public class MimaButtonArea {
     public MimaButtonArea(final MimaUserInterface mimaUI, final RunActions actions) {
         this.runActions = actions;
         this.mimaUI = mimaUI;
+        runButton = new RunnableIconButton(Icons.RUN_INACTIVE, Icons.RUN,
+                                           Icons.RUN_ACTIVE);
+        debugButton = new RunnableIconButton(Icons.DEBUG_INACTIVE, Icons.DEBUG,
+                                             Icons.DEBUG_ACTIVE);
+        pause = new IconButton(Icons.PAUSE_INACTIVE, Icons.PAUSE);
+        resume = new IconButton(Icons.RESUME_INACTIVE, Icons.RESUME);
+        undo = new IconButton(Icons.UNDO_INACTIVE, Icons.UNDO);
+        redo = new IconButton(Icons.REDO_INACTIVE, Icons.REDO);
+        step = new IconButton(Icons.REDO_INACTIVE, Icons.REDO);
+        stop = new IconButton(Icons.STOP_INACTIVE, Icons.STOP);
+        separator = ButtonPanelBuilder.createSeparator();
+        debugger = runActions.getDebugger();
+        mimaRunner = runActions.getMimaRunner();
         this.panel = createButtons();
+    }
+
+    private void createSubscriptions() {
+        final var sm = SubscriptionManager.getCurrentManager();
+
+        sm.subscribe(new SimpleSubscriber<>((identifier, value) -> {
+                         var editor = mimaUI.currentEditor();
+                         redo.setEnabled(editor != null && editor.canRedo());
+                         undo.setEnabled(editor != null && editor.canUndo());
+                     }),
+                     History.POSITION_PROPERTY,
+                     History.LENGTH_PROPERTY,
+                     EditorTabbedPane.SELECTED_TAB_PROPERTY);
+        sm.subscribe(new SimpleSubscriber<Boolean>((identifier, value) -> {
+                         pause.setVisible(value);
+                         resume.setVisible(value);
+                         step.setVisible(value);
+                         debugButton.setEnabled(!value);
+                         debugButton.setRunning(value);
+                         runButton.setEnabled(!value);
+                         runButton.setRunning(!value && mimaRunner.isRunning());
+                         separator.setVisible(value);
+                     }),
+                     Debugger.RUNNING_PROPERTY);
+        sm.subscribe(new SimpleSubscriber<Boolean>((identifier, value) -> {
+                         pause.setEnabled(!value);
+                         resume.setEnabled(value);
+                         step.setEnabled(value);
+                     }),
+                     Debugger.PAUSE_PROPERTY);
+        sm.subscribe(new SimpleSubscriber<Boolean>((identifier, value) -> {
+                         runButton.setEnabled(!value);
+                         stop.setEnabled(value);
+                     }),
+                     MimaRunner.RUNNING_PROPERTY);
     }
 
     @NotNull
     private JPanel createButtons() {
-        final RunnableIconButton runButton = new RunnableIconButton(Icons.RUN_INACTIVE, Icons.RUN,
-                Icons.RUN_ACTIVE);
-        final RunnableIconButton debugButton = new RunnableIconButton(Icons.DEBUG_INACTIVE, Icons.DEBUG,
-                Icons.DEBUG_ACTIVE);
-        var debugger = runActions.getDebugger();
-        var mimaRunner = runActions.getMimaRunner();
-        var sm = SubscriptionManager.getCurrentManager();
-        var undo = new IconButton(Icons.UNDO_INACTIVE, Icons.UNDO);
-        var redo = new IconButton(Icons.REDO_INACTIVE, Icons.REDO);
-        sm.subscribe(new SimpleSubscriber(((identifier, value) -> {
-                    var editor = mimaUI.currentEditor();
-                    undo.setEnabled(editor != null && editor.canUndo());
-                })), History.POSITION_PROPERTY, History.LENGTH_PROPERTY,
-                     EditorTabbedPane.SELECTED_TAB_PROPERTY);
-        sm.subscribe(new SimpleSubscriber(((identifier, value) -> {
-                    var editor = mimaUI.currentEditor();
-                    redo.setEnabled(editor != null && editor.canRedo());
-                })), History.POSITION_PROPERTY, History.LENGTH_PROPERTY,
-                     EditorTabbedPane.SELECTED_TAB_PROPERTY);
+        createSubscriptions();
         return new ButtonPanelBuilder()
                        // Pause
-                       .addButton(new IconButton(Icons.PAUSE_INACTIVE, Icons.PAUSE)).bindVisible(
-                        debugger, debugger::isRunning, Debugger.RUNNING_PROPERTY).bindEnabled(debugger,
-                        () -> !debugger.isPaused(),
-                        Debugger.PAUSE_PROPERTY).addAction(
-                        debugger::pause).setVisible(false)
+                       .addButton(pause)
+                       .addAccelerator("F2").setTooltip("Pause (F2)")
+                       .addAction(debugger::pause).setVisible(false)
                        // Resume
-                       .addButton(new IconButton(Icons.RESUME_INACTIVE, Icons.RESUME)).addAction(
-                        debugger::resume).bindEnabled(debugger, debugger::isPaused,
-                        Debugger.PAUSE_PROPERTY).bindVisible(debugger,
-                        debugger::isRunning,
-                        Debugger.RUNNING_PROPERTY).setVisible(
-                        false)
+                       .addButton(resume)
+                       .addAccelerator("F1").setTooltip("Resume (F1)")
+                       .addAction(debugger::resume).setVisible(false)
                        // Step
-                       .addButton(new IconButton(Icons.REDO_INACTIVE, Icons.REDO)).addAccelerator(
-                        "alt S").setTooltip("Step (Alt+S)").addAction(debugger::step).bindEnabled(
-                        debugger, debugger::isPaused, Debugger.PAUSE_PROPERTY).bindVisible(debugger,
-                        debugger::isRunning,
-                        Debugger.RUNNING_PROPERTY).setVisible(
-                        false)
+                       .addButton(step)
+                       .addAccelerator("F3").setTooltip("Step (F3)")
+                       .addAction(debugger::step).setVisible(false)
                        // Separator
-                       .addSeparator().bindVisible(debugger, debugger::isRunning,
-                        Debugger.RUNNING_PROPERTY).setVisible(false)
+                       .addSeparator(separator).setVisible(false)
                        // Debug
-                       .addButton(debugButton).addAccelerator("alt D").setTooltip(
-                        "Debug (Alt+D)").addAction(runActions::debug).bindEnabled(debugger,
-                        () -> !debugger.isRunning(),
-                        Debugger.RUNNING_PROPERTY).bind(
-                        debugger, () -> debugButton.setRunning(debugger.isRunning()),
-                        Debugger.RUNNING_PROPERTY)
+                       .addButton(debugButton)
+                       .addAccelerator("F4").setTooltip("Debug (F4)")
+                       .addAction(runActions::debug)
                        // Run
-                       .addButton(runButton).addAccelerator("alt R").setTooltip(
-                        "Run (Alt+R)").addAction(runActions::run).bindEnabled(mimaRunner,
-                        () -> !mimaRunner.isRunning(),
-                        MimaRunner.RUNNING_PROPERTY).bind(
-                        debugger,
-                        () -> runButton.setRunning(!debugger.isRunning() && mimaRunner.isRunning()),
-                        Debugger.RUNNING_PROPERTY)
+                       .addButton(runButton)
+                       .addAccelerator("F5").setTooltip("Run (F5)")
+                       .addAction(runActions::run)
                        // Stop
-                       .addButton(new IconButton(Icons.STOP_INACTIVE, Icons.STOP)).addAccelerator(
-                        "alt P").setTooltip("Stop (Alt+P)").addAction(runActions::stop).setEnabled(
-                        false).bindEnabled(mimaRunner, mimaRunner::isRunning,
-                        MimaRunner.RUNNING_PROPERTY).addSpace()
+                       .addButton(stop).addAccelerator("F6").setTooltip("Stop (F6)")
+                       .addAction(runActions::stop).setEnabled(false)
+                       .addSpace()
                        // Undo
-                       .addButton(undo).addAction(() -> mimaUI.currentEditor().undo()).setTooltip(
-                        "Redo (Ctrl+Z)").setEnabled(false)
+                       .addButton(undo).setTooltip("Redo (Ctrl+Z)")
+                       .addAction(() -> mimaUI.currentEditor().undo()).setEnabled(false)
                        // Redo
-                       .addButton(redo).addAction(() -> mimaUI.currentEditor().redo()).setTooltip(
-                        "Redo (Ctrl+Shift+Z)").setEnabled(false).addSpace().get();
+                       .addButton(redo).setTooltip("Redo (Ctrl+Shift+Z)")
+                       .addAction(() -> mimaUI.currentEditor().redo()).setEnabled(false)
+                       .addSpace().get();
     }
 
     /**

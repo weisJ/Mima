@@ -40,8 +40,8 @@ public class TooltipDemo {
                                 button,
                                 new DefaultTooltipWindow(
                                         "Hallo Laaaaaaaaaaaaaaaaaaaaaanger "
-                                                + " \n "
-                                                + "Test1 \n Tes 2 \n\n\n\nHoher Text"),
+                                        + " \n "
+                                        + "Test1 \n Tes 2 \n\n\n\nHoher Text"),
                                 600,
                                 TooltipConstants.PERSISTENT,
                                 AlignPolicy.COMPONENT_BOTH)

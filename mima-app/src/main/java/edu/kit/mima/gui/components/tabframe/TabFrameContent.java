@@ -292,15 +292,15 @@ public class TabFrameContent extends JPanel implements Persistable {
      * @param split       the split panel.
      * @param splitter    the splitter panel.
      * @param proportions the proportions as follows:
-     *                      top:  proportion to restore the split
-     *                      left: proportions to disable the peer if enabled
-     *                      bottom: proportion to disable the split
-     *                      right: proportion to disable
+     *                    top:  proportion to restore the split
+     *                    left: proportions to disable the peer if enabled
+     *                    bottom: proportion to disable the split
+     *                    right: proportion to disable
      * @param weights     the resize weights as follows:
-     *                      top: split enable weight
-     *                      bottom: splitter disable weight
-     *                      left: split disable weight
-     *                      right: splitter peer disable weight
+     *                    top: split enable weight
+     *                    bottom: splitter disable weight
+     *                    left: split disable weight
+     *                    right: splitter peer disable weight
      */
     private void changeStatus(final boolean enabled, @NotNull final Alignment peer,
                               @NotNull final SeamlessSplitPane split,

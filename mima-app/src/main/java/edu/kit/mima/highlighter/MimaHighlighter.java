@@ -97,8 +97,8 @@ public class MimaHighlighter implements Highlighter, FileEventHandler,
     @Override
     public void fileLoadedEvent(@NotNull final String filePath) {
         currentInstructionSet = filePath.endsWith(MimaConstants.MIMA_EXTENSION)
-                                        ? InstructionSet.MIMA
-                                        : InstructionSet.MIMA_X;
+                                ? InstructionSet.MIMA
+                                : InstructionSet.MIMA_X;
     }
 
     @Override

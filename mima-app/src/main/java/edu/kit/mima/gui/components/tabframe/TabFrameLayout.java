@@ -28,6 +28,10 @@ public class TabFrameLayout implements LayoutManager {
         public void actionPerformed(final ActionEvent e) {
         }
     };
+    /**
+     * The width/height of the frame.
+     */
+    private static final int SIZE = 24;
     private final TabArea bottomTabs = new TabArea();
     private final TabArea topTabs = new TabArea();
     private final TabArea leftTabs = new TabArea();
@@ -35,16 +39,10 @@ public class TabFrameLayout implements LayoutManager {
     private final JXLayer<JComponent> rotatePaneLeft;
     private final JXLayer<JComponent> rotatePaneRight;
     private final TabFrame tabFrame;
-
     private final MutableLineBorder leftBorder;
     private final MutableLineBorder topBorder;
     private final MutableLineBorder bottomBorder;
     private final MutableLineBorder rightBorder;
-
-    /**
-     * The width/height of the frame.
-     */
-    private static final int SIZE = 24;
     private final TabFrameContent content = new TabFrameContent();
     private final Map<Alignment, List<TabFrameTabComponent>> tabsMap;
     private final Map<Alignment, List<PopupComponent>> compsMap;
@@ -219,7 +217,7 @@ public class TabFrameLayout implements LayoutManager {
     public Dimension preferredLayoutSize(final Container parent) {
         var b = content.getPreferredSize();
         return new Dimension(leftTabs.getWidth() + rightTabs.getWidth() + b.width,
-                topTabs.getHeight() + bottomTabs.getHeight() + b.height);
+                             topTabs.getHeight() + bottomTabs.getHeight() + b.height);
     }
 
 
@@ -228,7 +226,7 @@ public class TabFrameLayout implements LayoutManager {
     public Dimension minimumLayoutSize(final Container parent) {
         var b = content.getMinimumSize();
         return new Dimension(leftTabs.getWidth() + rightTabs.getWidth() + b.width,
-                topTabs.getHeight() + bottomTabs.getHeight() + b.height);
+                             topTabs.getHeight() + bottomTabs.getHeight() + b.height);
     }
 
     @Override
@@ -261,8 +259,8 @@ public class TabFrameLayout implements LayoutManager {
         rightBorder.setLeft(topSize > 0 ? 0 : 1);
 
         content.setBounds(rotatePaneLeft.getWidth(), topTabs.getHeight(),
-                dim.width - rotatePaneLeft.getWidth() - rotatePaneRight.getWidth(),
-                dim.height - topTabs.getHeight() - bottomTabs.getHeight());
+                          dim.width - rotatePaneLeft.getWidth() - rotatePaneRight.getWidth(),
+                          dim.height - topTabs.getHeight() - bottomTabs.getHeight());
     }
 
     private void layoutTopTab(final Dimension dim, final int topSize, final int leftSize, final int rightSize) {
@@ -297,9 +295,9 @@ public class TabFrameLayout implements LayoutManager {
     private void layoutLeftTab(final Dimension dim, final int leftSize) {
         if (leftSize > 0) {
             rotatePaneLeft.setBounds(0, topTabs.getHeight(), SIZE,
-                    dim.height - topTabs.getHeight() - bottomTabs.getHeight()
-                            + (dim.height - topTabs.getHeight() - bottomTabs.getHeight())
-                                      % 2);
+                                     dim.height - topTabs.getHeight() - bottomTabs.getHeight()
+                                     + (dim.height - topTabs.getHeight() - bottomTabs.getHeight())
+                                       % 2);
             leftTabs.setPreferredSize(
                     new Dimension(rotatePaneLeft.getHeight(), rotatePaneLeft.getWidth()));
             leftTabs.setSize(leftTabs.getPreferredSize());
@@ -319,8 +317,8 @@ public class TabFrameLayout implements LayoutManager {
     private void layoutRightTab(final Dimension dim, final int rightSize) {
         if (rightSize > 0) {
             rotatePaneRight.setBounds(dim.width - SIZE, topTabs.getHeight(), SIZE,
-                    dim.height - topTabs.getHeight() - bottomTabs.getHeight()
-                            + (dim.height - topTabs.getHeight() - bottomTabs.getHeight()) % 2);
+                                      dim.height - topTabs.getHeight() - bottomTabs.getHeight()
+                                      + (dim.height - topTabs.getHeight() - bottomTabs.getHeight()) % 2);
             rightTabs.setPreferredSize(
                     new Dimension(rotatePaneRight.getHeight(), rotatePaneRight.getWidth()));
             rightTabs.setSize(rightTabs.getPreferredSize());

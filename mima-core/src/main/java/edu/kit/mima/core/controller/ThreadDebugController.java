@@ -106,12 +106,12 @@ public class ThreadDebugController implements DebugController {
             return;
         }
         if (autoPause
-                    || Optional.ofNullable(currentInstruction)
-                               .map(
-                                       t ->
-                                               breaks.contains(new SimpleBreakpoint(t.getOffset()))
-                                                       && t.getType() != TokenType.PROGRAM)
-                               .orElse(false)) {
+            || Optional.ofNullable(currentInstruction)
+                       .map(
+                               t ->
+                                       breaks.contains(new SimpleBreakpoint(t.getOffset()))
+                                       && t.getType() != TokenType.PROGRAM)
+                       .orElse(false)) {
             pause();
         }
     }

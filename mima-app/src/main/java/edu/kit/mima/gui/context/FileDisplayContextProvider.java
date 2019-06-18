@@ -10,8 +10,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.event.MouseEvent;
 
-import static com.sun.java.accessibility.util.AWTEventMonitor.addMouseListener;
-
 /**
  * Provider for FilePathDisplayItem contexts.
  *

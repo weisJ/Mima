@@ -4,8 +4,8 @@ import edu.kit.mima.api.util.Tuple;
 import edu.kit.mima.api.util.ValueTuple;
 import edu.kit.mima.core.MimaConstants;
 import edu.kit.mima.gui.EditorHotKeys;
-import edu.kit.mima.gui.components.text.editor.Editor;
 import edu.kit.mima.gui.components.tabbedpane.EditorTabbedPane;
+import edu.kit.mima.gui.components.text.editor.Editor;
 import edu.kit.mima.gui.icons.Icons;
 import edu.kit.mima.highlighter.MimaHighlighter;
 import edu.kit.mima.loading.FileManager;
@@ -61,16 +61,16 @@ public class MimaEditorManager implements AutoCloseable {
     @NotNull
     private EditorTabbedPane createEditorPane() {
         var pane = new EditorTabbedPane();
-        pane.addTabClosedEventHandler(
-                c -> {
-                    final Editor editor = (Editor) c;
-                    try {
-                        closeEditor(editor);
-                    } catch (@NotNull final IOException e) {
-                        throw new IllegalArgumentException("didn't save", e);
-                    }
-                });
+        pane.addTabClosedEventHandler(c -> {
+            final Editor editor = (Editor) c;
+            try {
+                closeEditor(editor);
+            } catch (@NotNull final IOException e) {
+                throw new IllegalArgumentException("didn't save", e);
+            }
+        });
         pane.addChangeListener(e -> parent.fileChanged());
+        pane.setPersistable(true, "MimaTabbedEditor");
         return pane;
     }
 
@@ -80,13 +80,11 @@ public class MimaEditorManager implements AutoCloseable {
     private void closeEditor(@NotNull final Editor editor) throws IOException {
         final var fm = fileManagers.get(editor);
         if (fm.unsaved()) {
-            fm.savePopUp(
-                    () -> {
-                        throw new IllegalArgumentException("aborted");
-                    });
+            fm.savePopUp(() -> {
+                throw new IllegalArgumentException("aborted");
+            });
         }
         fm.close();
-        editor.close();
         fileManagers.remove(editor);
     }
 
@@ -174,7 +172,7 @@ public class MimaEditorManager implements AutoCloseable {
         if (fileManagers.size() <= 1) {
             return fileManagers.keySet().stream().findFirst().orElse(null);
         } else {
-            return (Editor) tabbedEditor.getComponentAt(tabbedEditor.getSelectedIndex());
+            return tabbedEditor.getComponentAt(tabbedEditor.getSelectedIndex());
         }
     }
 
@@ -211,7 +209,8 @@ public class MimaEditorManager implements AutoCloseable {
     @Override
     public void close() throws IOException {
         final StringBuilder openFiles = new StringBuilder();
-        for (final var fm : fileManagers.values()) {
+        for (int i = 0; i < tabbedEditor.getTabCount(); i++) {
+            var fm = fileManagers.get(tabbedEditor.getComponentAt(i));
             if (fm.unsaved()) {
                 fm.savePopUp(
                         () -> {

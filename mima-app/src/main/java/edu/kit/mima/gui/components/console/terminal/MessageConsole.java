@@ -1,6 +1,7 @@
 package edu.kit.mima.gui.components.console.terminal;
 
 import edu.kit.mima.gui.components.text.protectedarea.ProtectedTextComponent;
+import edu.kit.mima.syntax.SyntaxColor;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -59,8 +60,8 @@ public class MessageConsole {
      * inserted as the first line of the console.
      *
      * @param textComponent text component to display on.
-     * @param charset charset of the content written to the stream.
-     * @param isAppend whether content should be appended.
+     * @param charset       charset of the content written to the stream.
+     * @param isAppend      whether content should be appended.
      */
     public MessageConsole(@NotNull final JTextComponent textComponent, final Charset charset, final boolean isAppend) {
         this.textComponent = textComponent;
@@ -69,7 +70,7 @@ public class MessageConsole {
         this.charset = charset;
         protectedTextComponent = new ProtectedTextComponent(textComponent);
         consoleOutputStream = new ConsoleOutputStream(null, null);
-        consoleErrorStream = new ConsoleOutputStream(Color.RED, null);
+        consoleErrorStream = new ConsoleOutputStream(SyntaxColor.ERROR, null);
     }
 
     /**
@@ -91,8 +92,8 @@ public class MessageConsole {
     }
 
     /**
-     *  Redirect the output from the standard output to the console
-     *  using the default text color and null PrintStream.
+     * Redirect the output from the standard output to the console
+     * using the default text color and null PrintStream.
      */
     public void redirectOut() {
         redirectOut(null, null);
@@ -104,7 +105,7 @@ public class MessageConsole {
      * is specified the message will be added to the Document before
      * it is also written to the PrintStream.
      *
-     * @param textColor text color to use.
+     * @param textColor   text color to use.
      * @param printStream print stream to redirect.
      */
     public void redirectOut(final Color textColor, final PrintStream printStream) {
@@ -127,7 +128,7 @@ public class MessageConsole {
      * is specified the message will be added to the Document before
      * it is also written to the PrintStream.
      *
-     * @param textColor text color to use.
+     * @param textColor   text color to use.
      * @param printStream print stream to redirect.
      */
     public void redirectErr(final Color textColor, final PrintStream printStream) {

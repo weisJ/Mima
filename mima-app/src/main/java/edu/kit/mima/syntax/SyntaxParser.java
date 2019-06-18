@@ -160,8 +160,8 @@ public class SyntaxParser extends Processor<SyntaxToken<?>, SyntaxTokenStream> {
             return token;
         } else {
             return new AtomSyntaxToken<>(TokenType.PUNCTUATION,
-                    String.valueOf(Punctuation.STRING),
-                    SyntaxColor.STRING, token.getOffset(), 1);
+                                         String.valueOf(Punctuation.STRING),
+                                         SyntaxColor.STRING, token.getOffset(), 1);
         }
     }
 

@@ -18,10 +18,7 @@ import java.util.Objects;
  * @since 2018
  */
 public final class Icons {
-    private static final Icons instance = new Icons();
-
     public static final Icon BREAKPOINT = create("breakpoint.svg");
-
     public static final UIAwareIcon DEBUG_INACTIVE = create("debug_inactive.svg");
     public static final UIAwareIcon DEBUG = create("debug.svg");
     public static final UIAwareIcon DEBUG_ACTIVE = create("debug_active.svg");
@@ -36,36 +33,26 @@ public final class Icons {
     public static final UIAwareIcon STOP_INACTIVE = create("stop_inactive.svg");
     public static final UIAwareIcon DIVIDER = create("divider.svg");
     public static final Icon STACK_POINTER = create("stack_pointer.svg");
-
     public static final UIAwareIcon FOLDER = create("folder.svg");
     public static final UIAwareIcon FOLDER_ROOT = create("folder_root.svg");
     public static final UIAwareIcon MIMA = create("class.svg");
     public static final UIAwareIcon MIMA_X = create("class.svg");
     public static final UIAwareIcon TEXT_FILE = create("text.svg");
     public static final UIAwareIcon UNKNOWN_FILE = create("unknown.svg");
-
     public static final UIAwareIcon REDO = create("redo.svg");
     public static final UIAwareIcon REDO_INACTIVE = create("redo_inactive.svg");
     public static final UIAwareIcon UNDO = create("undo.svg");
     public static final UIAwareIcon UNDO_INACTIVE = create("undo_inactive.svg");
-
     public static final UIAwareIcon MEMORY = create("memory.svg");
     public static final UIAwareIcon CONSOLE = create("console.svg");
     public static final UIAwareIcon TERMINAL = create("terminal.svg");
     public static final UIAwareIcon BUILD_GREY = create("build.svg");
-
-
-
     public static final UIAwareIcon SEARCH = create("search.svg");
     public static final UIAwareIcon SEARCH_WITH_HISTORY = create("searchWithHistory.svg");
     public static final UIAwareIcon CLOSE = create("close.svg");
     public static final UIAwareIcon CLOSE_HOVER = create("closeHovered.svg");
     public static final UIAwareIcon COLLAPSE = create("collapse.svg");
-    public static final Icon MORE_TABS = loadIcon("moreTabs.svg", 20, 20);
-    public static final Icon CLEAR = loadIcon("clear.svg", 12, 12);
     public static final UIAwareIcon ADD = create("add.svg");
-
-
     public static final UIAwareIcon MOVE_TOP_LEFT = create("moveToTopLeft.svg");
     public static final UIAwareIcon MOVE_TOP_RIGHT = create("moveToTopRight.svg");
     public static final UIAwareIcon MOVE_RIGHT_TOP = create("moveToRightTop.svg");
@@ -74,6 +61,9 @@ public final class Icons {
     public static final UIAwareIcon MOVE_BOTTOM_LEFT = create("moveToBottomLeft.svg");
     public static final UIAwareIcon MOVE_LEFT_BOTTOM = create("moveToLeftBottom.svg");
     public static final UIAwareIcon MOVE_LEFT_TOP = create("moveToLeftTop.svg");
+    private static final Icons instance = new Icons();
+    public static final Icon MORE_TABS = loadIcon("moreTabs.svg", 20, 20);
+    public static final Icon CLEAR = loadIcon("clear.svg", 12, 12);
 
     @Contract(pure = true)
     private Icons() {

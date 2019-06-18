@@ -87,12 +87,12 @@ public class ListToken<T> extends FileObjectAdapter implements Token<List<T>> {
     @Override
     public String toString() {
         return "[type=list, data="
-                       + className
-                       + "] {\n\t"
-                       + values.stream()
-                                 .map(t -> INDENT.matcher(t.toString()).replaceAll(INDENT_REPLACEMENT))
-                                 .collect(Collectors.joining("\n"))
-                       + "\n}";
+               + className
+               + "] {\n\t"
+               + values.stream()
+                         .map(t -> INDENT.matcher(t.toString()).replaceAll(INDENT_REPLACEMENT))
+                         .collect(Collectors.joining("\n"))
+               + "\n}";
     }
 
     @SuppressWarnings("unchecked")

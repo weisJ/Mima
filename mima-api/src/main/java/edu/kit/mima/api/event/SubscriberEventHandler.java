@@ -6,7 +6,7 @@ package edu.kit.mima.api.event;
  * @author Jannis Weis
  * @since 2019
  */
-public interface SubscriberEventHandler {
+public interface SubscriberEventHandler<K> {
 
-    void notifySubscription(String identifier, Object value);
+    void notifySubscription(String identifier, K value);
 }

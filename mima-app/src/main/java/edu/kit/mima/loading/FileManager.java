@@ -294,8 +294,8 @@ public class FileManager implements AutoCloseable {
         final File lFile = new File(lastFile);
         directory =
                 lFile.exists()
-                        ? lFile.getParentFile().getAbsolutePath()
-                        : pref.readString(PropertyKey.DIRECTORY_MIMA);
+                ? lFile.getParentFile().getAbsolutePath()
+                : pref.readString(PropertyKey.DIRECTORY_MIMA);
         pref.saveString(PropertyKey.DIRECTORY_WORKING, directory);
     }
 

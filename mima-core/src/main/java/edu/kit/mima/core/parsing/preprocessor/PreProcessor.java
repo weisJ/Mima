@@ -183,10 +183,10 @@ public final class PreProcessor extends Processor<Token<?>, TokenStream> {
         final File workingDir = new File(workingDirectory);
         final File homeDir = new File(mimaDirectory);
         return !isHome
-                       && workingDir.exists()
-                       && tryPath(workingDir.getAbsolutePath() + path + '.' + extension, false)
-                       || homeDir.exists() && tryPath(homeDir.getAbsolutePath() + path + '.' + extension, true)
-                       || tryPath(fullPath, false);
+               && workingDir.exists()
+               && tryPath(workingDir.getAbsolutePath() + path + '.' + extension, false)
+               || homeDir.exists() && tryPath(homeDir.getAbsolutePath() + path + '.' + extension, true)
+               || tryPath(fullPath, false);
     }
 
     /**

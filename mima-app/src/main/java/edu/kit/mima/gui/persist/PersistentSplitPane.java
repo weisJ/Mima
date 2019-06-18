@@ -1,10 +1,8 @@
 package edu.kit.mima.gui.persist;
 
-import edu.kit.mima.gui.components.listeners.AncestorAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import javax.swing.event.AncestorEvent;
 
 /**
  * {@link JSplitPane} that has persistable divider location.
@@ -47,8 +45,8 @@ public class PersistentSplitPane extends JSplitPane implements Persistable {
 
     private int getOrientedSize() {
         return getOrientation() == JSplitPane.VERTICAL_SPLIT
-                       ? getHeight() - getDividerSize()
-                       : getWidth() - getDividerSize();
+               ? getHeight() - getDividerSize()
+               : getWidth() - getDividerSize();
     }
 
     @Override
@@ -72,21 +70,6 @@ public class PersistentSplitPane extends JSplitPane implements Persistable {
     public void setPersistable(final boolean persistable, final String identifier) {
         this.persistable = persistable;
         this.identifier = identifier;
-        var ancestor = SwingUtilities.getWindowAncestor(this);
-        var permManager = PersistenceManager.getInstance();
-        if (ancestor == null) {
-            addAncestorListener(new AncestorAdapter() {
-                @Override
-                public void ancestorAdded(final AncestorEvent event) {
-                    var ancestor = SwingUtilities.getWindowAncestor(PersistentSplitPane.this);
-                    if (ancestor != null) {
-                        permManager.updateState(PersistentSplitPane.this, ancestor.getName());
-                        removeAncestorListener(this);
-                    }
-                }
-            });
-        } else {
-            permManager.updateState(this, ancestor.getName());
-        }
+        PersistableComponent.updateInFuture(this);
     }
 }

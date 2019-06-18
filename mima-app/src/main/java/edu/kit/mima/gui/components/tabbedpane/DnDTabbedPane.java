@@ -2,6 +2,9 @@ package edu.kit.mima.gui.components.tabbedpane;
 
 import edu.kit.mima.api.event.SubscriptionManager;
 import edu.kit.mima.api.event.SubscriptionService;
+import edu.kit.mima.gui.persist.Persistable;
+import edu.kit.mima.gui.persist.PersistableComponent;
+import edu.kit.mima.gui.persist.PersistenceInfo;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -16,7 +19,7 @@ import java.util.List;
  * @author Jannis Weis
  * @since 2018
  */
-public class DnDTabbedPane extends JTabbedPane {
+public class DnDTabbedPane<T extends JComponent> extends TypedTabbedPane<T> implements Persistable {
     public static final String SELECTED_TAB_PROPERTY = "selectedTab";
     static final String NAME = "TabTransferData";
     static final DataFlavor FLAVOR = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType, NAME);
@@ -31,8 +34,11 @@ public class DnDTabbedPane extends JTabbedPane {
     private final TabbedPaneDragSupport dragSupport;
 
     private final List<TabClosedEventHandler> handlerList = new ArrayList<>();
+    private final PersistenceInfo persistenceInfo;
     private int selectedTab;
     private TabAcceptor tabAcceptor = (component, index) -> true;
+    private String identifier;
+    private boolean persistable;
 
     /**
      * Create new Editor Tabbed Pane.
@@ -46,12 +52,20 @@ public class DnDTabbedPane extends JTabbedPane {
             selectedTab = getSelectedIndex();
         });
         dragSupport = new TabbedPaneDragSupport(this);
+        persistenceInfo = new PersistenceInfo();
     }
 
     @NotNull
     @Override
     public String getUIClassID() {
         return "DnDTabbedPaneUI";
+    }
+
+    @Override
+    public void insertTab(final String title, final Icon icon,
+                          final T component, final String tip,
+                          final int index) {
+        insertTab(title, icon, (Component) component, tip, index);
     }
 
     @Override
@@ -146,7 +160,38 @@ public class DnDTabbedPane extends JTabbedPane {
     }
 
     public Insets getTabInsets() {
-        return new Insets(0,0,0,0);
+        return new Insets(0, 0, 0, 0);
     }
 
+    @Override
+    public PersistenceInfo saveState() {
+        persistenceInfo.putValue("selected", getSelectedIndex());
+        return persistenceInfo;
+    }
+
+    @Override
+    public void loadState(@NotNull final PersistenceInfo info) {
+        int selected = info.getInt("selected", 0);
+        if (selected < getTabCount()) {
+            persistenceInfo.putValue("selected", selected);
+            setSelectedIndex(selected);
+        }
+    }
+
+    @Override
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    @Override
+    public boolean isPersistable() {
+        return persistable;
+    }
+
+    @Override
+    public void setPersistable(final boolean persistable, final String identifier) {
+        this.identifier = identifier;
+        this.persistable = persistable;
+        PersistableComponent.updateInFuture(this);
+    }
 }

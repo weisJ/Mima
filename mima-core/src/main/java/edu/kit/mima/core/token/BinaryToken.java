@@ -120,12 +120,12 @@ public class BinaryToken<T, K> extends FileObjectAdapter implements Token<T>, Im
     @Override
     public String toString() {
         return "[type="
-                       + type
-                       + "] {\n\t"
-                       + INDENT.matcher(first.toString()).replaceAll(INDENT_REPLACEMENT)
-                       + "\n\t"
-                       + INDENT.matcher(second.toString()).replaceAll(INDENT_REPLACEMENT)
-                       + "\n}";
+               + type
+               + "] {\n\t"
+               + INDENT.matcher(first.toString()).replaceAll(INDENT_REPLACEMENT)
+               + "\n\t"
+               + INDENT.matcher(second.toString()).replaceAll(INDENT_REPLACEMENT)
+               + "\n}";
     }
 
     @NotNull
@@ -149,8 +149,8 @@ public class BinaryToken<T, K> extends FileObjectAdapter implements Token<T>, Im
         }
         final BinaryToken<?, ?> that = (BinaryToken<?, ?>) obj;
         return type == that.type
-                       && Objects.equals(first, that.first)
-                       && Objects.equals(second, that.second);
+               && Objects.equals(first, that.first)
+               && Objects.equals(second, that.second);
     }
 
     @Override

@@ -1,7 +1,7 @@
 package edu.kit.mima.app;
 
 import edu.kit.mima.App;
-import edu.kit.mima.api.event.AbstractSubscriber;
+import edu.kit.mima.api.event.SimpleSubscriber;
 import edu.kit.mima.api.event.SubscriptionManager;
 import edu.kit.mima.core.Debugger;
 import edu.kit.mima.core.MimaCompiler;
@@ -94,33 +94,30 @@ public final class MimaUserInterface extends JFrame {
     private void createSubscriptions() {
         final var subscriptionManager = SubscriptionManager.getCurrentManager();
 
-        subscriptionManager.subscribe(new AbstractSubscriber(debugger) {
-            @Override
-            public <T> void notifySubscription(final String identifier, final T value) {
+        subscriptionManager.subscribe(new SimpleSubscriber<Boolean>((identifier, value) -> {
+            if (value) {
                 int index = Optional.ofNullable(mimaRunner.getCurrentStatement())
                                     .map(Token::getOffset)
                                     .orElse(-1);
                 editorManager.currentEditor().markLine(index);
                 memoryView.updateView();
             }
-        }, Debugger.PAUSE_PROPERTY);
+        }), Debugger.PAUSE_PROPERTY);
 
-        subscriptionManager.subscribe(new AbstractSubscriber(mimaRunner) {
-            @Override
-            public <T> void notifySubscription(final String identifier, final T value) {
+        subscriptionManager.subscribe(new SimpleSubscriber<Boolean>((identifier, value) -> {
+            if (!value) {
                 memoryView.updateView();
             }
-        }, MimaRunner.RUNNING_PROPERTY);
+        }), MimaRunner.RUNNING_PROPERTY);
 
-        subscriptionManager.subscribe(new AbstractSubscriber(debugger) {
-            @Override
-            public <T> void notifySubscription(final String identifier, final T value) {
+        subscriptionManager.subscribe(new SimpleSubscriber<Boolean>((identifier, value) -> {
+            if (!value) {
                 currentEditor().markLine(-1);
                 memoryView.updateView();
-                filePathDisplay.setMaximumSize(new Dimension(buttonArea.getX() - filePathDisplay.getX(),
-                                                             controlPanel.getMinimumSize().height));
             }
-        }, MimaRunner.RUNNING_PROPERTY);
+            filePathDisplay.setMaximumSize(new Dimension(buttonArea.getX() - filePathDisplay.getX(),
+                                                         controlPanel.getMinimumSize().height));
+        }), Debugger.RUNNING_PROPERTY);
 
         tabbedEditor.addChangeListener(
                 e -> Optional.ofNullable((Editor) tabbedEditor.getSelectedComponent())
@@ -130,7 +127,8 @@ public final class MimaUserInterface extends JFrame {
                                                              .orElse(System.getProperty("SystemDrive")));
                                  filePathDisplay.setFile(file);
                                  EditorHotKeys.setEditor(editor);
-                             }));
+                             })
+        );
     }
 
     /**
@@ -269,10 +267,9 @@ public final class MimaUserInterface extends JFrame {
                 .ifPresent(f -> {
                     final File parent = new File(f).getParentFile();
                     final var pref = Preferences.getInstance();
-                    final String workDir =
-                            parent != null
-                                    ? parent.getAbsolutePath()
-                                    : pref.readString(PropertyKey.DIRECTORY_MIMA);
+                    final String workDir = parent != null
+                                           ? parent.getAbsolutePath()
+                                           : pref.readString(PropertyKey.DIRECTORY_MIMA);
                     pref.saveString(PropertyKey.DIRECTORY_WORKING, workDir);
                 });
     }

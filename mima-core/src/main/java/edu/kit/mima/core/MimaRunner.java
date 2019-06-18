@@ -52,7 +52,8 @@ public class MimaRunner implements ExceptionHandler, CodeRunner {
     public MimaRunner() {
         subscriptionService = new SubscriptionService<>(MimaRunner.class);
         SubscriptionManager.getCurrentManager()
-                .offerSubscription(subscriptionService, RUNNING_PROPERTY, MimaDebugger.PAUSE_PROPERTY);
+                .offerSubscription(subscriptionService,
+                                   RUNNING_PROPERTY, MimaDebugger.PAUSE_PROPERTY, MimaDebugger.RUNNING_PROPERTY);
         debugger = new MimaDebugger();
         interpreter = new Interpreter(0, null, null);
         sharedException = new AtomicReference<>();
@@ -69,23 +70,25 @@ public class MimaRunner implements ExceptionHandler, CodeRunner {
         setupInterpreter(callback);
         threadDebugController.setBreaks(Collections.emptyList());
         threadDebugController.start();
-        subscriptionService.notifyEvent(RUNNING_PROPERTY, true, this);
+        subscriptionService.notifyEvent(MimaRunner.RUNNING_PROPERTY, true, this);
         do {
             threadDebugController.resume();
             checkForException();
         } while (threadDebugController.isActive() && isRunning());
-        subscriptionService.notifyEvent(RUNNING_PROPERTY, false, this);
+        subscriptionService.notifyEvent(MimaRunner.RUNNING_PROPERTY, false, this);
     }
 
     /**
      * Stop the execution.
      */
     public void stop() {
-        final boolean running = isRunning();
         debugger.active = false;
         Optional.ofNullable(threadDebugController).ifPresent(ThreadDebugController::stop);
         interpreter.setRunning(false);
-        subscriptionService.notifyEvent(RUNNING_PROPERTY, false, this);
+        if (debugger.active) {
+            subscriptionService.notifyEvent(MimaDebugger.RUNNING_PROPERTY, false, debugger);
+        }
+        subscriptionService.notifyEvent(MimaRunner.RUNNING_PROPERTY, false, this);
     }
 
     /**
@@ -117,7 +120,7 @@ public class MimaRunner implements ExceptionHandler, CodeRunner {
         interpreter = new Interpreter(program.getInstructionSet().getConstWordLength(), null, this);
         createGlobalEnvironment(callback);
         threadDebugController = new ThreadDebugController(new Thread(
-                                () -> interpreter.evaluateTopLevel(program.getProgramToken(), globalEnvironment)));
+                () -> interpreter.evaluateTopLevel(program.getProgramToken(), globalEnvironment)));
         interpreter.setDebugController(threadDebugController);
     }
 
@@ -212,11 +215,11 @@ public class MimaRunner implements ExceptionHandler, CodeRunner {
             } while (threadDebugController.isActive() && isRunning());
             if (!threadDebugController.isActive()) {
                 paused = true;
-                subscriptionService.notifyEvent(PAUSE_PROPERTY, true, this);
+                subscriptionService.notifyEvent(Debugger.PAUSE_PROPERTY, true, this);
             }
             if (!isRunning()) {
                 active = false;
-                subscriptionService.notifyEvent(RUNNING_PROPERTY, false, this);
+                subscriptionService.notifyEvent(Debugger.RUNNING_PROPERTY, false, this);
             }
         }
 
@@ -226,14 +229,14 @@ public class MimaRunner implements ExceptionHandler, CodeRunner {
             active = true;
             paused = false;
 
-            subscriptionService.notifyEvent(PAUSE_PROPERTY, true, this);
+            subscriptionService.notifyEvent(Debugger.PAUSE_PROPERTY, true, this);
 
             mima.reset();
             setupInterpreter(callback);
             threadDebugController.setBreaks(breakpoints);
             threadDebugController.start();
 
-            subscriptionService.notifyEvent(RUNNING_PROPERTY, true, this);
+            subscriptionService.notifyEvent(Debugger.RUNNING_PROPERTY, true, this);
 
             continueExecution();
         }
@@ -242,14 +245,14 @@ public class MimaRunner implements ExceptionHandler, CodeRunner {
         public void pause() {
             paused = true;
             threadDebugController.pause();
-
-            subscriptionService.notifyEvent(PAUSE_PROPERTY, true, this);
+            subscriptionService.notifyEvent(Debugger.PAUSE_PROPERTY, true, this);
         }
 
         @Override
         public void resume() {
             paused = false;
             threadDebugController.setAutoPause(false);
+            subscriptionService.notifyEvent(Debugger.PAUSE_PROPERTY, false, this);
             continueExecution();
         }
 
@@ -258,7 +261,7 @@ public class MimaRunner implements ExceptionHandler, CodeRunner {
             paused = true;
             threadDebugController.setAutoPause(true);
 
-            subscriptionService.notifyEvent(PAUSE_PROPERTY, false, this);
+            subscriptionService.notifyEvent(Debugger.PAUSE_PROPERTY, false, this);
             continueExecution();
         }
 
