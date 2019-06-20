@@ -231,7 +231,7 @@ public final class Preferences {
             //noinspection MagicConstant
             return new Font(decode[0], Integer.parseInt(decode[1]), Integer.parseInt(decode[2]));
         } catch (@NotNull final Exception e) {
-            return new Font("Monospaced", Font.PLAIN, 12);
+            return new Font(Font.MONOSPACED, Font.PLAIN, 12);
         }
     }
 

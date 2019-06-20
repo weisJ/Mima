@@ -579,7 +579,7 @@ public class TransformUI extends MouseEventUI<JComponent> {
      * <p>For older Java versions, {@link RepaintManager#setCurrentManager(RepaintManager)} will be
      * used with either {@link TransformRPMFallBack} or {@link TransformRPMSwingX}.
      */
-    protected static class TransformRepaintManager extends RepaintManager {
+    protected static final class TransformRepaintManager extends RepaintManager {
 
         private TransformRepaintManager() {
         }
@@ -595,15 +595,13 @@ public class TransformUI extends MouseEventUI<JComponent> {
                 TransformUI ui = (TransformUI) layer.getUI();
                 Point point = c.getLocationOnScreen();
                 SwingUtilities.convertPointFromScreen(point, layer);
-                Rectangle transformPortRegion =
-                        ui.transform(new Rectangle(x + point.x, y + point.y, w, h), layer);
-                RepaintManager.currentManager(layer)
-                        .addDirtyRegion(
-                                layer,
-                                transformPortRegion.x,
-                                transformPortRegion.y,
-                                transformPortRegion.width,
-                                transformPortRegion.height);
+                Rectangle transformPortRegion = ui.transform(new Rectangle(x + point.x, y + point.y, w, h),
+                                                             layer);
+                RepaintManager.currentManager(layer).addDirtyRegion(layer,
+                                                                    transformPortRegion.x,
+                                                                    transformPortRegion.y,
+                                                                    transformPortRegion.width,
+                                                                    transformPortRegion.height);
             }
         }
 

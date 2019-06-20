@@ -5,7 +5,6 @@ import edu.kit.mima.gui.components.alignment.Alignment;
 import edu.kit.mima.gui.components.tabframe.popuptab.PopupComponent;
 import edu.kit.mima.gui.persist.PersistableComponent;
 import edu.kit.mima.gui.persist.PersistenceInfo;
-import edu.kit.mima.gui.persist.PersistenceManager;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -128,7 +127,7 @@ public class TabFrame extends PersistableComponent {
             toggleTab(a, index, enabled);
         }
         var cont = ((TabFrameLayout) getLayout()).getTabFrameContent();
-        cont.loadState(PersistenceManager.getInstance().getStates(cont));
+        cont.loadState(info.getSubTree(cont.getIdentifier()));
     }
 
     @Override

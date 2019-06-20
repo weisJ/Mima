@@ -121,7 +121,7 @@ public class MimaSplash extends JWindow {
     }
 
     private void paintLabel(@NotNull final Graphics g) {
-        var font = new Font("Monospaced", Font.PLAIN, 12);
+        var font = new Font(Font.MONOSPACED, Font.PLAIN, 12);
         g.setColor(Color.WHITE);
         g.setFont(font);
         g.drawString(

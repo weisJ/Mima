@@ -18,52 +18,63 @@ import java.util.Objects;
  * @since 2018
  */
 public final class Icons {
+    public static final UIAwareIcon DEBUG_INACTIVE = create("actions/debug_inactive.svg");
     public static final Icon BREAKPOINT = create("breakpoint.svg");
-    public static final UIAwareIcon DEBUG_INACTIVE = create("debug_inactive.svg");
-    public static final UIAwareIcon DEBUG = create("debug.svg");
-    public static final UIAwareIcon DEBUG_ACTIVE = create("debug_active.svg");
-    public static final UIAwareIcon RUN_INACTIVE = create("run_inactive.svg");
-    public static final UIAwareIcon RUN = create("run.svg");
-    public static final UIAwareIcon RUN_ACTIVE = create("run_active.svg");
-    public static final UIAwareIcon PAUSE = create("pause.svg");
-    public static final UIAwareIcon PAUSE_INACTIVE = create("pause_inactive.svg");
-    public static final UIAwareIcon RESUME = create("resume.svg");
-    public static final UIAwareIcon RESUME_INACTIVE = create("resume_inactive.svg");
-    public static final UIAwareIcon STOP = create("stop.svg");
-    public static final UIAwareIcon STOP_INACTIVE = create("stop_inactive.svg");
-    public static final UIAwareIcon DIVIDER = create("divider.svg");
     public static final Icon STACK_POINTER = create("stack_pointer.svg");
-    public static final UIAwareIcon FOLDER = create("folder.svg");
-    public static final UIAwareIcon FOLDER_ROOT = create("folder_root.svg");
-    public static final UIAwareIcon MIMA = create("class.svg");
-    public static final UIAwareIcon MIMA_X = create("class.svg");
-    public static final UIAwareIcon TEXT_FILE = create("text.svg");
-    public static final UIAwareIcon UNKNOWN_FILE = create("unknown.svg");
-    public static final UIAwareIcon REDO = create("redo.svg");
-    public static final UIAwareIcon REDO_INACTIVE = create("redo_inactive.svg");
-    public static final UIAwareIcon UNDO = create("undo.svg");
-    public static final UIAwareIcon UNDO_INACTIVE = create("undo_inactive.svg");
+
+    public static final UIAwareIcon DEBUG = create("actions/debug.svg");
+    public static final UIAwareIcon DEBUG_ACTIVE = create("actions/debug_active.svg");
+    public static final UIAwareIcon RUN_INACTIVE = create("actions/run_inactive.svg");
+    public static final UIAwareIcon RUN = create("actions/run.svg");
+    public static final UIAwareIcon RUN_ACTIVE = create("actions/run_active.svg");
+    public static final UIAwareIcon PAUSE = create("actions/pause.svg");
+    public static final UIAwareIcon PAUSE_INACTIVE = create("actions/pause_inactive.svg");
+    public static final UIAwareIcon RESUME = create("actions/resume.svg");
+    public static final UIAwareIcon RESUME_INACTIVE = create("actions/resume_inactive.svg");
+    public static final UIAwareIcon STOP = create("actions/stop.svg");
+    public static final UIAwareIcon STOP_INACTIVE = create("actions/stop_inactive.svg");
+    public static final UIAwareIcon REDO = create("actions/redo.svg");
+    public static final UIAwareIcon REDO_INACTIVE = create("actions/redo_inactive.svg");
+    public static final UIAwareIcon UNDO = create("actions/undo.svg");
+    public static final UIAwareIcon UNDO_INACTIVE = create("actions/undo_inactive.svg");
+
+    public static final UIAwareIcon FOLDER = create("files/folder.svg");
+    public static final UIAwareIcon FOLDER_ROOT = create("files/folder_root.svg");
+    public static final UIAwareIcon MIMA = create("files/class.svg");
+    public static final UIAwareIcon MIMA_X = create("files/class.svg");
+    public static final UIAwareIcon TEXT_FILE = create("files/text.svg");
+    public static final UIAwareIcon UNKNOWN_FILE = create("files/unknown.svg");
+    public static final UIAwareIcon DIVIDER = create("navigation/divider.svg");
+
     public static final UIAwareIcon MEMORY = create("memory.svg");
     public static final UIAwareIcon CONSOLE = create("console.svg");
     public static final UIAwareIcon TERMINAL = create("terminal.svg");
     public static final UIAwareIcon BUILD_GREY = create("build.svg");
-    public static final UIAwareIcon SEARCH = create("search.svg");
-    public static final UIAwareIcon SEARCH_WITH_HISTORY = create("searchWithHistory.svg");
-    public static final UIAwareIcon CLOSE = create("close.svg");
-    public static final UIAwareIcon CLOSE_HOVER = create("closeHovered.svg");
-    public static final UIAwareIcon COLLAPSE = create("collapse.svg");
-    public static final UIAwareIcon ADD = create("add.svg");
-    public static final UIAwareIcon MOVE_TOP_LEFT = create("moveToTopLeft.svg");
-    public static final UIAwareIcon MOVE_TOP_RIGHT = create("moveToTopRight.svg");
-    public static final UIAwareIcon MOVE_RIGHT_TOP = create("moveToRightTop.svg");
-    public static final UIAwareIcon MOVE_RIGHT_BOTTOM = create("moveToRightBottom.svg");
-    public static final UIAwareIcon MOVE_BOTTOM_RIGHT = create("moveToBottomRight.svg");
-    public static final UIAwareIcon MOVE_BOTTOM_LEFT = create("moveToBottomLeft.svg");
-    public static final UIAwareIcon MOVE_LEFT_BOTTOM = create("moveToLeftBottom.svg");
-    public static final UIAwareIcon MOVE_LEFT_TOP = create("moveToLeftTop.svg");
+
+    public static final UIAwareIcon SEARCH = create("navigation/search.svg");
+    public static final UIAwareIcon SEARCH_WITH_HISTORY = create("navigation/searchWithHistory.svg");
+    public static final UIAwareIcon CLOSE = create("navigation/close.svg");
+    public static final UIAwareIcon CLOSE_HOVER = create("navigation/closeHovered.svg");
+    public static final UIAwareIcon COLLAPSE = create("navigation/collapse.svg");
+    public static final UIAwareIcon ADD = create("navigation/add.svg");
+    public static final UIAwareIcon MOVE_TOP_LEFT = create("navigation/moveToTopLeft.svg");
+    public static final UIAwareIcon MOVE_TOP_RIGHT = create("navigation/moveToTopRight.svg");
+    public static final UIAwareIcon MOVE_RIGHT_TOP = create("navigation/moveToRightTop.svg");
+    public static final UIAwareIcon MOVE_RIGHT_BOTTOM = create("navigation/moveToRightBottom.svg");
+    public static final UIAwareIcon MOVE_BOTTOM_RIGHT = create("navigation/moveToBottomRight.svg");
+    public static final UIAwareIcon MOVE_BOTTOM_LEFT = create("navigation/moveToBottomLeft.svg");
+    public static final UIAwareIcon MOVE_LEFT_BOTTOM = create("navigation/moveToLeftBottom.svg");
+    public static final UIAwareIcon MOVE_LEFT_TOP = create("navigation/moveToLeftTop.svg");
+    public static final UIAwareIcon ARROW_UP = create("navigation/arrowUp.svg");
+    public static final UIAwareIcon ARROW_LEFT = create("navigation/arrowLeft.svg");
+    public static final UIAwareIcon ARROW_RIGHT = create("navigation/arrowRight.svg");
+    public static final UIAwareIcon ARROW_DOWN = create("navigation/arrowDown.svg");
+    public static final UIAwareIcon PROJECT = create("project.svg");
+
     private static final Icons instance = new Icons();
-    public static final Icon MORE_TABS = loadIcon("moreTabs.svg", 20, 20);
-    public static final Icon CLEAR = loadIcon("clear.svg", 12, 12);
+    public static final Icon MORE_TABS = loadIcon("dark/navigation/moreTabs.svg", 20, 20);
+    public static final Icon CLEAR = loadIcon("dark/navigation/clear.svg", 12, 12);
+
 
     @Contract(pure = true)
     private Icons() {
@@ -75,7 +86,7 @@ public final class Icons {
     @NotNull
     @Contract(value = "_ -> new", pure = true)
     private static UIAwareIcon create(@NotNull final String name) {
-        return new UIAwareIcon(name, "light/" + name);
+        return new UIAwareIcon("dark/" + name, "light/" + name);
     }
 
     @NotNull

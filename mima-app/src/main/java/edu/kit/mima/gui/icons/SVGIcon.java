@@ -57,8 +57,7 @@ public class SVGIcon implements Icon {
      *                      the icon is centered and uses (w + 2 * x, h + 2 * y) as the size.
      * @throws IOException if url can't be fetched.
      */
-    public SVGIcon(
-            @NotNull final URL url, final int displayWidth, final int displayHeight, final boolean usePrimitive)
+    public SVGIcon(@NotNull final URL url, final int displayWidth, final int displayHeight, final boolean usePrimitive)
             throws IOException {
         this.displayHeight = displayHeight;
         this.displayWidth = displayWidth;
@@ -82,8 +81,7 @@ public class SVGIcon implements Icon {
             height = svgIcon.getPrimitiveBounds().getHeight() + 2 * svgIcon.getPrimitiveBounds().getY();
         } else {
             var viewBox = element.getAttribute("viewBox");
-            double[] bounds =
-                    Arrays.stream(viewBox.split(" ", 4)).mapToDouble(Double::parseDouble).toArray();
+            double[] bounds = Arrays.stream(viewBox.split(" ", 4)).mapToDouble(Double::parseDouble).toArray();
             width = bounds[2] - bounds[0];
             height = bounds[3] - bounds[1];
         }
@@ -122,8 +120,7 @@ public class SVGIcon implements Icon {
      * @param y        the y coordinate
      * @param rotation the rotation in radians.
      */
-    public void paintIcon(
-            final Component c, @NotNull final Graphics g, final int x, final int y, final double rotation) {
+    public void paintIcon(final Component c, @NotNull final Graphics g, final int x, final int y, final double rotation) {
         var g2 = (Graphics2D) g.create();
         g2.translate(x, y);
         renderIcon(g2, displayWidth, displayHeight, rotation);
