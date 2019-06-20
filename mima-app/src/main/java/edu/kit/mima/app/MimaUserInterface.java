@@ -12,6 +12,7 @@ import edu.kit.mima.gui.components.ProtectedScrollTable;
 import edu.kit.mima.gui.components.alignment.Alignment;
 import edu.kit.mima.gui.components.console.Console;
 import edu.kit.mima.gui.components.console.SystemConsole;
+import edu.kit.mima.gui.components.filetree.FileTree;
 import edu.kit.mima.gui.components.folderdisplay.FilePathDisplay;
 import edu.kit.mima.gui.components.tabbedpane.EditorTabbedPane;
 import edu.kit.mima.gui.components.tabframe.TabFrame;
@@ -220,7 +221,7 @@ public final class MimaUserInterface extends JFrame {
         tabFrame.addTab(new DefaultPopupComponent("Memory", Icons.MEMORY, memoryTable),
                         "Memory",
                         Icons.MEMORY,
-                        Alignment.NORTH_WEST);
+                        Alignment.EAST);
         tabFrame.addTab(new DefaultPopupComponent("Console", Icons.CONSOLE, console),
                         "Console",
                         Icons.CONSOLE,
@@ -231,6 +232,10 @@ public final class MimaUserInterface extends JFrame {
         tabFrame.addTab(new DefaultPopupComponent("Developer Console", Icons.BUILD_GREY, new SystemConsole()),
                         "Developer",
                         Icons.BUILD_GREY, Alignment.SOUTH);
+        tabFrame.addTab(new DefaultPopupComponent("Files", Icons.PROJECT,
+                                                  new FileTree(new File(Preferences.getInstance().readString(PropertyKey.DIRECTORY_WORKING)))),
+                        "Files",
+                        Icons.FOLDER, Alignment.NORTH_WEST);
         contentPane.add(tabFrame, BorderLayout.CENTER);
         setContentPane(contentPane);
         setJMenuBar(new MimaMenuBar(this, fileActions).getMenuBar());

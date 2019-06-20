@@ -34,18 +34,17 @@ public class CardPanelBuilder {
      * Create new Card Panel Builder.
      */
     public CardPanelBuilder() {
-        panel =
-                new JPanel(new CardLayout()) {
-                    @Override
-                    public Dimension getMinimumSize() {
-                        for (Component comp : getComponents()) {
-                            if (comp.isVisible()) {
-                                return comp.getMinimumSize();
-                            }
-                        }
-                        return super.getMinimumSize();
+        panel = new JPanel(new CardLayout()) {
+            @Override
+            public Dimension getMinimumSize() {
+                for (Component comp : getComponents()) {
+                    if (comp.isVisible()) {
+                        return comp.getMinimumSize();
                     }
-                };
+                }
+                return super.getMinimumSize();
+            }
+        };
         panelMap = new TreeMap<>();
     }
 
@@ -121,8 +120,7 @@ public class CardPanelBuilder {
             final Rectangle2D bounds = metrics.getStringBounds(maxElement.get(), null);
             minWidth = Math.max(minWidth, (int) bounds.getWidth());
         }
-        final var sidebar =
-                new JXTree(items) {
+        final var sidebar = new JXTree(items) {
                     @Override
                     public void updateUI() {
                         super.updateUI();

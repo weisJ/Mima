@@ -6,7 +6,6 @@ import edu.kit.mima.gui.components.listeners.AncestorAdapter;
 import edu.kit.mima.gui.components.tabframe.popuptab.PopupComponent;
 import edu.kit.mima.gui.persist.Persistable;
 import edu.kit.mima.gui.persist.PersistenceInfo;
-import edu.kit.mima.gui.persist.PersistenceManager;
 import org.apache.poi.sl.usermodel.Insets2D;
 import org.jetbrains.annotations.NotNull;
 
@@ -365,9 +364,8 @@ public class TabFrameContent extends JPanel implements Persistable {
 
     @Override
     public void loadState(final PersistenceInfo info) {
-        var manager = PersistenceManager.getInstance();
-        setupSplitPanes((s, o) -> s.loadState(manager.getStates(s, identifier)), null);
-        setupSplitterPanes((s, o) -> s.loadState(manager.getStates(s, identifier)), null);
+        setupSplitPanes((s, o) -> s.loadState(info.getSubTree(s.getIdentifier())), null);
+        setupSplitterPanes((s, o) -> s.loadState(info.getSubTree(s.getIdentifier())), null);
     }
 
     @Override

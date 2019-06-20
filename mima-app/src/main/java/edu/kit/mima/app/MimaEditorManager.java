@@ -134,12 +134,10 @@ public class MimaEditorManager implements AutoCloseable {
         editor.setRepaint(true);
         editor.setText(fileManager.getText());
         var pref = Preferences.getInstance();
-        editor.useHistory(
-                pref.readBoolean(PropertyKey.EDITOR_HISTORY),
-                pref.readInteger(PropertyKey.EDITOR_HISTORY_SIZE));
-        lastFile =
-                lastFile.substring(
-                        Math.max(Math.min(lastFile.lastIndexOf('\\') + 1, lastFile.length() - 1), 0));
+        editor.useHistory(pref.readBoolean(PropertyKey.EDITOR_HISTORY),
+                          pref.readInteger(PropertyKey.EDITOR_HISTORY_SIZE));
+        lastFile = lastFile.substring(Math.max(Math.min(lastFile.lastIndexOf('\\') + 1,
+                                                        lastFile.length() - 1), 0));
         tabbedEditor.addTab(lastFile, Icons.forFile(lastFile), editor);
         fileManagers.put(editor, fileManager);
     }

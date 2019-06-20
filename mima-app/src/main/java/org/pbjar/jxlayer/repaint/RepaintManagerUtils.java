@@ -52,7 +52,7 @@ public class RepaintManagerUtils {
     /**
      * Indicates the availability of SwingX on the class path.
      */
-    private static final boolean swingX = isSwingXAvalable();
+    private static final boolean swingX = isSwingXAvailable();
 
     @Contract(pure = true)
     private RepaintManagerUtils() {
@@ -146,7 +146,7 @@ public class RepaintManagerUtils {
      *
      * @return {@code} true if available, {@code false} otherwise
      */
-    private static boolean isSwingXAvalable() {
+    private static boolean isSwingXAvailable() {
         try {
             Class<?> clazz = ForwardingRepaintManager.class;
             System.out.println("SwingX is available");

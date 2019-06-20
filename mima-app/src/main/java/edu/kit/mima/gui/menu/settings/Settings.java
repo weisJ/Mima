@@ -140,14 +140,14 @@ public final class Settings extends JDialog {
         buttonPanel.add(cancel);
         buttonPanel.add(apply);
 
-        var content =
-                new CardPanelBuilder()
+        var content = new CardPanelBuilder()
                         .addItem("General")
                         .addSetting("Theme", createThemeChooser())
-                        .addItem("Editor", createFontChooserPanel(PropertyKey.EDITOR_FONT, new EditorPreview()))
-                        .addItem(
-                                "Console", createFontChooserPanel(PropertyKey.CONSOLE_FONT, new ConsolePreview()))
-                        .addItem("View")
+                              .addItem("Editor",
+                                       createFontChooserPanel(PropertyKey.EDITOR_FONT, new EditorPreview()))
+                              .addItem("Console",
+                                       createFontChooserPanel(PropertyKey.CONSOLE_FONT, new ConsolePreview()))
+                              .addItem("View")
                         .addSetting("Show Binary:", new JCheckBox())
                         .create(this);
         add(content, BorderLayout.CENTER);
@@ -158,8 +158,7 @@ public final class Settings extends JDialog {
 
     private JComponent createThemeChooser() {
         var combo = new JComboBox<>(new String[]{"Light", "Dark"});
-        combo.addItemListener(
-                e -> {
+        combo.addItemListener(e -> {
                     if (e.getStateChange() == ItemEvent.SELECTED) {
                         backup.saveString(PropertyKey.THEME, e.getItem().toString());
                     }

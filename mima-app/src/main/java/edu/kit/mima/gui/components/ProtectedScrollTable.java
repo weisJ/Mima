@@ -28,6 +28,7 @@ import java.util.Map;
  */
 public class ProtectedScrollTable extends BorderlessScrollPane {
 
+    private static final int ROW_HEIGHT = 20;
     @NotNull
     private final String[] tableHeader;
     private final Map<Pair<Integer, Integer>, Icon> iconMap;
@@ -60,15 +61,16 @@ public class ProtectedScrollTable extends BorderlessScrollPane {
         DefaultCellEditor editor = new DefaultCellEditor(textField);
         table.setDefaultEditor(Object.class, editor);
         table.setShowGrid(false);
+        table.setShowVerticalLines(true);
         table.setDragEnabled(false);
         table.getTableHeader().setReorderingAllowed(false);
         table.setFillsViewportHeight(true);
-        table.setRowHeight(20);
+        table.setRowHeight(ROW_HEIGHT);
 
         scrollPane.setViewportView(table);
         setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.getVerticalScrollBar().putClientProperty("ScrollBar.thin", Boolean.TRUE);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(table.getRowHeight());
+        scrollPane.getVerticalScrollBar().setUnitIncrement(ROW_HEIGHT);
 
         final Object[][] data = new Object[initialEntries][tableHeader.length - 1];
         setContent(data);
@@ -119,13 +121,21 @@ public class ProtectedScrollTable extends BorderlessScrollPane {
      */
     private final class SelectedBorder extends AbstractBorder {
 
+        private final boolean fix;
+
+        public SelectedBorder(final boolean fix) {
+            this.fix = fix;
+        }
+
         @Override
         public void paintBorder(@NotNull final Component c, @NotNull final Graphics g,
                                 final int x, final int y,
                                 final int width, final int height) {
             var g2 = g.create();
             g2.setColor(table.getSelectionBackground());
-            g2.setClip(-2, 0, 2, c.getHeight());
+            if (fix) {
+                g2.setClip(-2, 0, 2, c.getHeight());
+            }
             g2.fillRect(-2, 0, 2, c.getHeight());
             g2.dispose();
         }
@@ -136,9 +146,9 @@ public class ProtectedScrollTable extends BorderlessScrollPane {
         private final Border spacing = BorderFactory.createEmptyBorder(cellInsets.top, cellInsets.left,
                                                                        cellInsets.bottom, cellInsets.right);
 
-        private void borderSetup(@NotNull final JComponent c, final int row) {
+        private void borderSetup(@NotNull final JComponent c, final int row, final int column) {
             if (isRowSelected(row)) {
-                c.setBorder(new CompoundBorder(new SelectedBorder(), spacing));
+                c.setBorder(new CompoundBorder(new SelectedBorder(column == 0), spacing));
             } else {
                 c.setBorder(spacing);
             }
@@ -181,7 +191,7 @@ public class ProtectedScrollTable extends BorderlessScrollPane {
                 iconGap += icon.getIconWidth() - maxIconSize.get(column);
             }
             final var iconComp = new IconComponent<>(c, icon, IconComponent.LEFT, 3, iconGap);
-            borderSetup(iconComp, row);
+            borderSetup(iconComp, row, column);
             iconComp.setBackground(c.getBackground());
             iconComp.setOpaque(true);
             return iconComp;

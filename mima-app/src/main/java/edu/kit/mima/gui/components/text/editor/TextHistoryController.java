@@ -162,7 +162,7 @@ public class TextHistoryController {
      * @return true if undo can be performed.
      */
     public boolean canUndo() {
-        return history.previous() != 0;
+        return history.previous() > 0;
     }
 
     /**
@@ -171,7 +171,7 @@ public class TextHistoryController {
      * @return true if redo can be performed.
      */
     public boolean canRedo() {
-        return history.upcoming() != 0;
+        return history.upcoming() > 0;
     }
 
     /**

@@ -42,8 +42,6 @@ public class History<T> {
         maxCapacity = capacity;
         head = 0;
         preserved = 0;
-        firePositionChange(head);
-        fireLengthChange(0);
     }
 
     /**
@@ -64,7 +62,6 @@ public class History<T> {
      * @param element element to add
      */
     public void add(final T element) {
-        final int prevSize = length();
         final int removeCount = head;
         for (int i = 0; i < removeCount; i++) {
             history.removeFirst();
@@ -74,7 +71,7 @@ public class History<T> {
         if (history.size() > maxCapacity) {
             history.removeLast();
         }
-        fireLengthChange(prevSize);
+        fireLengthChange();
     }
 
     /**
@@ -84,10 +81,9 @@ public class History<T> {
      * @param element element to add.
      */
     public void addFront(final T element) {
-        final int prevSize = length();
         history.addFirst(element);
         head = 0;
-        fireLengthChange(prevSize);
+        fireLengthChange();
     }
 
     /**
@@ -126,7 +122,7 @@ public class History<T> {
         assert head < length() : "reached end of history";
         final T element = history.get(head);
         head++;
-        firePositionChange(head - 1);
+        firePositionChange();
         return element;
     }
 
@@ -139,7 +135,7 @@ public class History<T> {
         assert head != 0 : "already on newest version";
         final T element = history.get(head - 1);
         head--;
-        firePositionChange(head + 1);
+        firePositionChange();
         return element;
     }
 
@@ -167,11 +163,10 @@ public class History<T> {
      * Reset the history.
      */
     public void reset() {
-        final int prevSize = length();
         head = 0;
         history.clear();
         preserved = 0;
-        fireLengthChange(prevSize);
+        fireLengthChange();
     }
 
     /**
@@ -180,13 +175,12 @@ public class History<T> {
      * @param capacity new capacity
      */
     public void setCapacity(final int capacity) {
-        final int prevSize = length();
         maxCapacity = capacity;
         while (history.size() > maxCapacity) {
             history.removeLast();
         }
         head = Math.max(0, Math.min(head, history.size() - 1));
-        fireLengthChange(prevSize);
+        fireLengthChange();
     }
 
     /**
@@ -195,7 +189,7 @@ public class History<T> {
      * @return number of previous states.
      */
     public int previous() {
-        return length() - head - preserved - 1;
+        return length() - head - preserved;
     }
 
     /**
@@ -207,11 +201,11 @@ public class History<T> {
         return head;
     }
 
-    private void fireLengthChange(final int prevSize) {
+    private void fireLengthChange() {
         SUBSCRIPTION_SERVICE.notifyEvent(LENGTH_PROPERTY, length(), this);
     }
 
-    private void firePositionChange(final int prevPos) {
+    private void firePositionChange() {
         SUBSCRIPTION_SERVICE.notifyEvent(POSITION_PROPERTY, head, this);
     }
 }

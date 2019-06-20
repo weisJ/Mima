@@ -65,11 +65,8 @@ public class MimaHighlighter implements Highlighter, FileEventHandler,
         textPane.setIgnoreRepaint(true);
         final StyledDocument document = textPane.getStyledDocument();
         final StyleContext context = new StyleContext();
-        final Style standard = context.addStyle("Default", null);
         final Style error = context.addStyle("Error", null);
-        standard.addAttribute(StyleConstants.Foreground, textColor);
         error.addAttribute(HighlightView.JAGGED_UNDERLINE, errorColor);
-        document.setCharacterAttributes(0, document.getLength(), standard, true);
 
         try {
             final String text = document.getText(0, document.getLength());
@@ -127,6 +124,7 @@ public class MimaHighlighter implements Highlighter, FileEventHandler,
             this.textPane = textPane;
         }
 
+        @NotNull
         @Override
         protected Object doInBackground() {
             update(textPane);

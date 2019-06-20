@@ -149,10 +149,9 @@ public final class PersistenceManager {
      * Get the state for a specific component.
      *
      * @param persistable the persistable component.
-     * @param <T>         the type of the component.
      * @return the persistence info for the component.
      */
-    public <T> PersistenceInfo getStates(@NotNull final Persistable persistable) {
+    public PersistenceInfo getStates(@NotNull final Persistable persistable) {
         return getStates(persistable, "");
     }
 
@@ -161,10 +160,9 @@ public final class PersistenceManager {
      *
      * @param persistable the persistable component.
      * @param prefix      prefix to load states.
-     * @param <T>         the type of the component.
      * @return the persistence info for the component.
      */
-    public <T> PersistenceInfo getStates(@NotNull final Persistable persistable, @NotNull final String prefix) {
+    public PersistenceInfo getStates(@NotNull final Persistable persistable, @NotNull final String prefix) {
         String key = prefix.isEmpty() ? persistable.getIdentifier() : prefix + '.' + persistable.getIdentifier();
         return stateInfo.getSubTree(key);
     }
