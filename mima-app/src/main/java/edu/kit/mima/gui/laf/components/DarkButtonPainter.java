@@ -1,10 +1,10 @@
 package edu.kit.mima.gui.laf.components;
 
-import com.bulenkov.darcula.DarculaUIUtil;
 import com.bulenkov.darcula.ui.DarculaButtonPainter;
 import com.bulenkov.darcula.ui.DarculaButtonUI;
 import com.bulenkov.iconloader.util.GraphicsConfig;
 import com.bulenkov.iconloader.util.Gray;
+import edu.kit.mima.gui.laf.MimaUIUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,12 +25,12 @@ public class DarkButtonPainter extends DarculaButtonPainter {
         boolean square = DarculaButtonUI.isSquare(c);
         int offset = square ? 1 : this.getOffset();
         if (c.hasFocus()) {
-            DarculaUIUtil.paintFocusRing(g2d, offset, yOff, width - 2 * offset, height - 2 * yOff);
+            MimaUIUtil.paintFocusRing(g2d, offset, yOff, width - 2 * offset, height - 2 * yOff);
         } else {
             GraphicsConfig config = new GraphicsConfig(g);
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_DEFAULT);
-            if (c instanceof JButton && ((JButton) c).isDefaultButton()) {
+            if (c instanceof JButton && ((JButton) c).isDefaultButton() && c.isEnabled()) {
                 g2d.setPaint(UIManager.getColor("Button.darcula.selection.color2"));
 
             } else {

@@ -61,7 +61,6 @@ public class ProtectedScrollTable extends BorderlessScrollPane {
         DefaultCellEditor editor = new DefaultCellEditor(textField);
         table.setDefaultEditor(Object.class, editor);
         table.setShowGrid(false);
-        table.setShowVerticalLines(true);
         table.setDragEnabled(false);
         table.getTableHeader().setReorderingAllowed(false);
         table.setFillsViewportHeight(true);
@@ -121,22 +120,14 @@ public class ProtectedScrollTable extends BorderlessScrollPane {
      */
     private final class SelectedBorder extends AbstractBorder {
 
-        private final boolean fix;
-
-        public SelectedBorder(final boolean fix) {
-            this.fix = fix;
-        }
-
         @Override
         public void paintBorder(@NotNull final Component c, @NotNull final Graphics g,
                                 final int x, final int y,
                                 final int width, final int height) {
             var g2 = g.create();
             g2.setColor(table.getSelectionBackground());
-            if (fix) {
-                g2.setClip(-2, 0, 2, c.getHeight());
-            }
-            g2.fillRect(-2, 0, 2, c.getHeight());
+            g2.setClip(c.getWidth(), 0, 2, c.getHeight());
+            g2.fillRect(c.getWidth(), 0, 2, c.getHeight());
             g2.dispose();
         }
     }
@@ -148,7 +139,7 @@ public class ProtectedScrollTable extends BorderlessScrollPane {
 
         private void borderSetup(@NotNull final JComponent c, final int row, final int column) {
             if (isRowSelected(row)) {
-                c.setBorder(new CompoundBorder(new SelectedBorder(column == 0), spacing));
+                c.setBorder(new CompoundBorder(new SelectedBorder(), spacing));
             } else {
                 c.setBorder(spacing);
             }
@@ -176,6 +167,23 @@ public class ProtectedScrollTable extends BorderlessScrollPane {
             boolean colIsLead =
                     (columnModel.getSelectionModel().getLeadSelectionIndex() == column);
             return rowIsLead && colIsLead && isFocusOwner();
+        }
+
+        @Override
+        public void paint(final Graphics g) {
+            super.paint(g);
+            paintGrid(g);
+        }
+
+        private void paintGrid(@NotNull final Graphics g) {
+            if (getColumnCount() == 0 || getRowCount() == 0) {
+                return;
+            }
+            g.setColor(getGridColor());
+            for (int i = 0; i < getColumnCount() - 1; i++) {
+                var rect = getCellRect(0, i, true);
+                g.fillRect(rect.x + rect.width, 0, 1, getHeight());
+            }
         }
 
         @Contract(pure = true)
@@ -214,4 +222,5 @@ public class ProtectedScrollTable extends BorderlessScrollPane {
             return prepareView(c, row, column);
         }
     }
+
 }

@@ -22,7 +22,7 @@ public abstract class DnDTabbedPaneUI extends BasicTabbedPaneUI {
     protected Color tabBorderColor;
     protected Color selectedBackground;
     protected Color tabBackground;
-    protected DnDTabbedPane tabbedPane;
+    protected DnDTabbedPane<?> tabbedPane;
     private TabContainer tabContainer;
     private int minVisible;
     private int maxVisible;
@@ -40,7 +40,7 @@ public abstract class DnDTabbedPaneUI extends BasicTabbedPaneUI {
 
     @Override
     public void installUI(@NotNull final JComponent c) {
-        tabbedPane = (DnDTabbedPane) c;
+        tabbedPane = (DnDTabbedPane<?>) c;
         tabbedPane.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, tabBorderColor));
         super.installUI(c);
         tabbedPane.removePropertyChangeListener(propertyChangeListener);
@@ -48,6 +48,7 @@ public abstract class DnDTabbedPaneUI extends BasicTabbedPaneUI {
     }
 
     protected abstract void setupColors();
+
 
     @Override
     protected LayoutManager createLayoutManager() {
@@ -95,7 +96,7 @@ public abstract class DnDTabbedPaneUI extends BasicTabbedPaneUI {
 
     @Override
     public Dimension getMinimumSize(final JComponent c) {
-        DnDTabbedPane t = (DnDTabbedPane) c;
+        DnDTabbedPane<?> t = (DnDTabbedPane<?>) c;
         var dim = super.getMinimumSize(c);
         if (t.getTabCount() <= 0) {
             return dim;

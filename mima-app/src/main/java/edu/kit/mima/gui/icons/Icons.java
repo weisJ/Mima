@@ -44,12 +44,18 @@ public final class Icons {
     public static final UIAwareIcon MIMA_X = create("files/class.svg");
     public static final UIAwareIcon TEXT_FILE = create("files/text.svg");
     public static final UIAwareIcon UNKNOWN_FILE = create("files/unknown.svg");
+    public static final UIAwareIcon GENERAL_FILE = create("files/general.svg");
     public static final UIAwareIcon DIVIDER = create("navigation/divider.svg");
 
     public static final UIAwareIcon MEMORY = create("memory.svg");
     public static final UIAwareIcon CONSOLE = create("console.svg");
     public static final UIAwareIcon TERMINAL = create("terminal.svg");
     public static final UIAwareIcon BUILD_GREY = create("build.svg");
+
+    public static final UIAwareIcon CUT = create("menu/cut.svg");
+    public static final UIAwareIcon PASTE = create("menu/paste.svg");
+    public static final UIAwareIcon COPY = create("menu/copy.svg");
+    public static final UIAwareIcon DELETE = create("menu/delete.svg");
 
     public static final UIAwareIcon SEARCH = create("navigation/search.svg");
     public static final UIAwareIcon SEARCH_WITH_HISTORY = create("navigation/searchWithHistory.svg");
@@ -99,7 +105,7 @@ public final class Icons {
     public static Icon loadIcon(@NotNull final String name, final int w, final int h) {
         try {
             return new SVGIcon(Objects.requireNonNull(instance.getClass().getResource(name)), w, h);
-        } catch (IOException e) {
+        } catch (NullPointerException | IOException e) {
             e.printStackTrace();
         }
         return new EmptyIcon(0, 0);
@@ -124,6 +130,8 @@ public final class Icons {
             return MIMA;
         } else if (name.endsWith("." + MimaConstants.MIMA_X_EXTENSION)) {
             return MIMA_X;
+        } else if (!name.contains(".")) {
+            return UNKNOWN_FILE;
         } else {
             String fileType = null;
             try {
@@ -133,7 +141,7 @@ public final class Icons {
             if (fileType != null && fileType.startsWith("text")) {
                 return TEXT_FILE;
             } else {
-                return UNKNOWN_FILE;
+                return GENERAL_FILE;
             }
         }
     }

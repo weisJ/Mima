@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
 
 /**
  * DefaultTooltipWindow wrapper for handling the display management.
@@ -15,7 +14,7 @@ import java.awt.event.MouseAdapter;
  * @author Jannis Weis
  * @since 2018
  */
-public class TooltipComponent<T extends TooltipWindow> extends MouseAdapter implements TooltipConstants {
+public class TooltipComponent<T extends TooltipWindow> implements TooltipConstants {
 
     /*default*/
     @NotNull
@@ -30,6 +29,8 @@ public class TooltipComponent<T extends TooltipWindow> extends MouseAdapter impl
     private boolean showOnce;
 
     private Point mousePos = new Point(0, 0);
+
+    private Alignment alignmentOverwrite;
 
     /**
      * Register a tooltip component.
@@ -62,10 +63,18 @@ public class TooltipComponent<T extends TooltipWindow> extends MouseAdapter impl
     }
 
     /**
+     * Manually set the alignment.
+     *
+     * @param alignment the alignment to use.
+     */
+    public void setAlignment(final Alignment alignment) {
+        this.alignmentOverwrite = alignment;
+    }
+
+    /**
      * Uninstall the DefaultTooltipWindow.
      */
     public void uninstall() {
-        container.removeMouseListener(this);
         eventHandler.setActive(false);
     }
 
@@ -77,6 +86,15 @@ public class TooltipComponent<T extends TooltipWindow> extends MouseAdapter impl
      */
     public void showOnce(final Point p) {
         showOnce = true;
+        showAt(p);
+    }
+
+    /**
+     * Show the tooltip at the given position.
+     *
+     * @param p the position to show the tooltip at.
+     */
+    public void showAt(final Point p) {
         mousePos = p;
         showTooltipInternal();
     }
@@ -112,6 +130,14 @@ public class TooltipComponent<T extends TooltipWindow> extends MouseAdapter impl
         }
     }
 
+    public void updateLocation() {
+        var size = tooltip.getPreferredSize();
+        var p = calculatePositionIn(container.getRootPane(), size, mousePos);
+        var pos = new Point(p.x, p.y);
+        SwingUtilities.convertPointToScreen(pos, container.getRootPane());
+        tooltip.setBounds(pos.x, pos.y, size.width, size.height);
+    }
+
     /*
      * Make the tooltip visible.
      */
@@ -121,11 +147,7 @@ public class TooltipComponent<T extends TooltipWindow> extends MouseAdapter impl
         }
         tooltip.setVisible(true);
         eventHandler.setActive(true);
-        var size = tooltip.getPreferredSize();
-        var p = calculatePositionIn(container.getRootPane(), size, mousePos);
-        var pos = new Point(p.x, p.y);
-        SwingUtilities.convertPointToScreen(pos, container.getRootPane());
-        tooltip.setBounds(pos.x, pos.y, size.width, size.height);
+        updateLocation();
         tooltip.showTooltip();
         return true;
     }
@@ -135,14 +157,20 @@ public class TooltipComponent<T extends TooltipWindow> extends MouseAdapter impl
      */
     @NotNull
     @Contract("_, _, _ -> new")
-    private Point calculatePositionIn(
-            @NotNull final Component c, @NotNull final Dimension size, @NotNull final Point mousePos) {
+    private Point calculatePositionIn(@NotNull final Component c,
+                                      @NotNull final Dimension size,
+                                      @NotNull final Point mousePos) {
         final var containerPos = SwingUtilities.convertPoint(
                 container, new Point(container.getWidth() / 2, container.getHeight() / 2), c);
         SwingUtilities.convertPointFromScreen(mousePos, c);
         var pos = centerAt.calculatePosition(mousePos, containerPos);
-        Alignment alignment = Alignment.getAlignment(pos, size, c.getBounds(), Alignment.SOUTH);
-        alignment = alignment == Alignment.CENTER ? Alignment.SOUTH : alignment;
+        Alignment alignment;
+        if (alignmentOverwrite == null) {
+            alignment = Alignment.getAlignment(pos, size, c.getBounds(), Alignment.SOUTH);
+            alignment = alignment == Alignment.CENTER ? Alignment.SOUTH : alignment;
+        } else {
+            alignment = alignmentOverwrite;
+        }
         tooltip.setAlignment(alignment);
         return alignment.relativePos(size, pos);
     }

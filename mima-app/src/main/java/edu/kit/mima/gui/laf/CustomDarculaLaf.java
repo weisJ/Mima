@@ -6,6 +6,7 @@ import com.bulenkov.iconloader.util.ColorUtil;
 import com.bulenkov.iconloader.util.EmptyIcon;
 import com.bulenkov.iconloader.util.StringUtil;
 import com.bulenkov.iconloader.util.SystemInfo;
+import edu.kit.mima.gui.icons.Icons;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -200,18 +201,9 @@ public class CustomDarculaLaf extends BasicLookAndFeel {
             patchComboBox(metalDefaults, defaults);
             defaults.remove("Spinner.arrowButtonBorder");
             defaults.put("Spinner.arrowButtonSize", new Dimension(16, 5));
-            defaults.put(
-                    "Tree.collapsedIcon",
-                    new IconUIResource(
-                            IconLoader.getIcon("/com/bulenkov/darcula/icons/treeNodeCollapsed.png")));
-            defaults.put(
-                    "Tree.expandedIcon",
-                    new IconUIResource(
-                            IconLoader.getIcon("/com/bulenkov/darcula/icons/treeNodeExpanded.png")));
-            defaults.put(
-                    "Menu.arrowIcon",
-                    new IconUIResource(
-                            IconLoader.getIcon("/com/bulenkov/darcula/icons/menuItemArrowIcon.png")));
+            defaults.put("Tree.collapsedIcon", Icons.ARROW_RIGHT);
+            defaults.put("Tree.expandedIcon", Icons.ARROW_DOWN);
+            defaults.put("Menu.arrowIcon", Icons.ARROW_RIGHT);
             defaults.put("CheckBoxMenuItem.checkIcon", EmptyIcon.create(16));
             defaults.put("RadioButtonMenuItem.checkIcon", EmptyIcon.create(16));
             defaults.put(

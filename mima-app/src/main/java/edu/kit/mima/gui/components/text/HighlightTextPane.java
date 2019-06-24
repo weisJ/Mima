@@ -40,6 +40,7 @@ public class HighlightTextPane extends NonWrappingTextPane implements ChangeList
     private Point selectionStart;
     @Nullable
     private Point selectionEnd;
+    private Point selectionEnd2;
     private int vertLine;
     private boolean onceFocused = false;
 
@@ -153,7 +154,7 @@ public class HighlightTextPane extends NonWrappingTextPane implements ChangeList
                 for (int y = selectionStart.y + height; y < selectionEnd.y; y += height) {
                     g.fillRect(xoff, y, getWidth(), height);
                 }
-                g.fillRect(xoff, selectionEnd.y, selectionEnd.x, height);
+                g.fillRect(xoff, selectionEnd.y, selectionEnd2.x, height);
             }
         }
     }
@@ -189,8 +190,10 @@ public class HighlightTextPane extends NonWrappingTextPane implements ChangeList
             final var firstView = modelToView2D(0).getBounds();
             final var view = modelToView2D(getSelectionStart()).getBounds();
             final var endView = modelToView2D(getSelectionEnd()).getBounds();
+            final var endView2 = modelToView2D(getSelectionEnd() - 1).getBounds();
             selectionStart = Optional.ofNullable(view).map(Rectangle::getLocation).orElse(null);
             selectionEnd = Optional.ofNullable(endView).map(Rectangle::getLocation).orElse(null);
+            selectionEnd2 = Optional.ofNullable(endView2).map(Rectangle::getLocation).orElse(null);
             xoff = Optional.ofNullable(firstView).map(r -> r.x).orElse(0);
         } catch (@NotNull final NullPointerException | BadLocationException ignored) {
             xoff = 0;

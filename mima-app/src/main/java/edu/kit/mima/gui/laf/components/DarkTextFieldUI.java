@@ -48,8 +48,8 @@ public class DarkTextFieldUI extends DarculaTextFieldUI {
         config.restore();
     }
 
-    private void paintBorderBackground(
-            @NotNull final Graphics2D g, @NotNull final JTextComponent c, @NotNull final Border b) {
+    private void paintBorderBackground(@NotNull final Graphics2D g, @NotNull final JTextComponent c,
+                                       @NotNull final Border b) {
         if (c.isEnabled() && c.isEditable()) {
             g.setColor(c.getBackground());
         }
@@ -58,16 +58,16 @@ public class DarkTextFieldUI extends DarculaTextFieldUI {
         int height = c.getHeight();
         Insets i = b.getBorderInsets(c);
         if (c.hasFocus()) {
-            g.fillRoundRect(
-                    i.left - 5,
-                    i.top - 2,
-                    width - i.right - i.left + 10,
-                    height - i.top - i.bottom + 6,
-                    5,
-                    5);
+            g.fillRoundRect(i.left - 5, i.top - 2,
+                            width - i.right - i.left + 10,
+                            height - i.top - i.bottom + 6,
+                            5,
+                            5);
         } else {
-            g.fillRect(
-                    i.left - 5, i.top - 2, width - i.right - i.left + 12, height - i.top - i.bottom + 6);
+            g.fillRect(i.left - 5,
+                       i.top - 2,
+                       width - i.right - i.left + 12,
+                       height - i.top - i.bottom + 6);
         }
     }
 
@@ -79,7 +79,9 @@ public class DarkTextFieldUI extends DarculaTextFieldUI {
         g.setColor(c.isEnabled() ? Gray._100 : new Color(5460819));
         if (c.getClientProperty("JTextField.Search.noBorderRing") != Boolean.TRUE) {
             if (c.hasFocus()) {
-                MimaUIUtil.paintSearchFocusOval(g, r);
+                MimaUIUtil.paintOutlineBorder(g, r.width, r.height, 3, true, true,
+                                              MimaUIUtil.Outline.focus);
+//                MimaUIUtil.paintSearchFocusOval(g, r);
             } else {
                 g.drawRoundRect(r.x, r.y, r.width, r.height - 1, arcSize, arcSize);
             }

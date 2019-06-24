@@ -22,7 +22,7 @@ import java.util.Map;
  * @since 2019
  */
 @Context(provides = TabFrameTabComponent.class)
-public final class TabFrameTabContextProvider {
+public final class TabFrameTabContextProvider extends CachedContextProvider {
 
     /**
      * Create and register a context menu for the given {@link TabFrameTabComponent}.
@@ -31,42 +31,50 @@ public final class TabFrameTabContextProvider {
      */
     @ReflectionCall
     public static void createContextMenu(@NotNull final TabFrameTabComponent target) {
-        var menu = new JPopupMenu();
-        var remove = new JMenuItem();
-        remove.setAction(new AbstractAction("Remove from Sidebar") {
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                target.removeFromParent();
-            }
-        });
-        menu.add(remove);
-        var hide = new JMenuItem();
-        hide.setAction(new AbstractAction("Hide") {
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                target.setPopupVisible(false);
-            }
-        });
-        menu.addSeparator();
-        var moveToMenu = new JMenu("Move to");
-        Map<Alignment, JMenuItem> others = new HashMap<>();
+        PopupListener cached = get(target);
+        if (cached == null) {
+            var menu = new JPopupMenu();
+            var remove = new JMenuItem();
+            remove.setAction(new AbstractAction("Remove from Sidebar") {
+                @Override
+                public void actionPerformed(final ActionEvent e) {
+                    target.removeFromParent();
+                }
+            });
+            menu.add(remove);
+            var hide = new JMenuItem();
+            hide.setAction(new AbstractAction("Hide") {
+                @Override
+                public void actionPerformed(final ActionEvent e) {
+                    target.setPopupVisible(false);
+                }
+            });
+            menu.addSeparator();
+            var moveToMenu = new JMenu("Move to");
+            Map<Alignment, JMenuItem> others = new HashMap<>();
 
-        Alignment a = Alignment.NORTH;
-        do {
-            var item = moveToEntry(a, target, others);
-            others.put(a, item);
-            moveToMenu.add(item);
-            a = a.clockwise();
-        } while (a != Alignment.NORTH);
+            Alignment a = Alignment.NORTH;
+            do {
+                var item = moveToEntry(a, target, others);
+                others.put(a, item);
+                moveToMenu.add(item);
+                a = a.clockwise();
+            } while (a != Alignment.NORTH);
 
 
-        menu.add(moveToMenu);
-        menu.addSeparator();
-        menu.add(hide);
-        var listener = new PopupListener(menu);
-        listener.setUseAbsolutePos(true);
-        target.addMouseListener(listener);
+            menu.add(moveToMenu);
+            menu.addSeparator();
+            menu.add(hide);
 
+            var listener = new PopupListener(menu);
+            cache(target, listener);
+
+            listener.setUseAbsolutePos(true);
+            target.addMouseListener(listener);
+        } else {
+            target.removeMouseListener(cached);
+            target.addMouseListener(cached);
+        }
     }
 
     private static JMenuItem moveToEntry(@NotNull final Alignment a,

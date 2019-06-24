@@ -17,7 +17,7 @@ import java.awt.event.MouseEvent;
  * @since 2019
  */
 @Context(provides = FilePathDisplayItem.class)
-public final class FileDisplayContextProvider {
+public final class FileDisplayContextProvider extends CachedContextProvider {
 
 
     /**
@@ -27,7 +27,15 @@ public final class FileDisplayContextProvider {
      */
     @ReflectionCall
     public static void createContextMenu(@NotNull final FilePathDisplayItem target) {
-        final var tooltip = new DirectoryTooltip(target.getFile(), target.getHandler());
-        target.addMouseListener(new PopupListener(tooltip, MouseEvent.BUTTON1, true));
+        PopupListener cached = get(target);
+        if (cached == null) {
+            final var tooltip = new DirectoryTooltip(target.getFile(), target.getHandler());
+            var popupListener = new PopupListener(tooltip, MouseEvent.BUTTON1, true);
+            cache(target, popupListener);
+            target.addMouseListener(popupListener);
+        } else {
+            target.removeMouseListener(cached);
+            target.addMouseListener(cached);
+        }
     }
 }
