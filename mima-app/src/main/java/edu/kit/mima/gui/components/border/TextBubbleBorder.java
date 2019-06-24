@@ -136,7 +136,7 @@ public class TextBubbleBorder extends AbstractBorder {
      * @return thickness of border.
      */
     public int getThickness() {
-        return thickness;
+        return pointerSide == Alignment.CENTER ? 0 : thickness;
     }
 
     /**

@@ -21,6 +21,7 @@ public final class ContextManager {
     }
 
     public static void registerProvider(final Class<?> provider, final Class<?> providesFor) {
+        System.out.println("Registering " + provider + " for " + providesFor);
         menuMap.put(providesFor, provider);
     }
 
@@ -28,13 +29,11 @@ public final class ContextManager {
      * Create a context for the target. Will find the corresponding context menu.
      *
      * @param target the target object.
-     * @throws IllegalStateException if no appropriate context could be found.
      */
-    public static void createContext(@NotNull final Object target) throws IllegalStateException {
+    public static void createContext(@NotNull final Object target) {
         var targetClass = target.getClass();
         if (menuMap.containsKey(targetClass)) {
             createContext(menuMap.get(targetClass), targetClass, target);
-            return;
         } else {
             for (var menuClass : menuMap.keySet()) {
                 if (menuClass.isAssignableFrom(targetClass)) {
@@ -43,11 +42,10 @@ public final class ContextManager {
                 }
             }
         }
-        throw new IllegalStateException("Found no provider for type " + targetClass);
     }
 
-    private static void createContext(
-            @NotNull final Class<?> supplier, final Class<?> targetType, final Object target) {
+    private static void createContext(@NotNull final Class<?> supplier, final Class<?> targetType,
+                                      final Object target) {
         try {
             var creator = supplier.getDeclaredMethod("createContextMenu", targetType);
             creator.setAccessible(true);

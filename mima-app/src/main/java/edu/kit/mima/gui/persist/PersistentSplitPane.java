@@ -52,6 +52,7 @@ public class PersistentSplitPane extends JSplitPane implements Persistable {
     @Override
     public void loadState(@NotNull final PersistenceInfo info) {
         double pos = info.getDouble("position", getRelativeDividerLocation());
+        pos = Math.max(0.0, Math.min(1.0, pos));
         persistenceInfo.putValue("position", pos);
         setDividerLocation(pos);
     }

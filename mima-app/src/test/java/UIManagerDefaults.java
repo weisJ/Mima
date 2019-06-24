@@ -373,7 +373,7 @@ public class UIManagerDefaults implements ActionListener, ItemListener {
             return;
         }
         //  Create a new model for the requested item
-        //  and add the attributes of the item to the model
+        //  and addAtHead the attributes of the item to the model
         model = new DefaultTableModel(COLUMN_NAMES, 0);
         final Map attributes = items.get(itemName);
         for (final Object o : attributes.keySet()) {

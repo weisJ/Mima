@@ -12,6 +12,11 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
+import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 
 /**
  * DefaultTooltipWindow Component with Shadow.
@@ -26,6 +31,9 @@ public class DefaultTooltipWindow extends TooltipWindow {
     private final TooltipPanel tooltipPanel;
     private Alignment alignment;
     private float alpha = 0;
+    private boolean backgroundSet = false;
+    private boolean borderSet = false;
+
 
     /**
      * Create new DefaultTooltipWindow.
@@ -34,6 +42,7 @@ public class DefaultTooltipWindow extends TooltipWindow {
      */
     public DefaultTooltipWindow(@NotNull final String text) {
         setLayout(null);
+        setAlwaysOnTop(true);
 
         alignment = Alignment.NORTH;
         tooltipPanel = new TooltipPanel();
@@ -56,11 +65,49 @@ public class DefaultTooltipWindow extends TooltipWindow {
         add(tooltipPanel);
     }
 
-    @Override
-    public void setVisible(final boolean b) {
-        labelPanel.setBackground(UIManager.getColor("Tooltip.background"));
-        bubbleBorder.setColor(UIManager.getColor("Tooltip.borderColor"));
-        super.setVisible(b);
+    public TooltipPanel getTooltipPanel() {
+        return tooltipPanel;
+    }
+
+    public void setTooltipBackground(final Color c) {
+        if (labelPanel == null) {
+            return;
+        }
+        if (c != null) {
+            backgroundSet = true;
+            labelPanel.setBackground(c);
+        } else {
+            backgroundSet = false;
+            labelPanel.setBackground(UIManager.getColor("Tooltip.background"));
+        }
+    }
+
+    public void setTooltipBorderColor(final Color c) {
+        if (bubbleBorder == null) {
+            return;
+        }
+        if (c != null) {
+            borderSet = true;
+            bubbleBorder.setColor(c);
+        } else {
+            borderSet = false;
+            bubbleBorder.setColor(UIManager.getColor("Tooltip.borderColor"));
+        }
+    }
+
+    public void setTooltipForeground(final Color c) {
+        if (textLabel == null) {
+            return;
+        }
+        textLabel.setForeground(c);
+    }
+
+    public Font getTooltipFont() {
+        return textLabel.getFont();
+    }
+
+    public void setTooltipFont(final Font font) {
+        textLabel.setFont(font);
     }
 
     /**
@@ -135,7 +182,9 @@ public class DefaultTooltipWindow extends TooltipWindow {
                 bounds.x += 5 * pointerWidth - thickness;
                 bubbleBorder.setPointerPadPercent(1);
             }
-            default -> {
+            case CENTER -> {
+                bounds.width -= thickness;
+                bounds.height -= thickness;
             }
         }
         return bounds;
@@ -160,43 +209,78 @@ public class DefaultTooltipWindow extends TooltipWindow {
     @Override
     public void showTooltip() {
         setVisible(true);
-        startFadeTimer(0, 1, 0.05f);
+        toFront();
+        tooltipPanel.showTooltip(this);
     }
 
     @Override
     public void hideTooltip() {
-        startFadeTimer(1, 0, -0.05f);
+        tooltipPanel.hideTooltip(this);
     }
 
-    private void startFadeTimer(final float start, final float end, final float increment) {
-        alpha = start;
-        final var timer = new Timer();
-        final var task = new TimerTask() {
-            @Override
-            public void run() {
-                if (alpha == end) {
-                    timer.cancel();
-                }
-                alpha = start < end
-                        ? Math.min(alpha + increment, end)
-                        : Math.max(alpha + increment, end);
-                if (alpha == 0) {
-                    setVisible(false);
-                }
-                repaint();
+    public void setRoundCorners(final boolean roundCorners) {
+        if (roundCorners) {
+            bubbleBorder.setRadius(4);
+        } else {
+            bubbleBorder.setRadius(0);
+        }
+    }
+
+    public class TooltipPanel extends ShadowPane {
+
+
+        private final ScheduledExecutorService scheduler = newSingleThreadScheduledExecutor();
+        private ScheduledFuture<?> future;
+
+        public void showTooltip(final Component parent) {
+            setVisible(true);
+            startFadeTimer(0, 1, 0.05f, parent);
+        }
+
+        public void hideTooltip(final Component parent) {
+            startFadeTimer(1, 0, -0.05f, parent);
+        }
+
+        public void hideAndShow(final long millis, final Component parent) {
+            if (future != null && !future.isDone()) {
+                future.cancel(true);
+            } else {
+                hideTooltip(parent);
             }
-        };
-        timer.schedule(task, 0, 10);
-    }
+            future = scheduler.schedule(() -> showTooltip(parent), millis, TimeUnit.MILLISECONDS);
+        }
 
-    private class TooltipPanel extends ShadowPane {
+        private void startFadeTimer(final float start, final float end, final float increment,
+                                    final Component parent) {
+            alpha = start;
+            final var timer = new Timer();
+            final var task = new TimerTask() {
+                @Override
+                public void run() {
+                    if (alpha == end) {
+                        timer.cancel();
+                    }
+                    alpha = start < end
+                            ? Math.min(alpha + increment, end)
+                            : Math.max(alpha + increment, end);
+                    if (alpha == 0) {
+                        setVisible(false);
+                        DefaultTooltipWindow.this.setVisible(false);
+                    }
+                    parent.repaint();
+                }
+            };
+            timer.schedule(task, 0, 10);
+        }
+
+
         @Override
         public void updateUI() {
             super.updateUI();
-            if (labelPanel != null) {
+            if (labelPanel != null && !backgroundSet) {
                 labelPanel.setBackground(UIManager.getColor("Tooltip.background"));
             }
-            if (bubbleBorder != null) {
+            if (bubbleBorder != null && !borderSet) {
                 bubbleBorder.setColor(UIManager.getColor("Tooltip.borderColor"));
             }
         }

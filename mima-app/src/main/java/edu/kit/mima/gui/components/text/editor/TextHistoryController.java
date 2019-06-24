@@ -3,6 +3,8 @@ package edu.kit.mima.gui.components.text.editor;
 import edu.kit.mima.api.history.FileHistoryObject;
 import edu.kit.mima.api.history.FileHistoryObject.ChangeType;
 import edu.kit.mima.api.history.History;
+import edu.kit.mima.api.history.LinkedHistory;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.text.BadLocationException;
@@ -28,9 +30,10 @@ public class TextHistoryController {
      * @param textComponent editor pane to control
      * @param historyLength how many events the history should date back
      */
+    @Contract(pure = true)
     public TextHistoryController(final JTextComponent textComponent, final int historyLength) {
         this.textComponent = textComponent;
-        history = new History<>(historyLength);
+        history = new LinkedHistory<>(historyLength);
         active = true;
     }
 
@@ -54,7 +57,7 @@ public class TextHistoryController {
             if (old.isEmpty()) {
                 addInsertHistory(offset, text);
             } else {
-                history.add(new FileHistoryObject(textComponent, offset, text, old, ChangeType.REPLACE));
+                history.addAtHead(new FileHistoryObject(textComponent, offset, text, old, ChangeType.REPLACE));
             }
         }
     }
@@ -78,7 +81,7 @@ public class TextHistoryController {
                     new FileHistoryObject(
                             textComponent, fhs.getCaretOffset(), fhs.getText() + text, "", ChangeType.INSERT));
         } else {
-            history.add(new FileHistoryObject(textComponent, offset, text, "", ChangeType.INSERT));
+            history.addAtHead(new FileHistoryObject(textComponent, offset, text, "", ChangeType.INSERT));
         }
     }
 
@@ -115,7 +118,7 @@ public class TextHistoryController {
                     new FileHistoryObject(
                             textComponent, offset, "", text + fhs.getOldText(), ChangeType.REMOVE));
         } else {
-            history.add(new FileHistoryObject(textComponent, offset, "", text, ChangeType.REMOVE));
+            history.addAtHead(new FileHistoryObject(textComponent, offset, "", text, ChangeType.REMOVE));
         }
     }
 

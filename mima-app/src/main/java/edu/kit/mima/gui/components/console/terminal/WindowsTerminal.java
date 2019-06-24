@@ -1,6 +1,7 @@
 package edu.kit.mima.gui.components.console.terminal;
 
 import edu.kit.mima.api.history.History;
+import edu.kit.mima.api.history.LinkedHistory;
 import edu.kit.mima.api.lambda.CheckedRunnable;
 import edu.kit.mima.api.lambda.LambdaUtil;
 import edu.kit.mima.api.util.Tuple;
@@ -47,8 +48,8 @@ public class WindowsTerminal extends BorderlessScrollPane implements Terminal {
 
         messageConsole = new MessageConsole(textArea, Charset.forName("Cp850"));
         messageConsole.setMessageLines(1000);
-        input = new History<>(50);
-        input.add(new StringBuilder());
+        input = new LinkedHistory<>(50);
+        input.addAtHead(new StringBuilder());
 
         var session = startSession();
         stdin = session.getSecond();

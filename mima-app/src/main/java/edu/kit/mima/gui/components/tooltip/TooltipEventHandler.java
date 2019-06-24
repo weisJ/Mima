@@ -4,6 +4,8 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -50,6 +52,17 @@ public class TooltipEventHandler extends MouseAdapter {
             @Override
             public void mouseMoved(@NotNull final MouseEvent e) {
                 contentMouseMovedEvent(e);
+            }
+        });
+        tooltipComponent.container.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(final ComponentEvent e) {
+                tooltipComponent.updateLocation();
+            }
+
+            @Override
+            public void componentMoved(final ComponentEvent e) {
+                tooltipComponent.updateLocation();
             }
         });
         this.propagator = new EventPropagator();
@@ -133,7 +146,7 @@ public class TooltipEventHandler extends MouseAdapter {
                     //Hide tooltip after time has passed.
                     if (vanishingDelay > 0) {
                         do {
-                            //If mouse has moved don't hide and try again.
+                            //If mouse has moved don't hideAndShow and try again.
                             moved = false;
                             wait(vanishingDelay);
                         } while (moved);
@@ -170,7 +183,7 @@ public class TooltipEventHandler extends MouseAdapter {
         propagator.mouseExited(e);
         overContainer = false;
         inside = false;
-        //If mouse has left component hide immediately.
+        //If mouse has left component hideAndShow immediately.
         tooltipComponent.hideTooltip();
         if (thread != null && thread.isAlive()) {
             synchronized (this) {

@@ -26,11 +26,10 @@ import java.util.function.Supplier;
  */
 public class TabbedPopupComponent extends SimplePopupComponent {
 
-    private final DnDTabbedPane tabbedPane;
+    private final DnDTabbedPane<JComponent> tabbedPane;
     private final PopupTabbedPaneUI ui;
     private final Supplier<JComponent> componentSupplier;
     private PopupTabContainer tabContainer;
-    private boolean focus;
 
     public TabbedPopupComponent(final String title) {
         this(title, () -> {
@@ -46,7 +45,7 @@ public class TabbedPopupComponent extends SimplePopupComponent {
         setLayout(new BorderLayout());
         var label = new UILabel(title + ":");
 
-        tabbedPane = new DnDTabbedPane() {
+        tabbedPane = new DnDTabbedPane<>() {
             @Override
             public Insets getTabInsets() {
                 return new Insets(0, label.getWidth() + 10, 0,
@@ -105,7 +104,6 @@ public class TabbedPopupComponent extends SimplePopupComponent {
     @Override
     public void setFocus(final boolean focus) {
         ui.setFocus(focus);
-        this.focus = focus;
         tabbedPane.repaint();
     }
 

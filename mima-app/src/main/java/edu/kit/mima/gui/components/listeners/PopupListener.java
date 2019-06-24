@@ -40,8 +40,7 @@ public class PopupListener extends MouseAdapter {
         this.attachToComponent = attachToComponent;
     }
 
-    public PopupListener(
-            final JPopupMenu popupMenu, final int mouseButton, final boolean attachToComponent) {
+    public PopupListener(final JPopupMenu popupMenu, final int mouseButton, final boolean attachToComponent) {
         this(popupMenu, mouseButton, attachToComponent, false);
     }
 
@@ -83,17 +82,20 @@ public class PopupListener extends MouseAdapter {
             return;
         }
         if (e.getButton() == mouseButton) {
-            var pos = new Point();
-            if (useAbsolutePos) {
-                pos = calculatePos(MouseInfo.getPointerInfo().getLocation(), e.getComponent());
-                popupMenu.setInvoker(e.getComponent());
-                popupMenu.setLocation(pos.x, pos.y);
-                popupMenu.setVisible(true);
-            } else {
-                pos = calculatePos(e.getPoint(), e.getComponent());
-                popupMenu.show(e.getComponent(), pos.x, pos.y);
-            }
+            SwingUtilities.invokeLater(() -> {
+                var pos = new Point();
+                if (useAbsolutePos) {
+                    pos = calculatePos(MouseInfo.getPointerInfo().getLocation(), e.getComponent());
+                    popupMenu.setInvoker(e.getComponent());
+                    popupMenu.setLocation(pos.x, pos.y);
+                    popupMenu.setVisible(true);
+                } else {
+                    pos = calculatePos(e.getPoint(), e.getComponent());
+                    popupMenu.show(e.getComponent(), pos.x, pos.y);
+                }
+            });
         }
+
     }
 
     @NotNull
