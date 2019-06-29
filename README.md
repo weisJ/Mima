@@ -6,6 +6,8 @@ Simple environment for writing Mima-Code (see <http://gbi.ira.uka.de/> chapter 1
 
 This is a simple IDE developed for writing code targeted at the Mima (Minimal Computing Machine) taught at KIT (Karlsruher Intitute for Technology).
 
+This is a personal project to gain experience in GUI programming using the Java Swing Api. The design is based on the design of the Jetbrains product and builds on the open-source [Darcula Look and Feel](https://github.com/bulenkov/Darcula) but extends it in a lot of ways to keep up with the newer Darcula design with didn't yet make it into the LaF.
+
 # How to use
 You can run either the jar or executable from .\build or the release page.
 No further installation is needed.
