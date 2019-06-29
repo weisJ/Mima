@@ -50,6 +50,10 @@ public interface Punctuation {
      */
     char COMMENT = '#';
     /**
+     * Comment block modifier.
+     */
+    char COMMENT_BLOCK_MOD = '*';
+    /**
      * comma for arguments separation.
      */
     char COMMA = ',';
