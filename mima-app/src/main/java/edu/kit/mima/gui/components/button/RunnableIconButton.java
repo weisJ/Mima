@@ -27,6 +27,10 @@ public class RunnableIconButton extends IconButton {
             @NotNull final Icon inactive, @NotNull final Icon active, @NotNull final Icon running) {
         super(inactive, active);
         this.running = running;
+        addActionListener(e -> {
+            setEnabled(false);
+            setEnabled(true);
+        });
     }
 
     @NotNull
