@@ -14,6 +14,7 @@ import edu.kit.mima.gui.components.console.Console;
 import edu.kit.mima.gui.components.console.SystemConsole;
 import edu.kit.mima.gui.components.filetree.FileTree;
 import edu.kit.mima.gui.components.folderdisplay.FilePathDisplay;
+import edu.kit.mima.gui.components.listeners.MouseClickListener;
 import edu.kit.mima.gui.components.tabbedpane.EditorTabbedPane;
 import edu.kit.mima.gui.components.tabframe.TabFrame;
 import edu.kit.mima.gui.components.tabframe.popuptab.DefaultPopupComponent;
@@ -33,6 +34,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -214,6 +216,21 @@ public final class MimaUserInterface extends JFrame {
         controlPanel.setComponentZOrder(filePathDisplay, 1);
         controlPanel.setComponentZOrder(buttonArea, 0);
 
+        var fileTree =  new FileTree(new File(Preferences.getInstance().readString(PropertyKey.DIRECTORY_WORKING)));
+        fileTree.getTree().addMouseListener((MouseClickListener) e -> {
+            if (e.getClickCount() == 2) {
+                var tree = fileTree.getTree();
+                TreePath pathForLocation = tree.getClosestPathForLocation(e.getX(), e.getY());
+                if (pathForLocation != null) {
+                    if (!tree.isPathSelected(pathForLocation)) {
+                        tree.setSelectionPath(pathForLocation);
+                    }
+                    var file = fileTree.getSelectedFile();
+                    openFile(file.getAbsolutePath());
+                }
+            }
+        });
+
         contentPane.add(controlPanel, BorderLayout.NORTH);
         var tabFrame = new TabFrame();
         tabFrame.setPersistable(true, "mainTabFrame");
@@ -232,8 +249,7 @@ public final class MimaUserInterface extends JFrame {
         tabFrame.addTab(new DefaultPopupComponent("Developer Console", Icons.BUILD_GREY, new SystemConsole()),
                         "Developer",
                         Icons.BUILD_GREY, Alignment.SOUTH);
-        tabFrame.addTab(new DefaultPopupComponent("Files", Icons.PROJECT,
-                                                  new FileTree(new File(Preferences.getInstance().readString(PropertyKey.DIRECTORY_WORKING)))),
+        tabFrame.addTab(new DefaultPopupComponent("Files", Icons.PROJECT, fileTree),
                         "Files",
                         Icons.FOLDER, Alignment.NORTH_WEST);
         contentPane.add(tabFrame, BorderLayout.CENTER);
