@@ -14,7 +14,7 @@ You can also compile it yourself using maven.
 # What is a Mima
 The Mima or minimal Machine is an idealized Prozessor taught at the KIT. It uses, as the name implies, a minimal set of prozessor instruction to achieve full computational power.
 
---Diagramm--
+<img src="https://github.com/weisJ/Mima/blob/master/images/Mima_Diagram.png?raw=true" align="center">
 
 The Mima uses registers that are 24bit long and store numbers in twos complement. To encode the instructions the first four bytes of the register are reserved and the remaining 20 bits are used for the argument. This implies that arguments can only be positive numbers as negative numbers need to be stored in 24 bits.
 
