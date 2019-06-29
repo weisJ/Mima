@@ -208,7 +208,14 @@ public class TokenStream {
     }
 
     private void skipComment() {
-        readWhile(c -> c != NEW_LINE && c != Punctuation.COMMENT);
+        if (input.peek() == Punctuation.COMMENT_BLOCK_MOD) {
+            while (!input.isEmpty() && input.peek() != Punctuation.COMMENT) {
+                readWhile(c -> c != Punctuation.COMMENT_BLOCK_MOD);
+                input.next();
+            }
+        } else {
+            readWhile(c -> c != NEW_LINE && c != Punctuation.COMMENT);
+        }
         input.next();
     }
 

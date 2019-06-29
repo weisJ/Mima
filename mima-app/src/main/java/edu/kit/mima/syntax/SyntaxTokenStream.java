@@ -93,14 +93,23 @@ public class SyntaxTokenStream extends TokenStream {
     @Contract(" -> new")
     private SyntaxToken<?> readComment() {
         final int startIndex = getPosition();
-        String comment = "" + input.next();
-        comment += readWhile(c -> c != NEW_LINE && c != Punctuation.COMMENT);
-        if (input.peek() != NEW_LINE) {
-            comment += input.next();
+        StringBuilder comment = new StringBuilder("" + input.next());
+        if (input.peek() == Punctuation.COMMENT_BLOCK_MOD) {
+            comment.append(input.next());
+            while (!input.isEmpty() && input.peek() != Punctuation.COMMENT) {
+                comment.append(readWhile(c -> c != Punctuation.COMMENT_BLOCK_MOD));
+                comment.append(input.next());
+            }
+            comment.append(input.next());
+        } else {
+            comment.append(readWhile(c -> c != NEW_LINE && c != Punctuation.COMMENT));
+            if (input.peek() != NEW_LINE) {
+                comment.append(input.next());
+            }
         }
         final int stopIndex = getPosition();
         return new AtomSyntaxToken<>(
-                TokenType.COMMENT, comment, SyntaxColor.COMMENT, startIndex, stopIndex - startIndex);
+                TokenType.COMMENT, comment.toString(), SyntaxColor.COMMENT, startIndex, stopIndex - startIndex);
     }
 
     @NotNull
