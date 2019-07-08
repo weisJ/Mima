@@ -32,8 +32,8 @@ public class FilePathDisplayItem extends JPanel {
      * @param file    file associated with this component
      * @param handler action handler for popup
      */
-    /*default*/ FilePathDisplayItem(
-            final String name, @NotNull final File file, @NotNull final FilePopupActionHandler handler) {
+    /*default*/ FilePathDisplayItem(final String name, @NotNull final File file,
+                                    @NotNull final FilePopupActionHandler handler) {
         this(name, file, Icons.forFile(file), handler);
     }
 
@@ -45,11 +45,10 @@ public class FilePathDisplayItem extends JPanel {
      * @param icon    file icon
      * @param handler action handler for popup
      */
-    /*default*/ FilePathDisplayItem(
-            @Nullable final String name,
-            @NotNull final File file,
-            @NotNull final Icon icon,
-            @NotNull final FilePopupActionHandler handler) {
+    /*default*/ FilePathDisplayItem(@Nullable final String name,
+                                    @NotNull final File file,
+                                    @NotNull final Icon icon,
+                                    @NotNull final FilePopupActionHandler handler) {
         this.file = file;
         this.handler = handler;
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));

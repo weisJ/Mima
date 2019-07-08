@@ -58,18 +58,17 @@ public class DirectoryTooltip extends ScrollPopupMenu {
     @Override
     public void show(final Component invoker, final int x, final int y) {
         super.show(invoker, x, y);
-        SwingUtilities.invokeLater(
-                () -> {
-                    if (getComponentCount() < 1 || !this.isVisible()) {
-                        return;
-                    }
-                    final var c = this.getComponent(0);
-                    final Point point = c.getLocationOnScreen();
-                    try {
-                        final Robot robot = new Robot();
-                        robot.mouseMove(point.x + c.getWidth() / 3, point.y + c.getHeight() / 2);
-                    } catch (@NotNull final AWTException ignored) {
-                    }
-                });
+        SwingUtilities.invokeLater(() -> {
+            if (getComponentCount() < 1 || !this.isVisible()) {
+                return;
+            }
+            final var c = this.getComponent(0);
+            final Point point = c.getLocationOnScreen();
+            try {
+                final Robot robot = new Robot();
+                robot.mouseMove(point.x + c.getWidth() / 3, point.y + c.getHeight() / 2);
+            } catch (@NotNull final AWTException ignored) {
+            }
+        });
     }
 }

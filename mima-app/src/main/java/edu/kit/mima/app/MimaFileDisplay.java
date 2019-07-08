@@ -29,15 +29,13 @@ public class MimaFileDisplay {
      */
     public MimaFileDisplay(@NotNull final FileActions fileActions) {
         filePathDisplay = new FilePathDisplay();
-        filePathDisplay.setHandler(
-                file -> {
+        filePathDisplay.setHandler(file -> {
                     filePathDisplay.requestFocus();
                     if (file.isDirectory()) {
                         filePathDisplay.setFile(file);
                         filePathDisplay.focusLast();
                     } else if (MimaConstants.instructionSetForFile(file) != InstructionSet.EMPTY) {
-                        fileActions.openFile(
-                                fm -> {
+                        fileActions.openFile(fm -> {
                                     try {
                                         fm.load(file.getAbsolutePath());
                                     } catch (@NotNull final IOException e) {

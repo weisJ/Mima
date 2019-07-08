@@ -151,16 +151,16 @@ public class FilePathDisplay extends JPanel {
      * Focus and click last Element.
      */
     public void focusLast() {
-        SwingUtilities.invokeLater(
-                () -> {
-                    final var c = this.getComponent(getComponentCount() - 1);
-                    final Point point = c.getLocationOnScreen();
-                    try {
-                        final Robot robot = new Robot();
-                        robot.mouseMove(point.x + c.getWidth() / 2, point.y + c.getHeight() / 2);
-                        robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-                    } catch (@NotNull final AWTException ignored) {
-                    }
-                });
+        SwingUtilities.invokeLater(() -> {
+                final var c = this.getComponent(getComponentCount() - 1);
+                final Point point = c.getLocationOnScreen();
+                try {
+                    final Robot robot = new Robot();
+                    robot.mouseMove(point.x + c.getWidth() / 2, point.y + c.getHeight() / 2);
+                    robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+                    robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+                } catch (@NotNull final AWTException ignored) {
+                }
+            });
     }
 }
