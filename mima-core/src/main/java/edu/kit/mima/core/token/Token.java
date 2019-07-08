@@ -1,9 +1,9 @@
 package edu.kit.mima.core.token;
 
-import edu.kit.mima.core.file.FileObject;
 import edu.kit.mima.core.parsing.Parser;
 import edu.kit.mima.core.parsing.inputstream.TokenStream;
 import org.jetbrains.annotations.NotNull;
+import edu.kit.mima.core.file.FileObject;
 
 import java.util.stream.Stream;
 

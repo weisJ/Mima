@@ -13,6 +13,7 @@
         <module>mima-core</module>
         <module>mima-api</module>
         <module>annotations</module>
+        <module>mima.script</module>
     </modules>
 
     <properties>

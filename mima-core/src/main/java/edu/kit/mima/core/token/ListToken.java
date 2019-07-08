@@ -19,8 +19,8 @@ import java.util.stream.Stream;
  */
 public class ListToken<T> extends FileObjectAdapter implements Token<List<T>> {
 
-    private static final Pattern INDENT = Pattern.compile("\n");
-    private static final String INDENT_REPLACEMENT = "\n\t";
+    protected static final Pattern INDENT = Pattern.compile("\n");
+    protected static final String INDENT_REPLACEMENT = "\n\t";
     @NotNull
     private final String className;
     private final int filePos;
@@ -60,7 +60,7 @@ public class ListToken<T> extends FileObjectAdapter implements Token<List<T>> {
     @NotNull
     @Override
     public TokenType getType() {
-        return TokenType.ARRAY;
+        return TokenType.LIST;
     }
 
     @Override

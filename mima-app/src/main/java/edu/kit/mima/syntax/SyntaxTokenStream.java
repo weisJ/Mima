@@ -60,8 +60,7 @@ public class SyntaxTokenStream extends TokenStream {
         SyntaxToken<?> token = null;
         if (c == NEW_LINE) {
             input.next();
-            token =
-                    new AtomSyntaxToken<>(TokenType.NEW_LINE, NEW_LINE, SyntaxColor.TEXT, getPosition(), 1);
+            token = new AtomSyntaxToken<>(TokenType.NEW_LINE, NEW_LINE, SyntaxColor.TEXT, getPosition(), 1);
         } else if (c == Punctuation.COMMENT) {
             token = readComment();
         } else if (isDigitStart(c)) {
@@ -76,9 +75,8 @@ public class SyntaxTokenStream extends TokenStream {
             final int index = getPosition();
             input.next();
             // Needs further processing to determine Color
-            token =
-                    new AtomSyntaxToken<>(
-                            TokenType.PUNCTUATION, String.valueOf(c), SyntaxColor.TEXT, index, 1);
+            token = new AtomSyntaxToken<>(TokenType.PUNCTUATION, String.valueOf(c),
+                                          SyntaxColor.TEXT, index, 1);
         }
         if (token == null) {
             input.next();
@@ -114,10 +112,10 @@ public class SyntaxTokenStream extends TokenStream {
 
     @NotNull
     @Contract(" -> new")
-    private SyntaxToken<?> readNumber() {
+    protected SyntaxToken<?> readNumber() {
         final int startIndex = getPosition();
         String number = "" + input.next();
-        number += readWhile(TokenStream::isDigit);
+        number += readWhile(this::isDigit);
         final int stopIndex = getPosition();
         return new AtomSyntaxToken<>(
                 TokenType.NUMBER, number, SyntaxColor.NUMBER, startIndex, stopIndex - startIndex);
@@ -125,7 +123,7 @@ public class SyntaxTokenStream extends TokenStream {
 
     @NotNull
     @Contract(" -> new")
-    private SyntaxToken<?> readBinary() {
+    protected SyntaxToken<?> readBinary() {
         final int startIndex = getPosition();
         String binary = "" + input.next();
         binary += readWhile(c -> c == '0' || c == '1');
@@ -136,9 +134,9 @@ public class SyntaxTokenStream extends TokenStream {
 
     @NotNull
     @Contract(" -> new")
-    private SyntaxToken<?> readIdentification() {
+    protected SyntaxToken<?> readIdentification() {
         final int startIndex = getPosition();
-        final String identifier = readWhile(TokenStream::isIdentification);
+        final String identifier = readWhile(this::isIdentification);
         final int stopIndex = getPosition();
         if (isKeyword(identifier)) {
             return new AtomSyntaxToken<>(
@@ -151,7 +149,7 @@ public class SyntaxTokenStream extends TokenStream {
 
     @NotNull
     @Contract(" -> new")
-    private SyntaxToken<?> readString() {
+    protected SyntaxToken<?> readString() {
         final int startIndex = getPosition();
         String string = "" + input.next();
         string += readWhile(c -> c != Punctuation.STRING && c != NEW_LINE);

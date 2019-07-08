@@ -14,7 +14,6 @@ import edu.kit.mima.core.token.Token;
 import edu.kit.mima.core.token.TokenType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -115,8 +114,7 @@ public final class Parser extends Processor<Token<?>, TokenStream> {
      */
     @NotNull
     private Token<?> parseAtomic() {
-        return maybeCall(
-                () -> {
+        return maybeCall(() -> {
                     if (isPunctuation(Punctuation.SCOPE_OPEN)) {
                         input.next();
                         final var parsed = parseTopLevel();
@@ -190,10 +188,11 @@ public final class Parser extends Processor<Token<?>, TokenStream> {
         return new BinaryToken<>(
                 TokenType.CALL,
                 reference,
-                delimited(
-                        new char[]{Punctuation.OPEN_BRACKET, Punctuation.CLOSED_BRACKET, Punctuation.COMMA},
-                        this::parseExpression,
-                        true),
+                delimited(new char[]{Punctuation.OPEN_BRACKET,
+                                  Punctuation.CLOSED_BRACKET,
+                                  Punctuation.COMMA},
+                          this::parseExpression,
+                          true),
                 tokenIndexStack.peek(),
                 line);
     }
@@ -208,10 +207,11 @@ public final class Parser extends Processor<Token<?>, TokenStream> {
         final int line = input.getLine();
         return new AtomToken<>(
                 TokenType.DEFINITION,
-                delimited(
-                        new char[]{CharInputStream.EMPTY_CHAR, Punctuation.INSTRUCTION_END, Punctuation.COMMA},
-                        this::maybeConstant,
-                        false),
+                delimited(new char[]{CharInputStream.EMPTY_CHAR,
+                                  Punctuation.INSTRUCTION_END,
+                                  Punctuation.COMMA},
+                          this::maybeConstant,
+                          false),
                 tokenIndexStack.peek(),
                 line);
     }
@@ -263,7 +263,6 @@ public final class Parser extends Processor<Token<?>, TokenStream> {
         return input.error("expected identifier");
     }
 
-    @Nullable
     @Override
     protected Token<?> parseDelimiter() {
         return Optional.ofNullable(input.peek())
