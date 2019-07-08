@@ -1,0 +1,261 @@
+§define tmp;
+
+# Addition  A + B.
+op+ :
+    LDVR(0); # A
+    STV(tmp);
+    LDVR(1); # B
+    ADD(tmp);
+    RET();
+
+# Subtraction A - B.
+op- :
+    LDVR(1); # B
+    NOT();
+    ADC(1);
+    STVR(1); # -B
+    CALL(op+);
+    RET();
+
+# Multiplication A * B.
+op* :
+    LDVR(1);
+    ADC(-1);
+    STVR(1);
+    LDVR(0);
+    STV(tmp);
+    __mult__loop__ :
+        LDVR(1);
+        JMN(__mult__end__);
+        LDVR(0);
+        ADD(tmp);
+        STVR(0);
+        LDVR(1);
+        ADC(-1);
+        STVR(1);
+        JMP(__mult__loop__);
+    __mult__end__ : RET();
+
+# Signed division N / D.
+op/ :
+    LDC(0);
+    STV(tmp);
+    LDVR(1);
+    EQL(tmp);
+    JMN(__div__end__); # Division by zero. (D == 0)
+    LDVR(1);
+    JMN(__D__neg__);
+    JMP(__D__pos__);
+    __D__neg__: # D < 0
+        NOT();
+        ADC(1);
+        STVR(1);
+        CALL(op/);
+        CALL(un-);
+        STVR(0);
+        RET();
+    __D__pos__: #D >= 0
+        LDVR(0);
+        JMN(__N__neg__);
+        JMP(__N__pos__);
+        __N__neg__ : # N < 0 (divide signed -N / D = Q * D + R)
+            CALL(un-);
+            STVR(0);
+            LDVR(1);
+            STVR(2); # N, D, D
+            CALL(op/); # Q, R, D
+
+            LDC(0);
+            STV(tmp);
+            LDVR(1);
+            EQL(0);
+            JMN(__R__0__);
+            JMP(__R__);
+            __R__0__: # R == 0 return (-Q, 0)
+                CALL(un-);
+                STVR(0);
+                LDC(0);
+                STVR(1);
+                LDVR(0);
+                RET();
+            __R__: # R != 0 return (-Q - 1, D - R)
+                LDVR(0);
+                NOT(); # -Q - 1
+                STVR(0);
+                LDSP();
+                ADC(1):
+                STSP();# -Q-1 | R, D
+                CALL(op__swap); # -Q-1 | D, R
+                CALL(op-);
+                STVR(0); # -Q-1 | D - R, R
+                LDSP();
+                ADC(-1);
+                STSP(); # -Q-1, D- R
+                LDVR(0);
+                RET();
+        __N__pos__ : # N >= 0 (divide unsigned N / D)
+            CALL(op/__unsigned); # now N>= 0 and D > 0
+            RET();
+    __div__end__ : RET();
+
+# Unsigned Division N / D.
+op/__unsigned :
+    LDC(0);
+    STVR(2);
+    # R=N, D, Q=0,
+    __div__loop__ : # While R >= D
+        CALL(op<);
+        JMN(__div_nosgn__end__);
+        LDVR(2);
+        ADC(1);
+        STVR(2); # Q := Q + 1
+        CALL(op-);
+        STVR(0); # R-D, D, Q + 1
+        JMP(__div__loop__);
+    __div_nosgn__end__ :
+        LDVR(0);
+        STVR(1);
+        LDVR(2);
+        STVR(0); # Q, R
+        RET();
+
+# Modulo A mod B.
+op% :
+    CALL(op/); # Q, R
+    LDVR(1);
+    RET();
+
+# Logical or A || B.
+op|| :
+    LDVR(0);
+    STV(tmp);
+    LDVR(1);
+    OR(tmp);
+    RET();
+
+# Bitwise or A | B.
+op| :
+    CALL(op||);
+    RET();
+
+# Logical and A && B.
+op&& :
+    LDVR(0);
+    STV(tmp);
+    LDVR(1);
+    AND(tmp);
+    RET();
+
+# Bitwise and A & B.
+op& :
+    CALL(op&&);
+    RET();
+
+# Equality A == B.
+op== :
+    LDVR(0);
+    STV(tmp);
+    LDVR(1);
+    EQL(tmp);
+    RET();
+
+# Not equals A != B.
+op!= :
+    CALL(op==);
+    NOT();
+    RET();
+
+# Less than A < B.
+op< :
+    CALL(op-);
+    RET();
+
+# Less than or equals A <= B.
+op<= : {
+    CALL(op==);
+    JMN(__eql__leq__);
+    CALL(op<);
+    __eql__leq__ : RET();
+}
+
+# Greater than A > B.
+op> :
+    CALL(op__swap);
+    CALL(op<);
+    RET();
+
+# Greater than or equals A >= B.
+op>= :
+    CALL(op__swap);
+    CALL(op<=);
+    RET();
+
+# Bitwise xor A ^ B.
+op^ :
+    LDVR(0);
+    STV(tmp);
+    LDVR(1);
+    XOR(tmp);
+    RET();
+
+# Bitshift left. Shift B places to the left. A << B.
+op<< :
+    LDVR(1);
+    ADC(-1);
+    STVR(1);
+    __shift__left__loop__ :
+        LDVR(1);
+        JMN(__shift__left__end__);
+        LDVR(0);
+        STV(tmp);
+        ADD(tmp);
+        STVR(0);
+        LDVR(1);
+        ADC(-1);
+        STVR(1);
+        JMP(__shift__left__loop__);
+    __shift__left__end__ : RET();
+
+# Bitshift right. Shift B places to the left. A >> B.
+op>> :
+    LDVR(1);
+    ADC(-1);
+    STVR(1);
+    __shift__right__loop__ :
+        LDVR(1);
+        JMN(__shift__right__end__);
+        LDVR(0);
+        RAR();
+        STVR(0);
+        LDVR(1);
+        ADC(-1);
+        STVR(1);
+        JMP(__shift__right__loop__);
+    __shift__right__end__ : RET();
+
+# Unary plus. +A
+un+ :
+    LDVR(0);
+    RET();
+# Unary minus. -A
+un- :
+    LDVR(0);
+    NOT();
+    ADC(1);
+    RET();
+
+# Unary not. Invert all bits. !A.
+un! :
+    LDVR(0);
+    NOT();
+    RET();
+
+# Swap the values in SP, and SP + 1.
+op__swap :
+    LDVR(0);
+    STV(tmp);
+    LDVR(1);
+    STVR(0);
+    LDV(tmp);
+    STVR(1);
+    RET();

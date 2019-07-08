@@ -69,6 +69,10 @@ public interface Punctuation {
      * String begin and end.
      */
     char STRING = '\'';
+    /**
+     * Internal jump delimiter.
+     */
+    char INTERNAL_JUMP = '_';
 
     /**
      * Get the punctuation.

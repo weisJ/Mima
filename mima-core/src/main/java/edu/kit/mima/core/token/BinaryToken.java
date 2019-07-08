@@ -57,8 +57,7 @@ public class BinaryToken<T, K> extends FileObjectAdapter implements Token<T>, Im
      * @param first  first value
      * @param second second value
      */
-    public BinaryToken(
-            @NotNull final TokenType type, @NotNull final T first, @NotNull final K second) {
+    public BinaryToken(@NotNull final TokenType type, @NotNull final T first, @NotNull final K second) {
         this(type, first, second, -1, -1);
     }
 
@@ -97,10 +96,10 @@ public class BinaryToken<T, K> extends FileObjectAdapter implements Token<T>, Im
         Stream<Token<?>> stream = Stream.of(this);
         if (includeChildren) {
             if (first instanceof Token<?>) {
-                stream = Stream.concat(stream, ((Token<?>) first).stream());
+                stream = Stream.concat(stream, ((Token<?>) first).stream(true));
             }
             if (second instanceof Token) {
-                stream = Stream.concat(stream, ((Token<?>) second).stream());
+                stream = Stream.concat(stream, ((Token<?>) second).stream(true));
             }
         }
         return stream;

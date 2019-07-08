@@ -16,7 +16,7 @@ public interface Symbol {
     /**
      * Allowed symbols for names.
      */
-    String ALLOWED_SYMBOLS = "?!-_<>=0123456789";
+    String ALLOWED_SYMBOLS = "|&+*/%^?!-_<>=0123456789";
     /**
      * Allowed digits for numbers.
      */

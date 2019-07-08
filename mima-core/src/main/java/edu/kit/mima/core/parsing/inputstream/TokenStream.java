@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
  */
 public class TokenStream {
     protected static final char NEW_LINE = '\n';
-    private static final Token<?> EMPTY = new EmptyToken();
+    public static final Token<?> EMPTY = new EmptyToken();
     private static final List<String> KEYWORDS = List.of(Keyword.getKeywords());
     private static final Pattern WHITESPACE = Pattern.compile("[ \t\n\r\f]");
     private static final Pattern NUMBER_START = Pattern.compile(Symbol.NUMBER_SIGNED);
@@ -66,7 +66,7 @@ public class TokenStream {
      * @param c character to check
      * @return true if whitespace
      */
-    public static boolean isWhitespace(final char c) {
+    protected boolean isWhitespace(final char c) {
         return WHITESPACE.matcher(String.valueOf(c)).matches();
     }
 
@@ -76,7 +76,7 @@ public class TokenStream {
      * @param c character to check
      * @return true if start of digit.
      */
-    public static boolean isDigitStart(final char c) {
+    protected boolean isDigitStart(final char c) {
         return NUMBER_START.matcher(String.valueOf(c)).matches();
     }
 
@@ -86,7 +86,7 @@ public class TokenStream {
      * @param c character to check
      * @return true if digit.
      */
-    public static boolean isDigit(final char c) {
+    protected boolean isDigit(final char c) {
         return NUMBER.matcher(String.valueOf(c)).matches();
     }
 
@@ -96,8 +96,8 @@ public class TokenStream {
      * @param c character to check
      * @return true if start of identification.
      */
-    public static boolean isIdentificationStart(final char c) {
-        return LETTER.matcher(String.valueOf(c)).matches();
+    protected boolean isIdentificationStart(final char c) {
+        return LETTER.matcher(String.valueOf(c)).matches() || c == Punctuation.INTERNAL_JUMP;
     }
 
     /**
@@ -106,7 +106,7 @@ public class TokenStream {
      * @param c character to check
      * @return true if punctuation
      */
-    public static boolean isPunctuationChar(final char c) {
+    protected static boolean isPunctuationChar(final char c) {
         return PUNCTUATION.matcher(String.valueOf(c)).matches();
     }
 
@@ -116,7 +116,7 @@ public class TokenStream {
      * @param c character to check
      * @return true if identification char
      */
-    public static boolean isIdentification(final char c) {
+    protected boolean isIdentification(final char c) {
         return isIdentificationStart(c) || (Symbol.ALLOWED_SYMBOLS.indexOf(c) >= 0);
     }
 
@@ -126,7 +126,7 @@ public class TokenStream {
      * @param identifier String to check
      * @return true if keyword.
      */
-    public static boolean isKeyword(@Nullable final String identifier) {
+    protected boolean isKeyword(@Nullable final String identifier) {
         return KEYWORDS.stream().anyMatch(keyword -> keyword.equals(identifier));
     }
 
@@ -159,7 +159,7 @@ public class TokenStream {
      */
     public boolean isEmpty() {
         var t = peek();
-        return t == null || t == EMPTY;
+        return t == null || t == EMPTY || t.getType() == TokenType.EMPTY;
     }
 
     /**
@@ -207,7 +207,7 @@ public class TokenStream {
         return string.toString();
     }
 
-    private void skipComment() {
+    protected void skipComment() {
         if (input.peek() == Punctuation.COMMENT_BLOCK_MOD) {
             while (!input.isEmpty() && input.peek() != Punctuation.COMMENT) {
                 readWhile(c -> c != Punctuation.COMMENT_BLOCK_MOD);
@@ -223,7 +223,7 @@ public class TokenStream {
      * Read the next token
      */
     protected @Nullable Token<?> readNext() {
-        readWhile(TokenStream::isWhitespace);
+        readWhile(this::isWhitespace);
         if (input.isEmpty()) {
             return EMPTY;
         }
@@ -259,8 +259,8 @@ public class TokenStream {
      * Read a number value
      */
     @NotNull
-    private Token<?> readNumber() {
-        final String number = input.next() + readWhile(TokenStream::isDigit);
+    protected Token<?> readNumber() {
+        final String number = input.next() + readWhile(this::isDigit);
         return new AtomToken<>(TokenType.NUMBER, number);
     }
 
@@ -268,7 +268,7 @@ public class TokenStream {
      * Read an binary number
      */
     @NotNull
-    private Token<?> readBinary() {
+    protected Token<?> readBinary() {
         final String binary = readWhile(c -> c == '0' || c == '1');
         return new AtomToken<>(TokenType.BINARY, binary);
     }
@@ -279,8 +279,8 @@ public class TokenStream {
      */
     @NotNull
     @Contract(" -> new")
-    private Token<?> readIdentification() {
-        final String identifier = readWhile(TokenStream::isIdentification);
+    protected Token<?> readIdentification() {
+        final String identifier = readWhile(this::isIdentification);
         if (isKeyword(identifier)) {
             return new AtomToken<>(TokenType.KEYWORD, identifier);
         }
@@ -293,7 +293,7 @@ public class TokenStream {
      */
     @NotNull
     @Contract(" -> new")
-    private Token<?> readString() {
+    protected Token<?> readString() {
         final String string = readWhile(c -> c != Punctuation.STRING && c != NEW_LINE);
         input.next();
         return new AtomToken<>(TokenType.STRING, string);

@@ -4,6 +4,10 @@ import edu.kit.mima.core.parsing.lang.Keyword;
 import edu.kit.mima.core.parsing.lang.Punctuation;
 import org.jetbrains.annotations.Contract;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * Possible types of {@link Token}.
  *
@@ -48,6 +52,10 @@ public enum TokenType {
      */
     STRING,
     /**
+     * Boolean type.
+     */
+    BOOLEAN,
+    /**
      * Comment type.
      */
     COMMENT(String.valueOf(Punctuation.COMMENT)),
@@ -72,12 +80,36 @@ public enum TokenType {
      * Reference type.
      */
     REFERENCE("var "),
+    /**
+     * Operator type.
+     */
+    OPERATOR,
+    /**
+     * Binary expression type.
+     */
+    BINARY_EXPR,
+    /**
+     * Unary operation type.
+     */
+    UNARY,
+    /**
+     * Conditional if token.
+     */
+    CONDITIONAL,
+    /**
+     * Function token.
+     */
+    FUNCTION,
+    /**
+     * Return token.
+     */
+    RETURN(Map.of("types", Set.of(IDENTIFICATION, BINARY_EXPR, CALL, NUMBER, BINARY, BOOLEAN, UNARY))),
 
     /*Utility types*/
     /**
-     * Array type.
+     * List type.
      */
-    ARRAY,
+    LIST,
     /**
      * Empty type.
      */
@@ -92,19 +124,36 @@ public enum TokenType {
     SCOPE_END;
 
     private final String prefix;
+    private final Map<String, Object> propertyMap;
+
+    @Contract(pure = true)
+    TokenType(final String prefix, final Map<String, Object> propertyMap) {
+        this.prefix = prefix;
+        this.propertyMap = propertyMap;
+    }
+
+    @Contract(pure = true)
+    TokenType(final Map<String, Object> propertyMap) {
+        this("", propertyMap);
+    }
 
     @Contract(pure = true)
     TokenType(final String prefix) {
-        this.prefix = prefix;
+        this(prefix, new HashMap<>());
     }
 
     @Contract(pure = true)
     TokenType() {
-        this("");
+        this("", new HashMap<>());
     }
 
     @Contract(pure = true)
     public String getPrefix() {
         return prefix;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getProperty(final String key) {
+        return (T) propertyMap.get(key);
     }
 }

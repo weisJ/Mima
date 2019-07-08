@@ -27,8 +27,7 @@ public class AtomToken<T> extends ValueTuple<T, TokenType> implements Token<T> {
      * @param index   index of token
      * @param filePos position in file
      */
-    public AtomToken(
-            @NotNull final TokenType type, @NotNull final T value, final int index, final int filePos) {
+    public AtomToken(@NotNull final TokenType type, @NotNull final T value, final int index, final int filePos) {
         super(value, type);
         this.index = index;
         this.filePos = filePos;
