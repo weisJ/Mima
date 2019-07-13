@@ -2,6 +2,7 @@ package edu.kit.mima.gui.components.filetree;
 
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.io.IOException;
@@ -89,28 +90,34 @@ public class FileTreeWatchService {
     }
 
     private void create(@NotNull final Path path) {
-        var node = fileTree.getTreeNodeMap().get(path.getParent().toFile());
-        var file = path.toFile();
-        var newNode = new FileTreeNode(file);
-        fileTree.getTreeNodeMap().put(file, newNode);
-        node.add(newNode);
-        node.sort();
-        ((DefaultTreeModel) fileTree.getTree().getModel()).nodeStructureChanged(node);
+        SwingUtilities.invokeLater(() -> {
+            var node = fileTree.getTreeNodeMap().get(path.getParent().toFile());
+            var file = path.toFile();
+            var newNode = new FileTreeNode(file);
+            fileTree.getTreeNodeMap().put(file, newNode);
+            node.add(newNode);
+            node.sort();
+            ((DefaultTreeModel) fileTree.getTree().getModel()).nodeStructureChanged(node);
+        });
     }
 
     private void delete(@NotNull final Path path) {
-        var node = fileTree.getTreeNodeMap().get(path.toFile());
-        ((DefaultMutableTreeNode) node.getParent()).remove(node);
-        fileTree.getTreeNodeMap().remove(path.toFile());
-        ((DefaultTreeModel) fileTree.getTree().getModel()).nodeStructureChanged(node);
+        SwingUtilities.invokeLater(() -> {
+            var node = fileTree.getTreeNodeMap().get(path.toFile());
+            ((DefaultMutableTreeNode) node.getParent()).remove(node);
+            fileTree.getTreeNodeMap().remove(path.toFile());
+            ((DefaultTreeModel) fileTree.getTree().getModel()).nodeStructureChanged(node);
+        });
     }
 
     private void modify(@NotNull final Path path) {
-        var node = fileTree.getTreeNodeMap().get(path.toFile());
-        node.setUserObject(path.toFile());
-        node = (FileTreeNode) node.getParent();
-        node.sort();
-        ((DefaultTreeModel) fileTree.getTree().getModel()).nodeStructureChanged(node);
+        SwingUtilities.invokeLater(() -> {
+            var node = fileTree.getTreeNodeMap().get(path.toFile());
+            node.setUserObject(path.toFile());
+            node = (FileTreeNode) node.getParent();
+            node.sort();
+            ((DefaultTreeModel) fileTree.getTree().getModel()).nodeStructureChanged(node);
+        });
     }
 
 }

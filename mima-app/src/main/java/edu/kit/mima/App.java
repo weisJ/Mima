@@ -57,27 +57,27 @@ public final class App {
     public static void main(@Nullable final String[] args) {
         if (delegateToInstance(args)) {
             System.setProperty("org.apache.batik.warn_destination", "false");
-
+            try {
+                splash = new MimaSplash();
+                splash.showSplash();
+                System.out.println("makevisible");
+            } catch (IOException ignored) {
+            }
             SwingUtilities.invokeLater(() -> {
-//                try {
-//                    splash = new MimaSplash();
-//                    splash.showSplash();
-//                } catch (IOException ignored) {
-//                }
                 init(getFilePath(args));
-//                timer = new Timer(200, e -> {
-//                    var m = nextMessage();
-//                    if (m != null) {
-//                        splash.showMessage(m);
-//                    } else {
-//                        timer.stop();
-//                        splash.closeSplash();
-//                        start();
-//                    }
-//                });
-                start();
-//                timer.setRepeats(true);
-//                timer.start();
+                timer = new Timer(200, e -> {
+                    var m = nextMessage();
+                    if (m != null) {
+                        splash.showMessage(m);
+                    } else {
+                        timer.stop();
+                        System.out.println("visible no more");
+                        splash.closeSplash();
+                        start();
+                    }
+                });
+                timer.setRepeats(true);
+                timer.start();
             });
         }
     }
@@ -127,21 +127,22 @@ public final class App {
         frame.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentShown(final ComponentEvent e) {
-                SwingUtilities.invokeLater(() -> {
-                    PersistenceManager.getInstance().loadStates(frame.getName());
-                    frame.setSize(frame.getSize());
-                });
+                SwingUtilities.invokeLater(() -> PersistenceManager.getInstance().loadStates(frame.getName()));
             }
         });
         logger.setLevel(LogLevel.INFO);
         MimaCoreDefaults.setLogger(logger);
         frame.setLocationRelativeTo(null);
         registerWithJmxAgent(frame);
+        initResources();
+    }
+
+    private static void initResources() {
+        Preferences.getInstance();
     }
 
     private static void start() {
         frame.setVisible(true);
-        frame.requestFocus();
         frame.toFront();
     }
 

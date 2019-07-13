@@ -43,7 +43,7 @@ public class ScriptParser extends Processor<Token<?>, ScriptTokenStream> {
                 skipPunctuation(Punctuation.INSTRUCTION_END);
             }
         }
-        return new ProgramToken(program.toArray(new Token<?>[0]), 0);
+        return new ProgramToken(program.toArray(new Token<?>[0]), null,0,0, 0);
     }
 
     private Token<?> maybeList(final Supplier<Token<?>> supplier) {
@@ -76,7 +76,7 @@ public class ScriptParser extends Processor<Token<?>, ScriptTokenStream> {
 //        } else if (prog.getValue().size() == 1) {
 //            return prog.getValue().get(0);
 //        } else {
-        return new ProgramToken(prog.getValue().toArray(new Token<?>[0]), line);
+        return new ProgramToken(prog.getValue().toArray(new Token<?>[0]),null, 0, 0, line);
 //        }
     }
 

@@ -8,6 +8,7 @@ import edu.kit.mima.core.token.TokenType;
 import edu.kit.mima.gui.components.BorderlessScrollPane;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.stream.Collectors;
 
 /**
@@ -23,7 +24,9 @@ public class AssemblerView extends BorderlessScrollPane {
 
     public AssemblerView() {
         this.textArea = new JTextArea();
-        textArea.setFont(textArea.getFont().deriveFont((float) FONT_SIZE));
+        textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, FONT_SIZE));
+        textArea.setEditable(false);
+        textArea.setMargin(new Insets(0,5,0,0));
         getScrollPane().setViewportView(textArea);
         getScrollPane().getVerticalScrollBar().setUnitIncrement(FONT_SIZE);
         getScrollPane().getHorizontalScrollBar().setUnitIncrement(FONT_SIZE);
@@ -44,9 +47,15 @@ public class AssemblerView extends BorderlessScrollPane {
                                         .filter(t -> t.getType() != TokenType.CALL
                                                      || !((Token<?>) t.getValue()).getValue().toString()
                                                                  .equals(MimaXInstruction.SP.toString()))
-                                        .map(t -> t.getType() == TokenType.JUMP_POINT
-                                                  ? ((Token<?>) t.getValue()).simpleName() + " : "
-                                                  : t.simpleName() + "\n")
+                                        .map(t -> {
+                                            if (t.getType() == TokenType.JUMP_POINT) {
+                                                return '[' + ((Token<?>) t.getValue()).simpleName() + "]\n";
+                                            } else {
+                                                var s = t.simpleName().split(" ", 2);
+                                                var str = s[0] + "\t" + s[1] + "\n";
+                                                return s[0].length() == 4 ? str : " " + str;
+                                            }
+                                        })
                                         .collect(Collectors.joining());
         textArea.setText(assembly);
     }

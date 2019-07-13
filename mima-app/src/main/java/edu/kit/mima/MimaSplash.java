@@ -6,8 +6,10 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Calendar;
 import java.util.Objects;
+import java.util.Random;
 
 /**
  * Mima Splash screen window.
@@ -22,6 +24,7 @@ public class MimaSplash extends JWindow {
     private final Icon image;
     private final Icon sum;
     private final JTextArea messageArea;
+    private final Dimension splashDim;
 
     /**
      * Create new Mima Splash screen.
@@ -30,15 +33,14 @@ public class MimaSplash extends JWindow {
      */
     public MimaSplash() throws IOException {
         var dim = Toolkit.getDefaultToolkit().getScreenSize();
-        var splashDim = new Dimension((int) (dim.width / 2.5), (int) (dim.height / 2.5));
-        int size = Math.min(splashDim.width, splashDim.height);
+        splashDim = new Dimension((int) (dim.width / 2.5), (int) (dim.height / 2.5));
         int iw = splashDim.width / 4 - splashDim.width / 20;
         image = new SVGIcon(
                 Objects.requireNonNull(App.class.getClassLoader().getResource("images/mima.svg")),
                 iw,
                 iw,
                 true);
-        sum = new SVGIcon(Objects.requireNonNull(App.class.getResource(getFileName())), size, size);
+        sum = loadSum();
         messageArea = new JTextArea();
         messageArea.setOpaque(false);
         messageArea.setForeground(Color.WHITE);
@@ -60,6 +62,13 @@ public class MimaSplash extends JWindow {
         layer.add(messageArea);
         setLayeredPane(layer);
         setSize(splashDim);
+    }
+
+    private Icon loadSum() throws IOException {
+        int size = Math.min(splashDim.width, splashDim.height);
+        int index = new Random().nextInt(17) + 1;
+        final URL url = App.class.getClassLoader().getResource("splash/sum-" + index + ".svg");
+        return new SVGIcon(Objects.requireNonNull(url), size, size);
     }
 
     /**
@@ -87,17 +96,6 @@ public class MimaSplash extends JWindow {
     public void showMessage(final String message) {
         messageArea.setText(message);
         repaint();
-    }
-
-    @NotNull
-    private String getFileName() {
-        var cal = Calendar.getInstance();
-        return "sum-" + cal.get(Calendar.DAY_OF_MONTH)
-               + "-"
-               + (cal.get(Calendar.MONTH) + 1)
-               + "-"
-               + cal.get(Calendar.YEAR) % 100
-               + ".svg";
     }
 
     private void paintSum(final Graphics g) {

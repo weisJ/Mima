@@ -13,7 +13,8 @@
         <module>mima-core</module>
         <module>mima-api</module>
         <module>annotations</module>
-        <module>mima.script</module>
+        <module>mima-script</module>
+        <module>jlink</module>
     </modules>
 
     <properties>
@@ -128,6 +129,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <forceJavacCompilerUse>true</forceJavacCompilerUse>
                     <compilerArgs combine.children="append">
                         <arg>--enable-preview</arg>
                     </compilerArgs>

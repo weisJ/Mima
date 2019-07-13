@@ -119,18 +119,16 @@ public class TabFrameContent extends JPanel implements Persistable {
         });
     }
 
-    private <T> void setupSplitPanes(
-            @NotNull final BiConsumer<? super SeamlessSplitPane, T> consumer,
-            final T flag) {
+    private <T> void setupSplitPanes(@NotNull final BiConsumer<? super SeamlessSplitPane, T> consumer,
+                                     final T flag) {
         consumer.accept(topSplit, flag);
-        consumer.accept(bottomSplit, flag);
         consumer.accept(leftSplit, flag);
+        consumer.accept(bottomSplit, flag);
         consumer.accept(rightSplit, flag);
     }
 
-    private <T> void setupSplitterPanes(
-            @NotNull final BiConsumer<? super SeamlessSplitPane, T> consumer,
-            final T flag) {
+    private <T> void setupSplitterPanes(@NotNull final BiConsumer<? super SeamlessSplitPane, T> consumer,
+                                        final T flag) {
         consumer.accept(topSplitter, flag);
         consumer.accept(bottomSplitter, flag);
         consumer.accept(leftSplitter, flag);

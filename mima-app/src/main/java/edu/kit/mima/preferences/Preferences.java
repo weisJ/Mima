@@ -22,9 +22,9 @@ import java.util.Properties;
  */
 public final class Preferences {
 
-    private static final String directory = System.getProperty("user.home") + "\\.mima";
-    private static final String optionsPath = directory + "\\options.properties";
-    private static final Preferences instance = new Preferences();
+    public static final String DIR = System.getProperty("user.home") + "\\.mima";
+    private static final String optionsPath = DIR + "\\options.properties";
+    private static Preferences instance;
     private static final List<UserPreferenceChangedListener> listenerList = new ArrayList<>();
     @NotNull
     private final Properties options;
@@ -55,9 +55,11 @@ public final class Preferences {
         notify = true;
     }
 
-    @Contract(pure = true)
     @NotNull
     public static Preferences getInstance() {
+        if (instance == null) {
+            instance = new Preferences();
+        }
         return instance;
     }
 
@@ -95,7 +97,7 @@ public final class Preferences {
      * @throws IOException If options could not be saved.
      */
     public void saveOptions() throws IOException {
-        final File directory = new File(Preferences.directory);
+        final File directory = new File(Preferences.DIR);
         if (!directory.exists()) {
             //noinspection ResultOfMethodCallIgnored
             directory.mkdirs();
@@ -108,7 +110,7 @@ public final class Preferences {
                      Objects.requireNonNull(
                              getClass().getClassLoader().getResourceAsStream("options.properties"))) {
             options.load(inputStream);
-            saveString(PropertyKey.DIRECTORY_MIMA, directory);
+            saveString(PropertyKey.DIRECTORY_MIMA, DIR);
             saveOptions();
         } catch (@NotNull final IOException e) {
             e.printStackTrace();

@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.FilerException;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
@@ -44,8 +45,8 @@ public class ContextAnnotationProcessor extends AbstractProcessor {
     }
 
     @Nullable
-    private static AnnotationValue getAnnotationValue(
-            @NotNull final AnnotationMirror annotationMirror, final String key) {
+    private static AnnotationValue getAnnotationValue(@NotNull final AnnotationMirror annotationMirror,
+                                                      final String key) {
         for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry :
                 annotationMirror.getElementValues().entrySet()) {
             if (entry.getKey().getSimpleName().toString().equals(key)) {
@@ -56,21 +57,18 @@ public class ContextAnnotationProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean process(
-            final Set<? extends TypeElement> annotations, @NotNull final RoundEnvironment roundEnv) {
+    public boolean process(final Set<? extends TypeElement> annotations, @NotNull final RoundEnvironment roundEnv) {
         Collection<? extends Element> annotatedElements =
                 roundEnv.getElementsAnnotatedWith(Context.class);
 
-        StringBuilder builder =
-                new StringBuilder()
+        StringBuilder builder = new StringBuilder()
                         .append("\nimport edu.kit.mima.annotations.ContextManager;\n")
                         .append("public class ContextBuilder {\n")
                         .append("static {\n");
 
         for (var element : annotatedElements) {
             for (var clazz : getMyValue2(element)) {
-                builder
-                        .append("ContextManager.registerProvider(")
+                builder.append("ContextManager.registerProvider(")
                         .append(element.toString())
                         .append(".class")
                         .append(',')
@@ -86,13 +84,15 @@ public class ContextAnnotationProcessor extends AbstractProcessor {
             Writer writer = builderFile.openWriter();
             writer.write(builder.toString());
             writer.close();
+        } catch (FilerException ignore) {
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
         }
         return true;
     }
 
-    public List<Object> getMyValue2(final Element foo) {
+    private List<Object> getMyValue2(final Element foo) {
         AnnotationMirror am = getAnnotationMirror(foo, Context.class);
         if (am == null) {
             return null;

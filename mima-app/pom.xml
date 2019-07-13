@@ -92,9 +92,9 @@
                         <manifest>
                             <mainClass>edu.kit.mima.App</mainClass>
                         </manifest>
-                        <manifestEntries>
-                            <SplashScreen-Image>images/mima.png</SplashScreen-Image>
-                        </manifestEntries>
+<!--                        <manifestEntries>-->
+<!--                            <SplashScreen-Image>images/mima.png</SplashScreen-Image>-->
+<!--                        </manifestEntries>-->
                     </archive>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
@@ -129,6 +129,7 @@
                         <arg>--enable-preview</arg>
                         <arg>--add-exports=java.desktop/sun.awt=ALL-UNNAMED</arg>
                         <arg>--add-exports=java.desktop/com.sun.java.swing=ALL-UNNAMED</arg>
+                        <arg>--add-exports=java.desktop/sun.swing=ALL-UNNAMED</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>
