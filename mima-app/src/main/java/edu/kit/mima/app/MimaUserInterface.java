@@ -24,6 +24,7 @@ import edu.kit.mima.gui.icons.Icons;
 import edu.kit.mima.gui.menu.Help;
 import edu.kit.mima.gui.menu.settings.Settings;
 import edu.kit.mima.gui.persist.PersistenceManager;
+import edu.kit.mima.gui.view.AssemblerView;
 import edu.kit.mima.gui.view.MemoryTableView;
 import edu.kit.mima.loading.FileManager;
 import edu.kit.mima.preferences.Preferences;
@@ -68,6 +69,7 @@ public final class MimaUserInterface extends JFrame {
     private final Console console;
     @NotNull
     private final MemoryTableView memoryView;
+    private final AssemblerView assemblerView;
     @NotNull
     private final ProtectedScrollTable memoryTable;
     private JPanel buttonArea;
@@ -85,6 +87,7 @@ public final class MimaUserInterface extends JFrame {
         memoryTable = new ProtectedScrollTable(new String[]{"Address", "Value"},
                                                100, new Insets(0, 5, 0, 0));
         memoryView = new MemoryTableView(mimaRunner, memoryTable);
+        assemblerView = new AssemblerView();
 
         App.logger.setConsole(console);
         createSubscriptions();
@@ -121,7 +124,13 @@ public final class MimaUserInterface extends JFrame {
             filePathDisplay.setMaximumSize(new Dimension(buttonArea.getX() - filePathDisplay.getX(),
                                                          controlPanel.getMinimumSize().height));
         }), Debugger.RUNNING_PROPERTY);
-
+        subscriptionManager.subscribe(new SwingSubscriber<>((identifier, value) -> {
+            var editor = editorManager.currentEditor();
+            var manager = editorManager.managerForEditor(editor);
+            if (editor != null && manager != null && manager.unsaved()) {
+                assemblerView.setProgram(editor.getText());
+            }
+        }), MimaRunner.RUNNING_PROPERTY, Debugger.RUNNING_PROPERTY);
         tabbedEditor.addChangeListener(
                 e -> Optional.ofNullable((Editor) tabbedEditor.getSelectedComponent())
                              .ifPresent(editor -> {
@@ -129,6 +138,7 @@ public final class MimaUserInterface extends JFrame {
                                                              .map(FileManager::getLastFile)
                                                              .orElse(System.getProperty("SystemDrive")));
                                  filePathDisplay.setFile(file);
+                                 assemblerView.setProgram(editor.getText());
                                  EditorHotKeys.setEditor(editor);
                              })
         );
@@ -252,6 +262,9 @@ public final class MimaUserInterface extends JFrame {
         tabFrame.addTab(new DefaultPopupComponent("Files", Icons.PROJECT, fileTree),
                         "Files",
                         Icons.FOLDER, Alignment.NORTH_WEST);
+        tabFrame.addTab(new DefaultPopupComponent("Assembly", Icons.ASSEMBLY_FILE, assemblerView),
+                        "Assembly",
+                        Icons.ASSEMBLY_FILE, Alignment.EAST);
         contentPane.add(tabFrame, BorderLayout.CENTER);
         setContentPane(contentPane);
         setJMenuBar(new MimaMenuBar(this, fileActions).getMenuBar());

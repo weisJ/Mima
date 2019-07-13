@@ -45,7 +45,7 @@ public final class Icons {
     public static final UIAwareIcon TEXT_FILE = create("files/text.svg");
     public static final UIAwareIcon UNKNOWN_FILE = create("files/unknown.svg");
     public static final UIAwareIcon GENERAL_FILE = create("files/general.svg");
-    public static final UIAwareIcon DIVIDER = create("navigation/divider.svg");
+    public static final UIAwareIcon ASSEMBLY_FILE = create("files/assembly.svg");
 
     public static final UIAwareIcon MEMORY = create("memory.svg");
     public static final UIAwareIcon CONSOLE = create("console.svg");
@@ -57,6 +57,8 @@ public final class Icons {
     public static final UIAwareIcon COPY = create("menu/copy.svg");
     public static final UIAwareIcon DELETE = create("menu/delete.svg");
 
+
+    public static final UIAwareIcon DIVIDER = create("navigation/divider.svg");
     public static final UIAwareIcon SEARCH = create("navigation/search.svg");
     public static final UIAwareIcon SEARCH_WITH_HISTORY = create("navigation/searchWithHistory.svg");
     public static final UIAwareIcon CLOSE = create("navigation/close.svg");
