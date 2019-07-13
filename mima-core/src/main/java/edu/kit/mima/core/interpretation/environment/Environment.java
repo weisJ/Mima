@@ -2,6 +2,7 @@ package edu.kit.mima.core.interpretation.environment;
 
 import edu.kit.mima.core.data.MachineWord;
 import edu.kit.mima.core.instruction.Instruction;
+import edu.kit.mima.core.instruction.InstructionSet;
 import edu.kit.mima.core.token.ProgramToken;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -20,11 +21,13 @@ import java.util.function.Function;
  * @since 2018
  */
 public class Environment {
-    public static final Environment EMPTY_ENV = new Environment(null, null);
+    public static final Environment EMPTY_ENV = new Environment(null, null, null,
+                                                                0, 0);
 
     @Nullable
     private final Environment parent;
     private final ProgramToken programToken;
+    private final InstructionSet instructionSet;
     @NotNull
     private final HashMap<String, MachineWord> variables;
     @NotNull
@@ -33,6 +36,8 @@ public class Environment {
     private final HashMap<String, Instruction> functions;
     @NotNull
     private final HashMap<String, Integer> jumps;
+    private final int instructionRangeStart;
+    private final int instructionRangeEnd;
 
     /**
      * Index of current expression.
@@ -49,16 +54,51 @@ public class Environment {
      *
      * @param parent       parent Environment
      * @param programToken programToken for this environment
+     * @param instructionSet the instruction set
+     * @param instructionRangeStart index of first token in environment.
+     * @param instructionRangeEnd index of last token in environment.
      */
-    public Environment(@Nullable final Environment parent, final ProgramToken programToken) {
+    public Environment(@Nullable final Environment parent, final ProgramToken programToken,
+                       final InstructionSet instructionSet,
+                       final int instructionRangeStart, final int instructionRangeEnd) {
         this.parent = parent;
         this.programToken = programToken;
+        this.instructionSet = instructionSet;
+        this.instructionRangeStart = instructionRangeStart;
+        this.instructionRangeEnd = instructionRangeEnd;
         variables = new HashMap<>();
         constants = new HashMap<>();
         functions = new HashMap<>();
         jumps = new HashMap<>();
         expressionIndex = 0;
         reservedIndex = -1;
+    }
+
+    /**
+     * Get the current instruction set.
+     *
+     * @return the instruction set used for evaluation.
+     */
+    public InstructionSet getInstructionSet() {
+        return instructionSet;
+    }
+
+    /**
+     * Index where the environment starts.
+     *
+     * @return index of first token inside environment.
+     */
+    public int getInstructionRangeStart() {
+        return instructionRangeStart;
+    }
+
+    /**
+     * Index where the environment ends.
+     *
+     * @return index of last token inside environment.
+     */
+    public int getInstructionRangeEnd() {
+        return instructionRangeEnd;
     }
 
     /**
@@ -79,7 +119,9 @@ public class Environment {
      */
     @NotNull
     public Environment extend(final ProgramToken programToken) {
-        return new Environment(this, programToken);
+        final int startIndex = programToken.getLineIndex();
+        return new Environment(this, programToken,instructionSet, startIndex,
+                               startIndex + programToken.getLength() - 1);
     }
 
     /**
@@ -133,6 +175,24 @@ public class Environment {
     @NotNull
     public Environment lookupJump(final String name) {
         return lookup(env -> env.jumps, name);
+    }
+
+    /**
+     * Returns the environment for which the index of the token is inside.
+     *
+     * @param index of token.
+     * @return Environment containing the token. Null if index is out of range.
+     */
+    @NotNull
+    public Environment lookupToken(final int index) {
+        Environment scope = this;
+        while (scope != null) {
+            if (index >= scope.getInstructionRangeStart() && index <= scope.getInstructionRangeEnd()) {
+                return scope;
+            }
+            scope = scope.parent;
+        }
+        return EMPTY_ENV;
     }
 
     @NotNull

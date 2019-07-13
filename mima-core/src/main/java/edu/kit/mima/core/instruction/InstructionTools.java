@@ -59,9 +59,9 @@ public class InstructionTools {
     public static Value<?> getMemoryReference(@NotNull final List<Value<?>> arguments, final int index) {
         final var argument = arguments.get(index);
         if (argument == null
-            || !(argument.getType() == ValueType.NUMBER
-                 || argument.getType() == ValueType.CONSTANT
-                 || argument.getType() == ValueType.MEMORY_REFERENCE)) {
+            || (argument.getType() != ValueType.NUMBER
+                && argument.getType() != ValueType.CONSTANT
+                && argument.getType() != ValueType.MEMORY_REFERENCE)) {
             fail("must pass a memory address");
         }
         if (!(argument.getType() == ValueType.MEMORY_REFERENCE)
@@ -80,7 +80,9 @@ public class InstructionTools {
      */
     public static Value<?> getJumpReference(@NotNull final List<Value<?>> arguments, final int index) {
         final var argument = arguments.get(index);
-        if (argument.getType() != ValueType.JUMP_REFERENCE) {
+        // jump can be referenced through number literal const reference or jump reference.
+        if (argument.getType() != ValueType.JUMP_REFERENCE && argument.getType() != ValueType.CONSTANT
+            && argument.getType() != ValueType.NUMBER) {
             throw new IllegalArgumentException("must pass jump reference");
         }
         return argument;

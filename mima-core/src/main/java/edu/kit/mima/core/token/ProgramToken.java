@@ -26,7 +26,10 @@ public class ProgramToken extends FileObjectAdapter implements Token<Token<?>[]>
 
     private static final Pattern INDENT = Pattern.compile("\n");
     private static final String INDENT_REPLACEMENT = "\n\t";
+    private final List<Integer> indexList;
     private final int filePos;
+    private final int index;
+    private final int length;
     @NotNull
     private final Map<Token<?>, Integer> jumpMap;
     @NotNull
@@ -36,11 +39,18 @@ public class ProgramToken extends FileObjectAdapter implements Token<Token<?>[]>
      * Program token that holds an array of Tokens.
      *
      * @param program token array
+     * @param indexList list with indices corresponding to the instruction index of each token.
+     * @param index index of token.
+     * @param length amount of statement tokens inside.
      * @param filePos position in file
      */
-    public ProgramToken(@NotNull final Token<?>[] program, final int filePos) {
+    public ProgramToken(@NotNull final Token<?>[] program, final List<Integer> indexList,
+                        final int index, final int length, final int filePos) {
         this.program = program;
+        this.indexList = indexList;
         this.filePos = filePos;
+        this.index = index;
+        this.length = length;
         jumpMap = new HashMap<>();
         resolveJumps();
     }
@@ -50,12 +60,15 @@ public class ProgramToken extends FileObjectAdapter implements Token<Token<?>[]>
      */
     private void resolveJumps() {
         final List<Token<?>> tokens =
-                ((ProgramQueryResult)
-                         new ProgramQuery(this).whereEqual(Token::getType, TokenType.JUMP_POINT))
+                ((ProgramQueryResult) new ProgramQuery(this).whereEqual(Token::getType, TokenType.JUMP_POINT))
                         .get(false);
         for (final var token : tokens) {
             jumpMap.put((Token<?>) token.getValue(), token.getLineIndex());
         }
+    }
+
+    public List<Integer> getIndexList() {
+        return indexList;
     }
 
     /**
@@ -83,7 +96,7 @@ public class ProgramToken extends FileObjectAdapter implements Token<Token<?>[]>
     @Override
     public Stream<Token<?>> stream(final boolean includeChildren) {
         if (includeChildren) {
-            return Arrays.stream(program).flatMap(Token::stream);
+            return Arrays.stream(program).flatMap(t -> t.stream(true));
         } else {
             return Stream.of(this);
         }
@@ -91,12 +104,17 @@ public class ProgramToken extends FileObjectAdapter implements Token<Token<?>[]>
 
     @Override
     public int getLineIndex() {
-        return 0;
+        return index;
     }
 
     @Override
     public int getOffset() {
         return filePos;
+    }
+
+    @Override
+    public int getLength() {
+        return length;
     }
 
     @Override
