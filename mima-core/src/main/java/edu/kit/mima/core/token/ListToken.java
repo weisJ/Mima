@@ -101,9 +101,9 @@ public class ListToken<T> extends FileObjectAdapter implements Token<List<T>> {
     public String simpleName() {
         if (!values.isEmpty() && values.get(0) instanceof Token) {
             final List<Token<?>> tokens = (List<Token<?>>) values;
-            return '(' + tokens.stream().map(Token::simpleName).collect(Collectors.joining(", ")) + ')';
+            return tokens.stream().map(Token::simpleName).collect(Collectors.joining(", "));
         } else {
-            return '(' + values.stream().map(Object::toString).collect(Collectors.joining(", ")) + ')';
+            return values.stream().map(Object::toString).collect(Collectors.joining(", "));
         }
     }
 

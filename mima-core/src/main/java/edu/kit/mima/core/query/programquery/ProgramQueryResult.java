@@ -80,8 +80,7 @@ public class ProgramQueryResult implements QueryResult<Token<?>> {
      * @return List of tokens matching query
      */
     public List<Token<?>> get(final boolean recursive) {
-        final var result =
-                createTokenStream(query.getTokens(), recursive)
+        final var result = createTokenStream(query.getTokens(), recursive)
                         .filter(query.getFilter())
                         .collect(Collectors.toList());
         query.reset();
@@ -153,10 +152,8 @@ public class ProgramQueryResult implements QueryResult<Token<?>> {
     /*
      * Create Token stream from program Token flattening all nested program occurrences.
      */
-    private Stream<Token<?>> createTokenStream(
-            @NotNull final ProgramToken programToken, final boolean recursive) {
+    private Stream<Token<?>> createTokenStream(@NotNull final ProgramToken programToken, final boolean recursive) {
         // The types work out perfectly but it gets erased.
-        //noinspection unchecked
         return Arrays.stream(programToken.getValue()).flatMap(t -> t.stream(recursive));
     }
 

@@ -21,6 +21,7 @@ import java.util.Optional;
 public class ThreadDebugController implements DebugController {
 
     private final Thread workingThread;
+    private final Runnable pauseCallback;
     @Nullable
     private Collection<Breakpoint> breaks;
     private boolean isActive;
@@ -31,12 +32,14 @@ public class ThreadDebugController implements DebugController {
      * Create new ThreadDebugController.
      *
      * @param workingThread the working thread.
+     * @param pauseCallback callback for pause events if a breakpoint is hit.
      */
     @Contract(pure = true)
-    public ThreadDebugController(final Thread workingThread) {
+    public ThreadDebugController(final Thread workingThread, final Runnable pauseCallback) {
         isActive = false;
         autoPause = false;
         breaks = new HashSet<>();
+        this.pauseCallback = pauseCallback;
         this.workingThread = workingThread;
     }
 
@@ -105,14 +108,11 @@ public class ThreadDebugController implements DebugController {
         if (shouldDie || breaks == null) {
             return;
         }
-        if (autoPause
-            || Optional.ofNullable(currentInstruction)
-                       .map(
-                               t ->
-                                       breaks.contains(new SimpleBreakpoint(t.getOffset()))
-                                       && t.getType() != TokenType.PROGRAM)
-                       .orElse(false)) {
-            pause();
+        if (autoPause || Optional.ofNullable(currentInstruction)
+                                 .map(t -> breaks.contains(new SimpleBreakpoint(t.getOffset()))
+                                           && t.getType() != TokenType.PROGRAM)
+                                 .orElse(false)) {
+            pauseCallback.run();
         }
     }
 

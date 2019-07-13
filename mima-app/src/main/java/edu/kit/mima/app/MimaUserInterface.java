@@ -1,8 +1,8 @@
 package edu.kit.mima.app;
 
 import edu.kit.mima.App;
-import edu.kit.mima.api.event.SimpleSubscriber;
 import edu.kit.mima.api.event.SubscriptionManager;
+import edu.kit.mima.api.event.SwingSubscriber;
 import edu.kit.mima.core.Debugger;
 import edu.kit.mima.core.MimaCompiler;
 import edu.kit.mima.core.MimaRunner;
@@ -97,7 +97,7 @@ public final class MimaUserInterface extends JFrame {
     private void createSubscriptions() {
         final var subscriptionManager = SubscriptionManager.getCurrentManager();
 
-        subscriptionManager.subscribe(new SimpleSubscriber<Boolean>((identifier, value) -> {
+        subscriptionManager.subscribe(new SwingSubscriber<Boolean>((identifier, value) -> {
             if (value) {
                 int index = Optional.ofNullable(mimaRunner.getCurrentStatement())
                                     .map(Token::getOffset)
@@ -107,13 +107,13 @@ public final class MimaUserInterface extends JFrame {
             }
         }), Debugger.PAUSE_PROPERTY);
 
-        subscriptionManager.subscribe(new SimpleSubscriber<Boolean>((identifier, value) -> {
+        subscriptionManager.subscribe(new SwingSubscriber<Boolean>((identifier, value) -> {
             if (!value) {
                 memoryView.updateView();
             }
         }), MimaRunner.RUNNING_PROPERTY);
 
-        subscriptionManager.subscribe(new SimpleSubscriber<Boolean>((identifier, value) -> {
+        subscriptionManager.subscribe(new SwingSubscriber<Boolean>((identifier, value) -> {
             if (!value) {
                 currentEditor().markLine(-1);
                 memoryView.updateView();

@@ -43,8 +43,8 @@ public enum MimaInstruction implements Instruction {
      */
     LDV("LDV", 1) {
         @Override
-        protected MachineWord applyInternal(
-                @NotNull final List<Value<?>> arguments, final Environment environment) {
+        protected MachineWord applyInternal(@NotNull final List<Value<?>> arguments,
+                                            final Environment environment) {
             final var argument = InstructionTools.getMemoryReference(arguments, 0);
             mima.setAccumulator(mima.loadValue(((MachineWord) argument.getValue()).intValue()));
             return null;
@@ -196,10 +196,9 @@ public enum MimaInstruction implements Instruction {
     }
 
     @Override
-    public void apply(
-            @NotNull final List<Value<?>> arguments,
-            final Environment environment,
-            @NotNull final Consumer<Value<?>> callback) {
+    public void apply(@NotNull final List<Value<?>> arguments,
+                      final Environment environment,
+                      @NotNull final Consumer<Value<?>> callback) {
         InstructionTools.checkArgNumber(arguments, this.argNum);
         callback.accept(new Value<>(ValueType.NUMBER, this.applyInternal(arguments, environment)));
     }
@@ -211,15 +210,13 @@ public enum MimaInstruction implements Instruction {
      * @param environment execution environment
      * @return return value of instruction
      */
-    protected abstract @Nullable MachineWord applyInternal(
-            List<Value<?>> arguments, Environment environment);
+    protected abstract @Nullable MachineWord applyInternal(List<Value<?>> arguments, Environment environment);
 
     protected @Nullable MachineWord applyAlu(
             @NotNull final List<Value<?>> arguments,
             @NotNull final BiFunction<MachineWord, MachineWord, MachineWord> func) {
         final var argument = InstructionTools.getMemoryReference(arguments, 0);
-        mima.setAccumulator(
-                func.apply(
+        mima.setAccumulator(func.apply(
                         MachineWord.cast(mima.getAccumulator(), mima.getWordLength()),
                         mima.loadValue((((MachineWord) argument.getValue()).intValue()))));
         return null;
