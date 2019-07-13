@@ -82,13 +82,17 @@ public class MimaRunner implements ExceptionHandler, CodeRunner {
      * Stop the execution.
      */
     public void stop() {
+        boolean debuggerWasRunning = debugger.isRunning();
         debugger.active = false;
-        Optional.ofNullable(threadDebugController).ifPresent(ThreadDebugController::stop);
         interpreter.setRunning(false);
+        Optional.ofNullable(threadDebugController).ifPresent(ThreadDebugController::stop);
         if (debugger.active) {
             subscriptionService.notifyEvent(MimaDebugger.RUNNING_PROPERTY, false, debugger);
         }
         subscriptionService.notifyEvent(MimaRunner.RUNNING_PROPERTY, false, this);
+        if (debuggerWasRunning) {
+            subscriptionService.notifyEvent(Debugger.RUNNING_PROPERTY, false, this);
+        }
     }
 
     /**
@@ -99,7 +103,7 @@ public class MimaRunner implements ExceptionHandler, CodeRunner {
     private void createGlobalEnvironment(final Consumer<Value<?>> callback) {
         final InstructionSet instructionSet = program.getInstructionSet();
         mima = new Mima(instructionSet.getWordLength(), instructionSet.getConstWordLength());
-        globalEnvironment = new GlobalEnvironment(program.getProgramToken(), mima, interpreter, callback);
+        globalEnvironment = new GlobalEnvironment(program, mima, interpreter, callback);
         globalEnvironment.setupGlobalFunctions(MimaInstruction.values());
         if (instructionSet == InstructionSet.MIMA_X) {
             globalEnvironment.setupExtendedInstructionSet();
@@ -119,8 +123,13 @@ public class MimaRunner implements ExceptionHandler, CodeRunner {
         sharedException.set(null);
         interpreter = new Interpreter(program.getInstructionSet().getConstWordLength(), null, this);
         createGlobalEnvironment(callback);
-        threadDebugController = new ThreadDebugController(new Thread(
-                () -> interpreter.evaluateTopLevel(program.getProgramToken(), globalEnvironment)));
+        threadDebugController = new ThreadDebugController(
+                new Thread(() -> interpreter.evaluateTopLevel(program.getProgramToken(), globalEnvironment)),
+                () -> {
+                    if (debugger.isRunning()) {
+                        debugger.pause();
+                    }
+                });
         interpreter.setDebugController(threadDebugController);
     }
 
@@ -154,6 +163,7 @@ public class MimaRunner implements ExceptionHandler, CodeRunner {
         }
         this.program = program;
         this.mima.reset();
+
     }
 
     /**
@@ -224,8 +234,7 @@ public class MimaRunner implements ExceptionHandler, CodeRunner {
         }
 
         @Override
-        public void start(
-                final Consumer<Value<?>> callback, @NotNull final Collection<Breakpoint> breakpoints) {
+        public void start(final Consumer<Value<?>> callback, @NotNull final Collection<Breakpoint> breakpoints) {
             active = true;
             paused = false;
 
@@ -244,8 +253,8 @@ public class MimaRunner implements ExceptionHandler, CodeRunner {
         @Override
         public void pause() {
             paused = true;
-            threadDebugController.pause();
             subscriptionService.notifyEvent(Debugger.PAUSE_PROPERTY, true, this);
+            threadDebugController.pause();
         }
 
         @Override
@@ -260,8 +269,7 @@ public class MimaRunner implements ExceptionHandler, CodeRunner {
         public void step() {
             paused = true;
             threadDebugController.setAutoPause(true);
-
-            subscriptionService.notifyEvent(Debugger.PAUSE_PROPERTY, false, this);
+            subscriptionService.notifyEvent(Debugger.PAUSE_PROPERTY, true, this);
             continueExecution();
         }
 
@@ -274,5 +282,6 @@ public class MimaRunner implements ExceptionHandler, CodeRunner {
         public boolean isPaused() {
             return active && paused;
         }
+
     }
 }

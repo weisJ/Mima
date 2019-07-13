@@ -170,4 +170,5 @@ public class Mima {
         accumulator.setValue(0);
         stackPointer.setValue(0);
     }
+
 }

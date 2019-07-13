@@ -13,10 +13,12 @@ import org.jetbrains.annotations.NotNull;
 public class MachineWord {
 
     private final int wordLength;
+    private boolean calculated = false;
     /**
      * Bits with msb at index length - 1 and lsb at index 0.
      */
     private boolean[] bits;
+    private int intValue;
 
     /**
      * Create new MachineWord with the given number of bits bits.length must be equal to wordLength
@@ -167,6 +169,9 @@ public class MachineWord {
      * @return Integer value
      */
     public int intValue() {
+        if (calculated) {
+            return intValue;
+        }
         int value = 0;
         final boolean isNegative = msb() == 1;
         if (isNegative) {
@@ -180,6 +185,8 @@ public class MachineWord {
         if (isNegative) {
             value *= -1;
         }
+        this.intValue = value;
+        calculated = true;
         return value;
     }
 
@@ -192,6 +199,7 @@ public class MachineWord {
         assert (!(value > (Math.pow(2, wordLength - 1) - 1)))
                && (!(value < (-1 * Math.pow(2, wordLength - 1))))
                 : "value must be > 0 for unsigned data";
+        calculated = false;
         bits = new boolean[wordLength];
         final boolean isNegative = value < 0;
         int val = Math.abs(value);

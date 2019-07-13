@@ -206,7 +206,7 @@ public class Editor extends NumberedTextPane implements UserPreferenceChangedLis
      */
     public void markLine(final int index) {
         pane.removeMark(currentMark, "debug");
-        if (index > 0) {
+        if (index >= 0) {
             pane.markLine(index, "debug", markColor);
             currentMark = index;
             scrollToIndex(index);

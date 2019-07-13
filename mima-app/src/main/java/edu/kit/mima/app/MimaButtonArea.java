@@ -47,10 +47,8 @@ public class MimaButtonArea {
     public MimaButtonArea(final MimaUserInterface mimaUI, final RunActions actions) {
         this.runActions = actions;
         this.mimaUI = mimaUI;
-        runButton = new RunnableIconButton(Icons.RUN_INACTIVE, Icons.RUN,
-                                           Icons.RUN_ACTIVE);
-        debugButton = new RunnableIconButton(Icons.DEBUG_INACTIVE, Icons.DEBUG,
-                                             Icons.DEBUG_ACTIVE);
+        runButton = new RunnableIconButton(Icons.RUN_INACTIVE, Icons.RUN, Icons.RUN_ACTIVE);
+        debugButton = new RunnableIconButton(Icons.DEBUG_INACTIVE, Icons.DEBUG, Icons.DEBUG_ACTIVE);
         pause = new IconButton(Icons.PAUSE_INACTIVE, Icons.PAUSE);
         resume = new IconButton(Icons.RESUME_INACTIVE, Icons.RESUME);
         undo = new IconButton(Icons.UNDO_INACTIVE, Icons.UNDO);
@@ -82,6 +80,7 @@ public class MimaButtonArea {
                          debugButton.setRunning(value);
                          runButton.setEnabled(!value);
                          runButton.setRunning(!value && mimaRunner.isRunning());
+                         stop.setEnabled(value);
                          separator.setVisible(value);
                      }),
                      Debugger.RUNNING_PROPERTY);

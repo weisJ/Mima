@@ -40,8 +40,7 @@ public class MemoryTableView implements MemoryView {
         this.table = table;
     }
 
-    private static String getAssociation(
-            @NotNull final Map<String, Integer> associations, final int value) {
+    private static String getAssociation(@NotNull final Map<String, Integer> associations, final int value) {
         return associations.entrySet().stream()
                        .filter(entry -> entry.getValue() == value)
                        .findFirst()
@@ -51,11 +50,9 @@ public class MemoryTableView implements MemoryView {
 
     @Override
     public void updateView() {
-        SwingUtilities.invokeLater(() -> {
-            table.setContent(getMemoryTable());
-            table.clearIcons();
-            table.setIcon(Icons.STACK_POINTER, mimaRunner.getMima().getStackPointer().intValue() + 1, 0);
-        });
+        table.setContent(getMemoryTable());
+        table.clearIcons();
+        table.setIcon(Icons.STACK_POINTER, mimaRunner.getMima().getStackPointer().intValue() + 1, 0);
     }
 
     /**
@@ -80,8 +77,7 @@ public class MemoryTableView implements MemoryView {
         Environment scope = mimaRunner.getCurrentEnvironment();
         final Map<String, Integer> map = new HashMap<>();
         while (scope != null) {
-            map.putAll(
-                    new HashSet<>(scope.getDefinitions().get(0).entrySet())
+            map.putAll(new HashSet<>(scope.getDefinitions().get(0).entrySet())
                             .stream()
                             .filter(e -> !map.containsKey(e.getKey()))
                             .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().intValue())));
@@ -104,22 +100,22 @@ public class MemoryTableView implements MemoryView {
         final var stackPointer = mima.getStackPointer();
 
         final Map<Integer, MachineWord> values = memoryM.getMapping();
+        //Create accumulator entry
         final List<Object[]> data = new ArrayList<>();
-        data.add(
-                new Object[]{
-                        ACCUMULATOR, binaryView ? accumulator.binaryRepresentation() : accumulator.intValue()
+        data.add(new Object[]{
+                ACCUMULATOR,
+                binaryView ? accumulator.binaryRepresentation() : accumulator.intValue()
                 });
 
+        //Create memory entries
         final List<Object[]> memory = new ArrayList<>();
         final var entryList = new ArrayList<>(values.entrySet());
         entryList.sort(Comparator.comparingInt(Map.Entry::getKey));
         for (final Map.Entry<Integer, MachineWord> entry : entryList) {
-            final String valueString =
-                    binaryView
+            final String valueString = binaryView
                     ? entry.getValue().binaryRepresentation()
                     : String.valueOf(entry.getValue().intValue());
-            final Object[] element =
-                    associations.containsValue(entry.getKey())
+            final Object[] element = associations.containsValue(entry.getKey())
                     ? new Object[]{
                             entry.getKey() + " (" + getAssociation(associations, entry.getKey()) + ')',
                             valueString
@@ -143,4 +139,6 @@ public class MemoryTableView implements MemoryView {
         data.addAll(memory);
         return data.toArray(new Object[0][]);
     }
+
+
 }
