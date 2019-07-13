@@ -4,6 +4,7 @@ import edu.kit.mima.api.lambda.LambdaUtil;
 import edu.kit.mima.api.util.Tuple;
 import edu.kit.mima.core.controller.DebugController;
 import edu.kit.mima.core.data.MachineWord;
+import edu.kit.mima.core.instruction.InstructionSet;
 import edu.kit.mima.core.interpretation.environment.Environment;
 import edu.kit.mima.core.interpretation.environment.GlobalEnvironment;
 import edu.kit.mima.core.interpretation.stack.Continuation;
@@ -123,17 +124,16 @@ public class Interpreter {
                 final ProgramToken programToken = (ProgramToken) expression;
                 final Environment scope = environment.extend(programToken);
                 scope.setReservedIndex(environment.getReservedIndex());
-                programToken.getJumps().forEach((t, i) -> scope
-                                                                  .defineJump(t.getValue().toString(), i));
+                programToken.getJumps().forEach((t, i) -> scope.defineJump(t.getValue().toString(), i));
                 evaluateProgram(programToken, scope, callback);
             }
             case DEFINITION -> {
                 final var defToken = (ListToken<Token<?>>) expression.getValue();
                 evaluateDefinition(defToken, environment, callback);
             }
-            case NUMBER -> callback.accept(evaluateNumber((String) expression.getValue()));
+            case NUMBER -> callback.accept(evaluateNumber((String) expression.getValue(), environment));
             case EMPTY -> callback.accept(VOID);
-            case BINARY -> callback.accept(evaluateBinary((String) expression.getValue()));
+            case BINARY -> callback.accept(evaluateBinary((String) expression.getValue(), environment));
             case IDENTIFICATION -> callback.accept(evaluateIdentification(expression, environment));
             case CALL -> evaluateFunction((BinaryToken<Token<?>, ListToken<Token<?>>>) expression,
                                           environment, callback);
@@ -161,11 +161,11 @@ public class Interpreter {
             if (!isRunning()) {
                 return;
             }
-            if (i < tokens.length) {
+            if (i < tokens.length && i >= 0) {
+                currentToken = tokens[i];
                 if (i != startIndex || !(environment instanceof GlobalEnvironment)) {
                     debugController.afterInstruction(currentToken);
                 }
-                currentToken = tokens[i];
                 environment.setExpressionIndex(i);
                 evaluate(currentToken, environment, v -> func.accept(v, i + 1));
             } else {
@@ -205,9 +205,8 @@ public class Interpreter {
                                    @NotNull final Environment environment,
                                    @NotNull final Runnable continuation) {
         if (definition.getSecond().getType() == TokenType.EMPTY) {
-            environment.defineVariable(
-                    definition.getFirst().getValue().toString(),
-                    evaluateNumber(String.valueOf(environment.getReservedIndex())).getValue());
+            environment.defineVariable(definition.getFirst().getValue().toString(),
+                                       evaluatePrecheckedNumber(environment.getReservedIndex()).getValue());
             environment.setReservedIndex(environment.getReservedIndex() - 1);
             continuation.run();
         } else {
@@ -215,11 +214,8 @@ public class Interpreter {
                 if (v == VOID) {
                     fail("Not a definition body: " + definition.getSecond());
                 }
-                if (((MachineWord) v.getValue()).intValue() < 0) {
-                    fail("Can't have negative memory references");
-                }
-                environment.defineVariable(definition.getFirst().getValue().toString(),
-                                           (MachineWord) v.getValue());
+                checkArgumentRange(v, environment);
+                environment.defineVariable(definition.getFirst().getValue().toString(), (MachineWord) v.getValue());
                 continuation.run();
             });
         }
@@ -235,6 +231,7 @@ public class Interpreter {
             if (Objects.equals(v, VOID)) {
                 fail("Not a definition body: " + definition.getSecond());
             }
+            checkArgumentRange(v, environment);
             environment.defineConstant(definition.getFirst().getValue().toString(),
                                        (MachineWord) v.getValue()
             );
@@ -249,6 +246,7 @@ public class Interpreter {
                                   @NotNull final Environment environment,
                                   final Consumer<Value<?>> callback) throws Continuation {
         stackGuard.guard(() -> evaluateFunction(value, environment, callback));
+        System.out.println("Evaluating" + value.simpleName());
         List<Token<?>> arguments = value.getSecond().getValue();
         BiConsumer<List<Value<?>>, Integer> loop = LambdaUtil.createRecursive(func -> (args, i) -> {
             if (i < arguments.size()) {
@@ -268,19 +266,46 @@ public class Interpreter {
      * Evaluate a number string
      */
     @NotNull
+    @Contract("_,_ -> new")
+    private Value<MachineWord> evaluateNumber(@NotNull final String value, final Environment environment) {
+        final var v = new Value<>(ValueType.NUMBER, new MachineWord(Integer.parseInt(value), wordLength));
+        checkArgumentRange(v, environment);
+        return v;
+    }
+
+    /*
+     * Evaluate a number string
+     */
+    @NotNull
     @Contract("_ -> new")
-    private Value<MachineWord> evaluateNumber(@NotNull final String value) {
-        return new Value<>(ValueType.NUMBER, new MachineWord(Integer.parseInt(value), wordLength));
+    private Value<MachineWord> evaluatePrecheckedNumber(final int value) {
+        return new Value<>(ValueType.NUMBER, new MachineWord(value, wordLength));
     }
 
     /*
      * Evaluate a binary string
      */
     @NotNull
-    private Value<MachineWord> evaluateBinary(@NotNull final String binary) {
+    private Value<MachineWord> evaluateBinary(@NotNull final String binary, final Environment environment) {
         final Boolean[] bits = new StringBuilder(binary).reverse().toString()
                                        .chars().mapToObj(i -> i == '1').toArray(Boolean[]::new);
-        return new Value<>(ValueType.NUMBER, new MachineWord(bits, wordLength));
+        final var v = new Value<>(ValueType.NUMBER, new MachineWord(bits, wordLength));
+        checkArgumentRange(v, environment);
+        return v;
+    }
+
+    private void checkArgumentRange(final Value<?> value, final Environment environment) {
+        final int index = ((MachineWord)value.getValue()).intValue();
+        final InstructionSet instructionSet = environment.getInstructionSet();
+        final int maxValue = instructionSet.getConstWordLength() == instructionSet.getWordLength()
+                             ? (2 << (instructionSet.getWordLength() - 1)) - 1
+                             : (2 << instructionSet.getConstWordLength()) - 1;
+        final int minValue = instructionSet.getConstWordLength() == instructionSet.getWordLength()
+                             ? -(2 << (instructionSet.getWordLength() - 1))
+                             : 0;
+        if (index < minValue || index > maxValue) {
+            fail("Index out of range");
+        }
     }
 
     /*

@@ -36,6 +36,7 @@ public final class Parser extends Processor<Token<?>, TokenStream> {
     private final Stack<Integer> tokenIndexStack;
     private boolean skipEndOfInstruction;
     private int scopeIndex;
+    private int instructionIndex;
 
     /**
      * Create parser from string input.
@@ -59,6 +60,7 @@ public final class Parser extends Processor<Token<?>, TokenStream> {
     public Tuple<ProgramToken, List<ParserException>> parse() {
         errors.clear();
         tokenIndexStack.clear();
+        instructionIndex = 0;
         return parseTopLevel();
     }
 
@@ -69,9 +71,11 @@ public final class Parser extends Processor<Token<?>, TokenStream> {
     @Contract(" -> new")
     private Tuple<ProgramToken, List<ParserException>> parseTopLevel() {
         final List<Token<?>> program = new ArrayList<>();
+        final List<Integer> indexList = new ArrayList<>();
         scopeIndex++;
         tokenIndexStack.push(0);
         errors.addAll(skipError());
+        final int index = instructionIndex;
         final int line = input.getLine();
         boolean finishedScope = false;
         while (!input.isEmpty() && !finishedScope) {
@@ -85,10 +89,12 @@ public final class Parser extends Processor<Token<?>, TokenStream> {
                         input.next();
                     } else {
                         program.add(token);
+                        indexList.add(instructionIndex);
                         tokenIndexStack.push(tokenIndexStack.pop() + 1);
                     }
                 }
                 if (skipEndOfInstruction) {
+                    instructionIndex++;
                     skipPunctuation(Punctuation.INSTRUCTION_END);
                 }
             } catch (@NotNull final ParserException e) {
@@ -97,8 +103,9 @@ public final class Parser extends Processor<Token<?>, TokenStream> {
             }
         }
         tokenIndexStack.pop();
-        return new ValueTuple<>(
-                new ProgramToken(program.toArray(new Token<?>[0]), line), new ArrayList<>(errors));
+        return new ValueTuple<>(new ProgramToken(program.toArray(new Token<?>[0]), indexList,
+                                                 index, instructionIndex - index, line),
+                                new ArrayList<>(errors));
     }
 
     /*
@@ -115,41 +122,41 @@ public final class Parser extends Processor<Token<?>, TokenStream> {
     @NotNull
     private Token<?> parseAtomic() {
         return maybeCall(() -> {
-                    if (isPunctuation(Punctuation.SCOPE_OPEN)) {
-                        input.next();
-                        final var parsed = parseTopLevel();
-                        errors.addAll(parsed.getSecond());
-                        final Token<?> program = parsed.getFirst();
-                        if (isPunctuation(Punctuation.INSTRUCTION_END)) {
-                            input.next();
-                        }
-                        skipEndOfInstruction = false;
-                        return program;
-                    }
-                    if (isPunctuation(Punctuation.SCOPE_CLOSED)) {
-                        return new AtomToken<>(
-                                TokenType.SCOPE_END, scopeIndex, tokenIndexStack.peek(), input.getLine());
-                    }
-                    if (isPunctuation(Punctuation.OPEN_BRACKET)) {
-                        input.next();
-                        final Token<?> expression = parseExpression();
-                        skipPunctuation(Punctuation.CLOSED_BRACKET);
-                        return expression;
-                    }
-                    if (isPunctuation(Punctuation.DEFINITION_BEGIN)) {
-                        input.next();
-                        return parseDefinition();
-                    }
-                    final Token<?> token = input.peek();
-                    if (token != null
-                        && (token.getType() == TokenType.IDENTIFICATION
-                            || token.getType() == TokenType.BINARY
-                            || token.getType() == TokenType.NUMBER)) {
-                        input.next();
-                        return token;
-                    }
-                    return unexpected();
-                });
+            if (isPunctuation(Punctuation.SCOPE_OPEN)) {
+                input.next();
+                final var parsed = parseTopLevel();
+                errors.addAll(parsed.getSecond());
+                final Token<?> program = parsed.getFirst();
+                if (isPunctuation(Punctuation.INSTRUCTION_END)) {
+                    input.next();
+                }
+                skipEndOfInstruction = false;
+                return program;
+            }
+            if (isPunctuation(Punctuation.SCOPE_CLOSED)) {
+                return new AtomToken<>(
+                        TokenType.SCOPE_END, scopeIndex, tokenIndexStack.peek(), input.getLine());
+            }
+            if (isPunctuation(Punctuation.OPEN_BRACKET)) {
+                input.next();
+                final Token<?> expression = parseExpression();
+                skipPunctuation(Punctuation.CLOSED_BRACKET);
+                return expression;
+            }
+            if (isPunctuation(Punctuation.DEFINITION_BEGIN)) {
+                input.next();
+                return parseDefinition();
+            }
+            final Token<?> token = input.peek();
+            if (token != null
+                && (token.getType() == TokenType.IDENTIFICATION
+                    || token.getType() == TokenType.BINARY
+                    || token.getType() == TokenType.NUMBER)) {
+                input.next();
+                return token;
+            }
+            return unexpected();
+        });
     }
 
     /*
@@ -185,16 +192,14 @@ public final class Parser extends Processor<Token<?>, TokenStream> {
     @NotNull
     private Token<?> parseCall(@NotNull final Token<?> reference) {
         final int line = input.getLine();
-        return new BinaryToken<>(
-                TokenType.CALL,
-                reference,
-                delimited(new char[]{Punctuation.OPEN_BRACKET,
+        return new BinaryToken<>(TokenType.CALL, reference,
+                                 delimited(new char[]{Punctuation.OPEN_BRACKET,
                                   Punctuation.CLOSED_BRACKET,
                                   Punctuation.COMMA},
                           this::parseExpression,
                           true),
-                tokenIndexStack.peek(),
-                line);
+                                 tokenIndexStack.peek(),
+                                 line);
     }
 
     /*
