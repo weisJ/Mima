@@ -60,7 +60,6 @@ public final class App {
             try {
                 splash = new MimaSplash();
                 splash.showSplash();
-                System.out.println("makevisible");
             } catch (IOException ignored) {
             }
             SwingUtilities.invokeLater(() -> {
@@ -71,7 +70,6 @@ public final class App {
                         splash.showMessage(m);
                     } else {
                         timer.stop();
-                        System.out.println("visible no more");
                         splash.closeSplash();
                         start();
                     }

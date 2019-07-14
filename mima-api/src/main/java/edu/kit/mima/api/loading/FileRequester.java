@@ -43,11 +43,10 @@ public class FileRequester {
      * @param extension    allowed file extension
      * @param abortHandler action to perform if request was aborted
      */
-    public void requestSave(
-            @NotNull final String text,
-            final String searchPath,
-            @NotNull final String extension,
-            @NotNull final Runnable abortHandler) {
+    public void requestSave(@NotNull final String text,
+                            final String searchPath,
+                            @NotNull final String extension,
+                            @NotNull final Runnable abortHandler) {
         try {
             Optional.ofNullable(requestPath(searchPath, new String[]{extension}, abortHandler))
                     .map(p -> !p.endsWith(extension) ? p + '.' + extension : p).stream()
@@ -96,10 +95,9 @@ public class FileRequester {
                        .peek(manager::afterRequest)
                        .map(File::getAbsolutePath)
                        .findFirst()
-                       .orElseGet(
-                               () -> {
-                                   abortHandler.run();
-                                   return null;
-                               });
+                       .orElseGet(() -> {
+                           abortHandler.run();
+                           return null;
+                       });
     }
 }

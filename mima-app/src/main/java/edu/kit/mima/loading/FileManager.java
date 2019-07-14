@@ -3,8 +3,10 @@ package edu.kit.mima.loading;
 import edu.kit.mima.api.loading.FileEventHandler;
 import edu.kit.mima.api.loading.FileRequester;
 import edu.kit.mima.api.loading.IoTools;
+import edu.kit.mima.gui.components.dialog.FileDialog;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
+import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,7 +27,6 @@ import java.util.function.Consumer;
  */
 public class FileManager implements AutoCloseable {
 
-    private static final String UNSAVED_PREFIX = "unsaved";
     private final Component parent;
 
     @NotNull
@@ -60,32 +61,31 @@ public class FileManager implements AutoCloseable {
         this.extensions = extensions;
         this.parent = parent;
 
-        fileRequester =
-                new FileRequester(
-                        this.parent,
-                        new LogLoadManager() {
-                            private String backupLastFile;
-                            private String backupLastExtension;
+        fileRequester = new FileRequester(
+                this.parent,
+                new LogLoadManager() {
+                    private String backupLastFile;
+                    private String backupLastExtension;
 
-                            @Override
-                            public void beforeLoad() {
-                                backupLastFile = lastFile;
-                                backupLastExtension = lastExtension;
-                            }
+                    @Override
+                    public void beforeLoad() {
+                        backupLastFile = lastFile;
+                        backupLastExtension = lastExtension;
+                    }
 
-                            @Override
-                            public void onFail(final String errorMessage) {
-                                super.onFail(errorMessage);
-                                lastFile = backupLastFile;
-                                lastExtension = backupLastExtension;
-                            }
+                    @Override
+                    public void onFail(final String errorMessage) {
+                        super.onFail(errorMessage);
+                        lastFile = backupLastFile;
+                        lastExtension = backupLastExtension;
+                    }
 
-                            @Override
-                            public void afterRequest(@NotNull final File chosenFile) {
-                                lastFile = chosenFile.getAbsolutePath();
-                                updateReferences(chosenFile.getAbsolutePath());
-                            }
-                        });
+                    @Override
+                    public void afterRequest(@NotNull final File chosenFile) {
+                        lastFile = chosenFile.getAbsolutePath();
+                        updateReferences();
+                    }
+                });
         directory = Preferences.getInstance().readString(PropertyKey.DIRECTORY_WORKING);
     }
 
@@ -115,7 +115,7 @@ public class FileManager implements AutoCloseable {
         text = IoTools.loadFile(filePath);
         fileHash = text.hashCode();
         lastFile = filePath;
-        updateReferences(filePath);
+        updateReferences();
         notifyHandlers(e -> e.fileLoadedEvent(lastFile));
     }
 
@@ -123,9 +123,7 @@ public class FileManager implements AutoCloseable {
      * Create a new File. Requests user to chose file type
      */
     public void newFile() {
-        final String response =
-                (String)
-                        JOptionPane.showInputDialog(
+        final String response = (String) JOptionPane.showInputDialog(
                                 parent,
                                 "Choose file type",
                                 "New File",
@@ -133,17 +131,31 @@ public class FileManager implements AutoCloseable {
                                 null,
                                 extensions,
                                 extensions[0]);
-        if (response == null) {
-            throw new IllegalArgumentException("aborted");
+        final File file = FileDialog.showFileDialog(parent,
+                                                    new File(Preferences.getInstance()
+                                                                     .readString(PropertyKey.DIRECTORY_MIMA)),
+                                                    response);
+        try {
+            if (file.createNewFile()) {
+                createNewFile(file);
+            } else {
+                JOptionPane.showMessageDialog(parent, "Couldn't create File", "Error",
+                                              JOptionPane.ERROR_MESSAGE);
+                throw new IllegalArgumentException("Couldn't create file");
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(parent, e.getMessage(), "Error",
+                                          JOptionPane.ERROR_MESSAGE);
+            throw new IllegalArgumentException("Couldn't create file");
         }
-        createNewFile(response);
     }
 
-    private void createNewFile(@NotNull final String extension) {
-        lastFile = UNSAVED_PREFIX + '.' + extension;
-        text = "#New File\n";
+    private void createNewFile(final File file) {
+        lastFile = file.getAbsolutePath();
+        text = "";
         fileHash = text.hashCode();
-        updateReferences(extension);
+        text = "#New File\n";
+        updateReferences();
         notifyHandlers(e -> e.fileCreated(lastFile));
     }
 
@@ -168,13 +180,12 @@ public class FileManager implements AutoCloseable {
         if (text == null) {
             return;
         }
-        fileRequester.requestSave(
-                text,
-                directory,
-                lastExtension,
-                () -> {
-                    throw new IllegalArgumentException("aborted save");
-                });
+        fileRequester.requestSave(text,
+                                  directory,
+                                  lastExtension,
+                                  () -> {
+                                      throw new IllegalArgumentException("aborted save");
+                                  });
         isNewFile = false;
         fileHash = text.hashCode();
         notifyHandlers(e -> e.saveEvent(lastFile));
@@ -270,32 +281,14 @@ public class FileManager implements AutoCloseable {
         return Optional.ofNullable(lastFile).orElse("");
     }
 
-    /**
-     * Get the extension of the last used file.
-     *
-     * @return extension of last used file
-     */
-    public String getLastExtension() {
-        return lastExtension;
-    }
-
     /*
      * Set the extension used by loaded file
      */
-    private void updateReferences(@NotNull final String file) {
-        for (final String s : extensions) {
-            if (file.endsWith(s)) {
-                lastExtension = s;
-                break;
-            }
-        }
+    private void updateReferences() {
         final var pref = Preferences.getInstance();
-        isNewFile = lastFile.startsWith(UNSAVED_PREFIX);
         final File lFile = new File(lastFile);
-        directory =
-                lFile.exists()
-                ? lFile.getParentFile().getAbsolutePath()
-                : pref.readString(PropertyKey.DIRECTORY_MIMA);
+        lastExtension = FilenameUtils.getExtension(lFile.getName());
+        directory = lFile.getParentFile().getAbsolutePath();
         pref.saveString(PropertyKey.DIRECTORY_WORKING, directory);
     }
 

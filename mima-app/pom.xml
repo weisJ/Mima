@@ -114,9 +114,9 @@
                             <useUniqueVersions>false</useUniqueVersions>
                             <mainClass>edu.kit.mima.App</mainClass>
                         </manifest>
-                        <manifestEntries>
-                            <SplashScreen-Image>images/mima.png</SplashScreen-Image>
-                        </manifestEntries>
+<!--                        <manifestEntries>-->
+<!--                            <SplashScreen-Image>images/mima.png</SplashScreen-Image>-->
+<!--                        </manifestEntries>-->
                     </archive>
                 </configuration>
             </plugin>
