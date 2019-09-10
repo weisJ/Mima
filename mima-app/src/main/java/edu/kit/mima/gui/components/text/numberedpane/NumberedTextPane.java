@@ -1,6 +1,6 @@
 package edu.kit.mima.gui.components.text.numberedpane;
 
-import edu.kit.mima.gui.components.BorderlessScrollPane;
+import com.weis.darklaf.components.OverlayScrollPane;
 import edu.kit.mima.gui.components.IndexComponent;
 import edu.kit.mima.gui.components.listeners.IndexListener;
 import edu.kit.mima.gui.components.listeners.MouseClickListener;
@@ -48,9 +48,10 @@ public class NumberedTextPane extends JPanel {
                 numberingPane.repaint();
             }
         };
-        var borderedPane = new BorderlessScrollPane(pane);
+        var borderedPane = new OverlayScrollPane(pane);
         scrollPane = borderedPane.getScrollPane();
         scrollPane.getVerticalScrollBar().setUnitIncrement(2 * getFont().getSize());
+        scrollPane.getHorizontalScrollBar().setUnitIncrement(2 * getFont().getSize());
         numberingPane = new NumberingPane(pane, scrollPane);
         pane.addCaretListener(new VisibleCaretListener(scrollPane.getVerticalScrollBar().getWidth()));
 
@@ -58,6 +59,7 @@ public class NumberedTextPane extends JPanel {
         add(borderedPane, BorderLayout.CENTER);
 
         numberingPane.addMouseListener((MouseClickListener) e -> {
+            pane.requestFocus();
             if (e.getButton() == MouseEvent.BUTTON1) {
                 final Point p = e.getPoint();
                 try {

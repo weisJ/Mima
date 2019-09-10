@@ -1,7 +1,7 @@
 package edu.kit.mima.gui.components.tabframe;
 
-import com.bulenkov.iconloader.util.EmptyIcon;
-import edu.kit.mima.gui.components.alignment.Alignment;
+import com.weis.darklaf.icons.EmptyIcon;
+import com.weis.darklaf.components.alignment.Alignment;
 import edu.kit.mima.gui.components.tabframe.popuptab.PopupComponent;
 import edu.kit.mima.gui.persist.PersistableComponent;
 import edu.kit.mima.gui.persist.PersistenceInfo;
@@ -70,7 +70,7 @@ public class TabFrame extends PersistableComponent {
 
     public void insertTab(
             @NotNull final PopupComponent c, final String title, final Alignment a, final int index) {
-        insertTab(c, title, new EmptyIcon(0, 0), a, index);
+        insertTab(c, title, EmptyIcon.create(0), a, index);
     }
 
     public void insertTab(@NotNull final PopupComponent c, final Alignment a, final int index) {
@@ -83,7 +83,7 @@ public class TabFrame extends PersistableComponent {
     }
 
     public void addTab(final PopupComponent c, final String title, final Alignment a) {
-        addTab(c, title, new EmptyIcon(0, 0), a);
+        addTab(c, title, EmptyIcon.create(0), a);
     }
 
     public void toggleTab(final Alignment a, final int index, final boolean enabled) {
@@ -95,7 +95,7 @@ public class TabFrame extends PersistableComponent {
         var compAtIndex = tabs.get(index);
         if (compAtIndex.isSelected() != enabled) {
             compAtIndex.setSelected(enabled);
-            layout.notifySelectChange(compAtIndex);
+            layout.notifySelectionChange(compAtIndex);
             layout.compsForAlignment(a).get(index).setFocus(false);
         }
     }

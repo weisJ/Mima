@@ -31,6 +31,7 @@ package org.pbjar.jxlayer.plaf.ext;
  */
 
 import com.sun.java.swing.SwingUtilities3;
+import com.weis.darklaf.LogFormatter;
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.AbstractBufferedLayerUI;
 import org.jdesktop.jxlayer.plaf.LayerUI;
@@ -63,6 +64,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Logger;
 
 /**
  * This class provides for all necessary functionality when using transformations in a {@link
@@ -128,12 +131,19 @@ import java.util.Set;
  */
 public class TransformUI extends MouseEventUI<JComponent> {
 
+
     private static final LayoutManager transformLayout = new TransformLayout();
     private static final String KEY_VIEW = "view";
     private static final boolean delegatePossible;
     private static final RepaintManager wrappedManager = new TransformRepaintManager();
+    private static final Logger LOGGER = Logger.getLogger(TransformUI.class.getName());
 
     static {
+        LOGGER.setUseParentHandlers(false);
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setFormatter(new LogFormatter());
+        LOGGER.addHandler(handler);
+
         boolean value;
         try {
             SwingUtilities3.class.getMethod(
@@ -143,13 +153,9 @@ public class TransformUI extends MouseEventUI<JComponent> {
             value = false;
         }
         delegatePossible = value;
-        System.out.println("Java "
-                           + System.getProperty("java.version")
-                           + " "
-                           + System.getProperty("java.vm.version")
-                           + (delegatePossible
-                              ? ": RepaintManager delegate facility for JavaFX will be used."
-                              : ": RepaintManager.setCurrentManager() will be used."));
+        LOGGER.info("Java " + System.getProperty("java.version") + " " + System.getProperty("java.vm.version")
+                    + (delegatePossible ? ": RepaintManager delegate facility for JavaFX will be used."
+                                        : ": RepaintManager.setCurrentManager() will be used."));
     }
 
     private final ChangeListener changeListener = e -> revalidateLayer();
@@ -418,7 +424,7 @@ public class TransformUI extends MouseEventUI<JComponent> {
     public void uninstallUI(@NotNull final JComponent c) {
         JXLayer<? extends JComponent> installedLayer = this.getInstalledLayer();
         Objects.requireNonNull(installedLayer)
-                .removePropertyChangeListener(KEY_VIEW, this.viewChangeListener);
+               .removePropertyChangeListener(KEY_VIEW, this.viewChangeListener);
         installedLayer.setLayout(originalLayout);
         setView(null);
         super.uninstallUI(c);

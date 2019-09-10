@@ -55,8 +55,7 @@ public class TestShared {
         SwingUtilities.invokeLater(() -> new TestShared().test());
     }
 
-    private void addActions(
-            @NotNull final JMenu parentMenu, final String name, @NotNull final List<Action> actionList) {
+    private void addActions(@NotNull final JMenu parentMenu, final String name, @NotNull final List<Action> actionList) {
         JMenu menu;
         if (actionList.size() > 1) {
             menu = new JMenu(name);

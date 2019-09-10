@@ -1,6 +1,6 @@
 package edu.kit.mima.gui.components.console;
 
-import edu.kit.mima.gui.components.BorderlessScrollPane;
+import com.weis.darklaf.components.OverlayScrollPane;
 import edu.kit.mima.gui.components.console.terminal.MessageConsole;
 import edu.kit.mima.syntax.SyntaxColor;
 
@@ -14,7 +14,7 @@ import java.nio.charset.Charset;
  * @author Jannis Weis
  * @since 2019
  */
-public class SystemConsole extends BorderlessScrollPane {
+public class SystemConsole extends OverlayScrollPane {
 
     /**
      * Create System console that displays the Standard out and error stream.

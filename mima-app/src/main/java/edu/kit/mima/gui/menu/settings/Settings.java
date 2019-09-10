@@ -1,6 +1,6 @@
 package edu.kit.mima.gui.menu.settings;
 
-import edu.kit.mima.gui.components.border.AdaptiveLineBorder;
+import com.weis.darklaf.components.border.AdaptiveLineBorder;
 import edu.kit.mima.gui.components.fontchooser.FontChooser;
 import edu.kit.mima.gui.components.fontchooser.model.FontSelectionModel;
 import edu.kit.mima.gui.components.fontchooser.panes.AbstractPreviewPane;

@@ -24,7 +24,7 @@
 package demo;
 
 /**
- * Describes a TabFrameDemo application.
+ * Describes a mima.TabFrameDemo application.
  *
  * @author Piet Blok
  */

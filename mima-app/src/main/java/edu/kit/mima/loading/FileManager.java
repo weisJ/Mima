@@ -3,10 +3,10 @@ package edu.kit.mima.loading;
 import edu.kit.mima.api.loading.FileEventHandler;
 import edu.kit.mima.api.loading.FileRequester;
 import edu.kit.mima.api.loading.IoTools;
+import edu.kit.mima.api.util.FileName;
 import edu.kit.mima.gui.components.dialog.FileDialog;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
-import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -287,7 +287,7 @@ public class FileManager implements AutoCloseable {
     private void updateReferences() {
         final var pref = Preferences.getInstance();
         final File lFile = new File(lastFile);
-        lastExtension = FilenameUtils.getExtension(lFile.getName());
+        lastExtension = FileName.getExtension(lFile.getName());
         directory = lFile.getParentFile().getAbsolutePath();
         pref.saveString(PropertyKey.DIRECTORY_WORKING, directory);
     }

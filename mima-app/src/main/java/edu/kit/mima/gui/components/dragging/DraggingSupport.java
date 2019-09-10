@@ -37,19 +37,15 @@ public class DraggingSupport implements AWTEventListener {
     public DraggingSupport(
             final Component component, final float opacityInside, final float opacityOutside) {
         this.component = component;
-        dragWindow =
-                new JWindow() {
+        dragWindow = new JWindow() {
                     @Override
                     public void paint(@NotNull final Graphics g) {
                         setLocation(dragLocation);
                         if (extended) {
-                            g.drawImage(
-                                    extendedImage,
-                                    2,
-                                    2,
+                            g.drawImage(extendedImage, 2, 2,
                                     extendedImage.getWidth(this) - 4,
                                     extendedImage.getHeight(this) - 4,
-                                    this);
+                                        this);
                             var g2 = (Graphics2D) g;
                             g2.setStroke(new BasicStroke(2));
                             g2.setColor(UIManager.getColor("Border.line2"));
@@ -65,10 +61,7 @@ public class DraggingSupport implements AWTEventListener {
         dragWindow.setFocusable(false);
         listenerList = new ArrayList<>();
 
-        timer =
-                new Timer(
-                        10,
-                        e -> {
+        timer = new Timer(10, e -> {
                             final Point p = MouseInfo.getPointerInfo().getLocation();
                             extended =
                                     !SwingUtilities.getWindowAncestor(component).getBounds().contains(p)

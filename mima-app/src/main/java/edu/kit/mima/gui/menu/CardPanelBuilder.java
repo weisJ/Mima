@@ -2,7 +2,7 @@ package edu.kit.mima.gui.menu;
 
 import edu.kit.mima.api.util.Tuple;
 import edu.kit.mima.api.util.ValueTuple;
-import edu.kit.mima.gui.components.SeamlessSplitPane;
+import edu.kit.mima.gui.components.split.SeamlessSplitPane;
 import org.jdesktop.swingx.JXTree;
 import org.jetbrains.annotations.NotNull;
 

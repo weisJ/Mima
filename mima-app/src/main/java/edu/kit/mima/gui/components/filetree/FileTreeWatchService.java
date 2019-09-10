@@ -112,11 +112,14 @@ public class FileTreeWatchService {
 
     private void modify(@NotNull final Path path) {
         SwingUtilities.invokeLater(() -> {
-            var node = fileTree.getTreeNodeMap().get(path.toFile());
-            node.setUserObject(path.toFile());
-            node = (FileTreeNode) node.getParent();
-            node.sort();
-            ((DefaultTreeModel) fileTree.getTree().getModel()).nodeStructureChanged(node);
+            var file = path.toFile();
+            var node = fileTree.getTreeNodeMap().get(file);
+            var parent = (FileTreeNode) node.getParent();
+            var newNode = fileTree.createNodes(null, file);
+            parent.remove(node);
+            parent.add(newNode);
+            parent.sort();
+            ((DefaultTreeModel) fileTree.getTree().getModel()).nodeStructureChanged(parent);
         });
     }
 

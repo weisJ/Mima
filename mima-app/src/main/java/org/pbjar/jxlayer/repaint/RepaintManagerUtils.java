@@ -31,6 +31,7 @@
 
 package org.pbjar.jxlayer.repaint;
 
+import com.weis.darklaf.LogFormatter;
 import org.jdesktop.swingx.ForwardingRepaintManager;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -41,13 +42,23 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Logger;
 
 /**
  * Utility class that ensures that a correct {@link RepaintManager} is set.
  *
  * @author Piet Blok
  */
-public class RepaintManagerUtils {
+public final class RepaintManagerUtils {
+
+    private static final Logger LOGGER = Logger.getLogger(RepaintManagerUtils.class.getName());
+    static {
+        LOGGER.setUseParentHandlers(false);
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setFormatter(new LogFormatter());
+        LOGGER.addHandler(handler);
+    }
 
     /**
      * Indicates the availability of SwingX on the class path.
@@ -149,10 +160,10 @@ public class RepaintManagerUtils {
     private static boolean isSwingXAvailable() {
         try {
             Class<?> clazz = ForwardingRepaintManager.class;
-            System.out.println("SwingX is available");
+            LOGGER.info("SwingX is available");
             return clazz != null;
         } catch (Throwable t) {
-            System.out.println("SwingX is not available");
+            LOGGER.info("SwingX is not available");
             return false;
         }
     }

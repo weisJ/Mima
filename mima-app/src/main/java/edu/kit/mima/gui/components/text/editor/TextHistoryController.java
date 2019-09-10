@@ -1,9 +1,9 @@
 package edu.kit.mima.gui.components.text.editor;
 
+import edu.kit.mima.api.history.EditorHistory;
 import edu.kit.mima.api.history.FileHistoryObject;
 import edu.kit.mima.api.history.FileHistoryObject.ChangeType;
 import edu.kit.mima.api.history.History;
-import edu.kit.mima.api.history.LinkedHistory;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,7 +33,7 @@ public class TextHistoryController {
     @Contract(pure = true)
     public TextHistoryController(final JTextComponent textComponent, final int historyLength) {
         this.textComponent = textComponent;
-        history = new LinkedHistory<>(historyLength);
+        history = new EditorHistory(historyLength);
         active = true;
     }
 

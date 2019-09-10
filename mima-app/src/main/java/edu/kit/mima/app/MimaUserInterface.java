@@ -1,15 +1,17 @@
 package edu.kit.mima.app;
 
+import edu.kit.mima.gui.icon.Icons;
 import edu.kit.mima.App;
 import edu.kit.mima.api.event.SubscriptionManager;
 import edu.kit.mima.api.event.SwingSubscriber;
+import edu.kit.mima.api.util.FileName;
 import edu.kit.mima.core.Debugger;
 import edu.kit.mima.core.MimaCompiler;
 import edu.kit.mima.core.MimaRunner;
 import edu.kit.mima.core.token.Token;
 import edu.kit.mima.gui.EditorHotKeys;
-import edu.kit.mima.gui.components.ProtectedScrollTable;
-import edu.kit.mima.gui.components.alignment.Alignment;
+import edu.kit.mima.gui.components.ImmutableScrollTable;
+import com.weis.darklaf.components.alignment.Alignment;
 import edu.kit.mima.gui.components.console.Console;
 import edu.kit.mima.gui.components.console.SystemConsole;
 import edu.kit.mima.gui.components.filetree.FileTree;
@@ -20,7 +22,6 @@ import edu.kit.mima.gui.components.tabframe.TabFrame;
 import edu.kit.mima.gui.components.tabframe.popuptab.DefaultPopupComponent;
 import edu.kit.mima.gui.components.tabframe.popuptab.TerminalPopupComponent;
 import edu.kit.mima.gui.components.text.editor.Editor;
-import edu.kit.mima.gui.icons.Icons;
 import edu.kit.mima.gui.menu.Help;
 import edu.kit.mima.gui.menu.settings.Settings;
 import edu.kit.mima.gui.persist.PersistenceManager;
@@ -29,7 +30,6 @@ import edu.kit.mima.gui.view.MemoryTableView;
 import edu.kit.mima.loading.FileManager;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
-import edu.kit.mima.util.FileName;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -71,7 +71,7 @@ public final class MimaUserInterface extends JFrame {
     private final MemoryTableView memoryView;
     private final AssemblerView assemblerView;
     @NotNull
-    private final ProtectedScrollTable memoryTable;
+    private final ImmutableScrollTable memoryTable;
     private JPanel buttonArea;
     private JPanel controlPanel;
 
@@ -84,7 +84,7 @@ public final class MimaUserInterface extends JFrame {
         filePathDisplay = new MimaFileDisplay(fileActions).getDisplay();
         tabbedEditor = editorManager.getTabbedEditor();
         console = new Console();
-        memoryTable = new ProtectedScrollTable(new String[]{"Address", "Value"},
+        memoryTable = new ImmutableScrollTable(new String[]{"Address", "Value"},
                                                100, new Insets(0, 5, 0, 0));
         memoryView = new MemoryTableView(mimaRunner, memoryTable);
         assemblerView = new AssemblerView();

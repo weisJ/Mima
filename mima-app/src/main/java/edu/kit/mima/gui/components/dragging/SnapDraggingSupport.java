@@ -31,6 +31,7 @@ public class SnapDraggingSupport extends DraggingSupport {
      * @param snapRectSupplier the supplier for the snap rectangle.
      * @param opacityInside    the opacity for inside the parent frame.
      * @param opacityOutside   the opacity for outside the parent frame.
+     * @param snapRectGrow     buffer outside of snap rectangle to still snap into place.
      */
     public SnapDraggingSupport(
             final Component component,
@@ -93,10 +94,8 @@ public class SnapDraggingSupport extends DraggingSupport {
             var snapBound = snapRectSupplier.get();
             var compPos = snapBound.getLocation();
             SwingUtilities.convertPointToScreen(compPos, component);
-            point.x =
-                    Math.min(Math.max(compPos.x, point.x), compPos.x + snapBound.width - getDragWidth());
-            point.y =
-                    Math.min(Math.max(compPos.y, point.y), compPos.y + snapBound.height - getDragHeight());
+            point.x = Math.min(Math.max(compPos.x, point.x), compPos.x + snapBound.width - getDragWidth());
+            point.y = Math.min(Math.max(compPos.y, point.y), compPos.y + snapBound.height - getDragHeight());
             dragLocation.setLocation(point);
         }
     }

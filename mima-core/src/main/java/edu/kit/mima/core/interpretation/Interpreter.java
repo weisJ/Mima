@@ -1,6 +1,7 @@
 package edu.kit.mima.core.interpretation;
 
 import edu.kit.mima.api.lambda.LambdaUtil;
+import edu.kit.mima.api.logging.LogFormatter;
 import edu.kit.mima.api.util.Tuple;
 import edu.kit.mima.core.controller.DebugController;
 import edu.kit.mima.core.data.MachineWord;
@@ -25,6 +26,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Logger;
 
 /**
  * Interprets the result of {@link Parser}.
@@ -33,6 +36,14 @@ import java.util.function.Consumer;
  * @since 2018
  */
 public class Interpreter {
+
+    private static final Logger LOGGER = Logger.getLogger(Interpreter.class.getName());
+    static {
+        LOGGER.setUseParentHandlers(false);
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setFormatter(new LogFormatter());
+        LOGGER.addHandler(handler);
+    }
 
     private static final Value<MachineWord> VOID = new Value<>(ValueType.VOID,
                                                                new MachineWord(0, 0));
@@ -246,7 +257,7 @@ public class Interpreter {
                                   @NotNull final Environment environment,
                                   final Consumer<Value<?>> callback) throws Continuation {
         stackGuard.guard(() -> evaluateFunction(value, environment, callback));
-        System.out.println("Evaluating" + value.simpleName());
+        LOGGER.info("Evaluating " + value.simpleName());
         List<Token<?>> arguments = value.getSecond().getValue();
         BiConsumer<List<Value<?>>, Integer> loop = LambdaUtil.createRecursive(func -> (args, i) -> {
             if (i < arguments.size()) {

@@ -32,7 +32,7 @@ public final class MimaCoreDefaults {
      *
      * @param logger logger to use.
      */
-    public static void setLogger(@Nullable Logger logger) {
+    public static void setLogger(@Nullable final Logger logger) {
         MimaCoreDefaults.logger = Objects.requireNonNullElseGet(logger, DefaultLogger::new);
     }
 }

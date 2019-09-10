@@ -3,6 +3,7 @@ package edu.kit.mima.gui.persist;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import java.awt.*;
 
 /**
  * {@link JSplitPane} that has persistable divider location.
@@ -15,6 +16,8 @@ public class PersistentSplitPane extends JSplitPane implements Persistable {
     private final PersistenceInfo persistenceInfo;
     private String identifier;
     private boolean persistable;
+    private double proportionalLocation;
+    private boolean proportionalLocationSet = false;
 
     /**
      * Create new SplitPane that has a persistable divider location.
@@ -23,6 +26,23 @@ public class PersistentSplitPane extends JSplitPane implements Persistable {
         persistenceInfo = new PersistenceInfo();
         identifier = "";
         persistable = false;
+    }
+
+    @Override
+    public void setDividerLocation(final double proportionalLocation) {
+        super.setDividerLocation(proportionalLocation);
+        this.proportionalLocation = proportionalLocation;
+        this.proportionalLocationSet = true;
+    }
+
+    @Override
+    public void paint(final Graphics g) {
+        if (proportionalLocationSet) {
+            setDividerLocation(proportionalLocation);
+            proportionalLocationSet = false;
+        }
+        super.paint(g);
+
     }
 
     @Override

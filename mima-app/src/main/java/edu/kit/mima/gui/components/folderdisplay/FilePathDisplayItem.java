@@ -3,7 +3,7 @@ package edu.kit.mima.gui.components.folderdisplay;
 import edu.kit.mima.annotations.ContextManager;
 import edu.kit.mima.gui.components.IconPanel;
 import edu.kit.mima.gui.components.listeners.FilePopupActionHandler;
-import edu.kit.mima.gui.icons.Icons;
+import edu.kit.mima.util.IconUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,7 +34,7 @@ public class FilePathDisplayItem extends JPanel {
      */
     /*default*/ FilePathDisplayItem(final String name, @NotNull final File file,
                                     @NotNull final FilePopupActionHandler handler) {
-        this(name, file, Icons.forFile(file), handler);
+        this(name, file, IconUtil.forFile(file), handler);
     }
 
     /**

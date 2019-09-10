@@ -1,7 +1,7 @@
 package edu.kit.mima.gui.components.tabframe;
 
-import edu.kit.mima.gui.components.alignment.Alignment;
-import edu.kit.mima.gui.components.border.MutableLineBorder;
+import com.weis.darklaf.components.alignment.Alignment;
+import com.weis.darklaf.components.border.MutableLineBorder;
 import edu.kit.mima.gui.components.tabframe.popuptab.PopupComponent;
 import org.jdesktop.jxlayer.JXLayer;
 import org.jetbrains.annotations.Contract;
@@ -68,7 +68,6 @@ public class TabFrameLayout implements LayoutManager {
         tabFrame.add(rotatePaneLeft);
         tabFrame.add(rotatePaneRight);
 
-
         topBorder = new MutableLineBorder(0, 0, 1, 0, lineColor);
         bottomBorder = new MutableLineBorder(1, 0, 0, 0, lineColor);
         rightBorder = new MutableLineBorder(0, 0, 1, 0, lineColor);
@@ -109,7 +108,7 @@ public class TabFrameLayout implements LayoutManager {
             @Override
             public void actionPerformed(final ActionEvent e) {
                 tabComponent.setSelected(false);
-                notifySelectChange(tabComponent);
+                notifySelectionChange(tabComponent);
             }
         });
         c.setEnabled(false);
@@ -380,7 +379,7 @@ public class TabFrameLayout implements LayoutManager {
         content.updateSizes();
     }
 
-    public void notifySelectChange(final TabFrameTabComponent tabComponent) {
+    public void notifySelectionChange(final TabFrameTabComponent tabComponent) {
         if (tabComponent == null) {
             return;
         }
@@ -416,7 +415,7 @@ public class TabFrameLayout implements LayoutManager {
         content.setContentPane(c);
     }
 
-    final class TabArea extends JPanel {
+    private final class TabArea extends JPanel {
 
         private TabArea() {
             setLayout(null);

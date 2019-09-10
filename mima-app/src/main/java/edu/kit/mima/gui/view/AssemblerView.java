@@ -1,11 +1,11 @@
 package edu.kit.mima.gui.view;
 
+import com.weis.darklaf.components.OverlayScrollPane;
 import edu.kit.mima.core.instruction.MimaXInstruction;
 import edu.kit.mima.core.parsing.Parser;
 import edu.kit.mima.core.query.programquery.ProgramQuery;
 import edu.kit.mima.core.token.Token;
 import edu.kit.mima.core.token.TokenType;
-import edu.kit.mima.gui.components.BorderlessScrollPane;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  * @author Jannis Weis
  * @since 2019
  */
-public class AssemblerView extends BorderlessScrollPane {
+public class AssemblerView extends OverlayScrollPane {
 
     private static final int FONT_SIZE = 12;
     private final JTextArea textArea;

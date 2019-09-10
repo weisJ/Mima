@@ -6,11 +6,11 @@ import edu.kit.mima.core.MimaConstants;
 import edu.kit.mima.gui.EditorHotKeys;
 import edu.kit.mima.gui.components.tabbedpane.EditorTabbedPane;
 import edu.kit.mima.gui.components.text.editor.Editor;
-import edu.kit.mima.gui.icons.Icons;
 import edu.kit.mima.highlighter.MimaHighlighter;
 import edu.kit.mima.loading.FileManager;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
+import edu.kit.mima.util.IconUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -138,7 +138,7 @@ public class MimaEditorManager implements AutoCloseable {
                           pref.readInteger(PropertyKey.EDITOR_HISTORY_SIZE));
         lastFile = lastFile.substring(Math.max(Math.min(lastFile.lastIndexOf('\\') + 1,
                                                         lastFile.length() - 1), 0));
-        tabbedEditor.addTab(lastFile, Icons.forFile(lastFile), editor);
+        tabbedEditor.addTab(lastFile, IconUtil.forFile(lastFile), editor);
         fileManagers.put(editor, fileManager);
     }
 

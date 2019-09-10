@@ -31,6 +31,7 @@
 
 package org.pbjar.jxlayer.plaf.ext.transform;
 
+import com.weis.darklaf.LogFormatter;
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.LayerUI;
 import org.jetbrains.annotations.NotNull;
@@ -41,6 +42,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Logger;
 
 /**
  * To avoid duplicate code, this class implements the actual logic for {@link TransformRPMSwingX}
@@ -49,6 +52,16 @@ import java.lang.reflect.Method;
  * @author Piet Blok
  */
 public final class TransformRPMImpl {
+
+    private static final Logger LOGGER = Logger.getLogger(TransformRPMImpl.class.getName());
+
+    static {
+        LOGGER.setUseParentHandlers(false);
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setFormatter(new LogFormatter());
+        LOGGER.addHandler(handler);
+    }
+
 
     /**
      * A flag, indicating whether or not a very dirty initialization on created {@link
@@ -92,8 +105,7 @@ public final class TransformRPMImpl {
                 TransformUI ui = (TransformUI) layerUI;
                 Point point = aComponent.getLocationOnScreen();
                 SwingUtilities.convertPointFromScreen(point, layer);
-                Rectangle transformPortRegion = ui.transform(new Rectangle(x
-                                                                           + point.x, y + point.y, w, h),
+                Rectangle transformPortRegion = ui.transform(new Rectangle(x + point.x, y + point.y, w, h),
                                                              (JXLayer<JComponent>) layer);
                 manager.addDirtyRegion(layer,
                                        transformPortRegion.x, transformPortRegion.y,
@@ -118,44 +130,37 @@ public final class TransformRPMImpl {
             Class<RepaintManager> rpmClass = RepaintManager.class;
             try {
 
-                Field fieldBufferStrategyType = rpmClass
-                                                        .getDeclaredField("bufferStrategyType");
-                Field fieldPaintManager = rpmClass
-                                                  .getDeclaredField("paintManager");
-                Method methodGetPaintManager = rpmClass
-                                                       .getDeclaredMethod("getPaintManager");
+                Field fieldBufferStrategyType = rpmClass.getDeclaredField("bufferStrategyType");
+                Field fieldPaintManager = rpmClass.getDeclaredField("paintManager");
+                Method methodGetPaintManager = rpmClass.getDeclaredMethod("getPaintManager");
 
                 fieldBufferStrategyType.setAccessible(true);
                 fieldPaintManager.setAccessible(true);
                 methodGetPaintManager.setAccessible(true);
 
-                Object paintManager = methodGetPaintManager
-                                              .invoke(sourceManager);
-                short bufferStrategyType = (Short) fieldBufferStrategyType
-                                                           .get(sourceManager);
+                Object paintManager = methodGetPaintManager.invoke(sourceManager);
+                short bufferStrategyType = (Short) fieldBufferStrategyType.get(sourceManager);
 
-                fieldBufferStrategyType.set(destinationManager,
-                                            bufferStrategyType);
+                fieldBufferStrategyType.set(destinationManager, bufferStrategyType);
                 fieldPaintManager.set(destinationManager, paintManager);
 
                 fieldBufferStrategyType.setAccessible(false);
                 fieldPaintManager.setAccessible(false);
                 methodGetPaintManager.setAccessible(false);
 
-                System.out.println("Copied paintManager of type: "
-                                   + paintManager.getClass().getName());
+                LOGGER.warning("Copied paintManager of type: " + paintManager.getClass().getName());
                 switch (bufferStrategyType) {
-                    case (0) -> System.out.println("Copied bufferStrategyType "
-                                                   + bufferStrategyType
-                                                   + ": BUFFER_STRATEGY_NOT_SPECIFIED");
-                    case (1) -> System.out.println("Copied bufferStrategyType "
-                                                   + bufferStrategyType
-                                                   + ": BUFFER_STRATEGY_SPECIFIED_ON");
-                    case (2) -> System.out.println("Copied bufferStrategyType "
-                                                   + bufferStrategyType
-                                                   + ": BUFFER_STRATEGY_SPECIFIED_OFF");
-                    default -> System.out.println("Copied bufferStrategyType "
-                                                  + bufferStrategyType + ": ???");
+                    case (0) -> LOGGER.warning("Copied bufferStrategyType "
+                                               + bufferStrategyType
+                                               + ": BUFFER_STRATEGY_NOT_SPECIFIED");
+                    case (1) -> LOGGER.warning("Copied bufferStrategyType "
+                                               + bufferStrategyType
+                                               + ": BUFFER_STRATEGY_SPECIFIED_ON");
+                    case (2) -> LOGGER.warning("Copied bufferStrategyType "
+                                               + bufferStrategyType
+                                               + ": BUFFER_STRATEGY_SPECIFIED_OFF");
+                    default -> LOGGER.warning("Copied bufferStrategyType "
+                                              + bufferStrategyType + ": ???");
                 }
             } catch (Throwable t) {
                 t.printStackTrace(System.out);

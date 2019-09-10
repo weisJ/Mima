@@ -1,12 +1,12 @@
 package edu.kit.mima.gui.context;
 
+import edu.kit.mima.gui.icon.Icons;
+import com.weis.darklaf.icons.UIAwareIcon;
 import edu.kit.mima.annotations.Context;
 import edu.kit.mima.annotations.ReflectionCall;
-import edu.kit.mima.gui.components.alignment.Alignment;
+import com.weis.darklaf.components.alignment.Alignment;
 import edu.kit.mima.gui.components.listeners.PopupListener;
 import edu.kit.mima.gui.components.tabframe.TabFrameTabComponent;
-import edu.kit.mima.gui.icons.Icons;
-import edu.kit.mima.gui.icons.UIAwareIcon;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 

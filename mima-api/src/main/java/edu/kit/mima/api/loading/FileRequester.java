@@ -1,6 +1,7 @@
 package edu.kit.mima.api.loading;
 
 import edu.kit.mima.api.lambda.LambdaUtil;
+import edu.kit.mima.api.util.FileName;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -49,7 +50,7 @@ public class FileRequester {
                             @NotNull final Runnable abortHandler) {
         try {
             Optional.ofNullable(requestPath(searchPath, new String[]{extension}, abortHandler))
-                    .map(p -> !p.endsWith(extension) ? p + '.' + extension : p).stream()
+                    .map(p -> FileName.getBaseName(p) + '.' + extension).stream()
                     .peek(manager::onSave)
                     .peek(LambdaUtil.reduceFirst(LambdaUtil.wrap(IoTools::saveFile), text))
                     .forEach(p -> manager.afterSave());

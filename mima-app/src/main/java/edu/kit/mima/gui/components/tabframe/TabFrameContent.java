@@ -1,12 +1,12 @@
 package edu.kit.mima.gui.components.tabframe;
 
-import edu.kit.mima.gui.components.SeamlessSplitPane;
-import edu.kit.mima.gui.components.alignment.Alignment;
+import com.weis.darklaf.components.alignment.Alignment;
+import edu.kit.mima.gui.components.Insets2D;
 import edu.kit.mima.gui.components.listeners.AncestorAdapter;
+import edu.kit.mima.gui.components.split.SeamlessSplitPane;
 import edu.kit.mima.gui.components.tabframe.popuptab.PopupComponent;
 import edu.kit.mima.gui.persist.Persistable;
 import edu.kit.mima.gui.persist.PersistenceInfo;
-import org.apache.poi.sl.usermodel.Insets2D;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -362,7 +362,7 @@ public class TabFrameContent extends JPanel implements Persistable {
 
     @Override
     public void loadState(final PersistenceInfo info) {
-        setupSplitPanes((s, o) -> s.loadState(info.getSubTree(s.getIdentifier())), null);
+        setupSplitPanes((s, o) -> s.loadState(info.getSubTree(s.getIdentifier())), 0);
         setupSplitterPanes((s, o) -> s.loadState(info.getSubTree(s.getIdentifier())), null);
     }
 

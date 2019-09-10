@@ -14,7 +14,6 @@ limitations under the License.
 
 package edu.kit.mima.gui.components.text;
 
-import com.bulenkov.iconloader.util.JBInsets;
 import com.intellij.util.ui.UIUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,7 +21,6 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyListener;
 
 /**
@@ -30,20 +28,18 @@ import java.awt.event.KeyListener;
  */
 public class SearchTextField extends JPanel {
     @NotNull
-    private final JTextField myTextField;
+    private final JTextField textField;
 
     /**
      * Create new TextField that represents a search field.
      */
     public SearchTextField() {
         super(new BorderLayout());
-        myTextField = new JTextField();
-        myTextField.setColumns(15);
-        add(myTextField, BorderLayout.CENTER);
+        textField = new JTextField();
+        textField.setColumns(15);
+        add(textField, BorderLayout.CENTER);
 
-        myTextField.putClientProperty("JTextField.variant", "search");
-        myTextField.putClientProperty(
-                "JTextField.Search.CancelAction", (ActionListener) e -> myTextField.setText(""));
+        textField.putClientProperty("JTextField.variant", "search");
     }
 
     /**
@@ -62,6 +58,15 @@ public class SearchTextField extends JPanel {
      */
     public void removeDocumentListener(final DocumentListener listener) {
         getTextEditor().getDocument().removeDocumentListener(listener);
+    }
+
+    /**
+     * Add capability for a history popup.
+     *
+     * @param menu the popup to use.
+     */
+    public void addHistoryPopup(final JPopupMenu menu) {
+        textField.putClientProperty("JTextField.Search.FindPopup", menu);
     }
 
     /**
@@ -105,12 +110,12 @@ public class SearchTextField extends JPanel {
      */
     @NotNull
     public JTextField getTextEditor() {
-        return myTextField;
+        return textField;
     }
 
     @Override
     public boolean requestFocusInWindow() {
-        return myTextField.requestFocusInWindow();
+        return textField.requestFocusInWindow();
     }
 
     @Override
@@ -118,7 +123,9 @@ public class SearchTextField extends JPanel {
         Dimension size = super.getPreferredSize();
         Border border = super.getBorder();
         if (border != null && UIUtil.isUnderAquaLookAndFeel()) {
-            JBInsets.addTo(size, border.getBorderInsets(this));
+            var insets = border.getBorderInsets(this);
+            size.width += insets.left + insets.right;
+            size.height += insets.top + insets.bottom;
         }
         return size;
     }

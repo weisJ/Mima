@@ -1,6 +1,6 @@
 package edu.kit.mima.gui.components.tabframe;
 
-import edu.kit.mima.gui.components.alignment.Alignment;
+import com.weis.darklaf.components.alignment.Alignment;
 import edu.kit.mima.gui.components.tabframe.popuptab.PopupComponent;
 import org.jetbrains.annotations.NotNull;
 

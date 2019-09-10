@@ -1,7 +1,7 @@
 package edu.kit.mima.gui.components;
 
-import edu.kit.mima.gui.components.alignment.Alignment;
-import edu.kit.mima.gui.icons.SVGIcon;
+import com.weis.darklaf.icons.DarkSVGIcon;
+import com.weis.darklaf.components.alignment.Alignment;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -56,8 +56,8 @@ public class IconPanel extends JComponent {
     @Override
     public void paint(@NotNull final Graphics g) {
         super.paint(g);
-        if (icon instanceof SVGIcon) {
-            ((SVGIcon) icon).paintIcon(this, g, 0, 0, getAngle());
+        if (icon instanceof DarkSVGIcon) {
+            ((DarkSVGIcon) icon).paintIcon(this, g, 0, 0, getAngle());
         } else {
             Graphics2D g2 = (Graphics2D) g.create();
             AffineTransform transform = new AffineTransform();

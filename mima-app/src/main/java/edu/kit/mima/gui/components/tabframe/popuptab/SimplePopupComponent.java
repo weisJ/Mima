@@ -1,18 +1,18 @@
 package edu.kit.mima.gui.components.tabframe.popuptab;
 
-import edu.kit.mima.gui.components.alignment.Alignment;
+import edu.kit.mima.gui.icon.Icons;
+import com.weis.darklaf.components.alignment.Alignment;
 import edu.kit.mima.gui.components.button.ClickAction;
 import edu.kit.mima.gui.components.button.IconButton;
 import edu.kit.mima.gui.components.tooltip.DefaultTooltipWindow;
 import edu.kit.mima.gui.components.tooltip.TooltipUtil;
-import edu.kit.mima.gui.icons.Icons;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.FocusManager;
 import javax.swing.*;
 import javax.swing.plaf.UIResource;
 import java.awt.*;
 import java.awt.event.AWTEventListener;
-import java.awt.event.MouseEvent;
 
 /**
  * @author Jannis Weis
@@ -23,39 +23,23 @@ public abstract class SimplePopupComponent extends PopupComponent {
     protected final JButton closeButton;
     protected Color headerFocusBackground;
     protected Color headerBackground;
-    private boolean open;
-    private boolean locked = true;
 
     public SimplePopupComponent() {
         closeButton = new PopupButton(Icons.COLLAPSE);
-        closeButton.addActionListener(e -> open = false);
         var accelerator = "shift pressed ESCAPE";
         getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(accelerator), accelerator);
         getActionMap().put(accelerator, new ClickAction(closeButton));
         TooltipUtil.createDefaultTooltip(closeButton, new DefaultTooltipWindow("Hide (shift ESC)"));
-
-        Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
-            private boolean pressed;
-
-            @Override
-            public void eventDispatched(@NotNull final AWTEvent event) {
-                if (!SwingUtilities.isLeftMouseButton((MouseEvent) event)) {
-                    return;
-                }
-                if (locked) {
-                    requestFocus();
-                    locked = false;
-                    return;
-                }
-                if (event.getID() == MouseEvent.MOUSE_CLICKED && open) {
-                    setFocus(pressed && mouseInside());
-                    pressed = false;
-                } else if (event.getID() == MouseEvent.MOUSE_PRESSED) {
-                    pressed = mouseInside();
-                }
+        AWTEventListener eventListener = event -> {
+            var owner = FocusManager.getCurrentManager().getFocusOwner();
+            if ((owner instanceof JRootPane && (SwingUtilities.isDescendingFrom(SimplePopupComponent.this, owner)))
+                || owner == null) {
+                return;
             }
-        }, AWTEvent.MOUSE_EVENT_MASK);
+            setFocus(SwingUtilities.isDescendingFrom(owner, SimplePopupComponent.this));
+        };
+        Toolkit.getDefaultToolkit().addAWTEventListener(eventListener, AWTEvent.FOCUS_EVENT_MASK);
     }
 
     @Override
@@ -65,12 +49,6 @@ public abstract class SimplePopupComponent extends PopupComponent {
         headerFocusBackground = UIManager.getColor("TabFramePopup.focus");
     }
 
-    private boolean mouseInside() {
-        var mousePos = MouseInfo.getPointerInfo().getLocation();
-        SwingUtilities.convertPointFromScreen(mousePos, SimplePopupComponent.this);
-        return contains(mousePos);
-    }
-
     @Override
     public void setCloseAction(final Action action) {
         closeButton.setAction(action);
@@ -78,12 +56,6 @@ public abstract class SimplePopupComponent extends PopupComponent {
 
     @Override
     public void open() {
-        open = true;
-        /*
-         * Lock first mouse event as the opening click would remove the focus
-         * highlighting.
-         */
-        locked = true;
     }
 
     @Override
@@ -129,7 +101,7 @@ public abstract class SimplePopupComponent extends PopupComponent {
         }
     }
 
-    private final class PopupButton extends IconButton implements UIResource {
+    private static final class PopupButton extends IconButton implements UIResource {
 
         private PopupButton(@NotNull final Icon icon) {
             super(icon);

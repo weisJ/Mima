@@ -1,9 +1,15 @@
 package edu.kit.mima.gui.components.dialog;
 
 import com.intellij.ui.DocumentAdapter;
-import edu.kit.mima.gui.components.alignment.Alignment;
+import com.weis.darklaf.icons.EmptyIcon;
+import edu.kit.mima.gui.icon.Icons;
+import edu.kit.mima.api.util.FileName;
+import com.weis.darklaf.components.alignment.Alignment;
+import com.weis.darklaf.components.TextFieldHistory;
 import edu.kit.mima.gui.components.tooltip.DefaultTooltipWindow;
-import edu.kit.mima.gui.icons.Icons;
+import edu.kit.mima.util.Format;
+import edu.kit.mima.util.IconUtil;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -21,23 +27,24 @@ import java.io.File;
 public final class FileDialog extends JOptionPane {
 
     private static final FileDialog dialog = new FileDialog();
+    private static final TextFieldHistory directoryHistory = new TextFieldHistory(null, 20, 100);
     private final DefaultTooltipWindow errorTooltip;
     private final DefaultTooltipWindow.TooltipPanel tooltipPanel;
     private final JComponent glassPane;
     private File directory;
     private String extension;
     private JTextField textField;
+    private JLabel inputDescriptor;
     private JButton okButton;
     private JButton cancelButton;
     private boolean error = false;
     private boolean wantDirectory;
+    private boolean isDestinationChooser;
 
 
     private FileDialog() {
         super("Enter new file name:", JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
         setWantsInput(true);
-        textField.setColumns(30);
-
         errorTooltip = new DefaultTooltipWindow("");
         errorTooltip.setAlignment(Alignment.CENTER);
         errorTooltip.setTooltipFont(errorTooltip.getTooltipFont().deriveFont(11.0f));
@@ -57,7 +64,6 @@ public final class FileDialog extends JOptionPane {
                 tooltipPanel.hideAndShow(1000, FileDialog.this);
             }
         });
-
 
         textField.getDocument().addDocumentListener(new DocumentAdapter() {
             @Override
@@ -86,33 +92,57 @@ public final class FileDialog extends JOptionPane {
         });
     }
 
+    public static File showCopyFileDialog(final Component parentComponent, final File folder, final File initial) {
+        return showDialog(parentComponent, folder, null, "Copy File", initial.getName(),
+                          String.format(Format.BOLD, "Copy file " + initial.getAbsolutePath()),
+                          "New Name", false, false, false);
+    }
+
+    public static File showCopyFilesDialog(final Component parentComponent, final File folder) {
+        return showDialog(parentComponent, folder, null, "Copy File", folder.getAbsolutePath(),
+                          String.format(Format.BOLD, "Copy files to " + folder.getAbsolutePath()),
+                          "Copy to", false, false, true);
+    }
+
     public static File showFileDialog(final Component parentComponent, final File folder, final String extension) {
-        return showDialog(parentComponent, folder, extension, "New File", false);
+        return showDialog(parentComponent, folder, extension, "New File", "",
+                          "Enter new file name:", "Name", false,
+                          true, false);
     }
 
     public static File showFolderDialog(final Component parentComponent, final File folder) {
-        return showDialog(parentComponent, folder, null, "New Folder", true);
+        return showDialog(parentComponent, folder, null, "New Folder", "",
+                          "Enter new folder name:", "Name", true,
+                          true, false);
 
     }
 
     private static File showDialog(final Component parentComponent, final File folder,
-                                   final String extension, final String title, final boolean wantDirectory) {
+                                   final String extension, final String title, final String initialValue,
+                                   final String message, final String inputLabel,
+                                   final boolean wantDirectory,
+                                   final boolean showIcon,
+                                   final boolean destination) {
         String titleMessage = title;
         if (extension != null && !extension.isEmpty()) {
             titleMessage += " (." + extension + ')';
         }
-        if (wantDirectory) {
-            dialog.setMessage(new JLabel("Enter new folder name:", Icons.FOLDER, SwingConstants.LEFT));
-        } else {
-            Icon icon = extension == null || extension.isBlank() ? Icons.GENERAL_FILE
-                                                                 : Icons.forFile("." + extension);
-            dialog.setMessage(new JLabel("Enter new file name:", icon, SwingConstants.LEFT));
-        }
-
+        Icon icon = !showIcon
+                    ? EmptyIcon.create(0)
+                    : wantDirectory
+                      ? Icons.FOLDER
+                      : extension == null || extension.isBlank()
+                        ? Icons.GENERAL_FILE
+                        : IconUtil.forFile("." + extension);
+        var panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.LINE_AXIS));
+        panel.add(new JLabel(message, icon, SwingConstants.LEFT));
+        dialog.setMessage(panel);
         dialog.directory = folder.isDirectory() ? folder : folder.getParentFile();
         dialog.extension = extension;
         dialog.wantDirectory = wantDirectory;
-        dialog.prepare();
+        dialog.isDestinationChooser = destination;
+        dialog.prepare(initialValue, inputLabel);
 
         JDialog window = dialog.createDialog(parentComponent, titleMessage);
         window.setGlassPane(dialog.glassPane);
@@ -129,12 +159,13 @@ public final class FileDialog extends JOptionPane {
         return folder.toPath().resolve(ensureExtension((String) value, extension)).toFile();
     }
 
+    @Contract("_, null -> param1")
     private static String ensureExtension(String name, final String extension) {
         if (extension == null) {
             return name;
         }
         if (!extension.isEmpty()) {
-            if (!name.endsWith(extension)) {
+            if (!FileName.isExtension(name, extension)) {
                 name += "." + extension;
             }
         }
@@ -142,13 +173,20 @@ public final class FileDialog extends JOptionPane {
     }
 
     private boolean hasError(final String text) {
-        return (wantDirectory && text.contains("."))
-               || !text.isEmpty() && fileExists(directory, ensureExtension(text, extension));
+        if (!isDestinationChooser && FileName.isValidFileName(text)) {
+            if (!wantDirectory) {
+                return !text.isEmpty() && fileExists(directory, ensureExtension(text, extension));
+            }
+            return true;
+        }
+        return false;
     }
 
     private String getErrorMessage(final String text) {
         if (!wantDirectory) {
             return "A file with name '" + text + "' already exists.";
+        } else if (isDestinationChooser) {
+            return "Directory does not exist.";
         } else {
             if (text.contains(".")) {
                 return "Not a valid folder name.";
@@ -163,10 +201,17 @@ public final class FileDialog extends JOptionPane {
     }
 
 
-    private void prepare() {
-        textField.setText("");
+    private void prepare(final String initial, final String inputLabel) {
+        textField.setText(initial);
+        textField.setColumns(0);
+        inputDescriptor.setText(inputLabel);
         okButton.setEnabled(true);
         cancelButton.setEnabled(true);
+        if (isDestinationChooser) {
+            textField.putClientProperty("JTextField.Search.FindPopup", directoryHistory);
+        } else {
+            textField.putClientProperty("JTextField.Search.FindPopup", null);
+        }
     }
 
     @Override
@@ -178,9 +223,9 @@ public final class FileDialog extends JOptionPane {
 
         @Override
         protected Container createMessageArea() {
-            var container = super.createMessageArea();
+            JPanel cont = (JPanel) super.createMessageArea();
             textField = (JTextField) inputComponent;
-            return container;
+            return cont;
         }
 
         @Override
@@ -190,14 +235,23 @@ public final class FileDialog extends JOptionPane {
             cancelButton = (JButton) container.getComponent(1);
         }
 
+
         @Override
         protected Object getMessage() {
             var obj = super.getMessage();
+            var panel = new JPanel();
+            if (inputDescriptor == null) {
+                inputDescriptor = new JLabel();
+            }
+            panel.setLayout(new BoxLayout(panel, BoxLayout.LINE_AXIS));
+            panel.add(inputDescriptor);
             if (obj instanceof Object[]) {
                 var msg = (Object[]) obj;
-                return new Object[]{msg[0], createSeparator(), msg[1]};
+                panel.add(createSeparator());
+                panel.add((Component) msg[1]);
+                return new Object[]{msg[0], createSeparator(), panel};
             }
-            return obj;
+            return new Object[]{obj, createSeparator(), panel};
         }
 
         @Override
@@ -205,9 +259,15 @@ public final class FileDialog extends JOptionPane {
             return new JPanel() {
                 @Override
                 public Dimension getPreferredSize() {
-                    return new Dimension(0, 5);
+                    return new Dimension(5, 5);
                 }
             };
+        }
+
+        protected Container createButtonArea() {
+            var bottom = super.createButtonArea();
+            bottom.setLayout(new FlowLayout(FlowLayout.RIGHT));
+            return bottom;
         }
     }
 }

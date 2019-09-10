@@ -1,8 +1,8 @@
 package edu.kit.mima.gui.components.tooltip;
 
 import edu.kit.mima.gui.components.ShadowPane;
-import edu.kit.mima.gui.components.alignment.Alignment;
-import edu.kit.mima.gui.components.border.TextBubbleBorder;
+import com.weis.darklaf.components.alignment.Alignment;
+import com.weis.darklaf.components.border.TextBubbleBorder;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 

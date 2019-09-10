@@ -11,7 +11,7 @@ import edu.kit.mima.core.interpretation.InterpreterException;
 import edu.kit.mima.logger.LoadingIndicator;
 import edu.kit.mima.preferences.Preferences;
 import edu.kit.mima.preferences.PropertyKey;
-import edu.kit.mima.util.FileName;
+import edu.kit.mima.api.util.FileName;
 import org.jetbrains.annotations.Contract;
 
 /**

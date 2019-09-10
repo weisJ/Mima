@@ -1,11 +1,12 @@
 package edu.kit.mima;
 
-import edu.kit.mima.gui.icons.SVGIcon;
+import com.weis.darklaf.icons.DarkSVGIcon;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.Objects;
@@ -31,15 +32,15 @@ public class MimaSplash extends JWindow {
      *
      * @throws IOException if splash icons could not be loaded.
      */
-    public MimaSplash() throws IOException {
+    public MimaSplash() throws IOException, URISyntaxException {
         var dim = Toolkit.getDefaultToolkit().getScreenSize();
         splashDim = new Dimension((int) (dim.width / 2.5), (int) (dim.height / 2.5));
         int iw = splashDim.width / 4 - splashDim.width / 20;
-        image = new SVGIcon(
-                Objects.requireNonNull(App.class.getClassLoader().getResource("images/mima.svg")),
+        image = new DarkSVGIcon(
+                Objects.requireNonNull(App.class.getClassLoader().getResource("images/mima.svg")).toURI(),
                 iw,
-                iw,
-                true);
+                iw
+        );
         sum = loadSum();
         messageArea = new JTextArea();
         messageArea.setOpaque(false);
@@ -64,11 +65,11 @@ public class MimaSplash extends JWindow {
         setSize(splashDim);
     }
 
-    private Icon loadSum() throws IOException {
+    private Icon loadSum() throws URISyntaxException {
         int size = Math.min(splashDim.width, splashDim.height);
         int index = new Random().nextInt(17) + 1;
         final URL url = App.class.getClassLoader().getResource("splash/sum-" + index + ".svg");
-        return new SVGIcon(Objects.requireNonNull(url), size, size);
+        return new DarkSVGIcon(Objects.requireNonNull(url).toURI(), size, size);
     }
 
     /**

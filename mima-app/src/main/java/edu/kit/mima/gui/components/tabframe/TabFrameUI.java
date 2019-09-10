@@ -1,7 +1,7 @@
 package edu.kit.mima.gui.components.tabframe;
 
 import edu.kit.mima.annotations.ReflectionCall;
-import edu.kit.mima.gui.components.alignment.Alignment;
+import com.weis.darklaf.components.alignment.Alignment;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 

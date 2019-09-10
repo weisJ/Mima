@@ -1,9 +1,9 @@
 package edu.kit.mima.gui.components.tabbedpane;
 
+import com.weis.darklaf.components.ScrollPopupMenu;
+import edu.kit.mima.gui.icon.Icons;
 import edu.kit.mima.gui.components.button.IconButton;
 import edu.kit.mima.gui.components.listeners.PopupListener;
-import edu.kit.mima.gui.components.popupmenu.ScrollPopupMenu;
-import edu.kit.mima.gui.icons.Icons;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,13 +21,13 @@ import java.util.List;
  * @since 2019
  */
 public class TabContainer extends JPanel implements UIResource {
-    protected final DnDTabbedPane tabPane;
+    protected final DnDTabbedPane<?> tabPane;
     private final PopupListener listener;
     private final DefaultAddon stash;
     private final List<TabAddon> addons;
     private boolean notifyTabbedPane;
 
-    public TabContainer(final DnDTabbedPane tabPane) {
+    public TabContainer(final DnDTabbedPane<?> tabPane) {
         super(null);
         setOpaque(false);
         this.tabPane = tabPane;

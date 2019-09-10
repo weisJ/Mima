@@ -1,8 +1,12 @@
 package edu.kit.mima.gui.persist;
 
+import edu.kit.mima.app.MimaUserInterface;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -165,5 +169,27 @@ public final class PersistenceManager {
     public PersistenceInfo getStates(@NotNull final Persistable persistable, @NotNull final String prefix) {
         String key = prefix.isEmpty() ? persistable.getIdentifier() : prefix + '.' + persistable.getIdentifier();
         return stateInfo.getSubTree(key);
+    }
+
+    /**
+     * Load the gui state of the given frame. If the frame isn't visible the action is delegated to when the frame
+     * is first realized on screen,
+     *
+     * @param frame frame to load gui state of.
+     */
+    public void loadStates(final MimaUserInterface frame) {
+        if (frame.isVisible()) {
+            loadStates(frame.getName());
+        } else {
+            frame.addComponentListener(new ComponentAdapter() {
+                @Override
+                public void componentShown(final ComponentEvent e) {
+                    SwingUtilities.invokeLater(() -> {
+                        loadStates(frame.getName());
+                        frame.removeComponentListener(this);
+                    });
+                }
+            });
+        }
     }
 }

@@ -1,12 +1,12 @@
 package edu.kit.mima.gui.components.console.terminal;
 
+import com.weis.darklaf.components.OverlayScrollPane;
 import edu.kit.mima.api.history.History;
 import edu.kit.mima.api.history.LinkedHistory;
 import edu.kit.mima.api.lambda.CheckedRunnable;
 import edu.kit.mima.api.lambda.LambdaUtil;
 import edu.kit.mima.api.util.Tuple;
 import edu.kit.mima.api.util.ValueTuple;
-import edu.kit.mima.gui.components.BorderlessScrollPane;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,7 +30,7 @@ import java.util.Objects;
  * @author Jannis Weis
  * @since 2019
  */
-public class WindowsTerminal extends BorderlessScrollPane implements Terminal {
+public class WindowsTerminal extends OverlayScrollPane implements Terminal {
 
     private static final byte[] INPUT_INDICATOR = "|<< ".getBytes();
     private static final int PADDING = 100;

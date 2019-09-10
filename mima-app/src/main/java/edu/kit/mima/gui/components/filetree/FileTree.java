@@ -1,7 +1,7 @@
 package edu.kit.mima.gui.components.filetree;
 
+import com.weis.darklaf.components.OverlayScrollPane;
 import edu.kit.mima.annotations.ContextManager;
-import edu.kit.mima.gui.components.BorderlessScrollPane;
 import edu.kit.mima.gui.components.listeners.AncestorAdapter;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,7 +25,7 @@ import java.util.Optional;
 /**
  * Display a file system in a JTree view.
  */
-public class FileTree extends BorderlessScrollPane {
+public class FileTree extends OverlayScrollPane {
 
     private static final float FONT_SIZE = 13;
     private static final int ROW_HEIGHT = 20;
@@ -44,12 +44,12 @@ public class FileTree extends BorderlessScrollPane {
         setLayout(new BorderLayout());
 
         treeNodeMap = new HashMap<>();
-        tree = new JTree(addNodes(null, dir));
+        tree = new JTree(createNodes(null, dir));
         tree.putClientProperty("skinny", Boolean.FALSE);
         tree.setCellRenderer(new FileTreeCellRenderer(tree));
         tree.setFont(tree.getFont().deriveFont(FONT_SIZE));
         tree.setRowHeight(ROW_HEIGHT);
-        tree.setScrollsOnExpand(false);
+        tree.setScrollsOnExpand(true);
         tree.setEditable(false);
 
         ((BasicTreeUI) tree.getUI()).setLeftChildIndent(8);
@@ -92,7 +92,8 @@ public class FileTree extends BorderlessScrollPane {
     /**
      * Add nodes from under "dir" into curTop. Highly recursive.
      */
-    private FileTreeNode addNodes(final SortedTreeNode curTop, @NotNull final File dir) {
+    @NotNull
+    public FileTreeNode createNodes(final SortedTreeNode curTop, @NotNull final File dir) {
         FileTreeNode curDir = new FileTreeNode(dir);
         treeNodeMap.put(dir, curDir);
         if (curTop != null) {
@@ -109,7 +110,7 @@ public class FileTree extends BorderlessScrollPane {
                 continue;
             }
             if ((f).isDirectory()) {
-                addNodes(curDir, f);
+                createNodes(curDir, f);
             } else {
                 files.add(f);
             }
@@ -120,6 +121,10 @@ public class FileTree extends BorderlessScrollPane {
             curDir.add(node);
         }
         return curDir;
+    }
+
+    public void toggleNode(final File file, final boolean active) {
+        treeNodeMap.get(file).setActive(active);
     }
 
     /**
@@ -142,7 +147,7 @@ public class FileTree extends BorderlessScrollPane {
             return;
         }
         this.showHidden = showHidden;
-        tree.setModel(new DefaultTreeModel(addNodes(null, file)));
+        tree.setModel(new DefaultTreeModel(createNodes(null, file)));
     }
 
     /**

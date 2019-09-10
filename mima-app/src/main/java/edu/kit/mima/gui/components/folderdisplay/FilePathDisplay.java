@@ -1,10 +1,10 @@
 package edu.kit.mima.gui.components.folderdisplay;
 
-import com.intellij.openapi.util.io.FileUtil;
+import edu.kit.mima.gui.icon.Icons;
+import edu.kit.mima.api.util.FileName;
+import edu.kit.mima.api.util.FileUtility;
 import edu.kit.mima.gui.components.IconPanel;
 import edu.kit.mima.gui.components.listeners.FilePopupActionHandler;
-import edu.kit.mima.gui.icons.Icons;
-import edu.kit.mima.util.FileName;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -57,7 +57,7 @@ public class FilePathDisplay extends JPanel {
      */
     @SuppressWarnings("ValueOfIncrementOrDecrementUsed")
     public void setFile(@Nullable final File file) {
-        if (file == null || file.toString().isEmpty() || FileUtil.filesEqual(file, this.file)) {
+        if (file == null || file.toString().isEmpty() || FileUtility.filesEqual(file, this.file)) {
             return;
         }
         removeAll();

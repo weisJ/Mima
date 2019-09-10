@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
  * @author Jannis Weis
  * @since 2019
  */
-public interface History<T> {
+public interface History<T> extends Iterable<T> {
 
     String LENGTH_PROPERTY = "historyLength";
     String POSITION_PROPERTY = "historyPosition";

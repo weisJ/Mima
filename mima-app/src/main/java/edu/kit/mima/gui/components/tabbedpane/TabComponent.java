@@ -1,10 +1,10 @@
 package edu.kit.mima.gui.components.tabbedpane;
 
+import edu.kit.mima.gui.icon.Icons;
 import edu.kit.mima.gui.components.IconLabel;
 import edu.kit.mima.gui.components.button.IconButton;
 import edu.kit.mima.gui.components.tooltip.DefaultTooltipWindow;
 import edu.kit.mima.gui.components.tooltip.TooltipUtil;
-import edu.kit.mima.gui.icons.Icons;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

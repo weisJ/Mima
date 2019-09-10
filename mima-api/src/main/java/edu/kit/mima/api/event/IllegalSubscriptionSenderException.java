@@ -14,7 +14,7 @@ public class IllegalSubscriptionSenderException extends RuntimeException {
      *
      * @param message the exception message.
      */
-    public IllegalSubscriptionSenderException(String message) {
+    public IllegalSubscriptionSenderException(final String message) {
         super(message);
     }
 }

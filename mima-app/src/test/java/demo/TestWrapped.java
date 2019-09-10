@@ -34,7 +34,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * TabFrameDemo the wrapping of JXLayer's into one another.
+ * mima.TabFrameDemo the wrapping of JXLayer's into one another.
  *
  * <p>Run a web start demo: <a
  * href="http://www.pbjar.org/blogs/jxlayer/jxlayer40/WrappingDemo.jnlp"><IMG style="CLEAR: right"
@@ -79,8 +79,7 @@ public class TestWrapped {
             final String id,
             @NotNull final JMenu menubar,
             @NotNull final GeneralLayerUI<JComponent, ?>[] layerUIs) {
-        JTextPane originalComponent =
-                new JTextPane() {
+        JTextPane originalComponent = new JTextPane() {
 
                     private static final long serialVersionUID = 1L;
 

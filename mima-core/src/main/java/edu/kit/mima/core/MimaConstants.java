@@ -30,7 +30,7 @@ public final class MimaConstants {
      * @return Instructions set of {@link InstructionSet#EMPTY} if none is found.
      */
     @NotNull
-    public static InstructionSet instructionSetForFile(@NotNull File file) {
+    public static InstructionSet instructionSetForFile(@NotNull final File file) {
         return instructionSetForFile(file.getName());
     }
 

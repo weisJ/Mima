@@ -1,10 +1,13 @@
 package edu.kit.mima.annotations;
 
+import edu.kit.mima.api.logging.LogFormatter;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Logger;
 
 /**
  * The Manager for creating application contexts.
@@ -16,12 +19,20 @@ public final class ContextManager {
 
     private static final Map<Class<?>, Class<?>> menuMap = new HashMap<>();
 
+    private static final Logger LOGGER = Logger.getLogger(ContextManager.class.getName());
+    static {
+        LOGGER.setUseParentHandlers(false);
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setFormatter(new LogFormatter());
+        LOGGER.addHandler(handler);
+    }
+
     static {
         init();
     }
 
     public static void registerProvider(final Class<?> provider, final Class<?> providesFor) {
-        System.out.println("Registering " + provider + " for " + providesFor);
+        LOGGER.info("Registering provider class '" + provider + "' for target class '" + providesFor + "'");
         menuMap.put(providesFor, provider);
     }
 
@@ -50,8 +61,10 @@ public final class ContextManager {
             var creator = supplier.getDeclaredMethod("createContextMenu", targetType);
             creator.setAccessible(true);
             creator.invoke(null, target);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+        } catch (NoSuchMethodException | IllegalAccessException e) {
             throw new IllegalStateException("Found no provider for type " + target.getClass());
+        } catch (InvocationTargetException e) {
+            throw (RuntimeException) e.getTargetException();
         }
     }
 

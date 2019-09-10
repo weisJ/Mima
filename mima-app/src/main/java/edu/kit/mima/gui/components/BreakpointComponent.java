@@ -1,8 +1,8 @@
 package edu.kit.mima.gui.components;
 
+import edu.kit.mima.gui.icon.Icons;
 import edu.kit.mima.core.interpretation.Breakpoint;
 import edu.kit.mima.gui.components.text.numberedpane.NumberedTextPane;
-import edu.kit.mima.gui.icons.Icons;
 
 import javax.swing.*;
 import java.awt.*;

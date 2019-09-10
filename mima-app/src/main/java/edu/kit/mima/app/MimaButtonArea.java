@@ -1,7 +1,9 @@
 package edu.kit.mima.app;
 
+import edu.kit.mima.gui.icon.Icons;
 import edu.kit.mima.api.event.SimpleSubscriber;
 import edu.kit.mima.api.event.SubscriptionManager;
+import edu.kit.mima.api.history.EditorHistory;
 import edu.kit.mima.api.history.History;
 import edu.kit.mima.core.Debugger;
 import edu.kit.mima.core.MimaRunner;
@@ -9,7 +11,6 @@ import edu.kit.mima.gui.components.button.ButtonPanelBuilder;
 import edu.kit.mima.gui.components.button.IconButton;
 import edu.kit.mima.gui.components.button.RunnableIconButton;
 import edu.kit.mima.gui.components.tabbedpane.EditorTabbedPane;
-import edu.kit.mima.gui.icons.Icons;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -64,7 +65,7 @@ public class MimaButtonArea {
     private void createSubscriptions() {
         final var sm = SubscriptionManager.getCurrentManager();
 
-        sm.subscribe(new SimpleSubscriber<>((identifier, value) -> {
+        sm.subscribe(new SimpleSubscriber<>(EditorHistory.class, (identifier, value) -> {
                          var editor = mimaUI.currentEditor();
                          redo.setEnabled(editor != null && editor.canRedo());
                          undo.setEnabled(editor != null && editor.canUndo());

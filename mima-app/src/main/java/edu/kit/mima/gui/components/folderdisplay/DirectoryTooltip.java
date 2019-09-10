@@ -1,18 +1,17 @@
 package edu.kit.mima.gui.components.folderdisplay;
 
+import com.weis.darklaf.components.ScrollPopupMenu;
+import edu.kit.mima.api.util.FileName;
 import edu.kit.mima.core.MimaConstants;
 import edu.kit.mima.gui.components.listeners.FilePopupActionHandler;
-import edu.kit.mima.gui.components.popupmenu.ScrollPopupMenu;
-import edu.kit.mima.gui.icons.Icons;
-import edu.kit.mima.util.FileName;
-import edu.kit.mima.util.HSLColor;
+import edu.kit.mima.util.IconUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.util.Arrays;
 
 /**
  * DefaultTooltipWindow Menu for Displaying directories and files.
@@ -28,14 +27,21 @@ public class DirectoryTooltip extends ScrollPopupMenu {
      * @param directory parent directory
      * @param handler   action handler.
      */
-    public DirectoryTooltip(
-            @NotNull final File directory, @NotNull final FilePopupActionHandler handler) {
+    public DirectoryTooltip(@NotNull final File directory, @NotNull final FilePopupActionHandler handler) {
         super(300);
-        final var children = directory.listFiles();
+        final File[] children = directory.listFiles();
         if (children == null) {
             return;
         }
-        setBorder(new LineBorder(new HSLColor(getBackground()).adjustTone(60).getRGB(), 1));
+        Arrays.sort(children, (a,b) -> {
+            if ((a.isDirectory() && b.isDirectory()) || (a.isFile() && b.isFile())) {
+                return a.getName().compareTo(b.getName());
+            } else if (a.isDirectory()) {
+                return -1;
+            } else {
+                return 1;
+            }
+        });
         for (final var file : children) {
             if (!file.isHidden()) {
                 final var menuItem = new JMenuItem(new AbstractAction() {
@@ -49,7 +55,7 @@ public class DirectoryTooltip extends ScrollPopupMenu {
                     label = file.getName();
                 }
                 menuItem.setText(label);
-                menuItem.setIcon(Icons.forFile(file));
+                menuItem.setIcon(IconUtil.forFile(file));
                 add(menuItem);
             }
         }

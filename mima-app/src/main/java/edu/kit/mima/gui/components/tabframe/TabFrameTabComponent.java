@@ -2,7 +2,7 @@ package edu.kit.mima.gui.components.tabframe;
 
 import edu.kit.mima.annotations.ContextManager;
 import edu.kit.mima.gui.components.IconLabel;
-import edu.kit.mima.gui.components.alignment.Alignment;
+import com.weis.darklaf.components.alignment.Alignment;
 import edu.kit.mima.gui.components.listeners.HoverListener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -56,7 +56,7 @@ public class TabFrameTabComponent extends IconLabel {
             public void mouseClicked(final MouseEvent e) {
                 if (SwingUtilities.isLeftMouseButton(e)) {
                     setSelected(!selected);
-                    parent.notifySelectChange(TabFrameTabComponent.this);
+                    parent.notifySelectionChange(TabFrameTabComponent.this);
                 }
             }
         });
@@ -76,7 +76,7 @@ public class TabFrameTabComponent extends IconLabel {
 
     public void setPopupVisible(final boolean visible) {
         setSelected(visible);
-        parent.notifySelectChange(TabFrameTabComponent.this);
+        parent.notifySelectionChange(TabFrameTabComponent.this);
     }
 
     public int getIndex() {

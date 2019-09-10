@@ -1,6 +1,6 @@
 package edu.kit.mima.app;
 
-import edu.kit.mima.gui.components.border.AdaptiveLineBorder;
+import com.weis.darklaf.components.border.AdaptiveLineBorder;
 import edu.kit.mima.gui.menu.Help;
 import edu.kit.mima.gui.menu.MenuBuilder;
 import edu.kit.mima.gui.menu.settings.Settings;

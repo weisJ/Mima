@@ -14,7 +14,6 @@
         <module>mima-api</module>
         <module>annotations</module>
         <module>mima-script</module>
-        <module>jlink</module>
     </modules>
 
     <properties>
@@ -40,10 +39,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -133,6 +128,8 @@
                     <compilerArgs combine.children="append">
                         <arg>--enable-preview</arg>
                     </compilerArgs>
+                    <source>12</source>
+                    <target>12</target>
                 </configuration>
             </plugin>
         </plugins>

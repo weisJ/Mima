@@ -1,6 +1,6 @@
 package edu.kit.mima.gui.components.console;
 
-import edu.kit.mima.gui.components.BorderlessScrollPane;
+import com.weis.darklaf.components.OverlayScrollPane;
 import edu.kit.mima.gui.components.text.nonwrapping.NonWrappingEditorPane;
 import edu.kit.mima.preferences.ColorKey;
 import edu.kit.mima.preferences.Preferences;
@@ -25,7 +25,7 @@ import java.awt.event.AdjustmentListener;
  * @author Jannis Weis
  * @since 2018
  */
-public class Console extends BorderlessScrollPane implements UserPreferenceChangedListener {
+public class Console extends OverlayScrollPane implements UserPreferenceChangedListener {
 
     @NotNull
     private final JEditorPane editorPane;

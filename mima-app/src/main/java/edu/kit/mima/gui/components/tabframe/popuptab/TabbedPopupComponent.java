@@ -1,13 +1,13 @@
 package edu.kit.mima.gui.components.tabframe.popuptab;
 
-import edu.kit.mima.gui.components.alignment.Alignment;
-import edu.kit.mima.gui.components.border.AdaptiveLineBorder;
+import com.weis.darklaf.components.border.AdaptiveLineBorder;
+import edu.kit.mima.gui.icon.Icons;
+import com.weis.darklaf.components.alignment.Alignment;
 import edu.kit.mima.gui.components.button.IconButton;
 import edu.kit.mima.gui.components.tabbedpane.DnDTabbedPane;
 import edu.kit.mima.gui.components.tabbedpane.TabAddon;
 import edu.kit.mima.gui.components.tabbedpane.TabContainer;
-import edu.kit.mima.gui.icons.Icons;
-import edu.kit.mima.gui.laf.components.DarkDnDTabbedPaneUI;
+import edu.kit.mima.gui.laf.DarkDnDTabbedPaneUI;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 

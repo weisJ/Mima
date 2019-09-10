@@ -50,8 +50,7 @@ class NumberingPane extends JPanel {
         this.addMouseWheelListener(
                 ev -> {
                     var bar = scrollPane.getVerticalScrollBar();
-                    bar.setValue(
-                            bar.getValue() + Integer.signum(ev.getUnitsToScroll()) * bar.getUnitIncrement());
+                    bar.setValue(bar.getValue() + Integer.signum(ev.getUnitsToScroll()) * bar.getUnitIncrement());
                 });
     }
 
@@ -141,8 +140,7 @@ class NumberingPane extends JPanel {
         final FontMetrics fontMetrics = g.getFontMetrics(pane.getFont());
         int startingY = -1;
         try {
-            startingY =
-                    (((int) pane.modelToView2D(start).getY() - scrollPane.getViewport().getViewPosition().y)
+            startingY = (((int) pane.modelToView2D(start).getY() - scrollPane.getViewport().getViewPosition().y)
                      + fontMetrics.getHeight())
                     - fontMetrics.getDescent();
         } catch (@NotNull final BadLocationException ignored) {

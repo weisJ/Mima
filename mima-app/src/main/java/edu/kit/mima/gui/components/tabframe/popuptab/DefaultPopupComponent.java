@@ -1,9 +1,9 @@
 package edu.kit.mima.gui.components.tabframe.popuptab;
 
-import com.bulenkov.iconloader.util.EmptyIcon;
+import com.weis.darklaf.components.border.AdaptiveLineBorder;
+import com.weis.darklaf.icons.EmptyIcon;
 import edu.kit.mima.gui.components.IconLabel;
-import edu.kit.mima.gui.components.alignment.Alignment;
-import edu.kit.mima.gui.components.border.AdaptiveLineBorder;
+import com.weis.darklaf.components.alignment.Alignment;
 import edu.kit.mima.gui.components.tabframe.TabFrame;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,7 +26,7 @@ public class DefaultPopupComponent extends SimplePopupComponent {
     private final JPanel headerCont;
 
     public DefaultPopupComponent(final String title, @NotNull final JComponent content) {
-        this(title, new EmptyIcon(0, 0), content);
+        this(title, EmptyIcon.create(0), content);
     }
 
     public DefaultPopupComponent(final String title, final Icon icon,
@@ -82,5 +82,6 @@ public class DefaultPopupComponent extends SimplePopupComponent {
         } else {
             header.setBackground(headerBackground);
         }
+        repaint();
     }
 }

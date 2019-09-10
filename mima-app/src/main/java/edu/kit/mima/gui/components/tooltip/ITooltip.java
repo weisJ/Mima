@@ -1,6 +1,6 @@
 package edu.kit.mima.gui.components.tooltip;
 
-import edu.kit.mima.gui.components.alignment.Alignment;
+import com.weis.darklaf.components.alignment.Alignment;
 
 /**
  * DefaultTooltipWindow interface.

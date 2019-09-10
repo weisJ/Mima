@@ -29,31 +29,29 @@ import java.awt.dnd.InvalidDnDOperationException;
 public class TabbedPaneDragSupport
         implements DragSourceListener, DragGestureListener, SnapListener, DragListener {
 
-    private final DnDTabbedPane tabbedPane;
+    private final DnDTabbedPane<?> tabbedPane;
     private final SnapDraggingSupport draggingSupport;
     private boolean dragging;
     private int dropTargetIndex = -1;
     private int dropSourceIndex = -1;
 
     @Contract(pure = true)
-    public TabbedPaneDragSupport(final DnDTabbedPane tabbedPane) {
+    public TabbedPaneDragSupport(final DnDTabbedPane<?> tabbedPane) {
         this.tabbedPane = tabbedPane;
         dragging = false;
-        draggingSupport =
-                new SnapDraggingSupport(
-                        tabbedPane,
-                        () -> {
-                            var rect = tabbedPane.getTabAreaBound();
-                            rect.setRect(rect.x, rect.y + 1, rect.width, rect.height);
-                            return rect;
-                        },
-                        1.0f,
-                        0.9f,
-                        20);
+        draggingSupport = new SnapDraggingSupport(
+                tabbedPane,
+                () -> {
+                    var rect = tabbedPane.getTabAreaBound();
+                    rect.setRect(rect.x, rect.y + 1, rect.width, rect.height);
+                    return rect;
+                },
+                1.0f,
+                0.9f,
+                20);
         draggingSupport.addSnapListener(this);
         draggingSupport.addDragListener(this);
-        new DragSource()
-                .createDefaultDragGestureRecognizer(tabbedPane, DnDConstants.ACTION_COPY_OR_MOVE, this);
+        new DragSource().createDefaultDragGestureRecognizer(tabbedPane, DnDConstants.ACTION_COPY_OR_MOVE, this);
     }
 
     @Override
@@ -106,10 +104,9 @@ public class TabbedPaneDragSupport
         try {
             dragging = true;
             draggingSupport.showDrag(true);
-            dge.startDrag(
-                    Cursor.getDefaultCursor(),
-                    new TabTransferable(tabbedPane, dragTabIndex),
-                    TabbedPaneDragSupport.this);
+            dge.startDrag(Cursor.getDefaultCursor(),
+                          new TabTransferable(tabbedPane, dragTabIndex),
+                          TabbedPaneDragSupport.this);
         } catch (@NotNull final InvalidDnDOperationException ignored) {
         }
     }
@@ -125,14 +122,12 @@ public class TabbedPaneDragSupport
         if (comp instanceof Editor) {
             compImage = ((Editor) comp).createPreviewImage();
         } else {
-            compImage =
-                    ImageUtil.imageFromComponent(
-                            c,
-                            new Rectangle(
-                                    compRect.x,
-                                    compRect.y,
-                                    Math.max(compRect.width, 200),
-                                    Math.max(compRect.height, 400)));
+            compImage = ImageUtil.imageFromComponent(
+                    c,
+                    new Rectangle(compRect.x,
+                                  compRect.y,
+                                  Math.max(compRect.width, 200),
+                                  Math.max(compRect.height, 400)));
         }
         draggingSupport.setImage(tabImage);
         draggingSupport.setExtendedImage(compImage);

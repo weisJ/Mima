@@ -1,10 +1,12 @@
 package edu.kit.mima.api.history;
 
-import edu.kit.mima.api.event.SubscriptionManager;
-import edu.kit.mima.api.event.SubscriptionService;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.function.Consumer;
 
 /**
  * LinkedHistory containing arbitrary objects.
@@ -14,22 +16,14 @@ import org.jetbrains.annotations.Nullable;
  */
 public class LinkedHistory<T> implements History<T> {
 
-    private static final SubscriptionService<Integer> SUBSCRIPTION_SERVICE = new SubscriptionService<>();
+    protected final HistoryNode headNode;
+    protected final HistoryNode tailNode;
+    protected HistoryNode currNode;
 
-    static {
-        SubscriptionManager.getCurrentManager().offerSubscription(SUBSCRIPTION_SERVICE,
-                                                                  LENGTH_PROPERTY,
-                                                                  POSITION_PROPERTY);
-    }
-
-    private final HistoryNode headNode;
-    private final HistoryNode tailNode;
-    private HistoryNode currNode;
-
-    private int maxCapacity;
-    private int head;
-    private int preserved;
-    private int size;
+    protected int maxCapacity;
+    protected int head;
+    protected int preserved;
+    protected int size;
 
     /**
      * Create LinkedHistory.
@@ -205,26 +199,60 @@ public class LinkedHistory<T> implements History<T> {
         }
     }
 
-    private void removeLast() {
-        var removedNode = tailNode.prev;
-        var node = tailNode.prev.prev;
-        tailNode.prev = node;
-        node.next = tailNode;
-
-        removedNode.next = removedNode;
-        removedNode.prev = removedNode;
+    protected void remove(final HistoryNode node) {
+        node.prev.next = node.next;
+        node.next.prev = node.prev;
+        if (currNode == node) {
+            currNode = currNode.next;
+        }
+        node.next = node;
+        node.prev = node;
         size--;
     }
 
-    private void fireLengthChange() {
-        SUBSCRIPTION_SERVICE.notifyEvent(LENGTH_PROPERTY, length(), this);
+    protected void removeLast() {
+        remove(tailNode.prev);
     }
 
-    private void firePositionChange() {
-        SUBSCRIPTION_SERVICE.notifyEvent(POSITION_PROPERTY, head, this);
+    protected void fireLengthChange() {
     }
 
-    private final class HistoryNode {
+    protected void firePositionChange() {
+    }
+
+    @NotNull
+    @Override
+    public Iterator<T> iterator() {
+        return new Iterator<>() {
+            HistoryNode curr = currNode;
+
+            @Override
+            public boolean hasNext() {
+                return curr != null && curr != tailNode;
+            }
+
+            @Override
+            public T next() {
+                T element = curr.value;
+                curr = curr.next;
+                return element;
+            }
+        };
+    }
+
+    @Override
+    public void forEach(final Consumer<? super T> action) {
+        for (T item : this) {
+            action.accept(item);
+        }
+    }
+
+    @Override
+    public Spliterator<T> spliterator() {
+        throw new UnsupportedOperationException();
+    }
+
+    protected final class HistoryNode {
 
         private HistoryNode prev;
         private HistoryNode next;
@@ -234,6 +262,10 @@ public class LinkedHistory<T> implements History<T> {
         @Contract(pure = true)
         private HistoryNode(final T value) {
             this.value = value;
+        }
+
+        public T getValue() {
+            return value;
         }
     }
 }

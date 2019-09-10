@@ -1,6 +1,6 @@
 package edu.kit.mima.gui.components;
 
-import com.bulenkov.iconloader.util.EmptyIcon;
+import com.weis.darklaf.icons.EmptyIcon;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -35,7 +35,7 @@ public class IconComponent<T extends Component> extends JComponent {
         this.alignment = alignment;
         this.horizontalGap = horizontalGap;
         this.iconGap = iconGap;
-        iconPanel = new IconPanel(icon == null ? new EmptyIcon(0, 0) : icon);
+        iconPanel = new IconPanel(icon == null ? EmptyIcon.create(0) : icon);
         iconPanel.setOpaque(false);
         setLayout(new TabLayout());
         add(comp);
@@ -79,7 +79,7 @@ public class IconComponent<T extends Component> extends JComponent {
      * @param icon the icon. null if no icon should be used.
      */
     public void setIcon(final Icon icon) {
-        iconPanel.setIcon(icon == null ? new EmptyIcon(0, 0) : icon);
+        iconPanel.setIcon(icon == null ? EmptyIcon.create(0) : icon);
     }
 
     /**

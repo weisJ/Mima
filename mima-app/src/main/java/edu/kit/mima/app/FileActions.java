@@ -5,7 +5,7 @@ import edu.kit.mima.api.lambda.CheckedConsumer;
 import edu.kit.mima.gui.components.text.editor.Editor;
 import edu.kit.mima.loading.FileManager;
 import edu.kit.mima.logger.LoadingIndicator;
-import edu.kit.mima.util.FileName;
+import edu.kit.mima.api.util.FileName;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 

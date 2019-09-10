@@ -1,11 +1,11 @@
 package edu.kit.mima.gui.view;
 
+import edu.kit.mima.gui.icon.Icons;
 import edu.kit.mima.core.Mima;
 import edu.kit.mima.core.MimaRunner;
 import edu.kit.mima.core.data.MachineWord;
 import edu.kit.mima.core.interpretation.environment.Environment;
-import edu.kit.mima.gui.components.ProtectedScrollTable;
-import edu.kit.mima.gui.icons.Icons;
+import edu.kit.mima.gui.components.ImmutableScrollTable;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,11 +31,11 @@ public class MemoryTableView implements MemoryView {
 
     private final MimaRunner mimaRunner;
 
-    private final ProtectedScrollTable table;
+    private final ImmutableScrollTable table;
     private boolean binaryView = false;
 
     @Contract(pure = true)
-    public MemoryTableView(final MimaRunner mimaRunner, final ProtectedScrollTable table) {
+    public MemoryTableView(final MimaRunner mimaRunner, final ImmutableScrollTable table) {
         this.mimaRunner = mimaRunner;
         this.table = table;
     }

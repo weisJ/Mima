@@ -21,6 +21,7 @@ public abstract class DnDTabbedPaneUI extends BasicTabbedPaneUI {
     protected Color selectedColor;
     protected Color tabBorderColor;
     protected Color selectedBackground;
+    protected Color selectedUnfocusedColor;
     protected Color tabBackground;
     protected DnDTabbedPane<?> tabbedPane;
     private TabContainer tabContainer;
@@ -44,7 +45,14 @@ public abstract class DnDTabbedPaneUI extends BasicTabbedPaneUI {
         tabbedPane.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, tabBorderColor));
         super.installUI(c);
         tabbedPane.removePropertyChangeListener(propertyChangeListener);
+        tabbedPane.addFocusListener(focusListener);
         tabBackground = tabbedPane.getBackground();
+    }
+
+    @Override
+    protected void uninstallListeners() {
+        super.uninstallListeners();
+        tabbedPane.removeFocusListener(focusListener);
     }
 
     protected abstract void setupColors();
@@ -169,13 +177,9 @@ public abstract class DnDTabbedPaneUI extends BasicTabbedPaneUI {
 
     protected void drawTab(@NotNull final Graphics2D g, final int index, final boolean isSelected) {
         final var bounds = rects[index];
-        if (isSelected) {
-            g.setColor(selectedBackground);
-            g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
-        } else {
-            g.setColor(tabBackground);
-            g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
-        }
+        var color = isSelected ? selectedBackground : tabBackground;
+        g.setColor(color);
+        g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
     }
 
     private void paintTabBorder(@NotNull final Graphics g, final Shape oldClip) {
